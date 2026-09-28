@@ -3,7 +3,7 @@
   "use strict";
 
   // 1. CONFIGURATION
-  const config = { defaultRoute: "home", useServerHomeContent: false, useServerOverviewContent: false };
+  const config = { defaultRoute: "home", useServerHomeContent: false, useServerOverviewContent: false, useServerOfferingsContent: false };
   const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
   const mobileQuery = window.matchMedia("(max-width: 767px)");
   const tabletQuery = window.matchMedia("(min-width: 768px) and (max-width: 1199px)");
@@ -117,6 +117,432 @@
       viewerUrl: "https://drive.google.com/file/d/1Bd_y884skBv0TUHV7kXjzZWZRnTQ6EGU/view?usp=drive_link"
     }
   };
+
+  // H2 OFFERINGS — Phase 1–4 asset registry.
+  const offeringsAssetRegistry = {
+    "offerings-hero": {
+      fileId: "1F7k7e96IrRUZGdZur6hapf6Lla_jQ2Wr",
+      viewerUrl: "https://drive.google.com/file/d/1F7k7e96IrRUZGdZur6hapf6Lla_jQ2Wr/view?usp=drive_link",
+      phase: 1
+    },
+    "offering-sofa": {
+      fileId: "1aXzQb73mx3OTFKdp3qde9KfzoXR242ad",
+      viewerUrl: "https://drive.google.com/file/d/1aXzQb73mx3OTFKdp3qde9KfzoXR242ad/view?usp=drive_link",
+      phase: 2
+    },
+    "offering-rafa": {
+      fileId: "1T6KD6KGRapjUfcmZxu4BNopYQi5cv_TP",
+      viewerUrl: "https://drive.google.com/file/d/1T6KD6KGRapjUfcmZxu4BNopYQi5cv_TP/view?usp=drive_link",
+      phase: 2
+    },
+    "offering-mcloud": {
+      fileId: "16uSmePCHkgqrhncPVdscBixpxZ3zWa_t",
+      viewerUrl: "https://drive.google.com/file/d/16uSmePCHkgqrhncPVdscBixpxZ3zWa_t/view?usp=drive_link",
+      phase: 2
+    },
+    "offering-msoc": {
+      fileId: "1e8WTGTQ60mOa4V_a2EIj7mMQi_CCK-Yk",
+      viewerUrl: "https://drive.google.com/file/d/1e8WTGTQ60mOa4V_a2EIj7mMQi_CCK-Yk/view?usp=drive_link",
+      phase: 2
+    },
+    "offering-ms": {
+      fileId: "1v-Hi8tmmazn3iwp3USCoK2PWjUzMj4po",
+      viewerUrl: "https://drive.google.com/file/d/1v-Hi8tmmazn3iwp3USCoK2PWjUzMj4po/view?usp=drive_link",
+      phase: 2
+    },
+    "accelerator-ai-education": {
+      fileId: "1i2lA-n7MbL9quAIUcEQzmgPxJ0WHFUbx",
+      viewerUrl: "https://drive.google.com/file/d/1i2lA-n7MbL9quAIUcEQzmgPxJ0WHFUbx/view?usp=drive_link",
+      phase: 3
+    },
+    "accelerator-personal-ai": {
+      fileId: "150Snq1TAfgD34s3y7m1IDn-hWgz8sXcN",
+      viewerUrl: "https://drive.google.com/file/d/150Snq1TAfgD34s3y7m1IDn-hWgz8sXcN/view?usp=drive_link",
+      phase: 3
+    },
+    "accelerator-sovereign-ai": {
+      fileId: "1SMMeuJ0azc7svG05SVWIMK7GUeyv_TPs",
+      viewerUrl: "https://drive.google.com/file/d/1SMMeuJ0azc7svG05SVWIMK7GUeyv_TPs/view?usp=drive_link",
+      phase: 3
+    }
+  };
+
+  // H2 OFFERINGS — Phase 4 centralized content model.
+  // This static model remains the fallback until matching Code.gs endpoints exist.
+  const offeringsPageData = {
+    coreOfferings: [
+      {
+        id: "sofa-2",
+        domId: "sofa",
+        number: "01",
+        name: "SOFA 2.0",
+        coe: "Experience – CX/API",
+        coeKey: "experience",
+        coeChip: "EXPERIENCE",
+        imageKey: "offering-sofa",
+        themeClass: "is-experience",
+        description: "Accelerate application development with autonomous agents for smarter, faster, and more intuitive digital experiences.",
+        artifacts: [
+          { label: "Pitchbook", action: "sofa-pitchbook" },
+          { label: "Discovery Guide", action: "sofa-discovery-guide" },
+          { label: "Standard Proposal", action: "sofa-standard-proposal" }
+        ],
+        exploreAction: "explore-sofa"
+      },
+      {
+        id: "rafa",
+        domId: "rafa",
+        number: "02",
+        name: "RAFA",
+        coe: "Intelligence – Data",
+        coeKey: "data",
+        coeChip: "DATA",
+        imageKey: "offering-rafa",
+        themeClass: "is-data",
+        description: "Turn complex data into real-time insights with autonomous agents designed for regulated and highly governed environments.",
+        artifacts: [
+          { label: "Pitchbook", action: "rafa-pitchbook" },
+          { label: "Discovery Guide", action: "rafa-discovery-guide" },
+          { label: "Standard Proposal", action: "rafa-standard-proposal" }
+        ],
+        exploreAction: "explore-rafa"
+      },
+      {
+        id: "mcloud",
+        domId: "mcloud",
+        number: "03",
+        name: "MCLOUD",
+        coe: "Intelligence – Cloud",
+        coeKey: "cloud",
+        coeChip: "CLOUD",
+        imageKey: "offering-mcloud",
+        themeClass: "is-cloud",
+        description: "Modernize and optimize infrastructure operations with autonomous cloud agents for greater agility and observability.",
+        artifacts: [
+          { label: "Pitchbook", action: "mcloud-pitchbook" },
+          { label: "Discovery Guide", action: "mcloud-discovery-guide" },
+          { label: "Standard Proposal", action: "mcloud-standard-proposal" }
+        ],
+        exploreAction: "explore-mcloud"
+      },
+      {
+        id: "msoc",
+        domId: "msoc",
+        number: "04",
+        name: "MSOC",
+        coe: "Modernization – NETSEC",
+        coeKey: "netsec",
+        coeChip: "NETSEC",
+        imageKey: "offering-msoc",
+        themeClass: "is-netsec",
+        description: "Proactively detect, respond, and neutralize threats with autonomous security agents built for always-on protection.",
+        artifacts: [
+          { label: "Pitchbook", action: "msoc-pitchbook" },
+          { label: "Discovery Guide", action: "msoc-discovery-guide" },
+          { label: "Standard Proposal", action: "msoc-standard-proposal" }
+        ],
+        exploreAction: "explore-msoc"
+      },
+      {
+        id: "ms",
+        domId: "ms",
+        number: "05",
+        name: "MS",
+        coe: "Modernization – EDGE",
+        coeKey: "edge",
+        coeChip: "EDGE",
+        imageKey: "offering-ms",
+        themeClass: "is-edge",
+        description: "Deliver seamless, resilient end-user experiences with autonomous edge agents anywhere, anytime.",
+        artifacts: [
+          { label: "Pitchbook", action: "ms-pitchbook" },
+          { label: "Discovery Guide", action: "ms-discovery-guide" },
+          { label: "Standard Proposal", action: "ms-standard-proposal" }
+        ],
+        exploreAction: "explore-ms"
+      }
+    ],
+
+    accelerators: [
+      {
+        id: "ai-education",
+        title: "AI EDUCATION",
+        coe: "Encompassing",
+        description: "Build AI fluency across the organization.",
+        imageKey: "accelerator-ai-education",
+        themeClass: "is-ai-education",
+        artifacts: [
+          { label: "Pitchbook", action: "ai-education-pitchbook" },
+          { label: "Discovery Guide", action: "ai-education-discovery-guide" },
+          { label: "Standard Proposal", action: "ai-education-standard-proposal" }
+        ],
+        exploreAction: "explore-ai-education"
+      },
+      {
+        id: "personal-ai",
+        title: "PERSONAL AI",
+        coe: "Modernization – EDGE",
+        description: "Your AI companion for higher productivity.",
+        imageKey: "accelerator-personal-ai",
+        themeClass: "is-personal-ai",
+        artifacts: [
+          { label: "Pitchbook", action: "personal-ai-pitchbook" },
+          { label: "Discovery Guide", action: "personal-ai-discovery-guide" },
+          { label: "Standard Proposal", action: "personal-ai-standard-proposal" }
+        ],
+        exploreAction: "explore-personal-ai"
+      },
+      {
+        id: "sovereign-ai",
+        title: "SOVEREIGN AI",
+        coe: "Modernization – INFRA",
+        description: "AI on your terms for a safer, stronger nation.",
+        imageKey: "accelerator-sovereign-ai",
+        themeClass: "is-sovereign-ai",
+        artifacts: [
+          { label: "Pitchbook", action: "sovereign-ai-pitchbook" },
+          { label: "Discovery Guide", action: "sovereign-ai-discovery-guide" },
+          { label: "Standard Proposal", action: "sovereign-ai-standard-proposal" }
+        ],
+        exploreAction: "explore-sovereign-ai"
+      }
+    ],
+
+    quoteOffers: [
+      {
+        id: "supply-deliver",
+        title: "SUPPLY & DELIVER",
+        description: "From strategy to execution, we make it real.",
+        action: "quote-supply-deliver",
+        icon: "delivery",
+        themeClass: "is-supply-deliver"
+      },
+      {
+        id: "staff-aug",
+        title: "MRS / STAFF AUG",
+        description: "Augment your team with the right expertise.",
+        action: "quote-staff-aug",
+        icon: "staffing",
+        themeClass: "is-staff-aug"
+      }
+    ]
+  };
+
+  function getStaticOfferingsContent() {
+    return cloneData(offeringsPageData);
+  }
+
+  function normalizeOfferingsContent(value) {
+    const fallback = getStaticOfferingsContent();
+    if (!value || typeof value !== "object") return fallback;
+
+    return {
+      coreOfferings: Array.isArray(value.coreOfferings) && value.coreOfferings.length
+        ? value.coreOfferings
+        : fallback.coreOfferings,
+      accelerators: Array.isArray(value.accelerators) && value.accelerators.length
+        ? value.accelerators
+        : fallback.accelerators,
+      quoteOffers: Array.isArray(value.quoteOffers) && value.quoteOffers.length
+        ? value.quoteOffers
+        : fallback.quoteOffers
+    };
+  }
+
+  function escapeOfferingsHtml(value) {
+    return String(value == null ? "" : value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  function renderOfferingArtifacts(artifacts) {
+    const items = Array.isArray(artifacts) ? artifacts : [];
+
+    return '<div class="offering-artifacts">' +
+      '<p class="offering-artifacts-title">STANDARD ARTIFACTS</p>' +
+      items.map(function (item) {
+        return '<button type="button" data-offerings-action="' +
+          escapeOfferingsHtml(item.action) + '">' +
+          '<span class="artifact-icon" aria-hidden="true">▣</span>' +
+          '<span>' + escapeOfferingsHtml(item.label) + '</span>' +
+        '</button>';
+      }).join("") +
+    '</div>';
+  }
+
+  function renderCoreOfferings(pageRoot, offerings) {
+    if (!pageRoot) return;
+    const grid = pageRoot.querySelector("#core-offerings-grid");
+    if (!grid || !Array.isArray(offerings)) return;
+
+    grid.innerHTML = offerings.map(function (offering) {
+      const id = escapeOfferingsHtml(offering.id);
+      const domId = escapeOfferingsHtml(offering.domId || offering.id);
+      const name = escapeOfferingsHtml(offering.name);
+      const coeKey = escapeOfferingsHtml(offering.coeKey);
+      const imageKey = escapeOfferingsHtml(offering.imageKey);
+      const themeClass = escapeOfferingsHtml(offering.themeClass || "");
+
+      return '<article class="core-offering-card ' + themeClass + '" ' +
+        'data-offering-id="' + id + '" data-coe="' + coeKey + '" ' +
+        'aria-labelledby="offering-' + domId + '-title">' +
+          '<div class="core-offering-card-topline">' +
+            '<span class="core-offering-number">' + escapeOfferingsHtml(offering.number) + '</span>' +
+            '<span class="core-offering-coe-chip">' + escapeOfferingsHtml(offering.coeChip) + '</span>' +
+          '</div>' +
+
+          '<div class="core-offering-visual">' +
+            '<img id="offering-' + domId + '-image" class="core-offering-image" ' +
+              'data-image-key="' + imageKey + '" alt="" width="700" height="420" ' +
+              'loading="lazy" decoding="async" fetchpriority="low">' +
+            '<div id="offering-' + domId + '-fallback" ' +
+              'class="image-placeholder core-offering-image-fallback" ' +
+              'data-image-fallback="' + imageKey + '" role="img" ' +
+              'aria-label="' + name + ' visual unavailable" hidden>' +
+              name +
+            '</div>' +
+          '</div>' +
+
+          '<div class="core-offering-content">' +
+            '<h3 id="offering-' + domId + '-title">' + name + '</h3>' +
+            '<p class="core-offering-coe">COE: ' + escapeOfferingsHtml(offering.coe) + '</p>' +
+            '<p class="core-offering-description">' + escapeOfferingsHtml(offering.description) + '</p>' +
+            renderOfferingArtifacts(offering.artifacts) +
+          '</div>' +
+
+          '<button class="offering-explore-button" type="button" data-offerings-action="' +
+            escapeOfferingsHtml(offering.exploreAction) + '">' +
+            '<span>Explore Offering</span><span aria-hidden="true">→</span>' +
+          '</button>' +
+        '</article>';
+    }).join("");
+  }
+
+  function renderAIAccelerators(pageRoot, accelerators) {
+    if (!pageRoot) return;
+    const grid = pageRoot.querySelector("#ai-accelerators-grid");
+    if (!grid || !Array.isArray(accelerators)) return;
+
+    grid.innerHTML = accelerators.map(function (item) {
+      const id = escapeOfferingsHtml(item.id);
+      const title = escapeOfferingsHtml(item.title);
+      const imageKey = escapeOfferingsHtml(item.imageKey);
+      const themeClass = escapeOfferingsHtml(item.themeClass || "");
+
+      return '<article class="ai-accelerator-card ' + themeClass + '" ' +
+        'data-accelerator-id="' + id + '" aria-labelledby="' + id + '-title">' +
+          '<div class="ai-accelerator-main">' +
+            '<div class="ai-accelerator-icon">' +
+              '<img id="accelerator-' + id + '-image" data-image-key="' + imageKey + '" ' +
+                'alt="" width="180" height="180" loading="lazy" decoding="async" fetchpriority="low">' +
+              '<div id="accelerator-' + id + '-fallback" class="image-placeholder" ' +
+                'data-image-fallback="' + imageKey + '" role="img" ' +
+                'aria-label="' + title + ' visual unavailable" hidden>AI</div>' +
+            '</div>' +
+            '<div class="ai-accelerator-copy">' +
+              '<h3 id="' + id + '-title">' + title + '</h3>' +
+              '<p class="ai-accelerator-coe">COE: ' + escapeOfferingsHtml(item.coe) + '</p>' +
+              '<p>' + escapeOfferingsHtml(item.description) + '</p>' +
+            '</div>' +
+          '</div>' +
+          '<div class="offering-artifacts ai-accelerator-artifacts">' +
+            '<p class="offering-artifacts-title">STANDARD ARTIFACTS</p>' +
+            (Array.isArray(item.artifacts) ? item.artifacts : []).map(function (artifact) {
+              return '<button type="button" data-offerings-action="' +
+                escapeOfferingsHtml(artifact.action) + '">' +
+                '<span class="artifact-icon" aria-hidden="true">▣</span>' +
+                '<span>' + escapeOfferingsHtml(artifact.label) + '</span>' +
+              '</button>';
+            }).join("") +
+          '</div>' +
+          '<button class="offering-explore-button" type="button" data-offerings-action="' +
+            escapeOfferingsHtml(item.exploreAction) + '">' +
+            '<span>Explore Offering</span><span aria-hidden="true">→</span>' +
+          '</button>' +
+        '</article>';
+    }).join("");
+  }
+
+  function offeringsQuoteIconSvg(icon) {
+    if (icon === "staffing") {
+      return '<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2"/><path d="M3 19c0-3.4 2.4-5.5 6-5.5s6 2.1 6 5.5M14 15c3.6-.6 6 1.2 6 4"/></svg>';
+    }
+
+    return '<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h11v10H3z"/><path d="M14 10h4l3 3v4h-7z"/><circle cx="7" cy="18" r="2"/><circle cx="18" cy="18" r="2"/></svg>';
+  }
+
+  function renderQuoteOffers(pageRoot, quoteOffers) {
+    if (!pageRoot) return;
+    const section = pageRoot.querySelector("#offerings-quote-section");
+    if (!section || !Array.isArray(quoteOffers)) return;
+
+    section.innerHTML = quoteOffers.map(function (item, index) {
+      const card = '<article class="offerings-quote-card ' +
+        escapeOfferingsHtml(item.themeClass || "") + '">' +
+          '<div class="offerings-quote-icon" aria-hidden="true">' +
+            offeringsQuoteIconSvg(item.icon) +
+          '</div>' +
+          '<div class="offerings-quote-copy">' +
+            '<h2>' + escapeOfferingsHtml(item.title) + '</h2>' +
+            '<p>' + escapeOfferingsHtml(item.description) + '</p>' +
+          '</div>' +
+          '<button class="offerings-quote-button" type="button" data-offerings-action="' +
+            escapeOfferingsHtml(item.action) + '">' +
+            '<span>Generate a Quote</span><span aria-hidden="true">→</span>' +
+          '</button>' +
+        '</article>';
+
+      if (index === 0 && quoteOffers.length > 1) {
+        return card + '<span class="offerings-quote-divider" aria-hidden="true"></span>';
+      }
+
+      return card;
+    }).join("");
+  }
+
+  function bindOfferingsPageAssets(pageRoot) {
+    if (!pageRoot) return;
+
+    bindOfferingsAsset(
+      pageRoot.querySelector("#offerings-hero-image"),
+      pageRoot.querySelector("#offerings-hero-fallback"),
+      2400
+    );
+
+    offeringsPageData.coreOfferings.forEach(function (offering) {
+      const domId = offering.domId || offering.id;
+      bindOfferingsAsset(
+        pageRoot.querySelector("#offering-" + domId + "-image"),
+        pageRoot.querySelector("#offering-" + domId + "-fallback"),
+        1200
+      );
+    });
+
+    offeringsPageData.accelerators.forEach(function (item) {
+      bindOfferingsAsset(
+        pageRoot.querySelector("#accelerator-" + item.id + "-image"),
+        pageRoot.querySelector("#accelerator-" + item.id + "-fallback"),
+        600
+      );
+    });
+  }
+
+  function renderOfferingsContent(pageRoot, content) {
+    if (!pageRoot) return;
+    const normalized = normalizeOfferingsContent(content);
+
+    offeringsPageData.coreOfferings = cloneData(normalized.coreOfferings);
+    offeringsPageData.accelerators = cloneData(normalized.accelerators);
+    offeringsPageData.quoteOffers = cloneData(normalized.quoteOffers);
+
+    renderCoreOfferings(pageRoot, offeringsPageData.coreOfferings);
+    renderAIAccelerators(pageRoot, offeringsPageData.accelerators);
+    renderQuoteOffers(pageRoot, offeringsPageData.quoteOffers);
+    bindOfferingsPageAssets(pageRoot);
+  }
 
   // H1 OVERVIEW — Phase 1–4 asset registry.
   const overviewAssetRegistry = {
@@ -632,6 +1058,179 @@
     });
   }
 
+
+  function bindOfferingsAsset(image, fallback, width) {
+    if (!image) return;
+    const asset = offeringsAssetRegistry[image.dataset.imageKey];
+    bindImageCandidates(image, fallback, getDriveImageCandidates(asset, width));
+  }
+
+  function retryFailedOfferingsAssets(pageRoot) {
+    if (!pageRoot) return;
+    pageRoot.querySelectorAll('img[data-asset-state="error"]').forEach(function (image) {
+      if (typeof image._nexusRetryAsset === "function") image._nexusRetryAsset();
+    });
+  }
+
+  function showOfferingsStatus(pageRoot, message) {
+    if (!pageRoot) return;
+    const status = pageRoot.querySelector("#offerings-status");
+    if (!status) return;
+
+    status.textContent = message || "";
+    status.classList.add("is-visible");
+
+    window.clearTimeout(status._nexusStatusTimer);
+    status._nexusStatusTimer = window.setTimeout(function () {
+      status.classList.remove("is-visible");
+    }, 2400);
+  }
+
+  function getOfferingsActionLabel(action) {
+    const labels = {
+      "sofa-pitchbook": "SOFA 2.0 Pitchbook",
+      "sofa-discovery-guide": "SOFA 2.0 Discovery Guide",
+      "sofa-standard-proposal": "SOFA 2.0 Standard Proposal",
+      "explore-sofa": "SOFA 2.0",
+      "rafa-pitchbook": "RAFA Pitchbook",
+      "rafa-discovery-guide": "RAFA Discovery Guide",
+      "rafa-standard-proposal": "RAFA Standard Proposal",
+      "explore-rafa": "RAFA",
+      "mcloud-pitchbook": "MCLOUD Pitchbook",
+      "mcloud-discovery-guide": "MCLOUD Discovery Guide",
+      "mcloud-standard-proposal": "MCLOUD Standard Proposal",
+      "explore-mcloud": "MCLOUD",
+      "msoc-pitchbook": "MSOC Pitchbook",
+      "msoc-discovery-guide": "MSOC Discovery Guide",
+      "msoc-standard-proposal": "MSOC Standard Proposal",
+      "explore-msoc": "MSOC",
+      "ms-pitchbook": "MS Pitchbook",
+      "ms-discovery-guide": "MS Discovery Guide",
+      "ms-standard-proposal": "MS Standard Proposal",
+      "explore-ms": "MS",
+      "ai-education-pitchbook": "AI Education Pitchbook",
+      "ai-education-discovery-guide": "AI Education Discovery Guide",
+      "ai-education-standard-proposal": "AI Education Standard Proposal",
+      "explore-ai-education": "AI Education",
+      "personal-ai-pitchbook": "Personal AI Pitchbook",
+      "personal-ai-discovery-guide": "Personal AI Discovery Guide",
+      "personal-ai-standard-proposal": "Personal AI Standard Proposal",
+      "explore-personal-ai": "Personal AI",
+      "sovereign-ai-pitchbook": "Sovereign AI Pitchbook",
+      "sovereign-ai-discovery-guide": "Sovereign AI Discovery Guide",
+      "sovereign-ai-standard-proposal": "Sovereign AI Standard Proposal",
+      "explore-sovereign-ai": "Sovereign AI",
+      "quote-supply-deliver": "Supply & Deliver quote",
+      "quote-staff-aug": "MRS / Staff Aug quote"
+    };
+
+    return labels[action] || "This offering item";
+  }
+
+  function applyOfferingsFilter(pageRoot, filterKey, announce) {
+    if (!pageRoot) return;
+
+    const normalizedFilter = String(filterKey || "").toLowerCase();
+    const cards = Array.from(pageRoot.querySelectorAll(".core-offering-card"));
+    const chips = Array.from(pageRoot.querySelectorAll("[data-offerings-filter]"));
+
+    pageRoot.dataset.activeOfferingFilter = normalizedFilter;
+
+    cards.forEach(function (card) {
+      const matches = !normalizedFilter || card.dataset.coe === normalizedFilter;
+      card.hidden = !matches;
+      card.setAttribute("aria-hidden", String(!matches));
+    });
+
+    chips.forEach(function (chip) {
+      const selected = chip.dataset.offeringsFilter === normalizedFilter && Boolean(normalizedFilter);
+      chip.setAttribute("aria-pressed", String(selected));
+      chip.classList.toggle("is-selected", selected);
+    });
+
+    const grid = pageRoot.querySelector("#core-offerings-grid");
+    if (grid) {
+      grid.classList.toggle("is-filtered", Boolean(normalizedFilter));
+    }
+
+    if (announce) {
+      const activeChip = chips.find(function (chip) {
+        return chip.dataset.offeringsFilter === normalizedFilter;
+      });
+
+      showOfferingsStatus(
+        pageRoot,
+        normalizedFilter && activeChip
+          ? "Showing " + activeChip.textContent.trim() + " Core Offerings. Select it again to show all."
+          : "Showing all Core Offerings."
+      );
+    }
+  }
+
+  function handleOfferingsFilter(pageRoot, chip) {
+    const requested = chip.dataset.offeringsFilter || "";
+    const current = pageRoot.dataset.activeOfferingFilter || "";
+    applyOfferingsFilter(pageRoot, current === requested ? "" : requested, true);
+  }
+
+  function handleOfferingsAction(pageRoot, action) {
+    if (!action) return;
+
+    showOfferingsStatus(
+      pageRoot,
+      getOfferingsActionLabel(action) + " will open when its destination is connected."
+    );
+  }
+
+  function initializeOfferingsInteractions(pageRoot) {
+    if (!pageRoot || pageRoot.dataset.offeringsInteractionsInitialized === "true") return;
+
+    pageRoot.addEventListener("click", function (event) {
+      const filterChip = event.target.closest("[data-offerings-filter]");
+      if (filterChip && pageRoot.contains(filterChip)) {
+        handleOfferingsFilter(pageRoot, filterChip);
+        return;
+      }
+
+      const actionTrigger = event.target.closest("[data-offerings-action]");
+      if (actionTrigger && pageRoot.contains(actionTrigger)) {
+        handleOfferingsAction(pageRoot, actionTrigger.dataset.offeringsAction || "");
+      }
+    });
+
+    pageRoot.dataset.offeringsInteractionsInitialized = "true";
+  }
+
+  function refreshOfferingsFromServer(pageRoot) {
+    if (!pageRoot || !config.useServerOfferingsContent) return;
+
+    NexusAPI.getOfferingsContent(
+      function (data) {
+        const activeFilter = pageRoot.dataset.activeOfferingFilter || "";
+        renderOfferingsContent(pageRoot, data);
+        applyOfferingsFilter(pageRoot, activeFilter, false);
+        retryFailedOfferingsAssets(pageRoot);
+      },
+      function () {
+        // Static offerings data already remains available as the safe fallback.
+      }
+    );
+  }
+
+  function initializeOfferingsPage(pageRoot) {
+    if (!pageRoot) return;
+
+    if (pageRoot.dataset.pageInitialized !== "true") {
+      renderOfferingsContent(pageRoot, getStaticOfferingsContent());
+      initializeOfferingsInteractions(pageRoot);
+      applyOfferingsFilter(pageRoot, "", false);
+      pageRoot.dataset.pageInitialized = "true";
+      refreshOfferingsFromServer(pageRoot);
+      return;
+    }
+
+    retryFailedOfferingsAssets(pageRoot);
+  }
 
   function bindOverviewAsset(image, fallback, width) {
     if (!image) return;
@@ -1479,6 +2078,7 @@
 
     if (route === "home") initializeHomePage(wrapper);
     if (route === "overview") initializeOverviewPage(wrapper);
+    if (route === "offerings") initializeOfferingsPage(wrapper);
     return wrapper;
   }
 
@@ -1491,6 +2091,7 @@
     if (activePage) activePage.hidden = false;
     if (route === "home" && activePage) retryFailedHomeAssets(activePage);
     if (route === "overview" && activePage) retryFailedOverviewAssets(activePage);
+    if (route === "offerings" && activePage) retryFailedOfferingsAssets(activePage);
 
     const hasPageHero = Boolean(activePage && activePage.querySelector("[data-page-hero]"));
     dom.app.classList.toggle("hero-route", hasPageHero);
@@ -1832,6 +2433,68 @@
           if (onSuccess) onSuccess(fallback);
         })
         .getDirectories();
+    },
+
+    // H2 Offerings Phase 4 hooks. Disabled by default through
+    // config.useServerOfferingsContent until matching Code.gs functions exist.
+    getOfferingsContent(onSuccess, onFailure) {
+      const fallback = getStaticOfferingsContent();
+
+      if (!this.isAppsScriptAvailable()) {
+        if (onSuccess) onSuccess(fallback);
+        return;
+      }
+
+      google.script.run
+        .withSuccessHandler(function (data) {
+          if (onSuccess) onSuccess(normalizeOfferingsContent(data));
+        })
+        .withFailureHandler(function (error) {
+          console.warn("getOfferingsContent is not available yet; using static Offerings data.", error);
+          if (onFailure) onFailure(error);
+          if (onSuccess) onSuccess(fallback);
+        })
+        .getOfferingsContent();
+    },
+
+    getCoreOfferings(onSuccess, onFailure) {
+      const fallback = cloneData(offeringsPageData.coreOfferings);
+
+      if (!this.isAppsScriptAvailable()) {
+        if (onSuccess) onSuccess(fallback);
+        return;
+      }
+
+      google.script.run
+        .withSuccessHandler(function (data) {
+          if (onSuccess) onSuccess(Array.isArray(data) ? data : fallback);
+        })
+        .withFailureHandler(function (error) {
+          console.warn("getCoreOfferings is not available yet; using static Offerings data.", error);
+          if (onFailure) onFailure(error);
+          if (onSuccess) onSuccess(fallback);
+        })
+        .getCoreOfferings();
+    },
+
+    getAIAccelerators(onSuccess, onFailure) {
+      const fallback = cloneData(offeringsPageData.accelerators);
+
+      if (!this.isAppsScriptAvailable()) {
+        if (onSuccess) onSuccess(fallback);
+        return;
+      }
+
+      google.script.run
+        .withSuccessHandler(function (data) {
+          if (onSuccess) onSuccess(Array.isArray(data) ? data : fallback);
+        })
+        .withFailureHandler(function (error) {
+          console.warn("getAIAccelerators is not available yet; using static Offerings data.", error);
+          if (onFailure) onFailure(error);
+          if (onSuccess) onSuccess(fallback);
+        })
+        .getAIAccelerators();
     }
   };
 

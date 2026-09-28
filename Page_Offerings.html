@@ -1,7 +1,786 @@
-<section class="page-container" aria-labelledby="offerings-page-title">
-  <div class="page-development-placeholder">
-    <span class="section-label">H2: OFFERINGS</span>
-    <h1 id="offerings-page-title" data-page-title tabindex="-1">Offerings</h1>
-    <p>Page content will be implemented separately.</p>
-  </div>
+<!-- =========================================================
+     H2: OFFERINGS
+     Novare Nexus / ONESCA
+     Semantic page structure based on the supplied reference.
+     Styling belongs in Styles.html.
+     Interactions/data rendering belong in Scripts.html.
+========================================================== -->
+
+<section class="offerings-page" data-page="offerings">
+
+  <!-- =======================================================
+       HERO
+       Global nav contract: data-page-hero
+  ======================================================== -->
+  <section
+    class="offerings-hero page-hero"
+    data-page-hero
+    aria-labelledby="offerings-title"
+  >
+    <div class="offerings-hero-media" aria-hidden="true">
+      <img
+        id="offerings-hero-image"
+        class="offerings-hero-image"
+        data-image-key="offerings-hero"
+        alt=""
+        width="2000"
+        height="620"
+        loading="eager"
+        decoding="async"
+        fetchpriority="high"
+        hidden
+      >
+      <div
+        id="offerings-hero-fallback"
+        class="image-placeholder offerings-hero-fallback"
+        data-image-fallback="offerings-hero"
+        role="img"
+        aria-label="Offerings hero visual unavailable"
+        hidden
+      >
+        H2: Offerings
+      </div>
+      <div class="offerings-hero-overlay"></div>
+    </div>
+
+    <div class="offerings-hero-content">
+      <div class="offerings-hero-copy">
+        <p class="offerings-eyebrow">H2 : OFFERINGS</p>
+
+        <h1 id="offerings-title">
+          <span>Traditional Offerings,</span>
+          <strong>Supercharged by AI Agents</strong>
+        </h1>
+
+        <p class="offerings-hero-description">
+          Infusing autonomous intelligence into your mission-critical operations
+          for unmatched speed, optimization, and security.
+        </p>
+
+        <div class="offerings-hero-tagline">
+          <span class="offerings-hero-tagline-rule" aria-hidden="true"></span>
+          <span>Ideas. People. Technology. Impact.</span>
+        </div>
+      </div>
+
+      <aside
+        class="offerings-impact-panel"
+        aria-label="AI Agents real impact"
+      >
+        <p class="offerings-impact-kicker">AI AGENTS</p>
+        <h2>REAL IMPACT</h2>
+
+        <ul class="offerings-impact-list">
+          <li>
+            <span class="offerings-impact-check" aria-hidden="true">✓</span>
+            <span>Faster decisions</span>
+          </li>
+          <li>
+            <span class="offerings-impact-check" aria-hidden="true">✓</span>
+            <span>Greater efficiency</span>
+          </li>
+          <li>
+            <span class="offerings-impact-check" aria-hidden="true">✓</span>
+            <span>Stronger security</span>
+          </li>
+          <li>
+            <span class="offerings-impact-check" aria-hidden="true">✓</span>
+            <span>Scalable growth</span>
+          </li>
+        </ul>
+      </aside>
+
+      <div class="offerings-hero-message" aria-label="Different today. A brighter tomorrow.">
+        <span class="offerings-hero-message-rule" aria-hidden="true"></span>
+        <p>DIFFERENT<br>TODAY.<br>A BRIGHTER<br>TOMORROW.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- =======================================================
+       CORE OFFERINGS
+  ======================================================== -->
+  <section
+    class="offerings-core-section"
+    aria-labelledby="core-offerings-title"
+  >
+    <header class="offerings-section-header offerings-core-header">
+      <div class="offerings-section-heading">
+        <div class="offerings-section-title-row">
+          <h2 id="core-offerings-title">CORE OFFERINGS</h2>
+          <span class="offerings-section-rule" aria-hidden="true"></span>
+          <p>End-to-end solutions, reimagined with AI.</p>
+        </div>
+      </div>
+
+      <div class="offerings-coe-filter" role="group" aria-label="Filter Core Offerings by Center of Excellence">
+        <span class="offerings-coe-filter-label">CENTERS OF EXCELLENCE:</span>
+
+        <button type="button" class="offerings-coe-chip is-experience" data-offerings-filter="experience" aria-controls="core-offerings-grid" aria-pressed="false">
+          EXPERIENCE
+        </button>
+        <button type="button" class="offerings-coe-chip is-data" data-offerings-filter="data" aria-controls="core-offerings-grid" aria-pressed="false">
+          DATA
+        </button>
+        <button type="button" class="offerings-coe-chip is-cloud" data-offerings-filter="cloud" aria-controls="core-offerings-grid" aria-pressed="false">
+          CLOUD
+        </button>
+        <button type="button" class="offerings-coe-chip is-edge" data-offerings-filter="edge" aria-controls="core-offerings-grid" aria-pressed="false">
+          EDGE
+        </button>
+        <button type="button" class="offerings-coe-chip is-infra" data-offerings-filter="infra" aria-controls="core-offerings-grid" aria-pressed="false">
+          INFRA
+        </button>
+        <button type="button" class="offerings-coe-chip is-netsec" data-offerings-filter="netsec" aria-controls="core-offerings-grid" aria-pressed="false">
+          NETSEC
+        </button>
+      </div>
+    </header>
+
+    <div id="core-offerings-grid" class="core-offerings-grid" aria-live="polite">
+
+      <!-- 01 — SOFA 2.0 -->
+      <article
+        class="core-offering-card is-experience"
+        data-offering-id="sofa-2"
+        data-coe="experience"
+        aria-labelledby="offering-sofa-title"
+      >
+        <div class="core-offering-card-topline">
+          <span class="core-offering-number">01</span>
+          <span class="core-offering-coe-chip">EXPERIENCE</span>
+        </div>
+
+        <div class="core-offering-visual">
+          <img
+            id="offering-sofa-image"
+            class="core-offering-image"
+            data-image-key="offering-sofa"
+            alt=""
+            width="700"
+            height="420"
+            loading="lazy"
+            decoding="async"
+            fetchpriority="low"
+            hidden
+          >
+          <div
+            id="offering-sofa-fallback"
+            class="image-placeholder core-offering-image-fallback"
+            data-image-fallback="offering-sofa"
+            role="img"
+            aria-label="SOFA 2.0 visual unavailable"
+            hidden
+          >
+            SOFA 2.0
+          </div>
+        </div>
+
+        <div class="core-offering-content">
+          <h3 id="offering-sofa-title">SOFA 2.0</h3>
+          <p class="core-offering-coe">COE: Experience – CX/API</p>
+          <p class="core-offering-description">
+            Accelerate application development with autonomous agents for smarter,
+            faster, and more intuitive digital experiences.
+          </p>
+
+          <div class="offering-artifacts">
+            <p class="offering-artifacts-title">STANDARD ARTIFACTS</p>
+            <button type="button" data-offerings-action="sofa-pitchbook">
+              <span class="artifact-icon" aria-hidden="true">▣</span>
+              <span>Pitchbook</span>
+            </button>
+            <button type="button" data-offerings-action="sofa-discovery-guide">
+              <span class="artifact-icon" aria-hidden="true">▣</span>
+              <span>Discovery Guide</span>
+            </button>
+            <button type="button" data-offerings-action="sofa-standard-proposal">
+              <span class="artifact-icon" aria-hidden="true">▣</span>
+              <span>Standard Proposal</span>
+            </button>
+          </div>
+        </div>
+
+        <button
+          class="offering-explore-button"
+          type="button"
+          data-offerings-action="explore-sofa"
+        >
+          <span>Explore Offering</span>
+          <span aria-hidden="true">→</span>
+        </button>
+      </article>
+
+      <!-- 02 — RAFA -->
+      <article
+        class="core-offering-card is-data"
+        data-offering-id="rafa"
+        data-coe="data"
+        aria-labelledby="offering-rafa-title"
+      >
+        <div class="core-offering-card-topline">
+          <span class="core-offering-number">02</span>
+          <span class="core-offering-coe-chip">DATA</span>
+        </div>
+
+        <div class="core-offering-visual">
+          <img
+            id="offering-rafa-image"
+            class="core-offering-image"
+            data-image-key="offering-rafa"
+            alt=""
+            width="700"
+            height="420"
+            loading="lazy"
+            decoding="async"
+            fetchpriority="low"
+            hidden
+          >
+          <div
+            id="offering-rafa-fallback"
+            class="image-placeholder core-offering-image-fallback"
+            data-image-fallback="offering-rafa"
+            role="img"
+            aria-label="RAFA visual unavailable"
+            hidden
+          >
+            RAFA
+          </div>
+        </div>
+
+        <div class="core-offering-content">
+          <h3 id="offering-rafa-title">RAFA</h3>
+          <p class="core-offering-coe">COE: Intelligence – Data</p>
+          <p class="core-offering-description">
+            Turn complex data into real-time insights with autonomous agents
+            designed for regulated and highly governed environments.
+          </p>
+
+          <div class="offering-artifacts">
+            <p class="offering-artifacts-title">STANDARD ARTIFACTS</p>
+            <button type="button" data-offerings-action="rafa-pitchbook">
+              <span class="artifact-icon" aria-hidden="true">▣</span>
+              <span>Pitchbook</span>
+            </button>
+            <button type="button" data-offerings-action="rafa-discovery-guide">
+              <span class="artifact-icon" aria-hidden="true">▣</span>
+              <span>Discovery Guide</span>
+            </button>
+            <button type="button" data-offerings-action="rafa-standard-proposal">
+              <span class="artifact-icon" aria-hidden="true">▣</span>
+              <span>Standard Proposal</span>
+            </button>
+          </div>
+        </div>
+
+        <button
+          class="offering-explore-button"
+          type="button"
+          data-offerings-action="explore-rafa"
+        >
+          <span>Explore Offering</span>
+          <span aria-hidden="true">→</span>
+        </button>
+      </article>
+
+      <!-- 03 — MCLOUD -->
+      <article
+        class="core-offering-card is-cloud"
+        data-offering-id="mcloud"
+        data-coe="cloud"
+        aria-labelledby="offering-mcloud-title"
+      >
+        <div class="core-offering-card-topline">
+          <span class="core-offering-number">03</span>
+          <span class="core-offering-coe-chip">CLOUD</span>
+        </div>
+
+        <div class="core-offering-visual">
+          <img
+            id="offering-mcloud-image"
+            class="core-offering-image"
+            data-image-key="offering-mcloud"
+            alt=""
+            width="700"
+            height="420"
+            loading="lazy"
+            decoding="async"
+            fetchpriority="low"
+            hidden
+          >
+          <div
+            id="offering-mcloud-fallback"
+            class="image-placeholder core-offering-image-fallback"
+            data-image-fallback="offering-mcloud"
+            role="img"
+            aria-label="MCLOUD visual unavailable"
+            hidden
+          >
+            MCLOUD
+          </div>
+        </div>
+
+        <div class="core-offering-content">
+          <h3 id="offering-mcloud-title">MCLOUD</h3>
+          <p class="core-offering-coe">COE: Intelligence – Cloud</p>
+          <p class="core-offering-description">
+            Modernize and optimize infrastructure operations with autonomous
+            cloud agents for greater agility and observability.
+          </p>
+
+          <div class="offering-artifacts">
+            <p class="offering-artifacts-title">STANDARD ARTIFACTS</p>
+            <button type="button" data-offerings-action="mcloud-pitchbook">
+              <span class="artifact-icon" aria-hidden="true">▣</span>
+              <span>Pitchbook</span>
+            </button>
+            <button type="button" data-offerings-action="mcloud-discovery-guide">
+              <span class="artifact-icon" aria-hidden="true">▣</span>
+              <span>Discovery Guide</span>
+            </button>
+            <button type="button" data-offerings-action="mcloud-standard-proposal">
+              <span class="artifact-icon" aria-hidden="true">▣</span>
+              <span>Standard Proposal</span>
+            </button>
+          </div>
+        </div>
+
+        <button
+          class="offering-explore-button"
+          type="button"
+          data-offerings-action="explore-mcloud"
+        >
+          <span>Explore Offering</span>
+          <span aria-hidden="true">→</span>
+        </button>
+      </article>
+
+      <!-- 04 — MSOC -->
+      <article
+        class="core-offering-card is-netsec"
+        data-offering-id="msoc"
+        data-coe="netsec"
+        aria-labelledby="offering-msoc-title"
+      >
+        <div class="core-offering-card-topline">
+          <span class="core-offering-number">04</span>
+          <span class="core-offering-coe-chip">NETSEC</span>
+        </div>
+
+        <div class="core-offering-visual">
+          <img
+            id="offering-msoc-image"
+            class="core-offering-image"
+            data-image-key="offering-msoc"
+            alt=""
+            width="700"
+            height="420"
+            loading="lazy"
+            decoding="async"
+            fetchpriority="low"
+            hidden
+          >
+          <div
+            id="offering-msoc-fallback"
+            class="image-placeholder core-offering-image-fallback"
+            data-image-fallback="offering-msoc"
+            role="img"
+            aria-label="MSOC visual unavailable"
+            hidden
+          >
+            MSOC
+          </div>
+        </div>
+
+        <div class="core-offering-content">
+          <h3 id="offering-msoc-title">MSOC</h3>
+          <p class="core-offering-coe">COE: Modernization – NETSEC</p>
+          <p class="core-offering-description">
+            Proactively detect, respond, and neutralize threats with autonomous
+            security agents built for always-on protection.
+          </p>
+
+          <div class="offering-artifacts">
+            <p class="offering-artifacts-title">STANDARD ARTIFACTS</p>
+            <button type="button" data-offerings-action="msoc-pitchbook">
+              <span class="artifact-icon" aria-hidden="true">▣</span>
+              <span>Pitchbook</span>
+            </button>
+            <button type="button" data-offerings-action="msoc-discovery-guide">
+              <span class="artifact-icon" aria-hidden="true">▣</span>
+              <span>Discovery Guide</span>
+            </button>
+            <button type="button" data-offerings-action="msoc-standard-proposal">
+              <span class="artifact-icon" aria-hidden="true">▣</span>
+              <span>Standard Proposal</span>
+            </button>
+          </div>
+        </div>
+
+        <button
+          class="offering-explore-button"
+          type="button"
+          data-offerings-action="explore-msoc"
+        >
+          <span>Explore Offering</span>
+          <span aria-hidden="true">→</span>
+        </button>
+      </article>
+
+      <!-- 05 — MS -->
+      <article
+        class="core-offering-card is-edge"
+        data-offering-id="ms"
+        data-coe="edge"
+        aria-labelledby="offering-ms-title"
+      >
+        <div class="core-offering-card-topline">
+          <span class="core-offering-number">05</span>
+          <span class="core-offering-coe-chip">EDGE</span>
+        </div>
+
+        <div class="core-offering-visual">
+          <img
+            id="offering-ms-image"
+            class="core-offering-image"
+            data-image-key="offering-ms"
+            alt=""
+            width="700"
+            height="420"
+            loading="lazy"
+            decoding="async"
+            fetchpriority="low"
+            hidden
+          >
+          <div
+            id="offering-ms-fallback"
+            class="image-placeholder core-offering-image-fallback"
+            data-image-fallback="offering-ms"
+            role="img"
+            aria-label="MS visual unavailable"
+            hidden
+          >
+            MS
+          </div>
+        </div>
+
+        <div class="core-offering-content">
+          <h3 id="offering-ms-title">MS</h3>
+          <p class="core-offering-coe">COE: Modernization – EDGE</p>
+          <p class="core-offering-description">
+            Deliver seamless, resilient end-user experiences with autonomous
+            edge agents anywhere, anytime.
+          </p>
+
+          <div class="offering-artifacts">
+            <p class="offering-artifacts-title">STANDARD ARTIFACTS</p>
+            <button type="button" data-offerings-action="ms-pitchbook">
+              <span class="artifact-icon" aria-hidden="true">▣</span>
+              <span>Pitchbook</span>
+            </button>
+            <button type="button" data-offerings-action="ms-discovery-guide">
+              <span class="artifact-icon" aria-hidden="true">▣</span>
+              <span>Discovery Guide</span>
+            </button>
+            <button type="button" data-offerings-action="ms-standard-proposal">
+              <span class="artifact-icon" aria-hidden="true">▣</span>
+              <span>Standard Proposal</span>
+            </button>
+          </div>
+        </div>
+
+        <button
+          class="offering-explore-button"
+          type="button"
+          data-offerings-action="explore-ms"
+        >
+          <span>Explore Offering</span>
+          <span aria-hidden="true">→</span>
+        </button>
+      </article>
+    </div>
+
+  </section>
+
+  <!-- =======================================================
+       AI ACCELERATORS
+  ======================================================== -->
+  <section
+    class="offerings-accelerators-section"
+    aria-labelledby="ai-accelerators-title"
+  >
+    <header class="offerings-section-header">
+      <div class="offerings-section-title-row">
+        <h2 id="ai-accelerators-title">AI ACCELERATORS</h2>
+        <span class="offerings-section-rule" aria-hidden="true"></span>
+        <p>Capability builders for a smarter, stronger tomorrow.</p>
+      </div>
+    </header>
+
+    <div id="ai-accelerators-grid" class="ai-accelerators-grid" aria-live="polite">
+
+      <article
+        class="ai-accelerator-card is-ai-education"
+        data-accelerator-id="ai-education"
+        aria-labelledby="ai-education-title"
+      >
+        <div class="ai-accelerator-main">
+          <div class="ai-accelerator-icon">
+            <img
+              id="accelerator-ai-education-image"
+              data-image-key="accelerator-ai-education"
+              alt=""
+              width="180"
+              height="180"
+              loading="lazy"
+              decoding="async"
+              fetchpriority="low"
+              hidden
+            >
+            <div
+              id="accelerator-ai-education-fallback"
+              class="image-placeholder"
+              data-image-fallback="accelerator-ai-education"
+              role="img"
+              aria-label="AI Education visual unavailable"
+              hidden
+            >
+              AI
+            </div>
+          </div>
+
+          <div class="ai-accelerator-copy">
+            <h3 id="ai-education-title">AI EDUCATION</h3>
+            <p class="ai-accelerator-coe">COE: Encompassing</p>
+            <p>Build AI fluency across the organization.</p>
+          </div>
+        </div>
+
+        <div class="offering-artifacts ai-accelerator-artifacts">
+          <p class="offering-artifacts-title">STANDARD ARTIFACTS</p>
+          <button type="button" data-offerings-action="ai-education-pitchbook">
+            <span class="artifact-icon" aria-hidden="true">▣</span>
+            <span>Pitchbook</span>
+          </button>
+          <button type="button" data-offerings-action="ai-education-discovery-guide">
+            <span class="artifact-icon" aria-hidden="true">▣</span>
+            <span>Discovery Guide</span>
+          </button>
+          <button type="button" data-offerings-action="ai-education-standard-proposal">
+            <span class="artifact-icon" aria-hidden="true">▣</span>
+            <span>Standard Proposal</span>
+          </button>
+        </div>
+
+        <button
+          class="offering-explore-button"
+          type="button"
+          data-offerings-action="explore-ai-education"
+        >
+          <span>Explore Offering</span>
+          <span aria-hidden="true">→</span>
+        </button>
+      </article>
+
+      <article
+        class="ai-accelerator-card is-personal-ai"
+        data-accelerator-id="personal-ai"
+        aria-labelledby="personal-ai-title"
+      >
+        <div class="ai-accelerator-main">
+          <div class="ai-accelerator-icon">
+            <img
+              id="accelerator-personal-ai-image"
+              data-image-key="accelerator-personal-ai"
+              alt=""
+              width="180"
+              height="180"
+              loading="lazy"
+              decoding="async"
+              fetchpriority="low"
+              hidden
+            >
+            <div
+              id="accelerator-personal-ai-fallback"
+              class="image-placeholder"
+              data-image-fallback="accelerator-personal-ai"
+              role="img"
+              aria-label="Personal AI visual unavailable"
+              hidden
+            >
+              AI
+            </div>
+          </div>
+
+          <div class="ai-accelerator-copy">
+            <h3 id="personal-ai-title">PERSONAL AI</h3>
+            <p class="ai-accelerator-coe">COE: Modernization – EDGE</p>
+            <p>Your AI companion for higher productivity.</p>
+          </div>
+        </div>
+
+        <div class="offering-artifacts ai-accelerator-artifacts">
+          <p class="offering-artifacts-title">STANDARD ARTIFACTS</p>
+          <button type="button" data-offerings-action="personal-ai-pitchbook">
+            <span class="artifact-icon" aria-hidden="true">▣</span>
+            <span>Pitchbook</span>
+          </button>
+          <button type="button" data-offerings-action="personal-ai-discovery-guide">
+            <span class="artifact-icon" aria-hidden="true">▣</span>
+            <span>Discovery Guide</span>
+          </button>
+          <button type="button" data-offerings-action="personal-ai-standard-proposal">
+            <span class="artifact-icon" aria-hidden="true">▣</span>
+            <span>Standard Proposal</span>
+          </button>
+        </div>
+
+        <button
+          class="offering-explore-button"
+          type="button"
+          data-offerings-action="explore-personal-ai"
+        >
+          <span>Explore Offering</span>
+          <span aria-hidden="true">→</span>
+        </button>
+      </article>
+
+      <article
+        class="ai-accelerator-card is-sovereign-ai"
+        data-accelerator-id="sovereign-ai"
+        aria-labelledby="sovereign-ai-title"
+      >
+        <div class="ai-accelerator-main">
+          <div class="ai-accelerator-icon">
+            <img
+              id="accelerator-sovereign-ai-image"
+              data-image-key="accelerator-sovereign-ai"
+              alt=""
+              width="180"
+              height="180"
+              loading="lazy"
+              decoding="async"
+              fetchpriority="low"
+              hidden
+            >
+            <div
+              id="accelerator-sovereign-ai-fallback"
+              class="image-placeholder"
+              data-image-fallback="accelerator-sovereign-ai"
+              role="img"
+              aria-label="Sovereign AI visual unavailable"
+              hidden
+            >
+              AI
+            </div>
+          </div>
+
+          <div class="ai-accelerator-copy">
+            <h3 id="sovereign-ai-title">SOVEREIGN AI</h3>
+            <p class="ai-accelerator-coe">COE: Modernization – INFRA</p>
+            <p>AI on your terms for a safer, stronger nation.</p>
+          </div>
+        </div>
+
+        <div class="offering-artifacts ai-accelerator-artifacts">
+          <p class="offering-artifacts-title">STANDARD ARTIFACTS</p>
+          <button type="button" data-offerings-action="sovereign-ai-pitchbook">
+            <span class="artifact-icon" aria-hidden="true">▣</span>
+            <span>Pitchbook</span>
+          </button>
+          <button type="button" data-offerings-action="sovereign-ai-discovery-guide">
+            <span class="artifact-icon" aria-hidden="true">▣</span>
+            <span>Discovery Guide</span>
+          </button>
+          <button type="button" data-offerings-action="sovereign-ai-standard-proposal">
+            <span class="artifact-icon" aria-hidden="true">▣</span>
+            <span>Standard Proposal</span>
+          </button>
+        </div>
+
+        <button
+          class="offering-explore-button"
+          type="button"
+          data-offerings-action="explore-sovereign-ai"
+        >
+          <span>Explore Offering</span>
+          <span aria-hidden="true">→</span>
+        </button>
+      </article>
+    </div>
+  </section>
+
+  <!-- =======================================================
+       QUOTE / DELIVERY LANES
+  ======================================================== -->
+  <section
+    id="offerings-quote-section"
+    class="offerings-quote-section"
+    aria-label="Delivery and staffing offerings"
+  >
+    <article class="offerings-quote-card is-supply-deliver">
+      <div class="offerings-quote-icon" aria-hidden="true">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+             stroke-linejoin="round">
+          <path d="M3 7h11v10H3z"/>
+          <path d="M14 10h4l3 3v4h-7z"/>
+          <circle cx="7" cy="18" r="2"/>
+          <circle cx="18" cy="18" r="2"/>
+        </svg>
+      </div>
+
+      <div class="offerings-quote-copy">
+        <h2>SUPPLY &amp; DELIVER</h2>
+        <p>From strategy to execution, we make it real.</p>
+      </div>
+
+      <button
+        class="offerings-quote-button"
+        type="button"
+        data-offerings-action="quote-supply-deliver"
+      >
+        <span>Generate a Quote</span>
+        <span aria-hidden="true">→</span>
+      </button>
+    </article>
+
+    <span class="offerings-quote-divider" aria-hidden="true"></span>
+
+    <article class="offerings-quote-card is-staff-aug">
+      <div class="offerings-quote-icon" aria-hidden="true">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+             stroke-linejoin="round">
+          <circle cx="9" cy="8" r="3"/>
+          <circle cx="17" cy="9" r="2"/>
+          <path d="M3 19c0-3.4 2.4-5.5 6-5.5s6 2.1 6 5.5M14 15c3.6-.6 6 1.2 6 4"/>
+        </svg>
+      </div>
+
+      <div class="offerings-quote-copy">
+        <h2>MRS / STAFF AUG</h2>
+        <p>Augment your team with the right expertise.</p>
+      </div>
+
+      <button
+        class="offerings-quote-button"
+        type="button"
+        data-offerings-action="quote-staff-aug"
+      >
+        <span>Generate a Quote</span>
+        <span aria-hidden="true">→</span>
+      </button>
+    </article>
+  </section>
+
+
+
+  <p
+    id="offerings-status"
+    class="offerings-status"
+    role="status"
+    aria-live="polite"
+  ></p>
+
 </section>

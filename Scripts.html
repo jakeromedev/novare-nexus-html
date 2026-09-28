@@ -3,7 +3,7 @@
   "use strict";
 
   // 1. CONFIGURATION
-  const config = { defaultRoute: "home", useServerHomeContent: false, useServerOverviewContent: false, useServerOfferingsContent: false, useServerOpportunitiesContent: false };
+  const config = { defaultRoute: "home", useServerHomeContent: false, useServerOverviewContent: false, useServerOfferingsContent: false, useServerOpportunitiesContent: false, useServerProgramsContent: false };
   const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
   const mobileQuery = window.matchMedia("(max-width: 767px)");
   const tabletQuery = window.matchMedia("(min-width: 768px) and (max-width: 1199px)");
@@ -117,6 +117,365 @@
       viewerUrl: "https://drive.google.com/file/d/1Bd_y884skBv0TUHV7kXjzZWZRnTQ6EGU/view?usp=drive_link"
     }
   };
+
+  // H4 PROGRAMS — Phase 1–4 asset registry.
+  const programsAssetRegistry = {
+    "programs-hero": {
+      fileId: "13zHUcdSjng_HI-cGop4M_SQGKBIjgjGD",
+      viewerUrl: "https://drive.google.com/file/d/13zHUcdSjng_HI-cGop4M_SQGKBIjgjGD/view?usp=drive_link",
+      phase: 1
+    },
+    "programs-dashboard": {
+      fileId: "1B4fDLWutxKjEBf_P_a-vzQ6qlhxxQDNh",
+      viewerUrl: "https://drive.google.com/file/d/1B4fDLWutxKjEBf_P_a-vzQ6qlhxxQDNh/view?usp=drive_link",
+      phase: 1
+    },
+    "innovation-playbook": {
+      fileId: "157rOJ-vXl1hR-NgGgA7lWxXM5kvNMFWc",
+      viewerUrl: "https://drive.google.com/file/d/157rOJ-vXl1hR-NgGgA7lWxXM5kvNMFWc/view?usp=drive_link",
+      phase: 1
+    },
+    "program-toolkit-repository": {
+      fileId: "1GoHp0-v1IV_1nJbuvZlpRLyll3RaTs_g",
+      viewerUrl: "https://drive.google.com/file/d/1GoHp0-v1IV_1nJbuvZlpRLyll3RaTs_g/view?usp=drive_link",
+      phase: 1
+    },
+    "market-industry-insights": {
+      fileId: "16VHZo82CiUfMtdEZT9Mv9cWAj5OJxlcf",
+      viewerUrl: "https://drive.google.com/file/d/16VHZo82CiUfMtdEZT9Mv9cWAj5OJxlcf/view?usp=drive_link",
+      phase: 2
+    },
+    "client-buyer-insights": {
+      fileId: "14dPo8coSQpDCh4fCy39IRk-GSL15nrcy",
+      viewerUrl: "https://drive.google.com/file/d/14dPo8coSQpDCh4fCy39IRk-GSL15nrcy/view?usp=drive_link",
+      phase: 2
+    },
+    "business-challenges-solutions": {
+      fileId: "1ms9iyZw7JKpBkgusOnEw2XtnEjHx2Qtw",
+      viewerUrl: "https://drive.google.com/file/d/1ms9iyZw7JKpBkgusOnEw2XtnEjHx2Qtw/view?usp=drive_link",
+      phase: 2
+    },
+    "ai-opportunity-signals": {
+      fileId: "10smoumVEVkCvICMbhLnhuG_RDF2qQrfa",
+      viewerUrl: "https://drive.google.com/file/d/10smoumVEVkCvICMbhLnhuG_RDF2qQrfa/view?usp=drive_link",
+      phase: 2
+    },
+    "program-battlecards": {
+      fileId: "1L5fisREeBcu6J8u-S6hQFn4uG-B44qZE",
+      viewerUrl: "https://drive.google.com/file/d/1L5fisREeBcu6J8u-S6hQFn4uG-B44qZE/view?usp=drive_link",
+      phase: 2
+    }
+  };
+
+  // H4 PROGRAMS — Phase 4 centralized content model.
+  // Static content remains the safe fallback until matching Code.gs methods exist.
+  const programsPageData = {
+    entryPoints: [
+      {
+        id: "programs-dashboard",
+        title: "Programs Dashboard",
+        description: "Real-time overview of active programs, pipeline and performance.",
+        imageKey: "programs-dashboard",
+        themeClass: "is-dashboard",
+        icon: "dashboard",
+        action: "programs-dashboard",
+        metrics: [
+          { value: "12", label: "Active Programs" },
+          { value: "8", label: "In Pipeline" },
+          { value: "6", label: "Scaling" },
+          { value: "92%", label: "On Track" }
+        ]
+      },
+      {
+        id: "innovation-playbook",
+        title: "Innovation Playbook",
+        description: "Guiding framework to ideate, validate, build and scale initiatives.",
+        imageKey: "innovation-playbook",
+        themeClass: "is-playbook",
+        icon: "playbook",
+        action: "innovation-playbook",
+        stages: [
+          { id: "playbook-ideate", label: "Ideate", symbol: "◎" },
+          { id: "playbook-validate", label: "Validate", symbol: "⬡" },
+          { id: "playbook-build", label: "Build", symbol: "◉" },
+          { id: "playbook-scale", label: "Scale", symbol: "▣" }
+        ]
+      },
+      {
+        id: "program-toolkit",
+        title: "Toolkit & Repository",
+        description: "Central library of program assets, case studies, reports & references.",
+        imageKey: "program-toolkit-repository",
+        themeClass: "is-toolkit",
+        icon: "toolkit",
+        action: "program-toolkit-repository",
+        shortcuts: [
+          { id: "program-templates", label: "Templates", icon: "document" },
+          { id: "program-case-studies", label: "Case Studies", icon: "chart" },
+          { id: "program-reports", label: "Reports", icon: "report" },
+          { id: "program-references", label: "References", icon: "reference" }
+        ]
+      }
+    ],
+
+    marketInsights: [
+      {
+        id: "market-industry-insights",
+        titleLines: ["Market &", "Industry Insights"],
+        description: "Trends, forecasts, and industry shifts shaping opportunities.",
+        imageKey: "market-industry-insights",
+        icon: "market",
+        action: "market-industry-insights"
+      },
+      {
+        id: "client-buyer-insights",
+        titleLines: ["Client / Buyer", "Insights"],
+        description: "Understand client priorities, buying behaviors, and decision drivers.",
+        imageKey: "client-buyer-insights",
+        icon: "buyer",
+        action: "client-buyer-insights"
+      },
+      {
+        id: "business-challenges-solutions",
+        titleLines: ["Business Challenges", "→ Solution Plays"],
+        description: "Map key challenges to proven solution plays and value outcomes.",
+        imageKey: "business-challenges-solutions",
+        icon: "challenge",
+        action: "business-challenges-solutions"
+      },
+      {
+        id: "ai-opportunity-signals",
+        titleLines: ["AI Opportunity", "Signals"],
+        description: "AI-powered signals to identify emerging opportunities early.",
+        imageKey: "ai-opportunity-signals",
+        icon: "ai",
+        action: "ai-opportunity-signals"
+      },
+      {
+        id: "program-battlecards",
+        titleLines: ["Battlecards"],
+        description: "Compelling battlecards to differentiate and win against competitors.",
+        imageKey: "program-battlecards",
+        icon: "battle",
+        action: "program-battlecards"
+      }
+    ],
+
+    quickAccess: [
+      { id: "account-plans", label: "Account Plans", icon: "document", themeClass: "" },
+      { id: "key-contacts", label: "Key Contacts", icon: "contacts", themeClass: "" },
+      { id: "competitors", label: "Competitors", icon: "trophy", themeClass: "" },
+      { id: "products-solutions", label: "Products & Solutions", icon: "cube", themeClass: "" },
+      { id: "case-studies", label: "Case Studies", icon: "document", themeClass: "" },
+      { id: "partner-ecosystem", label: "Partner Ecosystem", icon: "partners", themeClass: "is-purple" }
+    ]
+  };
+
+  function getStaticProgramsContent() {
+    return cloneData(programsPageData);
+  }
+
+  function normalizeProgramsContent(value) {
+    const fallback = getStaticProgramsContent();
+    if (!value || typeof value !== "object") return fallback;
+
+    return {
+      entryPoints: Array.isArray(value.entryPoints) && value.entryPoints.length
+        ? value.entryPoints
+        : fallback.entryPoints,
+      marketInsights: Array.isArray(value.marketInsights) && value.marketInsights.length
+        ? value.marketInsights
+        : fallback.marketInsights,
+      quickAccess: Array.isArray(value.quickAccess) && value.quickAccess.length
+        ? value.quickAccess
+        : fallback.quickAccess
+    };
+  }
+
+  function escapeProgramsHtml(value) {
+    return String(value == null ? "" : value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  function programsIconSvg(type, size) {
+    const iconSize = Number(size) || 28;
+    const attrs = 'width="' + iconSize + '" height="' + iconSize + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"';
+
+    const paths = {
+      dashboard: '<rect x="3" y="4" width="18" height="7" rx="1.5"/><rect x="3" y="13" width="18" height="7" rx="1.5"/><path d="M7 7.5h4M7 16.5h4M17 7.5h.01M17 16.5h.01"/>',
+      playbook: '<path d="M5 4h14v16H5z"/><path d="M9 2v4M15 2v4M9 11h6M12 8v6M9 17h6"/>',
+      toolkit: '<path d="M4 7h16v13H4z"/><path d="M8 7V4h8v3"/><path d="m8 13 2 2 5-5"/>',
+      document: '<path d="M6 3h9l3 3v15H6z"/><path d="M14 3v4h4M9 12h6M9 16h6"/>',
+      chart: '<path d="M5 4h14v16H5z"/><path d="m8 14 2-2 2 2 4-4"/><path d="M15 7h1"/>',
+      report: '<path d="M6 3h9l3 3v15H6z"/><path d="M14 3v4h4M9 12h6M9 16h5"/>',
+      reference: '<path d="M7 4h10v16H7z"/><path d="M10 2v4M14 2v4M10 10h4M10 14h4"/>',
+      market: '<rect x="3" y="5" width="18" height="6" rx="1"/><rect x="3" y="13" width="18" height="6" rx="1"/><path d="M7 8h5M7 16h5"/>',
+      buyer: '<path d="M6 3h9l3 3v15H6z"/><path d="M14 3v4h4M9 12h5M9 16h4"/><circle cx="17.5" cy="16.5" r="2.5"/>',
+      challenge: '<circle cx="7" cy="7" r="3"/><circle cx="17" cy="17" r="3"/><path d="M9.5 9.5 14.5 14.5M14 5h5v5M10 19H5v-5"/>',
+      ai: '<circle cx="12" cy="12" r="5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>',
+      battle: '<path d="M4 19V5h16v14z"/><path d="m7 15 3-3 2 2 4-5"/>',
+      contacts: '<circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2"/><path d="M3 20c0-3.4 2.3-5.5 6-5.5s6 2.1 6 5.5M14 15c3.4-.4 5.5 1.4 5.5 4"/>',
+      trophy: '<path d="M8 4h8v4c0 4-2 6-4 7-2-1-4-3-4-7z"/><path d="M8 6H4c0 3 1 5 4 5M16 6h4c0 3-1 5-4 5M12 15v4M9 21h6"/>',
+      cube: '<path d="m12 3 8 4.5v9L12 21l-8-4.5v-9z"/><path d="m4 7.5 8 4.5 8-4.5M12 12v9"/>',
+      partners: '<circle cx="5" cy="12" r="2"/><circle cx="18" cy="5" r="2"/><circle cx="18" cy="19" r="2"/><path d="m7 11 9-5M7 13l9 5"/>'
+    };
+
+    return '<svg ' + attrs + '>' + (paths[type] || paths.document) + '</svg>';
+  }
+
+  function renderProgramEntryPoints(pageRoot, items) {
+    if (!pageRoot) return;
+    const grid = pageRoot.querySelector("#programs-entry-grid");
+    if (!grid || !Array.isArray(items)) return;
+
+    grid.innerHTML = items.map(function (item) {
+      const id = escapeProgramsHtml(item.id);
+      const title = escapeProgramsHtml(item.title);
+      const action = escapeProgramsHtml(item.action);
+      const imageKey = escapeProgramsHtml(item.imageKey);
+      const themeClass = escapeProgramsHtml(item.themeClass || "");
+      const iconClass = item.icon === "playbook"
+        ? "is-purple"
+        : (item.icon === "toolkit" ? "is-teal" : "is-blue");
+
+      let footer = "";
+
+      if (Array.isArray(item.metrics)) {
+        footer = '<div class="program-dashboard-metrics" aria-label="Programs dashboard summary">' +
+          item.metrics.map(function (metric) {
+            return '<div class="program-metric">' +
+              '<strong>' + escapeProgramsHtml(metric.value) + '</strong>' +
+              '<span>' + escapeProgramsHtml(metric.label) + '</span>' +
+            '</div>';
+          }).join("") +
+        '</div>';
+      } else if (Array.isArray(item.stages)) {
+        footer = '<div class="innovation-playbook-stages" aria-label="Innovation Playbook stages">' +
+          item.stages.map(function (stage) {
+            return '<button type="button" data-programs-action="' + escapeProgramsHtml(stage.id) + '">' +
+              '<span aria-hidden="true">' + escapeProgramsHtml(stage.symbol || "•") + '</span>' +
+              '<span>' + escapeProgramsHtml(stage.label) + '</span>' +
+            '</button>';
+          }).join("") +
+        '</div>';
+      } else if (Array.isArray(item.shortcuts)) {
+        footer = '<div class="program-toolkit-shortcuts" aria-label="Toolkit and Repository shortcuts">' +
+          item.shortcuts.map(function (shortcut) {
+            return '<button type="button" data-programs-action="' + escapeProgramsHtml(shortcut.id) + '">' +
+              '<span class="program-shortcut-icon" aria-hidden="true">' + programsIconSvg(shortcut.icon, 20) + '</span>' +
+              '<span>' + escapeProgramsHtml(shortcut.label) + '</span>' +
+            '</button>';
+          }).join("") +
+        '</div>';
+      }
+
+      return '<article class="program-entry-card ' + themeClass + '" aria-labelledby="' + id + '-title">' +
+        '<div class="program-entry-main">' +
+          '<span class="program-entry-icon ' + iconClass + '" aria-hidden="true">' + programsIconSvg(item.icon, 34) + '</span>' +
+          '<div class="program-entry-copy">' +
+            '<h2 id="' + id + '-title">' + title + '</h2>' +
+            '<p>' + escapeProgramsHtml(item.description) + '</p>' +
+          '</div>' +
+          '<div class="program-entry-visual">' +
+            '<img id="' + id + '-image" data-image-key="' + imageKey + '" alt="" width="520" height="250" loading="lazy" decoding="async" fetchpriority="low">' +
+            '<div id="' + id + '-fallback" class="image-placeholder program-entry-fallback" data-image-fallback="' + imageKey + '" role="img" aria-label="' + title + ' visual unavailable" hidden>' + title + '</div>' +
+          '</div>' +
+          '<button class="program-entry-arrow" type="button" data-programs-action="' + action + '" aria-label="Open ' + title + '"><span aria-hidden="true">→</span></button>' +
+        '</div>' +
+        footer +
+      '</article>';
+    }).join("");
+  }
+
+  function renderProgramMarketInsights(pageRoot, items) {
+    if (!pageRoot) return;
+    const grid = pageRoot.querySelector("#program-insights-grid");
+    if (!grid || !Array.isArray(items)) return;
+
+    grid.innerHTML = items.map(function (item) {
+      const id = escapeProgramsHtml(item.id);
+      const imageKey = escapeProgramsHtml(item.imageKey);
+      const titleText = Array.isArray(item.titleLines) ? item.titleLines.join(" ") : String(item.title || "");
+      const titleHtml = (Array.isArray(item.titleLines) ? item.titleLines : [item.title || ""])
+        .map(escapeProgramsHtml)
+        .join("<br>");
+
+      return '<article class="program-insight-card">' +
+        '<div class="program-insight-media">' +
+          '<img id="' + id + '-image" data-image-key="' + imageKey + '" alt="" width="720" height="300" loading="lazy" decoding="async" fetchpriority="low">' +
+          '<div id="' + id + '-fallback" class="image-placeholder program-insight-fallback" data-image-fallback="' + imageKey + '" role="img" aria-label="' + escapeProgramsHtml(titleText) + ' visual unavailable" hidden>' + escapeProgramsHtml(titleText) + '</div>' +
+        '</div>' +
+        '<div class="program-insight-body">' +
+          '<div class="program-insight-heading">' +
+            '<span class="program-insight-icon" aria-hidden="true">' + programsIconSvg(item.icon, 27) + '</span>' +
+            '<h3>' + titleHtml + '</h3>' +
+          '</div>' +
+          '<p>' + escapeProgramsHtml(item.description) + '</p>' +
+          '<button type="button" class="program-insight-cta" data-programs-action="' + escapeProgramsHtml(item.action || item.id) + '">' +
+            '<span>Explore</span><span aria-hidden="true">→</span>' +
+          '</button>' +
+        '</div>' +
+      '</article>';
+    }).join("");
+  }
+
+  function renderProgramsQuickAccess(pageRoot, items) {
+    if (!pageRoot) return;
+    const grid = pageRoot.querySelector("#programs-quick-access-grid");
+    if (!grid || !Array.isArray(items)) return;
+
+    grid.innerHTML = items.map(function (item) {
+      return '<button type="button" class="programs-quick-card ' + escapeProgramsHtml(item.themeClass || "") + '" data-programs-action="' + escapeProgramsHtml(item.id) + '">' +
+        '<span class="programs-quick-icon" aria-hidden="true">' + programsIconSvg(item.icon, 25) + '</span>' +
+        '<span>' + escapeProgramsHtml(item.label) + '</span>' +
+        '<span class="programs-quick-arrow" aria-hidden="true">→</span>' +
+      '</button>';
+    }).join("");
+  }
+
+  function bindProgramsPageAssets(pageRoot) {
+    if (!pageRoot) return;
+
+    bindProgramsAsset(
+      pageRoot.querySelector("#programs-hero-image"),
+      pageRoot.querySelector("#programs-hero-fallback"),
+      2400
+    );
+
+    programsPageData.entryPoints.forEach(function (item) {
+      bindProgramsAsset(
+        pageRoot.querySelector("#" + item.id + "-image"),
+        pageRoot.querySelector("#" + item.id + "-fallback"),
+        1200
+      );
+    });
+
+    programsPageData.marketInsights.forEach(function (item) {
+      bindProgramsAsset(
+        pageRoot.querySelector("#" + item.id + "-image"),
+        pageRoot.querySelector("#" + item.id + "-fallback"),
+        900
+      );
+    });
+  }
+
+  function renderProgramsContent(pageRoot, content) {
+    if (!pageRoot) return;
+    const normalized = normalizeProgramsContent(content);
+
+    programsPageData.entryPoints = cloneData(normalized.entryPoints);
+    programsPageData.marketInsights = cloneData(normalized.marketInsights);
+    programsPageData.quickAccess = cloneData(normalized.quickAccess);
+
+    renderProgramEntryPoints(pageRoot, programsPageData.entryPoints);
+    renderProgramMarketInsights(pageRoot, programsPageData.marketInsights);
+    renderProgramsQuickAccess(pageRoot, programsPageData.quickAccess);
+    bindProgramsPageAssets(pageRoot);
+  }
 
   // H3 OPPORTUNITIES — Phase 1–4 asset registry.
   const opportunitiesAssetRegistry = {
@@ -1389,6 +1748,129 @@
   }
 
 
+  function bindProgramsAsset(image, fallback, width) {
+    if (!image) return;
+    const asset = programsAssetRegistry[image.dataset.imageKey];
+    bindImageCandidates(image, fallback, getDriveImageCandidates(asset, width));
+  }
+
+  function retryFailedProgramsAssets(pageRoot) {
+    if (!pageRoot) return;
+    pageRoot.querySelectorAll('img[data-asset-state="error"]').forEach(function (image) {
+      if (typeof image._nexusRetryAsset === "function") image._nexusRetryAsset();
+    });
+  }
+
+  function showProgramsStatus(pageRoot, message) {
+    if (!pageRoot) return;
+    const status = pageRoot.querySelector("#programs-status");
+    if (!status) return;
+
+    status.textContent = message || "";
+    status.classList.add("is-visible");
+
+    window.clearTimeout(status._nexusStatusTimer);
+    status._nexusStatusTimer = window.setTimeout(function () {
+      status.classList.remove("is-visible");
+    }, 2500);
+  }
+
+  function getProgramsActionLabel(action) {
+    const labels = {
+      "programs-dashboard": "Programs Dashboard",
+      "innovation-playbook": "Innovation Playbook",
+      "program-toolkit-repository": "Toolkit & Repository",
+      "playbook-ideate": "Ideate",
+      "playbook-validate": "Validate",
+      "playbook-build": "Build",
+      "playbook-scale": "Scale",
+      "program-templates": "Templates",
+      "program-case-studies": "Case Studies",
+      "program-reports": "Reports",
+      "program-references": "References",
+      "view-all-insights": "Market Insights & Battlecards",
+      "market-industry-insights": "Market & Industry Insights",
+      "client-buyer-insights": "Client / Buyer Insights",
+      "business-challenges-solutions": "Business Challenges → Solution Plays",
+      "ai-opportunity-signals": "AI Opportunity Signals",
+      "program-battlecards": "Battlecards",
+      "account-plans": "Account Plans",
+      "key-contacts": "Key Contacts",
+      "competitors": "Competitors",
+      "products-solutions": "Products & Solutions",
+      "case-studies": "Case Studies",
+      "partner-ecosystem": "Partner Ecosystem"
+    };
+
+    return labels[action] || "This Programs resource";
+  }
+
+  function handleProgramsAction(pageRoot, action) {
+    if (!pageRoot || !action) return;
+
+    if (action === "view-all-insights") {
+      const title = pageRoot.querySelector("#program-insights-title");
+      if (title && typeof title.scrollIntoView === "function") {
+        title.scrollIntoView({
+          behavior: reducedMotionQuery.matches ? "auto" : "smooth",
+          block: "start"
+        });
+      }
+      showProgramsStatus(pageRoot, "Showing Market Insights & Battlecards.");
+      return;
+    }
+
+    showProgramsStatus(
+      pageRoot,
+      getProgramsActionLabel(action) +
+        " will open when its destination is connected."
+    );
+  }
+
+  function initializeProgramsActions(pageRoot) {
+    if (!pageRoot || pageRoot.dataset.programsActionsInitialized === "true") return;
+
+    pageRoot.addEventListener("click", function (event) {
+      const trigger = event.target.closest("[data-programs-action]");
+      if (!trigger || !pageRoot.contains(trigger)) return;
+
+      handleProgramsAction(
+        pageRoot,
+        trigger.dataset.programsAction || ""
+      );
+    });
+
+    pageRoot.dataset.programsActionsInitialized = "true";
+  }
+
+  function refreshProgramsFromServer(pageRoot) {
+    if (!pageRoot || !config.useServerProgramsContent) return;
+
+    NexusAPI.getProgramsContent(
+      function (data) {
+        renderProgramsContent(pageRoot, data);
+        retryFailedProgramsAssets(pageRoot);
+      },
+      function () {
+        // Static Programs content remains available as the safe fallback.
+      }
+    );
+  }
+
+  function initializeProgramsPage(pageRoot) {
+    if (!pageRoot) return;
+
+    if (pageRoot.dataset.pageInitialized !== "true") {
+      renderProgramsContent(pageRoot, getStaticProgramsContent());
+      initializeProgramsActions(pageRoot);
+      pageRoot.dataset.pageInitialized = "true";
+      refreshProgramsFromServer(pageRoot);
+      return;
+    }
+
+    retryFailedProgramsAssets(pageRoot);
+  }
+
   function bindOpportunitiesAsset(image, fallback, width) {
     if (!image) return;
     const asset = opportunitiesAssetRegistry[image.dataset.imageKey];
@@ -2533,6 +3015,7 @@
     if (route === "overview") initializeOverviewPage(wrapper);
     if (route === "offerings") initializeOfferingsPage(wrapper);
     if (route === "opportunities") initializeOpportunitiesPage(wrapper);
+    if (route === "programs") initializeProgramsPage(wrapper);
     return wrapper;
   }
 
@@ -2547,6 +3030,7 @@
     if (route === "overview" && activePage) retryFailedOverviewAssets(activePage);
     if (route === "offerings" && activePage) retryFailedOfferingsAssets(activePage);
     if (route === "opportunities" && activePage) retryFailedOpportunitiesAssets(activePage);
+    if (route === "programs" && activePage) retryFailedProgramsAssets(activePage);
 
     const hasPageHero = Boolean(activePage && activePage.querySelector("[data-page-hero]"));
     dom.app.classList.toggle("hero-route", hasPageHero);
@@ -3012,6 +3496,68 @@
           if (onSuccess) onSuccess(fallback);
         })
         .getSalesPillars();
+    },
+
+    // H4 Programs Phase 4 hooks. Disabled by default through
+    // config.useServerProgramsContent until matching Code.gs functions exist.
+    getProgramsContent(onSuccess, onFailure) {
+      const fallback = getStaticProgramsContent();
+
+      if (!this.isAppsScriptAvailable()) {
+        if (onSuccess) onSuccess(fallback);
+        return;
+      }
+
+      google.script.run
+        .withSuccessHandler(function (data) {
+          if (onSuccess) onSuccess(normalizeProgramsContent(data));
+        })
+        .withFailureHandler(function (error) {
+          console.warn("getProgramsContent is not available yet; using static Programs data.", error);
+          if (onFailure) onFailure(error);
+          if (onSuccess) onSuccess(fallback);
+        })
+        .getProgramsContent();
+    },
+
+    getProgramMarketInsights(onSuccess, onFailure) {
+      const fallback = cloneData(programsPageData.marketInsights);
+
+      if (!this.isAppsScriptAvailable()) {
+        if (onSuccess) onSuccess(fallback);
+        return;
+      }
+
+      google.script.run
+        .withSuccessHandler(function (data) {
+          if (onSuccess) onSuccess(Array.isArray(data) ? data : fallback);
+        })
+        .withFailureHandler(function (error) {
+          console.warn("getProgramMarketInsights is not available yet; using static Programs data.", error);
+          if (onFailure) onFailure(error);
+          if (onSuccess) onSuccess(fallback);
+        })
+        .getProgramMarketInsights();
+    },
+
+    getProgramQuickAccess(onSuccess, onFailure) {
+      const fallback = cloneData(programsPageData.quickAccess);
+
+      if (!this.isAppsScriptAvailable()) {
+        if (onSuccess) onSuccess(fallback);
+        return;
+      }
+
+      google.script.run
+        .withSuccessHandler(function (data) {
+          if (onSuccess) onSuccess(Array.isArray(data) ? data : fallback);
+        })
+        .withFailureHandler(function (error) {
+          console.warn("getProgramQuickAccess is not available yet; using static Programs data.", error);
+          if (onFailure) onFailure(error);
+          if (onSuccess) onSuccess(fallback);
+        })
+        .getProgramQuickAccess();
     }
   };
 

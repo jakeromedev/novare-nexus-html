@@ -1,7 +1,843 @@
-<section class="page-container" aria-labelledby="programs-page-title">
-  <div class="page-development-placeholder">
-    <span class="section-label">H4: PROGRAMS</span>
-    <h1 id="programs-page-title" data-page-title tabindex="-1">Programs</h1>
-    <p>Page content will be implemented separately.</p>
-  </div>
+<!-- =========================================================
+     H4: PROGRAMS
+     Novare Nexus / ONESCA
+     Semantic structure based strictly on the supplied reference.
+     Styles belong in Styles.html.
+     Behavior/data binding belongs in Scripts.html.
+========================================================== -->
+
+<section
+  class="programs-page"
+  data-page="programs"
+  aria-labelledby="programs-title"
+>
+
+  <!-- =======================================================
+       HERO
+       Global nav contract: data-page-hero
+  ======================================================== -->
+  <section
+    class="programs-hero page-hero"
+    data-page-hero
+    aria-labelledby="programs-title"
+  >
+    <div class="programs-hero-media" aria-hidden="true">
+      <img
+        id="programs-hero-image"
+        class="programs-hero-image"
+        data-image-key="programs-hero"
+        alt=""
+        width="2200"
+        height="620"
+        loading="eager"
+        decoding="async"
+        fetchpriority="high"
+        hidden
+      >
+
+      <div
+        id="programs-hero-fallback"
+        class="image-placeholder programs-hero-fallback"
+        data-image-fallback="programs-hero"
+        role="img"
+        aria-label="Programs hero visual unavailable"
+        hidden
+      >
+        H4: Programs
+      </div>
+
+      <div class="programs-hero-overlay"></div>
+    </div>
+
+    <div class="programs-hero-content">
+      <div class="programs-hero-copy">
+        <p class="programs-eyebrow">H4 : PROGRAMS</p>
+
+        <h1 id="programs-title" data-page-title tabindex="-1">
+          <span>From Ideas to</span>
+          <span><strong>Impact at Scale</strong></span>
+        </h1>
+
+        <p class="programs-hero-description">
+          Drive innovation, build repeatable programs, and scale our impact
+          through structured execution.
+        </p>
+
+        <div class="programs-hero-tagline">
+          <span class="programs-hero-tagline-rule" aria-hidden="true"></span>
+          <span>People. Ideas. Execution. Greater Impact.</span>
+        </div>
+      </div>
+
+      <div
+        class="programs-execution-stages"
+        aria-label="Programs execution stages"
+      >
+        <span class="programs-stage">INNOVATE</span>
+        <span class="programs-stage">EXECUTE</span>
+        <span class="programs-stage">SCALE</span>
+        <span class="programs-stage">CREATE IMPACT</span>
+      </div>
+
+      <div
+        class="programs-hero-message"
+        aria-label="Programs turn possibilities into progress. Ideas today. A brighter tomorrow."
+      >
+        <div class="programs-hero-message-primary">
+          <strong>PROGRAMS</strong>
+          <span>TURN POSSIBILITIES</span>
+          <span>INTO PROGRESS.</span>
+        </div>
+
+        <span class="programs-hero-message-rule" aria-hidden="true"></span>
+
+        <div class="programs-hero-message-secondary">
+          <span>IDEAS TODAY.</span>
+          <span>A BRIGHTER TOMORROW.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =======================================================
+       PROGRAM ENTRY CARDS
+  ======================================================== -->
+  <section
+    class="programs-entry-section"
+    aria-label="Programs resources"
+  >
+    <div
+      id="programs-entry-grid"
+      class="programs-entry-grid"
+      aria-live="polite"
+    >
+
+      <!-- Programs Dashboard -->
+      <article
+        class="program-entry-card is-dashboard"
+        aria-labelledby="programs-dashboard-title"
+      >
+        <div class="program-entry-main">
+          <span class="program-entry-icon is-blue" aria-hidden="true">
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.8"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="7" rx="1.5"/>
+              <rect x="3" y="13" width="18" height="7" rx="1.5"/>
+              <path d="M7 7.5h4M7 16.5h4M17 7.5h.01M17 16.5h.01"/>
+            </svg>
+          </span>
+
+          <div class="program-entry-copy">
+            <h2 id="programs-dashboard-title">Programs Dashboard</h2>
+            <p>
+              Real-time overview of active programs, pipeline and performance.
+            </p>
+          </div>
+
+          <div class="program-entry-visual">
+            <img
+              id="programs-dashboard-image"
+              data-image-key="programs-dashboard"
+              alt=""
+              width="520"
+              height="250"
+              loading="lazy"
+              decoding="async"
+              fetchpriority="low"
+              hidden
+            >
+
+            <div
+              id="programs-dashboard-fallback"
+              class="image-placeholder program-entry-fallback"
+              data-image-fallback="programs-dashboard"
+              role="img"
+              aria-label="Programs Dashboard visual unavailable"
+              hidden
+            >
+              Programs Dashboard
+            </div>
+          </div>
+
+          <button
+            class="program-entry-arrow"
+            type="button"
+            data-programs-action="programs-dashboard"
+            aria-label="Open Programs Dashboard"
+          >
+            <span aria-hidden="true">→</span>
+          </button>
+        </div>
+
+        <div
+          class="program-dashboard-metrics"
+          aria-label="Programs dashboard summary"
+        >
+          <div class="program-metric">
+            <strong>12</strong>
+            <span>Active Programs</span>
+          </div>
+
+          <div class="program-metric">
+            <strong>8</strong>
+            <span>In Pipeline</span>
+          </div>
+
+          <div class="program-metric">
+            <strong>6</strong>
+            <span>Scaling</span>
+          </div>
+
+          <div class="program-metric">
+            <strong>92%</strong>
+            <span>On Track</span>
+          </div>
+        </div>
+      </article>
+
+      <!-- Innovation Playbook -->
+      <article
+        class="program-entry-card is-playbook"
+        aria-labelledby="innovation-playbook-title"
+      >
+        <div class="program-entry-main">
+          <span class="program-entry-icon is-purple" aria-hidden="true">
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.8"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 4h14v16H5z"/>
+              <path d="M9 2v4M15 2v4M9 11h6M12 8v6"/>
+              <path d="M9 17h6"/>
+            </svg>
+          </span>
+
+          <div class="program-entry-copy">
+            <h2 id="innovation-playbook-title">Innovation Playbook</h2>
+            <p>
+              Guiding framework to ideate, validate, build and scale initiatives.
+            </p>
+          </div>
+
+          <div class="program-entry-visual">
+            <img
+              id="innovation-playbook-image"
+              data-image-key="innovation-playbook"
+              alt=""
+              width="520"
+              height="250"
+              loading="lazy"
+              decoding="async"
+              fetchpriority="low"
+              hidden
+            >
+
+            <div
+              id="innovation-playbook-fallback"
+              class="image-placeholder program-entry-fallback"
+              data-image-fallback="innovation-playbook"
+              role="img"
+              aria-label="Innovation Playbook visual unavailable"
+              hidden
+            >
+              Innovation Playbook
+            </div>
+          </div>
+
+          <button
+            class="program-entry-arrow"
+            type="button"
+            data-programs-action="innovation-playbook"
+            aria-label="Open Innovation Playbook"
+          >
+            <span aria-hidden="true">→</span>
+          </button>
+        </div>
+
+        <div
+          class="innovation-playbook-stages"
+          aria-label="Innovation Playbook stages"
+        >
+          <button type="button" data-programs-action="playbook-ideate">
+            <span aria-hidden="true">◎</span>
+            <span>Ideate</span>
+          </button>
+
+          <button type="button" data-programs-action="playbook-validate">
+            <span aria-hidden="true">⬡</span>
+            <span>Validate</span>
+          </button>
+
+          <button type="button" data-programs-action="playbook-build">
+            <span aria-hidden="true">◉</span>
+            <span>Build</span>
+          </button>
+
+          <button type="button" data-programs-action="playbook-scale">
+            <span aria-hidden="true">▣</span>
+            <span>Scale</span>
+          </button>
+        </div>
+      </article>
+
+      <!-- Toolkit & Repository -->
+      <article
+        class="program-entry-card is-toolkit"
+        aria-labelledby="program-toolkit-title"
+      >
+        <div class="program-entry-main">
+          <span class="program-entry-icon is-teal" aria-hidden="true">
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.8"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 7h16v13H4z"/>
+              <path d="M8 7V4h8v3"/>
+              <path d="m8 13 2 2 5-5"/>
+            </svg>
+          </span>
+
+          <div class="program-entry-copy">
+            <h2 id="program-toolkit-title">Toolkit &amp; Repository</h2>
+            <p>
+              Central library of program assets, case studies, reports &amp; references.
+            </p>
+          </div>
+
+          <div class="program-entry-visual">
+            <img
+              id="program-toolkit-image"
+              data-image-key="program-toolkit-repository"
+              alt=""
+              width="520"
+              height="250"
+              loading="lazy"
+              decoding="async"
+              fetchpriority="low"
+              hidden
+            >
+
+            <div
+              id="program-toolkit-fallback"
+              class="image-placeholder program-entry-fallback"
+              data-image-fallback="program-toolkit-repository"
+              role="img"
+              aria-label="Toolkit and Repository visual unavailable"
+              hidden
+            >
+              Toolkit &amp; Repository
+            </div>
+          </div>
+
+          <button
+            class="program-entry-arrow"
+            type="button"
+            data-programs-action="program-toolkit-repository"
+            aria-label="Open Toolkit and Repository"
+          >
+            <span aria-hidden="true">→</span>
+          </button>
+        </div>
+
+        <div
+          class="program-toolkit-shortcuts"
+          aria-label="Toolkit and Repository shortcuts"
+        >
+          <button type="button" data-programs-action="program-templates">
+            <span class="program-shortcut-icon" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="1.9">
+                <path d="M6 3h9l3 3v15H6z"/>
+                <path d="M14 3v4h4M9 12h6M9 16h6"/>
+              </svg>
+            </span>
+            <span>Templates</span>
+          </button>
+
+          <button type="button" data-programs-action="program-case-studies">
+            <span class="program-shortcut-icon" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="1.9">
+                <path d="M5 4h14v16H5z"/>
+                <path d="m8 14 2-2 2 2 4-4"/>
+                <path d="M15 7h1"/>
+              </svg>
+            </span>
+            <span>Case Studies</span>
+          </button>
+
+          <button type="button" data-programs-action="program-reports">
+            <span class="program-shortcut-icon" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="1.9">
+                <path d="M6 3h9l3 3v15H6z"/>
+                <path d="M14 3v4h4M9 12h6M9 16h5"/>
+              </svg>
+            </span>
+            <span>Reports</span>
+          </button>
+
+          <button type="button" data-programs-action="program-references">
+            <span class="program-shortcut-icon" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="1.9">
+                <path d="M7 4h10v16H7z"/>
+                <path d="M10 2v4M14 2v4M10 10h4M10 14h4"/>
+              </svg>
+            </span>
+            <span>References</span>
+          </button>
+        </div>
+      </article>
+    </div>
+  </section>
+
+
+  <!-- =======================================================
+       MARKET INSIGHTS & BATTLECARDS
+  ======================================================== -->
+  <section
+    class="program-insights-panel programs-panel"
+    aria-labelledby="program-insights-title"
+  >
+    <header class="programs-panel-header">
+      <div class="programs-panel-title-group">
+        <span class="programs-panel-icon is-insights" aria-hidden="true">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.9"
+               stroke-linecap="round">
+            <path d="M4 20V11M9 20V6M14 20v-8M19 20V3"/>
+            <path d="M2 20h20"/>
+          </svg>
+        </span>
+
+        <div>
+          <h2 id="program-insights-title">Market Insights &amp; Battlecards</h2>
+          <p>Stay ahead with insights and positioning to win in the market.</p>
+        </div>
+      </div>
+
+      <button
+        class="programs-view-all"
+        type="button"
+        data-programs-action="view-all-insights"
+      >
+        <span>View All Insights</span>
+        <span aria-hidden="true">→</span>
+      </button>
+    </header>
+
+    <div
+      id="program-insights-grid"
+      class="program-insights-grid"
+      aria-live="polite"
+    >
+
+      <!-- Market & Industry Insights -->
+      <article class="program-insight-card">
+        <div class="program-insight-media">
+          <img
+            id="market-industry-insights-image"
+            data-image-key="market-industry-insights"
+            alt=""
+            width="720"
+            height="300"
+            loading="lazy"
+            decoding="async"
+            fetchpriority="low"
+            hidden
+          >
+
+          <div
+            id="market-industry-insights-fallback"
+            class="image-placeholder program-insight-fallback"
+            data-image-fallback="market-industry-insights"
+            role="img"
+            aria-label="Market and Industry Insights visual unavailable"
+            hidden
+          >
+            Market &amp; Industry Insights
+          </div>
+        </div>
+
+        <div class="program-insight-body">
+          <div class="program-insight-heading">
+            <span class="program-insight-icon" aria-hidden="true">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="1.9">
+                <rect x="3" y="5" width="18" height="6" rx="1"/>
+                <rect x="3" y="13" width="18" height="6" rx="1"/>
+                <path d="M7 8h5M7 16h5"/>
+              </svg>
+            </span>
+
+            <h3>Market &amp;<br>Industry Insights</h3>
+          </div>
+
+          <p>Trends, forecasts, and industry shifts shaping opportunities.</p>
+
+          <button
+            type="button"
+            class="program-insight-cta"
+            data-programs-action="market-industry-insights"
+          >
+            <span>Explore</span>
+            <span aria-hidden="true">→</span>
+          </button>
+        </div>
+      </article>
+
+      <!-- Client / Buyer Insights -->
+      <article class="program-insight-card">
+        <div class="program-insight-media">
+          <img
+            id="client-buyer-insights-image"
+            data-image-key="client-buyer-insights"
+            alt=""
+            width="720"
+            height="300"
+            loading="lazy"
+            decoding="async"
+            fetchpriority="low"
+            hidden
+          >
+
+          <div
+            id="client-buyer-insights-fallback"
+            class="image-placeholder program-insight-fallback"
+            data-image-fallback="client-buyer-insights"
+            role="img"
+            aria-label="Client and Buyer Insights visual unavailable"
+            hidden
+          >
+            Client / Buyer Insights
+          </div>
+        </div>
+
+        <div class="program-insight-body">
+          <div class="program-insight-heading">
+            <span class="program-insight-icon" aria-hidden="true">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="1.9"
+                   stroke-linecap="round" stroke-linejoin="round">
+                <path d="M6 3h9l3 3v15H6z"/>
+                <path d="M14 3v4h4M9 12h5M9 16h4"/>
+                <circle cx="17.5" cy="16.5" r="2.5"/>
+              </svg>
+            </span>
+
+            <h3>Client / Buyer<br>Insights</h3>
+          </div>
+
+          <p>Understand client priorities, buying behaviors, and decision drivers.</p>
+
+          <button
+            type="button"
+            class="program-insight-cta"
+            data-programs-action="client-buyer-insights"
+          >
+            <span>Explore</span>
+            <span aria-hidden="true">→</span>
+          </button>
+        </div>
+      </article>
+
+      <!-- Business Challenges → Solution Plays -->
+      <article class="program-insight-card">
+        <div class="program-insight-media">
+          <img
+            id="business-challenges-solutions-image"
+            data-image-key="business-challenges-solutions"
+            alt=""
+            width="720"
+            height="300"
+            loading="lazy"
+            decoding="async"
+            fetchpriority="low"
+            hidden
+          >
+
+          <div
+            id="business-challenges-solutions-fallback"
+            class="image-placeholder program-insight-fallback"
+            data-image-fallback="business-challenges-solutions"
+            role="img"
+            aria-label="Business Challenges to Solution Plays visual unavailable"
+            hidden
+          >
+            Business Challenges → Solution Plays
+          </div>
+        </div>
+
+        <div class="program-insight-body">
+          <div class="program-insight-heading">
+            <span class="program-insight-icon" aria-hidden="true">
+              <svg width="27" height="27" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="1.9"
+                   stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="7" cy="7" r="3"/>
+                <circle cx="17" cy="17" r="3"/>
+                <path d="M9.5 9.5 14.5 14.5M14 5h5v5M10 19H5v-5"/>
+              </svg>
+            </span>
+
+            <h3>Business Challenges<br>→ Solution Plays</h3>
+          </div>
+
+          <p>Map key challenges to proven solution plays and value outcomes.</p>
+
+          <button
+            type="button"
+            class="program-insight-cta"
+            data-programs-action="business-challenges-solutions"
+          >
+            <span>Explore</span>
+            <span aria-hidden="true">→</span>
+          </button>
+        </div>
+      </article>
+
+      <!-- AI Opportunity Signals -->
+      <article class="program-insight-card">
+        <div class="program-insight-media">
+          <img
+            id="ai-opportunity-signals-image"
+            data-image-key="ai-opportunity-signals"
+            alt=""
+            width="720"
+            height="300"
+            loading="lazy"
+            decoding="async"
+            fetchpriority="low"
+            hidden
+          >
+
+          <div
+            id="ai-opportunity-signals-fallback"
+            class="image-placeholder program-insight-fallback"
+            data-image-fallback="ai-opportunity-signals"
+            role="img"
+            aria-label="AI Opportunity Signals visual unavailable"
+            hidden
+          >
+            AI Opportunity Signals
+          </div>
+        </div>
+
+        <div class="program-insight-body">
+          <div class="program-insight-heading">
+            <span class="program-insight-icon" aria-hidden="true">
+              <svg width="27" height="27" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="1.9"
+                   stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="5"/>
+                <path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>
+              </svg>
+            </span>
+
+            <h3>AI Opportunity<br>Signals</h3>
+          </div>
+
+          <p>AI-powered signals to identify emerging opportunities early.</p>
+
+          <button
+            type="button"
+            class="program-insight-cta"
+            data-programs-action="ai-opportunity-signals"
+          >
+            <span>Explore</span>
+            <span aria-hidden="true">→</span>
+          </button>
+        </div>
+      </article>
+
+      <!-- Battlecards -->
+      <article class="program-insight-card">
+        <div class="program-insight-media">
+          <img
+            id="program-battlecards-image"
+            data-image-key="program-battlecards"
+            alt=""
+            width="720"
+            height="300"
+            loading="lazy"
+            decoding="async"
+            fetchpriority="low"
+            hidden
+          >
+
+          <div
+            id="program-battlecards-fallback"
+            class="image-placeholder program-insight-fallback"
+            data-image-fallback="program-battlecards"
+            role="img"
+            aria-label="Battlecards visual unavailable"
+            hidden
+          >
+            Battlecards
+          </div>
+        </div>
+
+        <div class="program-insight-body">
+          <div class="program-insight-heading">
+            <span class="program-insight-icon" aria-hidden="true">
+              <svg width="27" height="27" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="1.9"
+                   stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 19V5h16v14z"/>
+                <path d="m7 15 3-3 2 2 4-5"/>
+              </svg>
+            </span>
+
+            <h3>Battlecards</h3>
+          </div>
+
+          <p>Compelling battlecards to differentiate and win against competitors.</p>
+
+          <button
+            type="button"
+            class="program-insight-cta"
+            data-programs-action="program-battlecards"
+          >
+            <span>Explore</span>
+            <span aria-hidden="true">→</span>
+          </button>
+        </div>
+      </article>
+    </div>
+  </section>
+
+
+  <!-- =======================================================
+       QUICK ACCESS
+  ======================================================== -->
+  <section
+    class="programs-quick-access programs-panel"
+    aria-labelledby="programs-quick-access-title"
+  >
+    <header class="programs-quick-access-header">
+      <div class="programs-quick-access-title-group">
+        <span class="programs-quick-bolt" aria-hidden="true">ϟ</span>
+        <h2 id="programs-quick-access-title">Quick Access</h2>
+        <p>Jump to commonly used resources.</p>
+      </div>
+    </header>
+
+    <div
+      id="programs-quick-access-grid"
+      class="programs-quick-access-grid"
+      aria-live="polite"
+    >
+      <button
+        type="button"
+        class="programs-quick-card"
+        data-programs-action="account-plans"
+      >
+        <span class="programs-quick-icon" aria-hidden="true">
+          <svg width="25" height="25" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.9">
+            <path d="M6 3h9l3 3v15H6z"/>
+            <path d="M14 3v4h4M9 12h6M9 16h6"/>
+          </svg>
+        </span>
+        <span>Account Plans</span>
+        <span class="programs-quick-arrow" aria-hidden="true">→</span>
+      </button>
+
+      <button
+        type="button"
+        class="programs-quick-card"
+        data-programs-action="key-contacts"
+      >
+        <span class="programs-quick-icon" aria-hidden="true">
+          <svg width="25" height="25" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.9"
+               stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="9" cy="8" r="3"/>
+            <circle cx="17" cy="9" r="2"/>
+            <path d="M3 20c0-3.4 2.3-5.5 6-5.5s6 2.1 6 5.5M14 15c3.4-.4 5.5 1.4 5.5 4"/>
+          </svg>
+        </span>
+        <span>Key Contacts</span>
+        <span class="programs-quick-arrow" aria-hidden="true">→</span>
+      </button>
+
+      <button
+        type="button"
+        class="programs-quick-card"
+        data-programs-action="competitors"
+      >
+        <span class="programs-quick-icon" aria-hidden="true">
+          <svg width="25" height="25" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.9">
+            <path d="M8 4h8v4c0 4-2 6-4 7-2-1-4-3-4-7z"/>
+            <path d="M8 6H4c0 3 1 5 4 5M16 6h4c0 3-1 5-4 5M12 15v4M9 21h6"/>
+          </svg>
+        </span>
+        <span>Competitors</span>
+        <span class="programs-quick-arrow" aria-hidden="true">→</span>
+      </button>
+
+      <button
+        type="button"
+        class="programs-quick-card"
+        data-programs-action="products-solutions"
+      >
+        <span class="programs-quick-icon" aria-hidden="true">
+          <svg width="25" height="25" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.9"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="m12 3 8 4.5v9L12 21l-8-4.5v-9z"/>
+            <path d="m4 7.5 8 4.5 8-4.5M12 12v9"/>
+          </svg>
+        </span>
+        <span>Products &amp; Solutions</span>
+        <span class="programs-quick-arrow" aria-hidden="true">→</span>
+      </button>
+
+      <button
+        type="button"
+        class="programs-quick-card"
+        data-programs-action="case-studies"
+      >
+        <span class="programs-quick-icon" aria-hidden="true">
+          <svg width="25" height="25" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.9">
+            <path d="M6 3h9l3 3v15H6z"/>
+            <path d="M14 3v4h4M9 12h6M9 16h6"/>
+          </svg>
+        </span>
+        <span>Case Studies</span>
+        <span class="programs-quick-arrow" aria-hidden="true">→</span>
+      </button>
+
+      <button
+        type="button"
+        class="programs-quick-card is-purple"
+        data-programs-action="partner-ecosystem"
+      >
+        <span class="programs-quick-icon" aria-hidden="true">
+          <svg width="25" height="25" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.9"
+               stroke-linecap="round">
+            <circle cx="5" cy="12" r="2"/>
+            <circle cx="18" cy="5" r="2"/>
+            <circle cx="18" cy="19" r="2"/>
+            <path d="m7 11 9-5M7 13l9 5"/>
+          </svg>
+        </span>
+        <span>Partner Ecosystem</span>
+        <span class="programs-quick-arrow" aria-hidden="true">→</span>
+      </button>
+    </div>
+  </section>
+
+
+
+  <p
+    id="programs-status"
+    class="programs-status"
+    role="status"
+    aria-live="polite"
+  ></p>
+
 </section>

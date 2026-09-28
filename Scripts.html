@@ -13,27 +13,27 @@
   // 2. ROUTES
   const routes = {
     home:          { title: "Home",                 templateId: "page-home-template",          showSearchFilters: true  },
-    workspace:     { title: "My Workspace",         templateId: "page-workspace-template",     showSearchFilters: false },
-    analytics:     { title: "Insights & Analytics", templateId: "page-analytics-template",     showSearchFilters: false },
-    overview:      { title: "Overview",             templateId: "page-overview-template",      showSearchFilters: false },
-    offerings:     { title: "Offerings",            templateId: "page-offerings-template",     showSearchFilters: false },
-    opportunities: { title: "Opportunities",        templateId: "page-opportunities-template", showSearchFilters: false },
-    programs:      { title: "Programs",             templateId: "page-programs-template",      showSearchFilters: false },
-    delivery:      { title: "Delivery",             templateId: "page-delivery-template",      showSearchFilters: false },
-    governance:    { title: "Governance",           templateId: "page-governance-template",    showSearchFilters: false },
-    tools:         { title: "Tools & Templates",    templateId: "page-tools-template",         showSearchFilters: false },
-    support:       { title: "Help & Support",       templateId: "page-support-template",       showSearchFilters: false }
+    workspace:     { title: "My Workspace",         templateId: "page-workspace-template",     showSearchFilters: true },
+    analytics:     { title: "Insights & Analytics", templateId: "page-analytics-template",     showSearchFilters: true },
+    overview:      { title: "Overview",             templateId: "page-overview-template",      showSearchFilters: true },
+    offerings:     { title: "Offerings",            templateId: "page-offerings-template",     showSearchFilters: true },
+    opportunities: { title: "Opportunities",        templateId: "page-opportunities-template", showSearchFilters: true },
+    programs:      { title: "Programs",             templateId: "page-programs-template",      showSearchFilters: true },
+    delivery:      { title: "Delivery",             templateId: "page-delivery-template",      showSearchFilters: true },
+    governance:    { title: "Governance",           templateId: "page-governance-template",    showSearchFilters: true },
+    tools:         { title: "Tools & Templates",    templateId: "page-tools-template",         showSearchFilters: true },
+    support:       { title: "Help & Support",       templateId: "page-support-template",       showSearchFilters: true }
   };
 
   // 3. CURRENT USER (prototype fallback; connect to your real identity source later)
   const currentUser = { name: "Davin Zen", department: "SC&A" };
 
-  // 4. DOM REFERENCES
+  // 4. GLOBAL SHELL DOM REFERENCES
   const dom = {
     app: document.getElementById("nexus-app"),
     sidebar: document.getElementById("nexus-sidebar"),
     workspace: document.getElementById("nexus-workspace"),
-    topbar: document.getElementById("nexus-topbar"),
+    navHeader: document.getElementById("nexus-nav-header"),
     overlay: document.getElementById("sidebar-overlay"),
     toggle: document.getElementById("sidebar-toggle"),
     sidebarClose: document.getElementById("sidebar-close"),
@@ -87,6 +87,21 @@
       fileId: "15B-4VMLDEJ9rd_eHkHrp383ZPB0fCGD2",
       viewerUrl: "https://drive.google.com/file/d/15B-4VMLDEJ9rd_eHkHrp383ZPB0fCGD2/view?usp=drive_link",
       phase: 2
+    },
+    "featured-go-to-market": {
+      fileId: "1ze987QKb5eF_9KPVVBIEx550XRitu_UF",
+      viewerUrl: "https://drive.google.com/file/d/1ze987QKb5eF_9KPVVBIEx550XRitu_UF/view?usp=drive_link",
+      phase: 3
+    },
+    "featured-solution-blueprint": {
+      fileId: "1G5rUPNw58_CWZ9VogQ-CiqmB9dhh2Lyu",
+      viewerUrl: "https://drive.google.com/file/d/1G5rUPNw58_CWZ9VogQ-CiqmB9dhh2Lyu/view?usp=drive_link",
+      phase: 3
+    },
+    "featured-deal-calculator": {
+      fileId: "1MA7OGxgzpUjeRKQnLZafgUcvrm4ZkMql",
+      viewerUrl: "https://drive.google.com/file/d/1MA7OGxgzpUjeRKQnLZafgUcvrm4ZkMql/view?usp=drive_link",
+      phase: 3
     },
     "featured-customer-engagement": {
       fileId: "1tjTiPzeA1Iyl9IE2lKtiHWcNp97t_BzQ",
@@ -348,7 +363,7 @@
         title: "Novare Next Go-to-Market Guide",
         description: "Strategy, messaging and enablement resources",
         assetKey: "featured-go-to-market",
-        placeholder: true
+        placeholder: false
       },
       {
         id: "solution-blueprint",
@@ -356,7 +371,7 @@
         title: "Solution Blueprint Template",
         description: "Build compelling and consistent solutions",
         assetKey: "featured-solution-blueprint",
-        placeholder: true
+        placeholder: false
       },
       {
         id: "customer-engagement",
@@ -372,7 +387,7 @@
         title: "Deal Calculator",
         description: "Estimate effort, value and resourcing",
         assetKey: "featured-deal-calculator",
-        placeholder: true
+        placeholder: false
       }
     ],
     whatsNew: [
@@ -613,7 +628,7 @@
       } else {
         image.hidden = true;
         fallback.hidden = false;
-        bindHomeAsset(image, fallback, 720);
+        bindHomeAsset(image, fallback, 1600);
       }
 
       media.appendChild(image);
@@ -875,8 +890,8 @@
     }
   }
 
-  // 6. HOME STICKY TOPBAR SCROLL EFFECT
-  let topbarScrollFrame = 0;
+  // 6. GLOBAL NAV HEADER SCROLL EFFECT
+  let navHeaderScrollFrame = 0;
 
   function getPageScrollTop() {
     return Math.max(
@@ -887,32 +902,33 @@
     );
   }
 
-  function updateHomeTopbarScrollEffect() {
-    topbarScrollFrame = 0;
-    if (!dom.topbar) return;
+  function updateNavHeaderScrollEffect() {
+    navHeaderScrollFrame = 0;
+    if (!dom.navHeader) return;
 
-    if (state.route !== "home") {
-      dom.topbar.style.removeProperty("--home-topbar-opacity");
-      dom.topbar.style.removeProperty("--home-topbar-border-opacity");
-      dom.topbar.style.removeProperty("--home-topbar-shadow-opacity");
-      dom.topbar.style.removeProperty("--home-topbar-blur");
+    if (!dom.app.classList.contains("hero-route")) {
+      dom.navHeader.style.removeProperty("--nav-header-opacity");
+      dom.navHeader.style.removeProperty("--nav-header-border-opacity");
+      dom.navHeader.style.removeProperty("--nav-header-shadow-opacity");
+      dom.navHeader.style.removeProperty("--nav-header-blur");
       return;
     }
 
-    // At the top the header is transparent. Over the first 180px of scroll,
+    // When the active route has a page hero, the global header is transparent at the top.
+    // Over the first 180px of scroll,
     // fade in a frosted surface so dashboard content stays readable beneath it.
     const progress = Math.max(0, Math.min(1, getPageScrollTop() / 180));
     const eased = 1 - Math.pow(1 - progress, 2);
 
-    dom.topbar.style.setProperty("--home-topbar-opacity", (eased * 0.94).toFixed(3));
-    dom.topbar.style.setProperty("--home-topbar-border-opacity", (eased * 0.72).toFixed(3));
-    dom.topbar.style.setProperty("--home-topbar-shadow-opacity", (eased * 0.08).toFixed(3));
-    dom.topbar.style.setProperty("--home-topbar-blur", (eased * 14).toFixed(1) + "px");
+    dom.navHeader.style.setProperty("--nav-header-opacity", (eased * 0.94).toFixed(3));
+    dom.navHeader.style.setProperty("--nav-header-border-opacity", (eased * 0.72).toFixed(3));
+    dom.navHeader.style.setProperty("--nav-header-shadow-opacity", (eased * 0.08).toFixed(3));
+    dom.navHeader.style.setProperty("--nav-header-blur", (eased * 14).toFixed(1) + "px");
   }
 
-  function scheduleHomeTopbarScrollEffect() {
-    if (topbarScrollFrame) return;
-    topbarScrollFrame = window.requestAnimationFrame(updateHomeTopbarScrollEffect);
+  function scheduleNavHeaderScrollEffect() {
+    if (navHeaderScrollFrame) return;
+    navHeaderScrollFrame = window.requestAnimationFrame(updateNavHeaderScrollEffect);
   }
 
   // 6. SPA ROUTING
@@ -953,13 +969,14 @@
     if (activePage) activePage.hidden = false;
     if (route === "home" && activePage) retryFailedHomeAssets(activePage);
 
-    dom.app.classList.toggle("home-route", route === "home");
+    const hasPageHero = Boolean(activePage && activePage.querySelector("[data-page-hero]"));
+    dom.app.classList.toggle("hero-route", hasPageHero);
+
     if (dom.search) {
-      dom.search.placeholder = route === "home"
-        ? "Search knowledge, templates, playbooks, tools..."
-        : "Search knowledge, templates, playbooks, tools, and more...";
+      dom.search.placeholder = "Search knowledge, templates, playbooks, tools...";
     }
-    if (dom.filters) dom.filters.hidden = !page.showSearchFilters;
+    // The navigation header is global, so its source filters remain visible on every route.
+    if (dom.filters) dom.filters.hidden = false;
     document.title = page.title + " | Novare Nexus 2026";
   }
 
@@ -991,7 +1008,7 @@
     state.route = route;
     setActiveNavigation(route);
     renderRoute(route);
-    updateHomeTopbarScrollEffect();
+    updateNavHeaderScrollEffect();
 
     const drawerWasOpen = state.mobileOpen;
     if (drawerWasOpen) setMobileSidebar(false, false);
@@ -1308,8 +1325,8 @@
     }
 
     window.addEventListener("hashchange", function () { handleRouteChange(true); });
-    window.addEventListener("scroll", scheduleHomeTopbarScrollEffect, { passive: true });
-    if (dom.workspace) dom.workspace.addEventListener("scroll", scheduleHomeTopbarScrollEffect, { passive: true });
+    window.addEventListener("scroll", scheduleNavHeaderScrollEffect, { passive: true });
+    if (dom.workspace) dom.workspace.addEventListener("scroll", scheduleNavHeaderScrollEffect, { passive: true });
     document.addEventListener("keydown", handleKeyboard);
     mobileQuery.addEventListener("change", handleViewportChange);
     tabletQuery.addEventListener("change", handleViewportChange);

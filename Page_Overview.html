@@ -1,7 +1,826 @@
-<section class="page-container" aria-labelledby="overview-page-title">
-  <div class="page-development-placeholder">
-    <span class="section-label">H1: OVERVIEW</span>
-    <h1 id="overview-page-title" data-page-title tabindex="-1">Overview</h1>
-    <p>Page content will be implemented separately.</p>
-  </div>
+<section class="overview-page" data-page="overview" aria-labelledby="overview-title">
+  <section
+    class="overview-hero page-hero"
+    data-page-hero
+    aria-labelledby="overview-title"
+  >
+    <div class="overview-hero-media" aria-hidden="true">
+      <img
+        id="overview-hero-image"
+        class="overview-hero-image page-hero-image"
+        data-image-key="overview-hero"
+        alt=""
+        width="2400"
+        height="620"
+        loading="eager"
+        fetchpriority="high"
+        decoding="async"
+        hidden
+      >
+      <div
+        id="overview-hero-fallback"
+        class="image-placeholder overview-hero-fallback"
+        data-image-fallback="overview-hero"
+        role="img"
+        aria-label="Overview hero artwork unavailable"
+        hidden
+      >
+        Overview hero visual unavailable
+      </div>
+    </div>
+
+    <div class="overview-hero-copy">
+      <p class="overview-eyebrow">H1: OVERVIEW</p>
+
+      <h1
+        id="overview-title"
+        class="overview-title"
+        data-page-title
+        tabindex="-1"
+      >
+        A Unified View<br>
+        for <span class="overview-title-accent">What’s Next</span>
+      </h1>
+
+      <p class="overview-description">
+        Corporate context, solution group matrices,<br>
+        and strategic architecture mandates.
+      </p>
+
+      <div class="overview-tagline">
+        <span class="overview-tagline-accent" aria-hidden="true"></span>
+        <strong>Same People. Greater Possibilities.</strong>
+      </div>
+    </div>
+
+    <div class="overview-hero-message" aria-label="People, solutions, impact. Turn knowledge into opportunity.">
+      <p class="overview-values">PEOPLE<br>SOLUTIONS<br>IMPACT</p>
+      <span class="overview-message-accent" aria-hidden="true"></span>
+      <p class="overview-opportunity">TURN<br>KNOWLEDGE<br>INTO OPPORTUNITY</p>
+    </div>
+  </section>
+
+
+  <!-- =========================================================
+       PHASE 2 — ABOUT NOVARE / ABOUT SC&A / DIRECTORIES
+  ========================================================== -->
+  <section
+    id="overview-reference-grid"
+    class="overview-reference-grid"
+    aria-label="Overview reference sections"
+  >
+    <article
+      class="overview-reference-card"
+      aria-labelledby="overview-about-novare-title"
+    >
+      <header class="overview-reference-card-header">
+        <div class="overview-reference-thumbnail">
+          <img
+            id="overview-about-novare-image"
+            class="overview-reference-image"
+            data-image-key="overview-about-novare"
+            alt=""
+            width="640"
+            height="356"
+            loading="lazy"
+            decoding="async"
+            fetchpriority="low"
+            hidden
+          >
+          <div
+            id="overview-about-novare-fallback"
+            class="image-placeholder overview-reference-image-fallback"
+            data-image-fallback="overview-about-novare"
+            role="img"
+            aria-label="About Novare visual unavailable"
+            hidden
+          >
+            About Novare
+          </div>
+        </div>
+
+        <div class="overview-reference-heading-copy">
+          <h2 id="overview-about-novare-title">About Novare</h2>
+          <p>Our corporate context, solution groups, industry focus, and partner ecosystem.</p>
+        </div>
+
+        <button
+          class="overview-card-arrow"
+          type="button"
+          data-overview-action="about-novare"
+          aria-label="Open About Novare"
+        >
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+               stroke-linejoin="round" aria-hidden="true">
+            <path d="M5 12h14M13 6l6 6-6 6"/>
+          </svg>
+        </button>
+      </header>
+
+      <div class="overview-reference-links">
+        <button class="overview-reference-row" type="button"
+                data-overview-action="corporate-overview">
+          <span class="overview-reference-row-icon" aria-hidden="true">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.9">
+              <path d="M6 2h9l4 4v16H6z"/>
+              <path d="M14 2v5h5M9 12h7M9 16h7"/>
+            </svg>
+          </span>
+          <span>Corporate Overview</span>
+          <span class="overview-reference-chevron" aria-hidden="true">›</span>
+        </button>
+
+        <button class="overview-reference-row" type="button"
+                data-overview-action="novare-solution-groups">
+          <span class="overview-reference-row-icon" aria-hidden="true">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.9">
+              <path d="M6 2h9l4 4v16H6z"/>
+              <path d="M14 2v5h5M9 12h7M9 16h7"/>
+            </svg>
+          </span>
+          <span>Novare Solutions Groups</span>
+          <span class="overview-reference-chevron" aria-hidden="true">›</span>
+        </button>
+
+        <button class="overview-reference-row" type="button"
+                data-overview-action="accounts-industry-focus">
+          <span class="overview-reference-row-icon" aria-hidden="true">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.9">
+              <path d="M6 2h9l4 4v16H6z"/>
+              <path d="M14 2v5h5M9 12h7M9 16h7"/>
+            </svg>
+          </span>
+          <span>Accounts &amp; Industry Focus</span>
+          <span class="overview-reference-chevron" aria-hidden="true">›</span>
+        </button>
+
+        <button class="overview-reference-row" type="button"
+                data-overview-action="partner-ecosystem">
+          <span class="overview-reference-row-icon" aria-hidden="true">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.9">
+              <path d="M6 2h9l4 4v16H6z"/>
+              <path d="M14 2v5h5M9 12h7M9 16h7"/>
+            </svg>
+          </span>
+          <span>Partner Ecosystem</span>
+          <span class="overview-reference-chevron" aria-hidden="true">›</span>
+        </button>
+      </div>
+
+      <button
+        class="overview-reference-featured-link"
+        type="button"
+        data-overview-action="corporate-pitchbook"
+      >
+        <span class="overview-reference-featured-icon" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.9">
+            <path d="M5 3h10l4 4v14H5z"/>
+            <path d="M14 3v5h5M9 13h6M9 17h4"/>
+          </svg>
+        </span>
+        <strong>Corporate PitchBook</strong>
+        <span class="overview-reference-chevron" aria-hidden="true">›</span>
+      </button>
+    </article>
+
+    <article
+      class="overview-reference-card"
+      aria-labelledby="overview-about-sca-title"
+    >
+      <header class="overview-reference-card-header">
+        <div class="overview-reference-thumbnail">
+          <img
+            id="overview-about-sca-image"
+            class="overview-reference-image"
+            data-image-key="overview-about-sca"
+            alt=""
+            width="640"
+            height="356"
+            loading="lazy"
+            decoding="async"
+            fetchpriority="low"
+            hidden
+          >
+          <div
+            id="overview-about-sca-fallback"
+            class="image-placeholder overview-reference-image-fallback"
+            data-image-fallback="overview-about-sca"
+            role="img"
+            aria-label="About SC&A visual unavailable"
+            hidden
+          >
+            About SC&amp;A
+          </div>
+        </div>
+
+        <div class="overview-reference-heading-copy">
+          <h2 id="overview-about-sca-title">About SC&amp;A</h2>
+          <p>Our charter, strategy, operating model, organization, and ways of working.</p>
+        </div>
+
+        <button
+          class="overview-card-arrow"
+          type="button"
+          data-overview-action="about-sca"
+          aria-label="Open About SC&A"
+        >
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+               stroke-linejoin="round" aria-hidden="true">
+            <path d="M5 12h14M13 6l6 6-6 6"/>
+          </svg>
+        </button>
+      </header>
+
+      <div class="overview-reference-links">
+        <button class="overview-reference-row" type="button"
+                data-overview-action="charter-mandate">
+          <span class="overview-reference-row-icon" aria-hidden="true">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.9">
+              <path d="M6 2h9l4 4v16H6z"/>
+              <path d="M14 2v5h5M9 12h7M9 16h7"/>
+            </svg>
+          </span>
+          <span>Charter &amp; Mandate</span>
+          <span class="overview-reference-chevron" aria-hidden="true">›</span>
+        </button>
+
+        <button class="overview-reference-row" type="button"
+                data-overview-action="strategy-practice-vision">
+          <span class="overview-reference-row-icon" aria-hidden="true">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.9">
+              <path d="M6 2h9l4 4v16H6z"/>
+              <path d="M14 2v5h5M9 12h7M9 16h7"/>
+            </svg>
+          </span>
+          <span>Strategy &amp; Practice Vision</span>
+          <span class="overview-reference-chevron" aria-hidden="true">›</span>
+        </button>
+
+        <button class="overview-reference-row" type="button"
+                data-overview-action="presales-operating-model">
+          <span class="overview-reference-row-icon" aria-hidden="true">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.9">
+              <path d="M6 2h9l4 4v16H6z"/>
+              <path d="M14 2v5h5M9 12h7M9 16h7"/>
+            </svg>
+          </span>
+          <span>PreSales Operating Model</span>
+          <span class="overview-reference-chevron" aria-hidden="true">›</span>
+        </button>
+
+        <button class="overview-reference-row" type="button"
+                data-overview-action="organization-roles">
+          <span class="overview-reference-row-icon" aria-hidden="true">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.9">
+              <path d="M6 2h9l4 4v16H6z"/>
+              <path d="M14 2v5h5M9 12h7M9 16h7"/>
+            </svg>
+          </span>
+          <span>Organization &amp; Roles</span>
+          <span class="overview-reference-chevron" aria-hidden="true">›</span>
+        </button>
+
+        <button class="overview-reference-row" type="button"
+                data-overview-action="ways-of-working">
+          <span class="overview-reference-row-icon" aria-hidden="true">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.9">
+              <path d="M6 2h9l4 4v16H6z"/>
+              <path d="M14 2v5h5M9 12h7M9 16h7"/>
+            </svg>
+          </span>
+          <span>Ways of Working</span>
+          <span class="overview-reference-chevron" aria-hidden="true">›</span>
+        </button>
+
+        <button class="overview-reference-row" type="button"
+                data-overview-action="performance-okrs">
+          <span class="overview-reference-row-icon" aria-hidden="true">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.9">
+              <path d="M6 2h9l4 4v16H6z"/>
+              <path d="M14 2v5h5M9 12h7M9 16h7"/>
+            </svg>
+          </span>
+          <span>Performance &amp; OKRs</span>
+          <span class="overview-reference-chevron" aria-hidden="true">›</span>
+        </button>
+      </div>
+
+      <button
+        class="overview-reference-featured-link"
+        type="button"
+        data-overview-action="sca-general-guidelines"
+      >
+        <span class="overview-reference-featured-icon" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.9">
+            <path d="M5 3h10l4 4v14H5z"/>
+            <path d="M14 3v5h5M9 13h6M9 17h4"/>
+          </svg>
+        </span>
+        <strong>SC&amp;A General Guidelines</strong>
+        <span class="overview-reference-chevron" aria-hidden="true">›</span>
+      </button>
+    </article>
+
+    <article
+      class="overview-reference-card overview-directory-card"
+      aria-labelledby="overview-directories-title"
+    >
+      <header class="overview-reference-card-header">
+        <div class="overview-reference-thumbnail">
+          <img
+            id="overview-directories-image"
+            class="overview-reference-image"
+            data-image-key="overview-directories"
+            alt=""
+            width="640"
+            height="356"
+            loading="lazy"
+            decoding="async"
+            fetchpriority="low"
+            hidden
+          >
+          <div
+            id="overview-directories-fallback"
+            class="image-placeholder overview-reference-image-fallback"
+            data-image-fallback="overview-directories"
+            role="img"
+            aria-label="Directories visual unavailable"
+            hidden
+          >
+            Directories
+          </div>
+        </div>
+
+        <div class="overview-reference-heading-copy">
+          <h2 id="overview-directories-title">Directories</h2>
+          <p>Find people, accounts, and partners across Novare.</p>
+        </div>
+
+        <button
+          class="overview-card-arrow"
+          type="button"
+          data-overview-action="directories"
+          aria-label="Open Directories"
+        >
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+               stroke-linejoin="round" aria-hidden="true">
+            <path d="M5 12h14M13 6l6 6-6 6"/>
+          </svg>
+        </button>
+      </header>
+
+      <div class="overview-reference-links overview-directory-links">
+        <button class="overview-reference-row overview-directory-row" type="button"
+                data-overview-action="sca-directory">
+          <span class="overview-reference-row-icon" aria-hidden="true">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.9">
+              <path d="M6 2h9l4 4v16H6z"/>
+              <path d="M14 2v5h5M9 12h7M9 16h7"/>
+            </svg>
+          </span>
+          <strong>SC&amp;A Directory</strong>
+          <span class="overview-reference-chevron" aria-hidden="true">›</span>
+        </button>
+
+        <button class="overview-reference-row overview-directory-row" type="button"
+                data-overview-action="accounts-directory">
+          <span class="overview-reference-row-icon" aria-hidden="true">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.9">
+              <path d="M6 2h9l4 4v16H6z"/>
+              <path d="M14 2v5h5M9 12h7M9 16h7"/>
+            </svg>
+          </span>
+          <strong>Accounts Directory</strong>
+          <span class="overview-reference-chevron" aria-hidden="true">›</span>
+        </button>
+
+        <button class="overview-reference-row overview-directory-row" type="button"
+                data-overview-action="partners-directory">
+          <span class="overview-reference-row-icon" aria-hidden="true">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.9">
+              <path d="M6 2h9l4 4v16H6z"/>
+              <path d="M14 2v5h5M9 12h7M9 16h7"/>
+            </svg>
+          </span>
+          <strong>Partners Directory</strong>
+          <span class="overview-reference-chevron" aria-hidden="true">›</span>
+        </button>
+      </div>
+    </article>
+  </section>
+
+  <p id="overview-status" class="overview-status" role="status" aria-live="polite"></p>
+
+
+  <!-- =========================================================
+       PHASE 3 — NOVARE SOLUTIONS GROUPS
+  ========================================================== -->
+  <section
+    id="overview-solution-groups"
+    class="overview-solution-groups"
+    aria-labelledby="overview-solution-groups-title"
+  >
+    <header class="overview-section-header">
+      <div class="overview-section-heading">
+        <div class="overview-section-title-row">
+          <span class="overview-section-accent" aria-hidden="true"></span>
+          <h2 id="overview-solution-groups-title" tabindex="-1">Novare Solutions Groups</h2>
+        </div>
+        <p>Explore our solution groups, capability areas, and key resources.</p>
+      </div>
+
+      <button
+        class="overview-view-all"
+        type="button"
+        data-overview-action="view-all-solution-groups"
+      >
+        <span>View All Solution Groups</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round"
+             stroke-linejoin="round" aria-hidden="true">
+          <path d="M5 12h14M13 6l6 6-6 6"/>
+        </svg>
+      </button>
+    </header>
+
+    <div id="overview-solution-group-grid" class="overview-solution-group-grid">
+      <!-- EXPERIENCE -->
+      <article
+        class="overview-solution-card is-experience"
+        aria-labelledby="overview-experience-title"
+      >
+        <div class="overview-solution-banner">
+          <img
+            id="overview-group-experience-image"
+            class="overview-solution-image"
+            data-image-key="overview-group-experience"
+            alt=""
+            width="1400"
+            height="820"
+            loading="lazy"
+            decoding="async"
+            fetchpriority="low"
+            hidden
+          >
+          <div
+            id="overview-group-experience-fallback"
+            class="image-placeholder overview-solution-image-fallback"
+            data-image-fallback="overview-group-experience"
+            role="img"
+            aria-label="Experience Solutions Group visual unavailable"
+            hidden
+          >
+            Experience Solutions Group
+          </div>
+
+          <div class="overview-solution-image-shade" aria-hidden="true"></div>
+
+          <div class="overview-solution-banner-copy">
+            <h3 id="overview-experience-title">Experience</h3>
+            <p class="overview-solution-label">Solutions Group</p>
+            <p class="overview-solution-description">
+              API orchestration, integration patterns<br>
+              and design systems.
+            </p>
+
+            <button
+              class="overview-video-button"
+              type="button"
+              data-overview-action="experience-overview-video"
+            >
+              <span class="overview-play-icon" aria-hidden="true">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="m8 5 11 7-11 7z"/>
+                </svg>
+              </span>
+              <span>Watch Overview Video</span>
+            </button>
+          </div>
+
+          <button
+            class="overview-solution-arrow"
+            type="button"
+            data-overview-action="experience"
+            aria-label="Open Experience Solutions Group"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2.2"
+                 stroke-linecap="round" stroke-linejoin="round"
+                 aria-hidden="true">
+              <path d="M5 12h14M13 6l6 6-6 6"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="overview-capability-grid overview-capability-grid-2">
+          <button
+            class="overview-capability-card"
+            type="button"
+            data-overview-action="cx"
+          >
+            <span class="overview-capability-icon overview-capability-icon-cx" aria-hidden="true">
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="1.8"
+                   stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="8" cy="8" r="3"/>
+                <circle cx="17" cy="9" r="2.5"/>
+                <path d="M2.5 19c0-3.2 2.3-5 5.5-5s5.5 1.8 5.5 5M13.5 15c3.5-.4 6 1.2 6 4"/>
+              </svg>
+            </span>
+            <span class="overview-capability-copy">
+              <strong>CX</strong>
+              <span>Customer experience<br>platforms and solutions</span>
+            </span>
+            <span class="overview-capability-chevron" aria-hidden="true">›</span>
+          </button>
+
+          <button
+            class="overview-capability-card"
+            type="button"
+            data-overview-action="api"
+          >
+            <span class="overview-capability-icon overview-capability-icon-api" aria-hidden="true">
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="1.8"
+                   stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M19.1 4.9 17 7M7 17l-2.1 2.1"/>
+              </svg>
+            </span>
+            <span class="overview-capability-copy">
+              <strong>API</strong>
+              <span>APIs, integration<br>and developer ecosystems</span>
+            </span>
+            <span class="overview-capability-chevron" aria-hidden="true">›</span>
+          </button>
+        </div>
+      </article>
+
+      <!-- INTELLIGENCE -->
+      <article
+        class="overview-solution-card is-intelligence"
+        aria-labelledby="overview-intelligence-title"
+      >
+        <div class="overview-solution-banner">
+          <img
+            id="overview-group-intelligence-image"
+            class="overview-solution-image"
+            data-image-key="overview-group-intelligence"
+            alt=""
+            width="1400"
+            height="820"
+            loading="lazy"
+            decoding="async"
+            fetchpriority="low"
+            hidden
+          >
+          <div
+            id="overview-group-intelligence-fallback"
+            class="image-placeholder overview-solution-image-fallback"
+            data-image-fallback="overview-group-intelligence"
+            role="img"
+            aria-label="Intelligence Solutions Group visual unavailable"
+            hidden
+          >
+            Intelligence Solutions Group
+          </div>
+
+          <div class="overview-solution-image-shade" aria-hidden="true"></div>
+
+          <div class="overview-solution-banner-copy">
+            <h3 id="overview-intelligence-title">Intelligence</h3>
+            <p class="overview-solution-label">Solutions Group</p>
+            <p class="overview-solution-description">
+              AI models, machine learning,<br>
+              and cloud infrastructure.
+            </p>
+
+            <button
+              class="overview-video-button"
+              type="button"
+              data-overview-action="intelligence-overview-video"
+            >
+              <span class="overview-play-icon" aria-hidden="true">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="m8 5 11 7-11 7z"/>
+                </svg>
+              </span>
+              <span>Watch Overview Video</span>
+            </button>
+          </div>
+
+          <button
+            class="overview-solution-arrow"
+            type="button"
+            data-overview-action="intelligence"
+            aria-label="Open Intelligence Solutions Group"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2.2"
+                 stroke-linecap="round" stroke-linejoin="round"
+                 aria-hidden="true">
+              <path d="M5 12h14M13 6l6 6-6 6"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="overview-capability-grid overview-capability-grid-2">
+          <button
+            class="overview-capability-card"
+            type="button"
+            data-overview-action="data"
+          >
+            <span class="overview-capability-icon overview-capability-icon-data" aria-hidden="true">
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="1.8"
+                   stroke-linecap="round" stroke-linejoin="round">
+                <ellipse cx="12" cy="5" rx="7" ry="3"/>
+                <path d="M5 5v6c0 1.7 3.1 3 7 3s7-1.3 7-3V5M5 11v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/>
+              </svg>
+            </span>
+            <span class="overview-capability-copy">
+              <strong>DATA</strong>
+              <span>Data platforms,<br>analytics and governance</span>
+            </span>
+            <span class="overview-capability-chevron" aria-hidden="true">›</span>
+          </button>
+
+          <button
+            class="overview-capability-card"
+            type="button"
+            data-overview-action="cloud"
+          >
+            <span class="overview-capability-icon overview-capability-icon-cloud" aria-hidden="true">
+              <svg width="31" height="31" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="1.8"
+                   stroke-linecap="round" stroke-linejoin="round">
+                <path d="M7 18h10a4 4 0 0 0 .7-7.9A6 6 0 0 0 6.2 8.7 4.5 4.5 0 0 0 7 18Z"/>
+                <path d="M9.5 13h5M12 10.5v5"/>
+              </svg>
+            </span>
+            <span class="overview-capability-copy">
+              <strong>CLOUD</strong>
+              <span>Cloud infrastructure<br>and modern data platforms</span>
+            </span>
+            <span class="overview-capability-chevron" aria-hidden="true">›</span>
+          </button>
+        </div>
+      </article>
+
+      <!-- MODERNIZATION -->
+      <article
+        class="overview-solution-card is-modernization"
+        aria-labelledby="overview-modernization-title"
+      >
+        <div class="overview-solution-banner">
+          <img
+            id="overview-group-modernization-image"
+            class="overview-solution-image"
+            data-image-key="overview-group-modernization"
+            alt=""
+            width="1400"
+            height="820"
+            loading="lazy"
+            decoding="async"
+            fetchpriority="low"
+            hidden
+          >
+          <div
+            id="overview-group-modernization-fallback"
+            class="image-placeholder overview-solution-image-fallback"
+            data-image-fallback="overview-group-modernization"
+            role="img"
+            aria-label="Modernization Solutions Group visual unavailable"
+            hidden
+          >
+            Modernization Solutions Group
+          </div>
+
+          <div class="overview-solution-image-shade" aria-hidden="true"></div>
+
+          <div class="overview-solution-banner-copy">
+            <h3 id="overview-modernization-title">Modernization</h3>
+            <p class="overview-solution-label">Solutions Group</p>
+            <p class="overview-solution-description">
+              Hardware blueprints, netsec<br>
+              and edge platforms.
+            </p>
+
+            <button
+              class="overview-video-button"
+              type="button"
+              data-overview-action="modernization-overview-video"
+            >
+              <span class="overview-play-icon" aria-hidden="true">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="m8 5 11 7-11 7z"/>
+                </svg>
+              </span>
+              <span>Watch Overview Video</span>
+            </button>
+          </div>
+
+          <button
+            class="overview-solution-arrow"
+            type="button"
+            data-overview-action="modernization"
+            aria-label="Open Modernization Solutions Group"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2.2"
+                 stroke-linecap="round" stroke-linejoin="round"
+                 aria-hidden="true">
+              <path d="M5 12h14M13 6l6 6-6 6"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="overview-capability-grid overview-capability-grid-3">
+          <button
+            class="overview-capability-card"
+            type="button"
+            data-overview-action="edge"
+          >
+            <span class="overview-capability-icon overview-capability-icon-edge" aria-hidden="true">
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="1.8"
+                   stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"/>
+                <circle cx="5" cy="6" r="2"/>
+                <circle cx="19" cy="6" r="2"/>
+                <circle cx="5" cy="18" r="2"/>
+                <circle cx="19" cy="18" r="2"/>
+                <path d="M7 7.5 10 10M17 7.5 14 10M7 16.5 10 14M17 16.5 14 14"/>
+              </svg>
+            </span>
+            <span class="overview-capability-copy">
+              <strong>EDGE</strong>
+              <span>Edge computing<br>and distributed infrastructure</span>
+            </span>
+            <span class="overview-capability-chevron" aria-hidden="true">›</span>
+          </button>
+
+          <button
+            class="overview-capability-card"
+            type="button"
+            data-overview-action="infra"
+          >
+            <span class="overview-capability-icon overview-capability-icon-infra" aria-hidden="true">
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="1.8"
+                   stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 4h16v5H4zM4 15h16v5H4z"/>
+                <path d="M7 6.5h.01M10 6.5h.01M7 17.5h.01M10 17.5h.01"/>
+              </svg>
+            </span>
+            <span class="overview-capability-copy">
+              <strong>INFRA</strong>
+              <span>Infrastructure<br>modernization and platforms</span>
+            </span>
+            <span class="overview-capability-chevron" aria-hidden="true">›</span>
+          </button>
+
+          <button
+            class="overview-capability-card"
+            type="button"
+            data-overview-action="netsec"
+          >
+            <span class="overview-capability-icon overview-capability-icon-netsec" aria-hidden="true">
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="1.8"
+                   stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 3 5 6v5c0 4.7 2.9 8.1 7 10 4.1-1.9 7-5.3 7-10V6z"/>
+                <path d="m9 12 2 2 4-4"/>
+              </svg>
+            </span>
+            <span class="overview-capability-copy">
+              <strong>NETSEC</strong>
+              <span>Network and<br>security modernization</span>
+            </span>
+            <span class="overview-capability-chevron" aria-hidden="true">›</span>
+          </button>
+        </div>
+      </article>
+    </div>
+  </section>
+
+
 </section>

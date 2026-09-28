@@ -3,7 +3,7 @@
   "use strict";
 
   // 1. CONFIGURATION
-  const config = { defaultRoute: "home", useServerHomeContent: false };
+  const config = { defaultRoute: "home", useServerHomeContent: false, useServerOverviewContent: false };
   const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
   const mobileQuery = window.matchMedia("(max-width: 767px)");
   const tabletQuery = window.matchMedia("(min-width: 768px) and (max-width: 1199px)");
@@ -117,6 +117,385 @@
       viewerUrl: "https://drive.google.com/file/d/1Bd_y884skBv0TUHV7kXjzZWZRnTQ6EGU/view?usp=drive_link"
     }
   };
+
+  // H1 OVERVIEW — Phase 1–4 asset registry.
+  const overviewAssetRegistry = {
+    "overview-hero": {
+      fileId: "1WYvc9MNy4Mas60foODwjcEJ-jY9dkoNb",
+      viewerUrl: "https://drive.google.com/file/d/1WYvc9MNy4Mas60foODwjcEJ-jY9dkoNb/view?usp=drive_link",
+      phase: 1
+    },
+    "overview-about-novare": {
+      fileId: "19c6m8U3a9AwPpdBl0DVJEs1hsFLjYL2G",
+      viewerUrl: "https://drive.google.com/file/d/19c6m8U3a9AwPpdBl0DVJEs1hsFLjYL2G/view?usp=drive_link",
+      phase: 2
+    },
+    "overview-about-sca": {
+      fileId: "14UvFetzHeS_pEdA6i1paL3tUnA6Kb2it",
+      viewerUrl: "https://drive.google.com/file/d/14UvFetzHeS_pEdA6i1paL3tUnA6Kb2it/view?usp=drive_link",
+      phase: 2
+    },
+    "overview-directories": {
+      fileId: "1EUoFq7g_FOnnDODqbBi0Dk2OAk4YRLX4",
+      viewerUrl: "https://drive.google.com/file/d/1EUoFq7g_FOnnDODqbBi0Dk2OAk4YRLX4/view?usp=drive_link",
+      phase: 2
+    },
+    "overview-group-experience": {
+      fileId: "1VjxjDfBXfG-gTiACitlNiU6Yutuey1ta",
+      viewerUrl: "https://drive.google.com/file/d/1VjxjDfBXfG-gTiACitlNiU6Yutuey1ta/view?usp=drive_link",
+      phase: 3
+    },
+    "overview-group-intelligence": {
+      fileId: "1kfLx_tWzDG5agMNNuGkT83Ddi9-WBgJS",
+      viewerUrl: "https://drive.google.com/file/d/1kfLx_tWzDG5agMNNuGkT83Ddi9-WBgJS/view?usp=drive_link",
+      phase: 3
+    },
+    "overview-group-modernization": {
+      fileId: "1uosGBAa94vGC6kPSShwRb36ZsDkbWS5C",
+      viewerUrl: "https://drive.google.com/file/d/1uosGBAa94vGC6kPSShwRb36ZsDkbWS5C/view?usp=drive_link",
+      phase: 3
+    }
+  };
+
+  // H1 OVERVIEW — Phase 4 data model.
+  // Static data remains the safe fallback until matching Code.gs endpoints are connected.
+  const overviewPageData = {
+    referenceCards: [
+      {
+        id: "about-novare",
+        title: "About Novare",
+        description: "Our corporate context, solution groups, industry focus, and partner ecosystem.",
+        imageKey: "overview-about-novare",
+        action: "about-novare",
+        items: [
+          { label: "Corporate Overview", action: "corporate-overview" },
+          { label: "Novare Solutions Groups", action: "novare-solution-groups" },
+          { label: "Accounts & Industry Focus", action: "accounts-industry-focus" },
+          { label: "Partner Ecosystem", action: "partner-ecosystem" }
+        ],
+        featuredItem: { label: "Corporate PitchBook", action: "corporate-pitchbook" }
+      },
+      {
+        id: "about-sca",
+        title: "About SC&A",
+        description: "Our charter, strategy, operating model, organization, and ways of working.",
+        imageKey: "overview-about-sca",
+        action: "about-sca",
+        items: [
+          { label: "Charter & Mandate", action: "charter-mandate" },
+          { label: "Strategy & Practice Vision", action: "strategy-practice-vision" },
+          { label: "PreSales Operating Model", action: "presales-operating-model" },
+          { label: "Organization & Roles", action: "organization-roles" },
+          { label: "Ways of Working", action: "ways-of-working" },
+          { label: "Performance & OKRs", action: "performance-okrs" }
+        ],
+        featuredItem: { label: "SC&A General Guidelines", action: "sca-general-guidelines" }
+      },
+      {
+        id: "directories",
+        title: "Directories",
+        description: "Find people, accounts, and partners across Novare.",
+        imageKey: "overview-directories",
+        action: "directories",
+        directory: true,
+        items: [
+          { label: "SC&A Directory", action: "sca-directory", strong: true },
+          { label: "Accounts Directory", action: "accounts-directory", strong: true },
+          { label: "Partners Directory", action: "partners-directory", strong: true }
+        ]
+      }
+    ],
+
+    solutionGroups: [
+      {
+        id: "experience",
+        title: "Experience",
+        label: "Solutions Group",
+        description: "API orchestration, integration patterns\nand design systems.",
+        imageKey: "overview-group-experience",
+        themeClass: "is-experience",
+        action: "experience",
+        videoAction: "experience-overview-video",
+        capabilities: [
+          {
+            id: "cx",
+            label: "CX",
+            description: "Customer experience\nplatforms and solutions",
+            icon: "cx"
+          },
+          {
+            id: "api",
+            label: "API",
+            description: "APIs, integration\nand developer ecosystems",
+            icon: "api"
+          }
+        ]
+      },
+      {
+        id: "intelligence",
+        title: "Intelligence",
+        label: "Solutions Group",
+        description: "AI models, machine learning,\nand cloud infrastructure.",
+        imageKey: "overview-group-intelligence",
+        themeClass: "is-intelligence",
+        action: "intelligence",
+        videoAction: "intelligence-overview-video",
+        capabilities: [
+          {
+            id: "data",
+            label: "DATA",
+            description: "Data platforms,\nanalytics and governance",
+            icon: "data"
+          },
+          {
+            id: "cloud",
+            label: "CLOUD",
+            description: "Cloud infrastructure\nand modern data platforms",
+            icon: "cloud"
+          }
+        ]
+      },
+      {
+        id: "modernization",
+        title: "Modernization",
+        label: "Solutions Group",
+        description: "Hardware blueprints, netsec\nand edge platforms.",
+        imageKey: "overview-group-modernization",
+        themeClass: "is-modernization",
+        action: "modernization",
+        videoAction: "modernization-overview-video",
+        capabilities: [
+          {
+            id: "edge",
+            label: "EDGE",
+            description: "Edge computing\nand distributed infrastructure",
+            icon: "edge"
+          },
+          {
+            id: "infra",
+            label: "INFRA",
+            description: "Infrastructure\nmodernization and platforms",
+            icon: "infra"
+          },
+          {
+            id: "netsec",
+            label: "NETSEC",
+            description: "Network and\nsecurity modernization",
+            icon: "netsec"
+          }
+        ]
+      }
+    ]
+  };
+
+  function getStaticOverviewContent() {
+    return cloneData(overviewPageData);
+  }
+
+  function normalizeOverviewContent(value) {
+    const fallback = getStaticOverviewContent();
+    if (!value || typeof value !== "object") return fallback;
+
+    return {
+      referenceCards: Array.isArray(value.referenceCards) && value.referenceCards.length
+        ? value.referenceCards
+        : fallback.referenceCards,
+      solutionGroups: Array.isArray(value.solutionGroups) && value.solutionGroups.length
+        ? value.solutionGroups
+        : fallback.solutionGroups
+    };
+  }
+
+  function escapeOverviewHtml(value) {
+    return String(value == null ? "" : value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  function formatOverviewLines(value) {
+    return String(value == null ? "" : value)
+      .split(/\n/)
+      .map(escapeOverviewHtml)
+      .join("<br>");
+  }
+
+  function overviewDocumentIconSvg() {
+    return '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><path d="M6 2h9l4 4v16H6z"/><path d="M14 2v5h5M9 12h7M9 16h7"/></svg>';
+  }
+
+  function overviewArrowSvg(size) {
+    const safeSize = Number(size) || 22;
+    return '<svg width="' + safeSize + '" height="' + safeSize + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+  }
+
+  function overviewPlaySvg() {
+    return '<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m8 5 11 7-11 7z"/></svg>';
+  }
+
+  function overviewCapabilityIconSvg(type) {
+    const icons = {
+      cx: '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M2.5 19c0-3.2 2.3-5 5.5-5s5.5 1.8 5.5 5M13.5 15c3.5-.4 6 1.2 6 4"/></svg>',
+      api: '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M19.1 4.9 17 7M7 17l-2.1 2.1"/></svg>',
+      data: '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="5" rx="7" ry="3"/><path d="M5 5v6c0 1.7 3.1 3 7 3s7-1.3 7-3V5M5 11v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/></svg>',
+      cloud: '<svg width="31" height="31" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18h10a4 4 0 0 0 .7-7.9A6 6 0 0 0 6.2 8.7 4.5 4.5 0 0 0 7 18Z"/><path d="M9.5 13h5M12 10.5v5"/></svg>',
+      edge: '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><circle cx="5" cy="6" r="2"/><circle cx="19" cy="6" r="2"/><circle cx="5" cy="18" r="2"/><circle cx="19" cy="18" r="2"/><path d="M7 7.5 10 10M17 7.5 14 10M7 16.5 10 14M17 16.5 14 14"/></svg>',
+      infra: '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16v5H4zM4 15h16v5H4z"/><path d="M7 6.5h.01M10 6.5h.01M7 17.5h.01M10 17.5h.01"/></svg>',
+      netsec: '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.7 2.9 8.1 7 10 4.1-1.9 7-5.3 7-10V6z"/><path d="m9 12 2 2 4-4"/></svg>'
+    };
+
+    return icons[type] || icons.api;
+  }
+
+  function renderOverviewReferenceCards(pageRoot, cards) {
+    if (!pageRoot) return;
+    const grid = pageRoot.querySelector("#overview-reference-grid");
+    if (!grid || !Array.isArray(cards)) return;
+
+    grid.innerHTML = cards.map(function (card) {
+      const id = escapeOverviewHtml(card.id);
+      const title = escapeOverviewHtml(card.title);
+      const description = escapeOverviewHtml(card.description);
+      const imageKey = escapeOverviewHtml(card.imageKey);
+      const action = escapeOverviewHtml(card.action || card.id);
+      const isDirectory = Boolean(card.directory);
+      const cardClasses = "overview-reference-card" + (isDirectory ? " overview-directory-card" : "");
+      const linksClasses = "overview-reference-links" + (isDirectory ? " overview-directory-links" : "");
+
+      const items = (card.items || []).map(function (item) {
+        return '<button class="overview-reference-row' + (isDirectory ? ' overview-directory-row' : '') + '" type="button" data-overview-action="' +
+          escapeOverviewHtml(item.action) + '">' +
+          '<span class="overview-reference-row-icon" aria-hidden="true">' + overviewDocumentIconSvg() + '</span>' +
+          (item.strong
+            ? '<strong>' + escapeOverviewHtml(item.label) + '</strong>'
+            : '<span>' + escapeOverviewHtml(item.label) + '</span>') +
+          '<span class="overview-reference-chevron" aria-hidden="true">›</span>' +
+          '</button>';
+      }).join("");
+
+      const featured = card.featuredItem
+        ? '<button class="overview-reference-featured-link" type="button" data-overview-action="' +
+          escapeOverviewHtml(card.featuredItem.action) + '">' +
+          '<span class="overview-reference-featured-icon" aria-hidden="true">' + overviewDocumentIconSvg() + '</span>' +
+          '<strong>' + escapeOverviewHtml(card.featuredItem.label) + '</strong>' +
+          '<span class="overview-reference-chevron" aria-hidden="true">›</span>' +
+          '</button>'
+        : "";
+
+      return '<article class="' + cardClasses + '" aria-labelledby="overview-' + id + '-title">' +
+        '<header class="overview-reference-card-header">' +
+          '<div class="overview-reference-thumbnail">' +
+            '<img id="overview-' + id + '-image" class="overview-reference-image" data-image-key="' + imageKey + '" alt="" width="640" height="356" loading="lazy" decoding="async" fetchpriority="low">' +
+            '<div id="overview-' + id + '-fallback" class="image-placeholder overview-reference-image-fallback" data-image-fallback="' + imageKey + '" role="img" aria-label="' + title + ' visual unavailable" hidden>' + title + '</div>' +
+          '</div>' +
+          '<div class="overview-reference-heading-copy">' +
+            '<h2 id="overview-' + id + '-title">' + title + '</h2>' +
+            '<p>' + description + '</p>' +
+          '</div>' +
+          '<button class="overview-card-arrow" type="button" data-overview-action="' + action + '" aria-label="Open ' + title + '">' +
+            overviewArrowSvg(22) +
+          '</button>' +
+        '</header>' +
+        '<div class="' + linksClasses + '">' + items + '</div>' +
+        featured +
+      '</article>';
+    }).join("");
+  }
+
+  function renderOverviewSolutionGroups(pageRoot, groups) {
+    if (!pageRoot) return;
+    const grid = pageRoot.querySelector("#overview-solution-group-grid");
+    if (!grid || !Array.isArray(groups)) return;
+
+    grid.innerHTML = groups.map(function (group) {
+      const id = escapeOverviewHtml(group.id);
+      const title = escapeOverviewHtml(group.title);
+      const label = escapeOverviewHtml(group.label || "Solutions Group");
+      const imageKey = escapeOverviewHtml(group.imageKey);
+      const themeClass = escapeOverviewHtml(group.themeClass || "");
+      const capabilities = Array.isArray(group.capabilities) ? group.capabilities : [];
+      const capabilityClass = capabilities.length >= 3
+        ? "overview-capability-grid overview-capability-grid-3"
+        : "overview-capability-grid overview-capability-grid-2";
+
+      const capabilityMarkup = capabilities.map(function (item) {
+        return '<button class="overview-capability-card" type="button" data-overview-action="' +
+          escapeOverviewHtml(item.id) + '">' +
+          '<span class="overview-capability-icon overview-capability-icon-' + escapeOverviewHtml(item.icon || item.id) + '" aria-hidden="true">' +
+            overviewCapabilityIconSvg(item.icon || item.id) +
+          '</span>' +
+          '<span class="overview-capability-copy">' +
+            '<strong>' + escapeOverviewHtml(item.label) + '</strong>' +
+            '<span>' + formatOverviewLines(item.description) + '</span>' +
+          '</span>' +
+          '<span class="overview-capability-chevron" aria-hidden="true">›</span>' +
+        '</button>';
+      }).join("");
+
+      return '<article class="overview-solution-card ' + themeClass + '" aria-labelledby="overview-' + id + '-title">' +
+        '<div class="overview-solution-banner">' +
+          '<img id="overview-group-' + id + '-image" class="overview-solution-image" data-image-key="' + imageKey + '" alt="" width="1400" height="820" loading="lazy" decoding="async" fetchpriority="low">' +
+          '<div id="overview-group-' + id + '-fallback" class="image-placeholder overview-solution-image-fallback" data-image-fallback="' + imageKey + '" role="img" aria-label="' + title + ' Solutions Group visual unavailable" hidden>' + title + ' Solutions Group</div>' +
+          '<div class="overview-solution-image-shade" aria-hidden="true"></div>' +
+          '<div class="overview-solution-banner-copy">' +
+            '<h3 id="overview-' + id + '-title">' + title + '</h3>' +
+            '<p class="overview-solution-label">' + label + '</p>' +
+            '<p class="overview-solution-description">' + formatOverviewLines(group.description) + '</p>' +
+            '<button class="overview-video-button" type="button" data-overview-action="' + escapeOverviewHtml(group.videoAction) + '">' +
+              '<span class="overview-play-icon" aria-hidden="true">' + overviewPlaySvg() + '</span>' +
+              '<span>Watch Overview Video</span>' +
+            '</button>' +
+          '</div>' +
+          '<button class="overview-solution-arrow" type="button" data-overview-action="' + escapeOverviewHtml(group.action) + '" aria-label="Open ' + title + ' Solutions Group">' +
+            overviewArrowSvg(24) +
+          '</button>' +
+        '</div>' +
+        '<div class="' + capabilityClass + '">' + capabilityMarkup + '</div>' +
+      '</article>';
+    }).join("");
+  }
+
+  function bindOverviewPageAssets(pageRoot) {
+    if (!pageRoot) return;
+
+    bindOverviewAsset(
+      pageRoot.querySelector("#overview-hero-image"),
+      pageRoot.querySelector("#overview-hero-fallback"),
+      2400
+    );
+
+    (overviewPageData.referenceCards || []).forEach(function (card) {
+      bindOverviewAsset(
+        pageRoot.querySelector("#overview-" + card.id + "-image"),
+        pageRoot.querySelector("#overview-" + card.id + "-fallback"),
+        900
+      );
+    });
+
+    (overviewPageData.solutionGroups || []).forEach(function (group) {
+      bindOverviewAsset(
+        pageRoot.querySelector("#overview-group-" + group.id + "-image"),
+        pageRoot.querySelector("#overview-group-" + group.id + "-fallback"),
+        1600
+      );
+    });
+  }
+
+  function renderOverviewContent(pageRoot, content) {
+    if (!pageRoot) return;
+    const normalized = normalizeOverviewContent(content);
+
+    // Keep the current model synchronized so asset binding and future server refreshes
+    // use the same content that is visible on screen.
+    overviewPageData.referenceCards = cloneData(normalized.referenceCards);
+    overviewPageData.solutionGroups = cloneData(normalized.solutionGroups);
+
+    renderOverviewReferenceCards(pageRoot, overviewPageData.referenceCards);
+    renderOverviewSolutionGroups(pageRoot, overviewPageData.solutionGroups);
+    bindOverviewPageAssets(pageRoot);
+  }
 
   function extractDriveFileId(value) {
     if (!value) return "";
@@ -253,6 +632,148 @@
     });
   }
 
+
+  function bindOverviewAsset(image, fallback, width) {
+    if (!image) return;
+    const asset = overviewAssetRegistry[image.dataset.imageKey];
+    bindImageCandidates(image, fallback, getDriveImageCandidates(asset, width));
+  }
+
+  function retryFailedOverviewAssets(pageRoot) {
+    if (!pageRoot) return;
+    pageRoot.querySelectorAll('img[data-asset-state="error"]').forEach(function (image) {
+      if (typeof image._nexusRetryAsset === "function") image._nexusRetryAsset();
+    });
+  }
+
+  function showOverviewStatus(pageRoot, message) {
+    if (!pageRoot) return;
+    const status = pageRoot.querySelector("#overview-status");
+    if (!status) return;
+
+    status.textContent = message || "";
+    status.classList.add("is-visible");
+
+    window.clearTimeout(status._nexusStatusTimer);
+    status._nexusStatusTimer = window.setTimeout(function () {
+      status.classList.remove("is-visible");
+    }, 2800);
+  }
+
+  function getOverviewActionLabel(action) {
+    const labels = {
+      "about-novare": "About Novare",
+      "corporate-overview": "Corporate Overview",
+      "novare-solution-groups": "Novare Solutions Groups",
+      "accounts-industry-focus": "Accounts & Industry Focus",
+      "partner-ecosystem": "Partner Ecosystem",
+      "corporate-pitchbook": "Corporate PitchBook",
+      "about-sca": "About SC&A",
+      "charter-mandate": "Charter & Mandate",
+      "strategy-practice-vision": "Strategy & Practice Vision",
+      "presales-operating-model": "PreSales Operating Model",
+      "organization-roles": "Organization & Roles",
+      "ways-of-working": "Ways of Working",
+      "performance-okrs": "Performance & OKRs",
+      "sca-general-guidelines": "SC&A General Guidelines",
+      "directories": "Directories",
+      "sca-directory": "SC&A Directory",
+      "accounts-directory": "Accounts Directory",
+      "partners-directory": "Partners Directory",
+      "view-all-solution-groups": "Novare Solutions Groups",
+      "experience": "Experience Solutions Group",
+      "experience-overview-video": "Experience overview video",
+      "cx": "CX",
+      "api": "API",
+      "intelligence": "Intelligence Solutions Group",
+      "intelligence-overview-video": "Intelligence overview video",
+      "data": "DATA",
+      "cloud": "CLOUD",
+      "modernization": "Modernization Solutions Group",
+      "modernization-overview-video": "Modernization overview video",
+      "edge": "EDGE",
+      "infra": "INFRA",
+      "netsec": "NETSEC"
+    };
+
+    return labels[action] || "This Overview item";
+  }
+
+  function focusOverviewSection(target, behavior) {
+    if (!target) return;
+    const reducedMotion = reducedMotionQuery.matches;
+    target.scrollIntoView({
+      behavior: reducedMotion ? "auto" : (behavior || "smooth"),
+      block: "start"
+    });
+
+    if (typeof target.focus === "function") {
+      window.setTimeout(function () {
+        target.focus({ preventScroll: true });
+      }, reducedMotion ? 0 : 320);
+    }
+  }
+
+  function handleOverviewAction(pageRoot, action) {
+    if (!pageRoot || !action) return;
+
+    if (action === "novare-solution-groups" || action === "view-all-solution-groups") {
+      focusOverviewSection(pageRoot.querySelector("#overview-solution-groups-title"));
+      return;
+    }
+
+    if (/-overview-video$/.test(action)) {
+      showOverviewStatus(pageRoot, getOverviewActionLabel(action) + " is not connected yet.");
+      return;
+    }
+
+    showOverviewStatus(
+      pageRoot,
+      getOverviewActionLabel(action) + " will open when its destination is connected."
+    );
+  }
+
+  function initializeOverviewActions(pageRoot) {
+    if (!pageRoot || pageRoot.dataset.overviewActionsInitialized === "true") return;
+
+    pageRoot.addEventListener("click", function (event) {
+      const trigger = event.target.closest("[data-overview-action]");
+      if (!trigger || !pageRoot.contains(trigger)) return;
+      handleOverviewAction(pageRoot, trigger.dataset.overviewAction || "");
+    });
+
+    pageRoot.dataset.overviewActionsInitialized = "true";
+  }
+
+  function refreshOverviewFromServer(pageRoot) {
+    if (!pageRoot || !config.useServerOverviewContent) return;
+
+    NexusAPI.getOverviewContent(
+      function (data) {
+        renderOverviewContent(pageRoot, data);
+        retryFailedOverviewAssets(pageRoot);
+      },
+      function () {
+        // NexusAPI already falls back to static data. No user-facing error is needed.
+      }
+    );
+  }
+
+  function initializeOverviewPage(pageRoot) {
+    if (!pageRoot) return;
+
+    if (pageRoot.dataset.pageInitialized !== "true") {
+      renderOverviewContent(pageRoot, getStaticOverviewContent());
+      initializeOverviewActions(pageRoot);
+      pageRoot.dataset.pageInitialized = "true";
+      refreshOverviewFromServer(pageRoot);
+      return;
+    }
+
+    // Cached SPA pages keep their state. When returning to Overview,
+    // retry only the assets that previously failed.
+    retryFailedOverviewAssets(pageRoot);
+  }
 
   function bindHomeAsset(image, fallback, width) {
     if (!image) return;
@@ -957,6 +1478,7 @@
     pageCache.set(route, wrapper);
 
     if (route === "home") initializeHomePage(wrapper);
+    if (route === "overview") initializeOverviewPage(wrapper);
     return wrapper;
   }
 
@@ -968,6 +1490,7 @@
     const activePage = ensurePage(route);
     if (activePage) activePage.hidden = false;
     if (route === "home" && activePage) retryFailedHomeAssets(activePage);
+    if (route === "overview" && activePage) retryFailedOverviewAssets(activePage);
 
     const hasPageHero = Boolean(activePage && activePage.querySelector("[data-page-hero]"));
     dom.app.classList.toggle("hero-route", hasPageHero);
@@ -1245,6 +1768,70 @@
           if (onSuccess) onSuccess(fallback);
         })
         .getRoleContent(roleId);
+    },
+
+    // H1 Overview Phase 4 hooks. They are prepared but disabled by default
+    // through config.useServerOverviewContent until matching Code.gs methods exist.
+    getOverviewContent(onSuccess, onFailure) {
+      const fallback = getStaticOverviewContent();
+      if (!this.isAppsScriptAvailable()) {
+        if (onSuccess) onSuccess(fallback);
+        return;
+      }
+
+      google.script.run
+        .withSuccessHandler(function (data) {
+          if (onSuccess) onSuccess(normalizeOverviewContent(data));
+        })
+        .withFailureHandler(function (error) {
+          console.warn("getOverviewContent is not available yet; using static Overview data.", error);
+          if (onFailure) onFailure(error);
+          if (onSuccess) onSuccess(fallback);
+        })
+        .getOverviewContent();
+    },
+
+    getSolutionGroups(onSuccess, onFailure) {
+      const fallback = cloneData(overviewPageData.solutionGroups);
+      if (!this.isAppsScriptAvailable()) {
+        if (onSuccess) onSuccess(fallback);
+        return;
+      }
+
+      google.script.run
+        .withSuccessHandler(function (data) {
+          if (onSuccess) onSuccess(Array.isArray(data) ? data : fallback);
+        })
+        .withFailureHandler(function (error) {
+          console.warn("getSolutionGroups is not available yet; using static Overview data.", error);
+          if (onFailure) onFailure(error);
+          if (onSuccess) onSuccess(fallback);
+        })
+        .getSolutionGroups();
+    },
+
+    getDirectories(onSuccess, onFailure) {
+      const fallback = cloneData(
+        overviewPageData.referenceCards.find(function (item) {
+          return item.id === "directories";
+        }) || null
+      );
+
+      if (!this.isAppsScriptAvailable()) {
+        if (onSuccess) onSuccess(fallback);
+        return;
+      }
+
+      google.script.run
+        .withSuccessHandler(function (data) {
+          if (onSuccess) onSuccess(data || fallback);
+        })
+        .withFailureHandler(function (error) {
+          console.warn("getDirectories is not available yet; using static Overview data.", error);
+          if (onFailure) onFailure(error);
+          if (onSuccess) onSuccess(fallback);
+        })
+        .getDirectories();
     }
   };
 

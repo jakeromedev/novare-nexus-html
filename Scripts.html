@@ -1,0 +1,529 @@
+<script>
+(function () {
+  "use strict";
+
+  // 1. CONFIGURATION
+  const config = { defaultRoute: "home" };
+  const mobileQuery = window.matchMedia("(max-width: 767px)");
+  const tabletQuery = window.matchMedia("(min-width: 768px) and (max-width: 1199px)");
+  const state = { route: null, filter: "all", mobileOpen: false, tabletExpanded: false };
+  const pageCache = new Map();
+
+  // 2. ROUTES
+  const routes = {
+    home:          { title: "Home",                 templateId: "page-home-template",          showSearchFilters: true  },
+    workspace:     { title: "My Workspace",         templateId: "page-workspace-template",     showSearchFilters: false },
+    analytics:     { title: "Insights & Analytics", templateId: "page-analytics-template",     showSearchFilters: false },
+    overview:      { title: "Overview",             templateId: "page-overview-template",      showSearchFilters: false },
+    offerings:     { title: "Offerings",            templateId: "page-offerings-template",     showSearchFilters: false },
+    opportunities: { title: "Opportunities",        templateId: "page-opportunities-template", showSearchFilters: false },
+    programs:      { title: "Programs",             templateId: "page-programs-template",      showSearchFilters: false },
+    delivery:      { title: "Delivery",             templateId: "page-delivery-template",      showSearchFilters: false },
+    governance:    { title: "Governance",           templateId: "page-governance-template",    showSearchFilters: false },
+    tools:         { title: "Tools & Templates",    templateId: "page-tools-template",         showSearchFilters: false },
+    support:       { title: "Help & Support",       templateId: "page-support-template",       showSearchFilters: false }
+  };
+
+  // 3. CURRENT USER (prototype fallback; connect to your real identity source later)
+  const currentUser = { name: "Davin Zen", department: "SC&A" };
+
+  // 4. DOM REFERENCES
+  const dom = {
+    app: document.getElementById("nexus-app"),
+    sidebar: document.getElementById("nexus-sidebar"),
+    workspace: document.getElementById("nexus-workspace"),
+    overlay: document.getElementById("sidebar-overlay"),
+    toggle: document.getElementById("sidebar-toggle"),
+    sidebarClose: document.getElementById("sidebar-close"),
+    content: document.getElementById("nexus-content"),
+    pageMount: document.getElementById("page-mount"),
+    search: document.getElementById("global-search"),
+    filters: document.getElementById("search-filters"),
+    navItems: Array.from(document.querySelectorAll("[data-route]")),
+    filterItems: Array.from(document.querySelectorAll("[data-filter]")),
+    launcher: document.getElementById("nosca-launcher"),
+    dialog: document.getElementById("nosca-dialog"),
+    dialogClose: document.getElementById("nosca-close"),
+    skipLink: document.querySelector(".skip-link")
+  };
+
+  // 5. HOME PAGE ASSETS / INTERACTIONS
+  const homeAssetRegistry = {
+          "home-hero": {
+              fileId: "1xAJNZvkEYW8QIb5Mlo42VAK_eTSbaP39",
+              viewerUrl: "https://drive.google.com/file/d/1xAJNZvkEYW8QIb5Mlo42VAK_eTSbaP39/view?usp=sharing",
+              phase: 1
+          },
+
+          "hero-handwritten-tagline": {
+              fileId: "1_UDHDOmycZdBWaWyvTWXw8KYE2RWtSJ8",
+              viewerUrl: "https://drive.google.com/file/d/1_UDHDOmycZdBWaWyvTWXw8KYE2RWtSJ8/view?usp=drive_link",
+              phase: 1
+          },
+
+          "role-execom": {
+              fileId: "10YqCyORiRaCKQr5rCPGUe3pa7Tn4J4b0",
+              viewerUrl: "https://drive.google.com/file/d/10YqCyORiRaCKQr5rCPGUe3pa7Tn4J4b0/view?usp=drive_link",
+              phase: 2
+          },
+
+          "role-sales-executives": {
+              fileId: "19H5dCRkUJr15Z7Q0wVVJHSHy_j1UYoyU",
+              viewerUrl: "https://drive.google.com/file/d/19H5dCRkUJr15Z7Q0wVVJHSHy_j1UYoyU/view?usp=drive_link",
+              phase: 2
+          },
+
+          "role-product-managers": {
+              fileId: "1E4i3IK6B-O-VqMVKpSmtrs0qFroo1Uvk",
+              viewerUrl: "https://drive.google.com/file/d/1E4i3IK6B-O-VqMVKpSmtrs0qFroo1Uvk/view?usp=drive_link",
+              phase: 2
+          },
+
+          "role-solutions-consultants": {
+              fileId: "1W-eADrnR6RwZf8e2AZHIC8E2Y331NG5A",
+              viewerUrl: "https://drive.google.com/file/d/1W-eADrnR6RwZf8e2AZHIC8E2Y331NG5A/view?usp=drive_link",
+              phase: 2
+          },
+
+          "role-delivery-risk-finance": {
+              fileId: "15B-4VMLDEJ9rd_eHkHrp383ZPB0fCGD2",
+              viewerUrl: "https://drive.google.com/file/d/15B-4VMLDEJ9rd_eHkHrp383ZPB0fCGD2/view?usp=drive_link",
+              phase: 2
+          },
+
+          "featured-customer-engagement": {
+              fileId: "1tjTiPzeA1Iyl9IE2lKtiHWcNp97t_BzQ",
+              viewerUrl: "https://drive.google.com/file/d/1tjTiPzeA1Iyl9IE2lKtiHWcNp97t_BzQ/view?usp=drive_link",
+              phase: 3
+          }
+      };
+
+  function getDriveImageUrl(fileId, width = 1600) {
+    return "https://drive.google.com/thumbnail?id=" + encodeURIComponent(fileId) + "&sz=w" + width;
+  }
+
+  function loadHomeAsset(imageId, fallbackId, width) {
+    const image = document.getElementById(imageId);
+    const fallback = document.getElementById(fallbackId);
+    if (!image || !fallback) return;
+    const asset = homeAssetRegistry[image.dataset.imageKey];
+
+    function showFallback() {
+      image.hidden = true;
+      fallback.hidden = false;
+    }
+
+    if (!asset) {
+      showFallback();
+      return;
+    }
+
+    image.addEventListener("load", function () {
+      if (!image.naturalWidth) {
+        showFallback();
+        return;
+      }
+      image.hidden = false;
+      fallback.hidden = true;
+    }, { once: true });
+
+    image.addEventListener("error", showFallback, { once: true });
+    image.src = getDriveImageUrl(asset.fileId, width);
+  }
+
+  const aiQuickActions = [
+    "Summarize a document",
+    "Find a template",
+    "Compare offerings",
+    "Create a playbook"
+  ];
+
+  const aiActionIcons = [
+    '<path d="M5 3h10l4 4v14H5ZM14 3v5h5M8 12h2v6H8Zm5-2h2v8h-2Z"/>',
+    '<path d="M4 5h7v6H4Zm9 0h7v6h-7ZM4 13h7v6H4Zm9 0h7v6h-7Z"/>',
+    '<path d="m8 3 4 4-4 4M12 7H3m13 6-4 4 4 4m-4-4h9"/>',
+    '<path d="M9 18h6m-5 3h4M8 14a6 6 0 1 1 8 0l-1 3H9Z"/>'
+  ];
+
+  function initializeHomePage(pageRoot) {
+    if (!pageRoot || pageRoot.dataset.pageInitialized === "true") return;
+
+    loadHomeAsset("home-hero-image", "home-hero-fallback", 2000);
+    loadHomeAsset("hero-handwritten-tagline", "home-handwriting-fallback", 480);
+
+    const input = pageRoot.querySelector("#home-ai-input");
+    const status = pageRoot.querySelector("#home-ai-status");
+    const track = pageRoot.querySelector("#home-ai-track");
+    const form = pageRoot.querySelector("#home-ai-form");
+    const next = pageRoot.querySelector("#home-ai-next");
+
+    if (!input || !status || !track || !form || !next) return;
+
+    aiQuickActions.forEach(function (label, index) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "button home-ai-action";
+      button.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + aiActionIcons[index] + '</svg>';
+
+      const labelNode = document.createElement("span");
+      labelNode.textContent = label;
+      button.appendChild(labelNode);
+
+      button.addEventListener("click", function () {
+        input.value = label;
+        status.textContent = "";
+        input.focus();
+      });
+
+      track.appendChild(button);
+    });
+
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
+      status.textContent = input.value.trim()
+        ? "Ask Nexus will be implemented in a later phase. Your prompt has not been sent."
+        : "Enter a question or choose a suggested action to get started.";
+      if (!input.value.trim()) input.focus();
+    });
+
+    next.addEventListener("click", function () {
+      const buttons = Array.from(track.querySelectorAll("button"));
+      if (!buttons.length) return;
+      const current = buttons.indexOf(document.activeElement);
+      const index = Number(next.dataset.nextIndex || 0);
+      const targetIndex = current >= 0 ? (current + 1) % buttons.length : index % buttons.length;
+      const target = buttons[targetIndex];
+      target.focus();
+      target.scrollIntoView({ block: "nearest", inline: "nearest" });
+      next.dataset.nextIndex = String((targetIndex + 1) % buttons.length);
+    });
+
+    pageRoot.dataset.pageInitialized = "true";
+  }
+
+  // 6. SPA ROUTING
+  function setActiveNavigation(route) {
+    dom.navItems.forEach(function (item) {
+      const active = item.dataset.route === route;
+      item.classList.toggle("is-active", active);
+      if (active) item.setAttribute("aria-current", "page");
+      else item.removeAttribute("aria-current");
+    });
+  }
+
+  function ensurePage(route) {
+    if (pageCache.has(route)) return pageCache.get(route);
+
+    const page = routes[route];
+    const template = document.getElementById(page.templateId);
+    if (!template || !dom.pageMount) return null;
+
+    const wrapper = document.createElement("div");
+    wrapper.className = "route-page";
+    wrapper.dataset.pageRoute = route;
+    wrapper.hidden = true;
+    wrapper.appendChild(template.content.cloneNode(true));
+    dom.pageMount.appendChild(wrapper);
+    pageCache.set(route, wrapper);
+
+    if (route === "home") initializeHomePage(wrapper);
+    return wrapper;
+  }
+
+  function renderRoute(route) {
+    const page = routes[route];
+    if (!page) return;
+
+    pageCache.forEach(function (element) { element.hidden = true; });
+    const activePage = ensurePage(route);
+    if (activePage) activePage.hidden = false;
+
+    dom.app.classList.toggle("home-route", route === "home");
+    if (dom.search) {
+      dom.search.placeholder = route === "home"
+        ? "Search knowledge, templates, playbooks, tools..."
+        : "Search knowledge, templates, playbooks, tools, and more...";
+    }
+    if (dom.filters) dom.filters.hidden = !page.showSearchFilters;
+    document.title = page.title + " | Novare Nexus 2026";
+  }
+
+  function getCurrentPageTitle() {
+    const page = pageCache.get(state.route);
+    return page ? page.querySelector("[data-page-title]") : null;
+  }
+
+  function focusPageTitle() {
+    const title = getCurrentPageTitle();
+    if (title) title.focus();
+  }
+
+  function handleRouteChange(focusContent) {
+    const requested = window.location.hash.slice(1);
+    const route = Object.prototype.hasOwnProperty.call(routes, requested)
+      ? requested
+      : config.defaultRoute;
+
+    if (requested !== route) {
+      try {
+        window.history.replaceState(null, "", "#" + route);
+      } catch (error) {
+        window.location.replace("#" + route);
+      }
+    }
+
+    const changed = state.route !== route;
+    state.route = route;
+    setActiveNavigation(route);
+    renderRoute(route);
+
+    const drawerWasOpen = state.mobileOpen;
+    if (drawerWasOpen) setMobileSidebar(false, false);
+    if (focusContent && (changed || drawerWasOpen)) focusPageTitle();
+  }
+
+  // 7. SIDEBAR
+  function updateSidebar() {
+    const mobile = mobileQuery.matches;
+    const open = mobile && state.mobileOpen;
+
+    dom.app.classList.toggle("mobile-open", open);
+    dom.app.classList.toggle("tablet-expanded", tabletQuery.matches && state.tabletExpanded);
+    document.body.classList.toggle("sidebar-open", open);
+
+    if (dom.overlay) dom.overlay.hidden = !open;
+    if (dom.workspace) dom.workspace.inert = open;
+    if (dom.skipLink) dom.skipLink.inert = open;
+
+    if (dom.sidebar) {
+      dom.sidebar.inert = mobile && !open;
+      if (open) {
+        dom.sidebar.setAttribute("role", "dialog");
+        dom.sidebar.setAttribute("aria-modal", "true");
+      } else {
+        dom.sidebar.removeAttribute("role");
+        dom.sidebar.removeAttribute("aria-modal");
+      }
+    }
+
+    if (dom.toggle) {
+      const expanded = mobile ? open : (!tabletQuery.matches || state.tabletExpanded);
+      dom.toggle.setAttribute("aria-expanded", String(expanded));
+      dom.toggle.setAttribute(
+        "aria-label",
+        mobile
+          ? (open ? "Close navigation" : "Open navigation")
+          : (expanded ? "Collapse navigation" : "Expand navigation")
+      );
+    }
+  }
+
+  function setMobileSidebar(open, restoreFocus) {
+    state.mobileOpen = open;
+    updateSidebar();
+    if (open && dom.sidebarClose) dom.sidebarClose.focus();
+    else if (restoreFocus && dom.toggle) dom.toggle.focus();
+  }
+
+  function toggleSidebar() {
+    if (mobileQuery.matches) {
+      setMobileSidebar(!state.mobileOpen, true);
+    } else if (tabletQuery.matches) {
+      state.tabletExpanded = !state.tabletExpanded;
+      updateSidebar();
+    }
+  }
+
+  // 8. SEARCH
+  function focusGlobalSearch() {
+    if (!dom.search || (dom.dialog && dom.dialog.open)) return;
+    if (state.mobileOpen) setMobileSidebar(false, false);
+    dom.search.focus();
+  }
+
+  function setSearchFilter(filter) {
+    state.filter = filter;
+    dom.filterItems.forEach(function (item) {
+      item.setAttribute("aria-pressed", String(item.dataset.filter === filter));
+    });
+    if (dom.search) dom.search.dataset.filter = filter;
+  }
+
+  // 9. RESPONSIVE NAVIGATION
+  function handleViewportChange() {
+    const active = document.activeElement;
+    const focusWasInSidebar = dom.sidebar && dom.sidebar.contains(active);
+
+    state.mobileOpen = false;
+    if (!tabletQuery.matches) state.tabletExpanded = false;
+    updateSidebar();
+
+    if (dom.dialog && dom.dialog.open) return;
+
+    if ((mobileQuery.matches && focusWasInSidebar) || active === dom.sidebarClose) {
+      if ((mobileQuery.matches || tabletQuery.matches) && dom.toggle) dom.toggle.focus();
+      else if (dom.navItems[0]) dom.navItems[0].focus();
+    } else if (!mobileQuery.matches && !tabletQuery.matches && active === dom.toggle) {
+      focusPageTitle();
+    }
+  }
+
+  function handleKeyboard(event) {
+    if (event.isComposing || event.defaultPrevented) return;
+    if (dom.dialog && dom.dialog.open) return;
+
+    if ((event.ctrlKey || event.metaKey) && !event.altKey && !event.shiftKey && event.key.toLowerCase() === "k") {
+      event.preventDefault();
+      focusGlobalSearch();
+      return;
+    }
+
+    if (!state.mobileOpen) return;
+
+    if (event.key === "Escape") {
+      event.preventDefault();
+      setMobileSidebar(false, true);
+    } else if (event.key === "Tab" && dom.sidebar) {
+      const focusable = Array.from(dom.sidebar.querySelectorAll("button, a[href], input, [tabindex='0']"))
+        .filter(function (item) { return !item.disabled && item.getClientRects().length > 0; });
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
+      if (!first) {
+        event.preventDefault();
+        dom.sidebar.focus();
+        return;
+      }
+
+      if (event.shiftKey && (document.activeElement === first || !dom.sidebar.contains(document.activeElement))) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && (document.activeElement === last || !dom.sidebar.contains(document.activeElement))) {
+        event.preventDefault();
+        first.focus();
+      }
+    }
+  }
+
+  // 10. ASK NOSCA PLACEHOLDER
+  function openNoscaPlaceholder() {
+    if (dom.dialog && !dom.dialog.open) dom.dialog.showModal();
+  }
+
+  function closeNoscaPlaceholder() {
+    if (dom.dialog && dom.dialog.open) dom.dialog.close();
+  }
+
+  // 11. APPS SCRIPT API ADAPTER
+  const NexusAPI = {
+    isAppsScriptAvailable() {
+      return Boolean(typeof google !== "undefined" && google && google.script && google.script.run);
+    },
+
+    getCurrentUserFallback() {
+      return { name: currentUser.name, department: currentUser.department };
+    },
+
+    getServerStatus(onSuccess, onFailure) {
+      if (!this.isAppsScriptAvailable()) {
+        if (onFailure) onFailure(new Error("Apps Script runtime is unavailable."));
+        return;
+      }
+
+      google.script.run
+        .withSuccessHandler(onSuccess || function () {})
+        .withFailureHandler(onFailure || console.error)
+        .getServerStatus();
+    }
+  };
+
+  // 12. INITIALIZATION
+  function initializeUser() {
+    const user = NexusAPI.getCurrentUserFallback();
+    const userName = document.getElementById("user-name");
+    const userDepartment = document.getElementById("user-department");
+    const userAvatar = document.getElementById("user-avatar");
+
+    if (userName) userName.textContent = user.name;
+    if (userDepartment) userDepartment.textContent = user.department;
+    if (userAvatar) {
+      userAvatar.textContent = user.name
+        .split(/\s+/)
+        .map(function (part) { return part.charAt(0); })
+        .slice(0, 2)
+        .join("")
+        .toUpperCase();
+      userAvatar.setAttribute("aria-label", user.name + " avatar placeholder");
+    }
+  }
+
+  function initializeApp() {
+    if (!dom.app || dom.app.dataset.initialized === "true") return;
+
+    dom.app.dataset.appsScriptAvailable = String(NexusAPI.isAppsScriptAvailable());
+    initializeUser();
+
+    dom.navItems.forEach(function (item) {
+      item.addEventListener("click", function () {
+        const route = item.dataset.route;
+        if (window.location.hash === "#" + route) {
+          if (state.mobileOpen) setMobileSidebar(false, false);
+          focusPageTitle();
+        } else {
+          window.location.hash = route;
+        }
+      });
+    });
+
+    dom.filterItems.forEach(function (item) {
+      item.addEventListener("click", function () {
+        setSearchFilter(item.dataset.filter);
+      });
+    });
+
+    if (dom.toggle) dom.toggle.addEventListener("click", toggleSidebar);
+    if (dom.sidebarClose) dom.sidebarClose.addEventListener("click", function () { setMobileSidebar(false, true); });
+    if (dom.overlay) dom.overlay.addEventListener("click", function () { setMobileSidebar(false, true); });
+
+    if (dom.skipLink) {
+      dom.skipLink.addEventListener("click", function (event) {
+        event.preventDefault();
+        if (dom.content) dom.content.focus();
+      });
+    }
+
+    if (dom.launcher) dom.launcher.addEventListener("click", openNoscaPlaceholder);
+
+    if (dom.dialogClose) {
+      dom.dialogClose.addEventListener("click", function (event) {
+        event.preventDefault();
+        closeNoscaPlaceholder();
+      });
+    }
+
+    if (dom.dialog) {
+      dom.dialog.addEventListener("cancel", function (event) {
+        event.preventDefault();
+        closeNoscaPlaceholder();
+      });
+
+      dom.dialog.addEventListener("close", function () {
+        if (mobileQuery.matches && !state.mobileOpen && dom.toggle) dom.toggle.focus();
+        else if (dom.launcher) dom.launcher.focus();
+      });
+    }
+
+    window.addEventListener("hashchange", function () { handleRouteChange(true); });
+    document.addEventListener("keydown", handleKeyboard);
+    mobileQuery.addEventListener("change", handleViewportChange);
+    tabletQuery.addEventListener("change", handleViewportChange);
+
+    updateSidebar();
+    setSearchFilter(state.filter);
+    handleRouteChange(false);
+    dom.app.dataset.initialized = "true";
+  }
+
+  initializeApp();
+}());
+</script>

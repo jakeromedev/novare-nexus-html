@@ -35,47 +35,101 @@
         <p id="home-ai-status" class="home-ai-status" role="status" aria-live="polite"></p>
       </section>
       <div class="home-dashboard-content">
-        <section class="home-section home-quick-access" aria-labelledby="home-quick-access-title">
-          <div class="home-section-header">
-            <h2 id="home-quick-access-title" class="home-section-title">
-              <span class="home-section-title-icon home-section-title-icon--quick" aria-hidden="true">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="m13 2-8 11h6l-1 9 9-12h-6z"/>
-                </svg>
-              </span>
-              Quick Access
-            </h2>
+        <div class="home-dashboard-grid">
+          <div class="home-main-column">
+            <section class="home-section home-quick-access" aria-labelledby="home-quick-access-title">
+              <div class="home-section-header">
+                <h2 id="home-quick-access-title" class="home-section-title">
+                  <span class="home-section-title-icon home-section-title-icon--quick" aria-hidden="true">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="m13 2-8 11h6l-1 9 9-12h-6z"/>
+                    </svg>
+                  </span>
+                  Quick Access
+                </h2>
+              </div>
+              <div id="home-quick-access-grid" class="quick-access-grid" aria-label="Quick Access resources"></div>
+            </section>
+
+            <section class="home-section home-role-explorer" aria-labelledby="home-role-title">
+              <div class="home-section-header">
+                <h2 id="home-role-title" class="home-section-title">
+                  <span class="home-section-title-icon home-section-title-icon--roles" aria-hidden="true">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                      <circle cx="9" cy="7" r="4"/>
+                      <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                  </span>
+                  Explore by Role
+                </h2>
+                <button id="home-role-view-all" class="home-view-all" type="button">
+                  <span>View All</span>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                </button>
+              </div>
+              <div id="home-role-grid" class="role-grid" aria-label="Explore Nexus resources by role"></div>
+            </section>
+
+            <section class="home-section home-featured" aria-labelledby="home-featured-title">
+              <div class="home-section-header">
+                <h2 id="home-featured-title" class="home-section-title">
+                  <span class="home-section-title-icon home-section-title-icon--featured" aria-hidden="true">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="m12 2.6 2.78 5.64 6.22.9-4.5 4.39 1.06 6.2L12 16.8l-5.56 2.93 1.06-6.2L3 9.14l6.22-.9z"/></svg>
+                  </span>
+                  Featured
+                </h2>
+                <button id="home-featured-view-all" class="home-view-all" type="button">
+                  <span>View All</span>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                </button>
+              </div>
+
+              <div class="featured-carousel" aria-label="Featured Nexus content">
+                <button id="featured-prev" class="featured-carousel-button featured-carousel-button--prev" type="button" aria-label="Previous featured content" aria-controls="featured-track">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+                </button>
+                <div id="featured-track" class="featured-track" tabindex="0"></div>
+                <button id="featured-next" class="featured-carousel-button featured-carousel-button--next" type="button" aria-label="Next featured content" aria-controls="featured-track">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+                </button>
+                <div id="featured-pagination" class="featured-pagination" aria-label="Featured carousel position"></div>
+              </div>
+            </section>
           </div>
 
-          <div id="home-quick-access-grid" class="quick-access-grid" aria-label="Quick Access resources"></div>
-        </section>
+          <aside class="home-right-rail" aria-label="Home page utilities">
+            <section class="home-utility-panel home-whats-new" aria-labelledby="home-whats-new-title">
+              <div class="home-utility-header">
+                <h2 id="home-whats-new-title" class="home-utility-title">
+                  <span class="home-utility-title-icon" aria-hidden="true">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11v2a2 2 0 0 0 2 2h2l4 4V5L7 9H5a2 2 0 0 0-2 2Z"/><path d="M15 8a5 5 0 0 1 0 8M18 5a9 9 0 0 1 0 14"/></svg>
+                  </span>
+                  What's New
+                </h2>
+                <button id="home-whats-new-view-all" class="home-view-all home-view-all--compact" type="button">
+                  <span>View All</span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                </button>
+              </div>
+              <div id="home-whats-new-list" class="whats-new-list"></div>
+            </section>
 
-        <section class="home-section home-role-explorer" aria-labelledby="home-role-title">
-          <div class="home-section-header">
-            <h2 id="home-role-title" class="home-section-title">
-              <span class="home-section-title-icon home-section-title-icon--roles" aria-hidden="true">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-                  <circle cx="9" cy="7" r="4"/>
-                  <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
-                </svg>
-              </span>
-              Explore by Role
-            </h2>
+            <section class="home-utility-panel home-help" aria-labelledby="home-help-title">
+              <div class="home-utility-header">
+                <h2 id="home-help-title" class="home-utility-title">
+                  <span class="home-utility-title-icon" aria-hidden="true">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.8 9a2.4 2.4 0 0 1 4.67.8c0 1.8-2.47 2.05-2.47 3.7M12 17h.01"/></svg>
+                  </span>
+                  Need Help?
+                </h2>
+              </div>
+              <div id="home-help-list" class="home-help-list"></div>
+            </section>
+          </aside>
+        </div>
 
-            <button id="home-role-view-all" class="home-view-all" type="button">
-              <span>View All</span>
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M5 12h14M13 6l6 6-6 6"/>
-              </svg>
-            </button>
-          </div>
-
-          <div id="home-role-grid" class="role-grid" aria-label="Explore Nexus resources by role"></div>
-        </section>
-
-        <p id="home-phase2-status" class="home-section-status" role="status" aria-live="polite"></p>
+        <p id="home-dashboard-status" class="home-section-status" role="status" aria-live="polite"></p>
       </div>
 
-      <!-- Featured content and the right utility rail are added in Phase 3. -->
     </section>

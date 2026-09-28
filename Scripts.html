@@ -286,8 +286,75 @@
     }
   ];
 
+  const featuredItems = [
+    {
+      id: "go-to-market",
+      category: "PLAYBOOK",
+      title: "Novare Next Go-to-Market Guide",
+      description: "Strategy, messaging and enablement resources",
+      assetKey: "featured-go-to-market",
+      placeholder: true
+    },
+    {
+      id: "solution-blueprint",
+      category: "TEMPLATE",
+      title: "Solution Blueprint Template",
+      description: "Build compelling and consistent solutions",
+      assetKey: "featured-solution-blueprint",
+      placeholder: true
+    },
+    {
+      id: "customer-engagement",
+      category: "GUIDE",
+      title: "Customer Engagement Lifecycle",
+      description: "From discovery to long-term value",
+      assetKey: "featured-customer-engagement",
+      placeholder: false
+    },
+    {
+      id: "deal-calculator",
+      category: "TOOL",
+      title: "Deal Calculator",
+      description: "Estimate effort, value and resourcing",
+      assetKey: "featured-deal-calculator",
+      placeholder: true
+    }
+  ];
+
+  const whatsNewItems = [
+    { type: "GUIDELINE", title: "Updated Governance Guidelines", date: "Sep 4, 2026", theme: "orange" },
+    { type: "TEMPLATE", title: "New SOW Template (FY27)", date: "Sep 6, 2026", theme: "blue" },
+    { type: "TOOL", title: "Deal Calculator v2.0", date: "Sep 7, 2026", theme: "orange" },
+    { type: "PLAYBOOK", title: "Novare Next Go-to-Market Guide", date: "Sep 9, 2026", theme: "purple" }
+  ];
+
+  const helpItems = [
+    {
+      id: "ask-nexus",
+      title: "Ask Nexus (AI Assistant)",
+      description: "Get quick answers, find resources, and discover content",
+      theme: "blue",
+      icon: '<path d="m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5ZM20 2v4m-2-2h4"/>'
+    },
+    {
+      id: "submit-request",
+      title: "Submit a Request",
+      description: "Content, access, or technical support",
+      theme: "green",
+      icon: '<path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z"/><path d="M8 10h8M8 14h5"/>'
+    },
+    {
+      id: "user-guide",
+      title: "Nexus User Guide",
+      description: "Learn how to make the most of Nexus",
+      theme: "blue",
+      icon: '<path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6M9 13h8M9 17h6"/>'
+    }
+  ];
+
+
   function showHomeSectionStatus(pageRoot, message) {
-    const status = pageRoot.querySelector("#home-phase2-status");
+    const status = pageRoot.querySelector("#home-dashboard-status") || pageRoot.querySelector("#home-phase2-status");
     if (!status) return;
 
     status.textContent = message;
@@ -420,6 +487,235 @@
     grid.dataset.rendered = "true";
   }
 
+
+  function renderFeatured(pageRoot) {
+    const track = pageRoot.querySelector("#featured-track");
+    const pagination = pageRoot.querySelector("#featured-pagination");
+    const prev = pageRoot.querySelector("#featured-prev");
+    const next = pageRoot.querySelector("#featured-next");
+    const viewAll = pageRoot.querySelector("#home-featured-view-all");
+    if (!track || track.dataset.rendered === "true") return;
+
+    featuredItems.forEach(function (item, index) {
+      const card = document.createElement("article");
+      card.className = "featured-card";
+      card.dataset.featuredId = item.id;
+      card.tabIndex = 0;
+
+      const media = document.createElement("div");
+      media.className = "featured-media";
+
+      const image = document.createElement("img");
+      image.className = "featured-image";
+      image.dataset.imageKey = item.assetKey;
+      image.alt = item.title;
+      image.width = 520;
+      image.height = 360;
+      image.loading = "lazy";
+      image.decoding = "async";
+
+      const fallback = document.createElement("div");
+      fallback.className = "image-placeholder featured-image-fallback";
+      fallback.setAttribute("role", "img");
+      fallback.setAttribute("aria-label", item.title + " thumbnail unavailable");
+      fallback.innerHTML = '<span class="featured-placeholder-label"></span>';
+      fallback.querySelector(".featured-placeholder-label").textContent = item.title;
+
+      if (item.placeholder) {
+        image.hidden = true;
+        fallback.hidden = false;
+      } else {
+        image.hidden = true;
+        fallback.hidden = false;
+        bindHomeAsset(image, fallback, 720);
+      }
+
+      media.appendChild(image);
+      media.appendChild(fallback);
+
+      const body = document.createElement("div");
+      body.className = "featured-card-body";
+
+      const category = document.createElement("span");
+      category.className = "featured-category";
+      category.textContent = item.category;
+
+      const title = document.createElement("h3");
+      title.className = "featured-title";
+      title.textContent = item.title;
+
+      const description = document.createElement("p");
+      description.className = "featured-description";
+      description.textContent = item.description;
+
+      const cta = document.createElement("button");
+      cta.type = "button";
+      cta.className = "featured-cta";
+      cta.innerHTML = '<span>View</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+      cta.addEventListener("click", function (event) {
+        event.stopPropagation();
+        showHomeSectionStatus(pageRoot, item.title + " will open its Nexus destination when content wiring is added.");
+      });
+
+      body.appendChild(category);
+      body.appendChild(title);
+      body.appendChild(description);
+      body.appendChild(cta);
+      card.appendChild(media);
+      card.appendChild(body);
+      card.addEventListener("click", function () {
+        showHomeSectionStatus(pageRoot, item.title + " will open its Nexus destination when content wiring is added.");
+      });
+      card.addEventListener("keydown", function (event) {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          card.click();
+        }
+      });
+
+      track.appendChild(card);
+
+      if (pagination) {
+        const dot = document.createElement("button");
+        dot.type = "button";
+        dot.className = "featured-dot";
+        dot.setAttribute("aria-label", "Show featured item " + (index + 1));
+        dot.addEventListener("click", function () {
+          card.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "start" });
+        });
+        pagination.appendChild(dot);
+      }
+    });
+
+    function getCards() {
+      return Array.from(track.querySelectorAll(".featured-card"));
+    }
+
+    function updateCarouselState() {
+      const cards = getCards();
+      if (!cards.length) return;
+      const trackRect = track.getBoundingClientRect();
+      let activeIndex = 0;
+      let nearest = Infinity;
+
+      cards.forEach(function (card, index) {
+        const distance = Math.abs(card.getBoundingClientRect().left - trackRect.left);
+        if (distance < nearest) {
+          nearest = distance;
+          activeIndex = index;
+        }
+      });
+
+      if (pagination) {
+        Array.from(pagination.querySelectorAll(".featured-dot")).forEach(function (dot, index) {
+          const active = index === activeIndex;
+          dot.classList.toggle("is-active", active);
+          dot.setAttribute("aria-current", active ? "true" : "false");
+        });
+      }
+
+      const maxScroll = Math.max(0, track.scrollWidth - track.clientWidth);
+      if (prev) prev.disabled = track.scrollLeft <= 4;
+      if (next) next.disabled = track.scrollLeft >= maxScroll - 4;
+    }
+
+    function scrollFeatured(direction) {
+      const card = track.querySelector(".featured-card");
+      if (!card) return;
+      const gap = parseFloat(getComputedStyle(track).gap) || 12;
+      track.scrollBy({ left: direction * (card.getBoundingClientRect().width + gap), behavior: "smooth" });
+    }
+
+    if (prev) prev.addEventListener("click", function () { scrollFeatured(-1); });
+    if (next) next.addEventListener("click", function () { scrollFeatured(1); });
+    track.addEventListener("scroll", updateCarouselState, { passive: true });
+    window.addEventListener("resize", updateCarouselState);
+
+    if (viewAll) {
+      viewAll.addEventListener("click", function () {
+        showHomeSectionStatus(pageRoot, "The full Featured content library will be connected in a later phase.");
+      });
+    }
+
+    track.dataset.rendered = "true";
+    requestAnimationFrame(updateCarouselState);
+  }
+
+  function renderWhatsNew(pageRoot) {
+    const list = pageRoot.querySelector("#home-whats-new-list");
+    const viewAll = pageRoot.querySelector("#home-whats-new-view-all");
+    if (!list || list.dataset.rendered === "true") return;
+
+    whatsNewItems.forEach(function (item) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "whats-new-item";
+      button.dataset.theme = item.theme;
+      button.setAttribute("aria-label", item.type + ": " + item.title + ", " + item.date);
+      button.innerHTML =
+        '<span class="whats-new-icon" aria-hidden="true">' +
+          '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6M9 13h8M9 17h6"/></svg>' +
+        '</span>' +
+        '<span class="whats-new-copy">' +
+          '<span class="whats-new-type"></span>' +
+          '<span class="whats-new-title"></span>' +
+          '<span class="whats-new-date"></span>' +
+        '</span>' +
+        '<span class="whats-new-chevron" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg></span>';
+
+      button.querySelector(".whats-new-type").textContent = item.type;
+      button.querySelector(".whats-new-title").textContent = item.title;
+      button.querySelector(".whats-new-date").textContent = item.date;
+      button.addEventListener("click", function () {
+        showHomeSectionStatus(pageRoot, item.title + " will open when the content repository is connected.");
+      });
+      list.appendChild(button);
+    });
+
+    if (viewAll) {
+      viewAll.addEventListener("click", function () {
+        showHomeSectionStatus(pageRoot, "The complete What's New feed will be connected in a later phase.");
+      });
+    }
+
+    list.dataset.rendered = "true";
+  }
+
+  function renderHelpPanel(pageRoot) {
+    const list = pageRoot.querySelector("#home-help-list");
+    if (!list || list.dataset.rendered === "true") return;
+
+    helpItems.forEach(function (item) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "home-help-item";
+      button.dataset.theme = item.theme;
+      button.setAttribute("aria-label", item.title + ": " + item.description);
+      button.innerHTML =
+        '<span class="home-help-icon" aria-hidden="true"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + item.icon + '</svg></span>' +
+        '<span class="home-help-copy"><span class="home-help-item-title"></span><span class="home-help-description"></span></span>' +
+        '<span class="home-help-chevron" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg></span>';
+
+      button.querySelector(".home-help-item-title").textContent = item.title;
+      button.querySelector(".home-help-description").textContent = item.description;
+      button.addEventListener("click", function () {
+        if (item.id === "ask-nexus") {
+          const input = pageRoot.querySelector("#home-ai-input");
+          if (input) {
+            input.focus();
+            input.scrollIntoView({ behavior: "smooth", block: "center" });
+          }
+          showHomeSectionStatus(pageRoot, "Ask Nexus is ready for your question; backend AI integration remains out of scope for this phase.");
+          return;
+        }
+        showHomeSectionStatus(pageRoot, item.title + " will be connected to its support destination in a later phase.");
+      });
+      list.appendChild(button);
+    });
+
+    list.dataset.rendered = "true";
+  }
+
   function initializeHomePage(pageRoot) {
     if (!pageRoot || pageRoot.dataset.pageInitialized === "true") return;
 
@@ -427,6 +723,9 @@
     loadHomeAsset(pageRoot, "hero-handwritten-tagline", "home-handwriting-fallback", 480);
     renderQuickAccess(pageRoot);
     renderRoleExplorer(pageRoot);
+    renderFeatured(pageRoot);
+    renderWhatsNew(pageRoot);
+    renderHelpPanel(pageRoot);
 
     const input = pageRoot.querySelector("#home-ai-input");
     const status = pageRoot.querySelector("#home-ai-status");

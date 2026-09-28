@@ -3,7 +3,7 @@
   "use strict";
 
   // 1. CONFIGURATION
-  const config = { defaultRoute: "home", useServerHomeContent: false, useServerOverviewContent: false, useServerOfferingsContent: false };
+  const config = { defaultRoute: "home", useServerHomeContent: false, useServerOverviewContent: false, useServerOfferingsContent: false, useServerOpportunitiesContent: false };
   const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
   const mobileQuery = window.matchMedia("(max-width: 767px)");
   const tabletQuery = window.matchMedia("(min-width: 768px) and (max-width: 1199px)");
@@ -117,6 +117,336 @@
       viewerUrl: "https://drive.google.com/file/d/1Bd_y884skBv0TUHV7kXjzZWZRnTQ6EGU/view?usp=drive_link"
     }
   };
+
+  // H3 OPPORTUNITIES — Phase 1–4 asset registry.
+  const opportunitiesAssetRegistry = {
+    "opportunities-hero": {
+      fileId: "170s_4fW76IwY4a_Kht2Pb11QC0Bor73k",
+      viewerUrl: "https://drive.google.com/file/d/170s_4fW76IwY4a_Kht2Pb11QC0Bor73k/view?usp=drive_link",
+      phase: 1
+    },
+    "opportunity-dashboard": {
+      fileId: "1aXSwXggc48zW97rSNu-1IevM-HndfKlO",
+      viewerUrl: "https://drive.google.com/file/d/1aXSwXggc48zW97rSNu-1IevM-HndfKlO/view?usp=drive_link",
+      phase: 1
+    },
+    "sales-process": {
+      fileId: "12XW-jHpl1DRDU2BuNOz8Te11b74JTzSN",
+      viewerUrl: "https://drive.google.com/file/d/12XW-jHpl1DRDU2BuNOz8Te11b74JTzSN/view?usp=drive_link",
+      phase: 1
+    },
+    "customer-engagement": {
+      fileId: "1kkQcGtw5vjlwLWK8TN7hctKVIOEgXpRO",
+      viewerUrl: "https://drive.google.com/file/d/1kkQcGtw5vjlwLWK8TN7hctKVIOEgXpRO/view?usp=drive_link",
+      phase: 1
+    },
+    "sales-pillar-tudi": {
+      fileId: "125DgraKmZoV3xEJrEcJ16QNgRpuIBSo2",
+      viewerUrl: "https://drive.google.com/file/d/125DgraKmZoV3xEJrEcJ16QNgRpuIBSo2/view?usp=drive_link",
+      phase: 3
+    },
+    "sales-pillar-bfsi": {
+      fileId: "1ZFpAmfTXOKivQUYtYkkeelC9H06HCgFh",
+      viewerUrl: "https://drive.google.com/file/d/1ZFpAmfTXOKivQUYtYkkeelC9H06HCgFh/view?usp=drive_link",
+      phase: 3
+    },
+    "sales-pillar-cg": {
+      fileId: "1BC101irslEn78ntf6Z6z2j7DUInrgdKj",
+      viewerUrl: "https://drive.google.com/file/d/1BC101irslEn78ntf6Z6z2j7DUInrgdKj/view?usp=drive_link",
+      phase: 3
+    }
+  };
+
+  // H3 OPPORTUNITIES — Phase 4 centralized content model.
+  // Static data remains the safe fallback until matching Code.gs endpoints exist.
+  const opportunitiesPageData = {
+    entryPoints: [
+      {
+        id: "opportunity-dashboard",
+        title: "Opportunity Dashboard",
+        description: "Real-time overview of your pipeline, key metrics, and deal health.",
+        imageKey: "opportunity-dashboard",
+        themeClass: "is-dashboard",
+        icon: "dashboard",
+        cta: "Go to Dashboard",
+        action: "opportunity-dashboard"
+      },
+      {
+        id: "sales-process",
+        title: "Simplified Sales Process",
+        description: "Standardized, stage-gated process for consistent and repeatable wins.",
+        imageKey: "sales-process",
+        themeClass: "is-process",
+        icon: "process",
+        cta: "View Process",
+        action: "sales-process"
+      },
+      {
+        id: "customer-engagement",
+        title: "Customer Engagement",
+        description: "Build stronger relationships at every stage of the customer journey.",
+        imageKey: "customer-engagement",
+        themeClass: "is-engagement",
+        icon: "engagement",
+        cta: "View Lifecycle",
+        action: "customer-engagement"
+      }
+    ],
+
+    toolkit: [
+      { id: "discovery-template", label: "Discovery\nTemplate", icon: "document", themeClass: "is-blue" },
+      { id: "conceptual-strategy-template", label: "Conceptual\nStrategy\nTemplate", icon: "idea", themeClass: "is-teal" },
+      { id: "solution-blueprint-template", label: "Solution\nBlueprint\nTemplate", icon: "cube", themeClass: "is-blue" },
+      { id: "bom-estimation-template", label: "BOM &\nEstimation\nTemplate", icon: "calculator", themeClass: "is-purple" },
+      { id: "proposal-template", label: "Proposal\nTemplate", icon: "document", themeClass: "is-blue" },
+      { id: "sow-template", label: "SOW\nTemplate", icon: "sow", themeClass: "is-teal" },
+      { id: "poc-pov-template", label: "POC/POV\nTemplate", icon: "lab", themeClass: "is-purple" },
+      { id: "technical-handover-checklist", label: "Technical\nHandover\nChecklist", icon: "checklist", themeClass: "is-orange" }
+    ],
+
+    salesPillars: [
+      { id: "tudi", label: "TUDI", imageKey: "sales-pillar-tudi", action: "sales-pillar-tudi" },
+      { id: "bfsi", label: "BFSI", imageKey: "sales-pillar-bfsi", action: "sales-pillar-bfsi" },
+      { id: "cg", label: "C&G", imageKey: "sales-pillar-cg", action: "sales-pillar-cg" }
+    ],
+
+    repositories: [
+      {
+        id: "win",
+        title: "Win Repository",
+        description: "Insights, success factors,\nand best practices.",
+        themeClass: "is-win",
+        icon: "trophy",
+        action: "win-repository"
+      },
+      {
+        id: "loss",
+        title: "Loss Repository",
+        description: "Challenges, lessons learned,\nand improvement opportunities.",
+        themeClass: "is-loss",
+        icon: "target",
+        action: "loss-repository"
+      }
+    ],
+
+    quickAccess: [
+      { id: "account-plans", label: "Account Plans", icon: "account", themeClass: "is-blue" },
+      { id: "key-contacts", label: "Key Contacts", icon: "contacts", themeClass: "is-blue" },
+      { id: "competitors", label: "Competitors", icon: "competitors", themeClass: "is-blue" },
+      { id: "products-solutions", label: "Products & Solutions", icon: "cube", themeClass: "is-blue" },
+      { id: "case-studies", label: "Case Studies", icon: "document", themeClass: "is-blue" },
+      { id: "partner-ecosystem", label: "Partner Ecosystem", icon: "partners", themeClass: "is-purple" }
+    ]
+  };
+
+  function getStaticOpportunitiesContent() {
+    return cloneData(opportunitiesPageData);
+  }
+
+  function normalizeOpportunitiesContent(value) {
+    const fallback = getStaticOpportunitiesContent();
+    if (!value || typeof value !== "object") return fallback;
+
+    return {
+      entryPoints: Array.isArray(value.entryPoints) && value.entryPoints.length
+        ? value.entryPoints
+        : fallback.entryPoints,
+      toolkit: Array.isArray(value.toolkit) && value.toolkit.length
+        ? value.toolkit
+        : fallback.toolkit,
+      salesPillars: Array.isArray(value.salesPillars) && value.salesPillars.length
+        ? value.salesPillars
+        : fallback.salesPillars,
+      repositories: Array.isArray(value.repositories) && value.repositories.length
+        ? value.repositories
+        : fallback.repositories,
+      quickAccess: Array.isArray(value.quickAccess) && value.quickAccess.length
+        ? value.quickAccess
+        : fallback.quickAccess
+    };
+  }
+
+  function escapeOpportunitiesHtml(value) {
+    return String(value == null ? "" : value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  function formatOpportunitiesLines(value) {
+    return String(value == null ? "" : value)
+      .split(/\n/)
+      .map(escapeOpportunitiesHtml)
+      .join("<br>");
+  }
+
+  function opportunitiesIconSvg(type, size) {
+    const iconSize = Number(size) || 30;
+    const attrs = 'width="' + iconSize + '" height="' + iconSize + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"';
+
+    const paths = {
+      dashboard: '<path d="M4 20V10M10 20V4M16 20v-7M22 20V7"/>',
+      process: '<path d="M12 3v4M5 10h14M5 10v4M12 10v4M19 10v4"/><rect x="2" y="14" width="6" height="5" rx="1"/><rect x="9" y="14" width="6" height="5" rx="1"/><rect x="16" y="14" width="6" height="5" rx="1"/>',
+      engagement: '<circle cx="8" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M2.5 19c0-3.2 2.3-5 5.5-5s5.5 1.8 5.5 5M13.5 15c3.5-.4 6 1.2 6 4"/>',
+      document: '<path d="M6 2h9l4 4v16H6z"/><path d="M14 2v5h5M9 12h7M9 16h7"/>',
+      idea: '<path d="M9 18h6M10 22h4"/><path d="M8.2 14.5A7 7 0 1 1 15.8 14.5C14.7 15.3 14 16.4 14 18h-4c0-1.6-.7-2.7-1.8-3.5Z"/>',
+      cube: '<path d="m12 3 8 4.5v9L12 21l-8-4.5v-9z"/><path d="m4 7.5 8 4.5 8-4.5M12 12v9"/>',
+      calculator: '<rect x="5" y="2" width="14" height="20" rx="2"/><path d="M8 6h8M8 10h2M12 10h2M16 10h.01M8 14h2M12 14h2M16 14h.01M8 18h2M12 18h2M16 18h.01"/>',
+      sow: '<path d="M5 3h10l4 4v14H5z"/><path d="M14 3v5h5M8 12h6M8 16h5M17 12l2 2-4 4-2 .5.5-2Z"/>',
+      lab: '<path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 1.8 3h10.4A2 2 0 0 0 19 18l-5-9V3"/><path d="M8 16h8"/>',
+      checklist: '<path d="M9 4h6M9 2h6v4H9z"/><rect x="5" y="4" width="14" height="18" rx="2"/><path d="m8 11 1.5 1.5L12 10M8 16l1.5 1.5L12 15M14 11h2M14 16h2"/>',
+      trophy: '<path d="M8 4h8v4c0 4-2 6-4 7-2-1-4-3-4-7z"/><path d="M8 6H4c0 3 1 5 4 5M16 6h4c0 3-1 5-4 5M12 15v4M9 21h6"/>',
+      target: '<circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="3"/><path d="m17 7 4-4M17 3h4v4"/>',
+      account: '<circle cx="12" cy="8" r="4"/><path d="M5 21c0-4 2.7-6 7-6s7 2 7 6"/>',
+      contacts: '<circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2"/><path d="M3 20c0-3.4 2.3-5.5 6-5.5s6 2.1 6 5.5M14 15c3.4-.4 5.5 1.4 5.5 4"/>',
+      competitors: '<path d="M4 20V11M10 20V5M16 20v-7M22 20V8"/>',
+      partners: '<circle cx="5" cy="12" r="2"/><circle cx="18" cy="5" r="2"/><circle cx="18" cy="19" r="2"/><path d="m7 11 9-5M7 13l9 5"/>'
+    };
+
+    return '<svg ' + attrs + '>' + (paths[type] || paths.document) + '</svg>';
+  }
+
+  function renderOpportunityEntryPoints(pageRoot, items) {
+    if (!pageRoot) return;
+    const grid = pageRoot.querySelector("#opportunities-entry-grid");
+    if (!grid || !Array.isArray(items)) return;
+
+    grid.innerHTML = items.map(function (item) {
+      const id = escapeOpportunitiesHtml(item.id);
+      const title = escapeOpportunitiesHtml(item.title);
+      const imageKey = escapeOpportunitiesHtml(item.imageKey);
+      const themeClass = escapeOpportunitiesHtml(item.themeClass || "");
+
+      return '<article class="opportunity-entry-card ' + themeClass + '" aria-labelledby="' + id + '-title">' +
+        '<div class="opportunity-entry-media">' +
+          '<img id="' + id + '-image" class="opportunity-entry-image" data-image-key="' + imageKey + '" alt="" width="900" height="300" loading="lazy" decoding="async" fetchpriority="low">' +
+          '<div id="' + id + '-fallback" class="image-placeholder opportunity-entry-fallback" data-image-fallback="' + imageKey + '" role="img" aria-label="' + title + ' visual unavailable" hidden>' + title + '</div>' +
+          '<div class="opportunity-entry-gradient" aria-hidden="true"></div>' +
+        '</div>' +
+        '<div class="opportunity-entry-content">' +
+          '<span class="opportunity-entry-icon" aria-hidden="true">' + opportunitiesIconSvg(item.icon, 34) + '</span>' +
+          '<div class="opportunity-entry-copy">' +
+            '<h2 id="' + id + '-title">' + title + '</h2>' +
+            '<p>' + escapeOpportunitiesHtml(item.description) + '</p>' +
+          '</div>' +
+          '<button class="opportunity-entry-arrow" type="button" data-opportunities-action="' + escapeOpportunitiesHtml(item.action) + '" aria-label="Open ' + title + '"><span aria-hidden="true">›</span></button>' +
+          '<button class="opportunity-entry-link" type="button" data-opportunities-action="' + escapeOpportunitiesHtml(item.action) + '"><span>' + escapeOpportunitiesHtml(item.cta) + '</span><span aria-hidden="true">→</span></button>' +
+        '</div>' +
+      '</article>';
+    }).join("");
+  }
+
+  function renderSolutioningToolkit(pageRoot, items) {
+    if (!pageRoot) return;
+    const grid = pageRoot.querySelector("#solutioning-toolkit-grid");
+    if (!grid || !Array.isArray(items)) return;
+
+    grid.innerHTML = items.map(function (item) {
+      return '<button class="toolkit-card ' + escapeOpportunitiesHtml(item.themeClass || "") + '" type="button" data-opportunities-action="' + escapeOpportunitiesHtml(item.id) + '">' +
+        '<span class="toolkit-card-icon" aria-hidden="true">' + opportunitiesIconSvg(item.icon, 29) + '</span>' +
+        '<span class="toolkit-card-label">' + formatOpportunitiesLines(item.label) + '</span>' +
+        '<span class="toolkit-card-arrow" aria-hidden="true">›</span>' +
+      '</button>';
+    }).join("");
+  }
+
+  function renderSalesPillars(pageRoot, items) {
+    if (!pageRoot) return;
+    const grid = pageRoot.querySelector("#sales-pillars-grid");
+    if (!grid || !Array.isArray(items)) return;
+
+    grid.innerHTML = items.map(function (item) {
+      const id = escapeOpportunitiesHtml(item.id);
+      const label = escapeOpportunitiesHtml(item.label);
+      const imageKey = escapeOpportunitiesHtml(item.imageKey);
+
+      return '<button class="sales-pillar-card" type="button" data-opportunities-action="' + escapeOpportunitiesHtml(item.action) + '">' +
+        '<span class="sales-pillar-media">' +
+          '<img id="sales-pillar-' + id + '-image" data-image-key="' + imageKey + '" alt="" width="320" height="180" loading="lazy" decoding="async" fetchpriority="low">' +
+          '<span id="sales-pillar-' + id + '-fallback" class="image-placeholder sales-pillar-fallback" data-image-fallback="' + imageKey + '" role="img" aria-label="' + label + ' repository visual unavailable" hidden>' + label + '</span>' +
+        '</span>' +
+        '<strong>' + label + '</strong>' +
+        '<span class="sales-pillar-arrow" aria-hidden="true">›</span>' +
+      '</button>';
+    }).join("");
+  }
+
+  function renderDealRepositories(pageRoot, items) {
+    if (!pageRoot) return;
+    const grid = pageRoot.querySelector("#deal-retrospective-grid");
+    if (!grid || !Array.isArray(items)) return;
+
+    grid.innerHTML = items.map(function (item) {
+      return '<button class="deal-retrospective-card ' + escapeOpportunitiesHtml(item.themeClass || "") + '" type="button" data-opportunities-action="' + escapeOpportunitiesHtml(item.action) + '">' +
+        '<span class="deal-retrospective-icon" aria-hidden="true">' + opportunitiesIconSvg(item.icon, 35) + '</span>' +
+        '<span class="deal-retrospective-copy">' +
+          '<strong>' + escapeOpportunitiesHtml(item.title) + '</strong>' +
+          '<span>' + formatOpportunitiesLines(item.description) + '</span>' +
+        '</span>' +
+        '<span class="deal-retrospective-arrow" aria-hidden="true">›</span>' +
+      '</button>';
+    }).join("");
+  }
+
+  function renderOpportunitiesQuickAccess(pageRoot, items) {
+    if (!pageRoot) return;
+    const grid = pageRoot.querySelector("#opportunities-quick-access-grid");
+    if (!grid || !Array.isArray(items)) return;
+
+    grid.innerHTML = items.map(function (item) {
+      return '<button type="button" class="opportunities-quick-card ' + escapeOpportunitiesHtml(item.themeClass || "") + '" data-opportunities-action="' + escapeOpportunitiesHtml(item.id) + '">' +
+        '<span class="opportunities-quick-icon" aria-hidden="true">' + opportunitiesIconSvg(item.icon, 25) + '</span>' +
+        '<span>' + escapeOpportunitiesHtml(item.label) + '</span>' +
+        '<span class="opportunities-quick-arrow" aria-hidden="true">›</span>' +
+      '</button>';
+    }).join("");
+  }
+
+  function bindOpportunitiesPageAssets(pageRoot) {
+    if (!pageRoot) return;
+
+    bindOpportunitiesAsset(
+      pageRoot.querySelector("#opportunities-hero-image"),
+      pageRoot.querySelector("#opportunities-hero-fallback"),
+      2400
+    );
+
+    opportunitiesPageData.entryPoints.forEach(function (item) {
+      bindOpportunitiesAsset(
+        pageRoot.querySelector("#" + item.id + "-image"),
+        pageRoot.querySelector("#" + item.id + "-fallback"),
+        1200
+      );
+    });
+
+    opportunitiesPageData.salesPillars.forEach(function (item) {
+      bindOpportunitiesAsset(
+        pageRoot.querySelector("#sales-pillar-" + item.id + "-image"),
+        pageRoot.querySelector("#sales-pillar-" + item.id + "-fallback"),
+        900
+      );
+    });
+  }
+
+  function renderOpportunitiesContent(pageRoot, content) {
+    if (!pageRoot) return;
+    const normalized = normalizeOpportunitiesContent(content);
+
+    opportunitiesPageData.entryPoints = cloneData(normalized.entryPoints);
+    opportunitiesPageData.toolkit = cloneData(normalized.toolkit);
+    opportunitiesPageData.salesPillars = cloneData(normalized.salesPillars);
+    opportunitiesPageData.repositories = cloneData(normalized.repositories);
+    opportunitiesPageData.quickAccess = cloneData(normalized.quickAccess);
+
+    renderOpportunityEntryPoints(pageRoot, opportunitiesPageData.entryPoints);
+    renderSolutioningToolkit(pageRoot, opportunitiesPageData.toolkit);
+    renderSalesPillars(pageRoot, opportunitiesPageData.salesPillars);
+    renderDealRepositories(pageRoot, opportunitiesPageData.repositories);
+    renderOpportunitiesQuickAccess(pageRoot, opportunitiesPageData.quickAccess);
+    bindOpportunitiesPageAssets(pageRoot);
+  }
 
   // H2 OFFERINGS — Phase 1–4 asset registry.
   const offeringsAssetRegistry = {
@@ -1058,6 +1388,129 @@
     });
   }
 
+
+  function bindOpportunitiesAsset(image, fallback, width) {
+    if (!image) return;
+    const asset = opportunitiesAssetRegistry[image.dataset.imageKey];
+    bindImageCandidates(image, fallback, getDriveImageCandidates(asset, width));
+  }
+
+  function retryFailedOpportunitiesAssets(pageRoot) {
+    if (!pageRoot) return;
+    pageRoot.querySelectorAll('img[data-asset-state="error"]').forEach(function (image) {
+      if (typeof image._nexusRetryAsset === "function") image._nexusRetryAsset();
+    });
+  }
+
+  function showOpportunitiesStatus(pageRoot, message) {
+    if (!pageRoot) return;
+    const status = pageRoot.querySelector("#opportunities-status");
+    if (!status) return;
+
+    status.textContent = message || "";
+    status.classList.add("is-visible");
+
+    window.clearTimeout(status._nexusStatusTimer);
+    status._nexusStatusTimer = window.setTimeout(function () {
+      status.classList.remove("is-visible");
+    }, 2500);
+  }
+
+  function getOpportunitiesActionLabel(action) {
+    const labels = {
+      "opportunity-dashboard": "Opportunity Dashboard",
+      "sales-process": "Simplified Sales Process",
+      "customer-engagement": "Customer Engagement",
+      "view-all-templates": "All Solutioning Toolkit templates",
+      "discovery-template": "Discovery Template",
+      "conceptual-strategy-template": "Conceptual Strategy Template",
+      "solution-blueprint-template": "Solution Blueprint Template",
+      "bom-estimation-template": "BOM & Estimation Template",
+      "proposal-template": "Proposal Template",
+      "sow-template": "SOW Template",
+      "poc-pov-template": "POC/POV Template",
+      "technical-handover-checklist": "Technical Handover Checklist",
+      "sales-pillar-tudi": "TUDI Knowledge Repository",
+      "sales-pillar-bfsi": "BFSI Knowledge Repository",
+      "sales-pillar-cg": "C&G Knowledge Repository",
+      "win-repository": "Win Repository",
+      "loss-repository": "Loss Repository",
+      "account-plans": "Account Plans",
+      "key-contacts": "Key Contacts",
+      "competitors": "Competitors",
+      "products-solutions": "Products & Solutions",
+      "case-studies": "Case Studies",
+      "partner-ecosystem": "Partner Ecosystem"
+    };
+
+    return labels[action] || "This Opportunities resource";
+  }
+
+  function handleOpportunitiesAction(pageRoot, action) {
+    if (!pageRoot || !action) return;
+
+    if (action === "view-all-templates") {
+      const toolkit = pageRoot.querySelector("#solutioning-toolkit-title");
+      if (toolkit && typeof toolkit.scrollIntoView === "function") {
+        toolkit.scrollIntoView({
+          behavior: reducedMotionQuery.matches ? "auto" : "smooth",
+          block: "start"
+        });
+      }
+      showOpportunitiesStatus(pageRoot, "Showing the Solutioning Toolkit.");
+      return;
+    }
+
+    showOpportunitiesStatus(
+      pageRoot,
+      getOpportunitiesActionLabel(action) +
+        " will open when its destination is connected."
+    );
+  }
+
+  function initializeOpportunitiesActions(pageRoot) {
+    if (!pageRoot || pageRoot.dataset.opportunitiesActionsInitialized === "true") return;
+
+    pageRoot.addEventListener("click", function (event) {
+      const trigger = event.target.closest("[data-opportunities-action]");
+      if (!trigger || !pageRoot.contains(trigger)) return;
+
+      handleOpportunitiesAction(
+        pageRoot,
+        trigger.dataset.opportunitiesAction || ""
+      );
+    });
+
+    pageRoot.dataset.opportunitiesActionsInitialized = "true";
+  }
+
+  function refreshOpportunitiesFromServer(pageRoot) {
+    if (!pageRoot || !config.useServerOpportunitiesContent) return;
+
+    NexusAPI.getOpportunitiesContent(
+      function (data) {
+        renderOpportunitiesContent(pageRoot, data);
+        retryFailedOpportunitiesAssets(pageRoot);
+      },
+      function () {
+        // Static Opportunities data remains available as the safe fallback.
+      }
+    );
+  }
+
+  function initializeOpportunitiesPage(pageRoot) {
+    if (!pageRoot) return;
+
+    if (pageRoot.dataset.pageInitialized !== "true") {
+      renderOpportunitiesContent(pageRoot, getStaticOpportunitiesContent());
+      initializeOpportunitiesActions(pageRoot);
+      pageRoot.dataset.pageInitialized = "true";
+      refreshOpportunitiesFromServer(pageRoot);
+      return;
+    }
+
+    retryFailedOpportunitiesAssets(pageRoot);
+  }
 
   function bindOfferingsAsset(image, fallback, width) {
     if (!image) return;
@@ -2079,6 +2532,7 @@
     if (route === "home") initializeHomePage(wrapper);
     if (route === "overview") initializeOverviewPage(wrapper);
     if (route === "offerings") initializeOfferingsPage(wrapper);
+    if (route === "opportunities") initializeOpportunitiesPage(wrapper);
     return wrapper;
   }
 
@@ -2092,6 +2546,7 @@
     if (route === "home" && activePage) retryFailedHomeAssets(activePage);
     if (route === "overview" && activePage) retryFailedOverviewAssets(activePage);
     if (route === "offerings" && activePage) retryFailedOfferingsAssets(activePage);
+    if (route === "opportunities" && activePage) retryFailedOpportunitiesAssets(activePage);
 
     const hasPageHero = Boolean(activePage && activePage.querySelector("[data-page-hero]"));
     dom.app.classList.toggle("hero-route", hasPageHero);
@@ -2495,6 +2950,68 @@
           if (onSuccess) onSuccess(fallback);
         })
         .getAIAccelerators();
+    },
+
+    // H3 Opportunities Phase 4 hooks. Disabled by default through
+    // config.useServerOpportunitiesContent until matching Code.gs functions exist.
+    getOpportunitiesContent(onSuccess, onFailure) {
+      const fallback = getStaticOpportunitiesContent();
+
+      if (!this.isAppsScriptAvailable()) {
+        if (onSuccess) onSuccess(fallback);
+        return;
+      }
+
+      google.script.run
+        .withSuccessHandler(function (data) {
+          if (onSuccess) onSuccess(normalizeOpportunitiesContent(data));
+        })
+        .withFailureHandler(function (error) {
+          console.warn("getOpportunitiesContent is not available yet; using static Opportunities data.", error);
+          if (onFailure) onFailure(error);
+          if (onSuccess) onSuccess(fallback);
+        })
+        .getOpportunitiesContent();
+    },
+
+    getOpportunityToolkit(onSuccess, onFailure) {
+      const fallback = cloneData(opportunitiesPageData.toolkit);
+
+      if (!this.isAppsScriptAvailable()) {
+        if (onSuccess) onSuccess(fallback);
+        return;
+      }
+
+      google.script.run
+        .withSuccessHandler(function (data) {
+          if (onSuccess) onSuccess(Array.isArray(data) ? data : fallback);
+        })
+        .withFailureHandler(function (error) {
+          console.warn("getOpportunityToolkit is not available yet; using static Opportunities data.", error);
+          if (onFailure) onFailure(error);
+          if (onSuccess) onSuccess(fallback);
+        })
+        .getOpportunityToolkit();
+    },
+
+    getSalesPillars(onSuccess, onFailure) {
+      const fallback = cloneData(opportunitiesPageData.salesPillars);
+
+      if (!this.isAppsScriptAvailable()) {
+        if (onSuccess) onSuccess(fallback);
+        return;
+      }
+
+      google.script.run
+        .withSuccessHandler(function (data) {
+          if (onSuccess) onSuccess(Array.isArray(data) ? data : fallback);
+        })
+        .withFailureHandler(function (error) {
+          console.warn("getSalesPillars is not available yet; using static Opportunities data.", error);
+          if (onFailure) onFailure(error);
+          if (onSuccess) onSuccess(fallback);
+        })
+        .getSalesPillars();
     }
   };
 

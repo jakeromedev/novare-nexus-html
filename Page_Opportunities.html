@@ -1,7 +1,785 @@
-<section class="page-container" aria-labelledby="opportunities-page-title">
-  <div class="page-development-placeholder">
-    <span class="section-label">H3: OPPORTUNITIES</span>
-    <h1 id="opportunities-page-title" data-page-title tabindex="-1">Opportunities</h1>
-    <p>Page content will be implemented separately.</p>
-  </div>
+<!-- =========================================================
+     H3: OPPORTUNITIES
+     Novare Nexus / ONESCA
+     Semantic structure based on the supplied reference.
+     Styles belong in Styles.html.
+     Behavior/data binding belongs in Scripts.html.
+========================================================== -->
+
+<section class="opportunities-page" data-page="opportunities" aria-labelledby="opportunities-title">
+
+  <!-- =======================================================
+       HERO
+       Global nav contract: data-page-hero
+  ======================================================== -->
+  <section
+    class="opportunities-hero page-hero"
+    data-page-hero
+    aria-labelledby="opportunities-title"
+  >
+    <div class="opportunities-hero-media" aria-hidden="true">
+      <img
+        id="opportunities-hero-image"
+        class="opportunities-hero-image"
+        data-image-key="opportunities-hero"
+        alt=""
+        width="2200"
+        height="620"
+        loading="eager"
+        decoding="async"
+        fetchpriority="high"
+        hidden
+      >
+      <div
+        id="opportunities-hero-fallback"
+        class="image-placeholder opportunities-hero-fallback"
+        data-image-fallback="opportunities-hero"
+        role="img"
+        aria-label="Opportunities hero visual unavailable"
+        hidden
+      >
+        H3: Opportunities
+      </div>
+      <div class="opportunities-hero-overlay"></div>
+    </div>
+
+    <div class="opportunities-hero-content">
+      <div class="opportunities-hero-copy">
+        <p class="opportunities-eyebrow">H3 : OPPORTUNITIES</p>
+
+        <h1 id="opportunities-title" data-page-title tabindex="-1">
+          <span>From Opportunities</span>
+          <span>to <strong>Lasting Impact</strong></span>
+        </h1>
+
+        <p class="opportunities-hero-description">
+          Turn market opportunities into real outcomes with proven methods,
+          curated resources, and collaborative tools.
+        </p>
+
+        <div class="opportunities-hero-tagline">
+          <span class="opportunities-hero-tagline-rule" aria-hidden="true"></span>
+          <span>Same People. Greater Possibilities.</span>
+        </div>
+      </div>
+
+      <div
+        class="opportunities-growth-steps"
+        aria-label="Opportunity growth stages"
+      >
+        <span>IDENTIFY</span>
+        <span>ENGAGE</span>
+        <span>SOLUTION</span>
+        <span>WIN</span>
+        <span>DELIVER</span>
+        <span>GROW</span>
+        <span class="opportunities-growth-rule" aria-hidden="true"></span>
+      </div>
+
+      <div
+        class="opportunities-hero-message"
+        aria-label="Opportunities today. A brighter tomorrow."
+      >
+        <p>
+          Opportunities<br>
+          today.<br>
+          A brighter<br>
+          tomorrow.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- =======================================================
+       OPPORTUNITY ENTRY POINTS
+  ======================================================== -->
+  <section
+    class="opportunities-entry-section"
+    aria-label="Opportunity resources"
+  >
+    <div
+      id="opportunities-entry-grid"
+      class="opportunities-entry-grid"
+    >
+
+      <!-- Opportunity Dashboard -->
+      <article
+        class="opportunity-entry-card is-dashboard"
+        aria-labelledby="opportunity-dashboard-title"
+      >
+        <div class="opportunity-entry-media">
+          <img
+            id="opportunity-dashboard-image"
+            class="opportunity-entry-image"
+            data-image-key="opportunity-dashboard"
+            alt=""
+            width="900"
+            height="300"
+            loading="lazy"
+            decoding="async"
+            fetchpriority="low"
+            hidden
+          >
+          <div
+            id="opportunity-dashboard-fallback"
+            class="image-placeholder opportunity-entry-fallback"
+            data-image-fallback="opportunity-dashboard"
+            role="img"
+            aria-label="Opportunity Dashboard visual unavailable"
+            hidden
+          >
+            Opportunity Dashboard
+          </div>
+          <div class="opportunity-entry-gradient" aria-hidden="true"></div>
+        </div>
+
+        <div class="opportunity-entry-content">
+          <span class="opportunity-entry-icon is-blue" aria-hidden="true">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2">
+              <path d="M4 20V10M10 20V4M16 20v-7M22 20V7"/>
+            </svg>
+          </span>
+
+          <div class="opportunity-entry-copy">
+            <h2 id="opportunity-dashboard-title">Opportunity Dashboard</h2>
+            <p>Real-time overview of your pipeline, key metrics, and deal health.</p>
+          </div>
+
+          <button
+            class="opportunity-entry-arrow"
+            type="button"
+            data-opportunities-action="opportunity-dashboard"
+            aria-label="Open Opportunity Dashboard"
+          >
+            <span aria-hidden="true">›</span>
+          </button>
+
+          <button
+            class="opportunity-entry-link"
+            type="button"
+            data-opportunities-action="opportunity-dashboard"
+          >
+            <span>Go to Dashboard</span>
+            <span aria-hidden="true">→</span>
+          </button>
+        </div>
+      </article>
+
+      <!-- Simplified Sales Process -->
+      <article
+        class="opportunity-entry-card is-process"
+        aria-labelledby="sales-process-title"
+      >
+        <div class="opportunity-entry-media">
+          <img
+            id="sales-process-image"
+            class="opportunity-entry-image"
+            data-image-key="sales-process"
+            alt=""
+            width="900"
+            height="300"
+            loading="lazy"
+            decoding="async"
+            fetchpriority="low"
+            hidden
+          >
+          <div
+            id="sales-process-fallback"
+            class="image-placeholder opportunity-entry-fallback"
+            data-image-fallback="sales-process"
+            role="img"
+            aria-label="Simplified Sales Process visual unavailable"
+            hidden
+          >
+            Simplified Sales Process
+          </div>
+          <div class="opportunity-entry-gradient" aria-hidden="true"></div>
+        </div>
+
+        <div class="opportunity-entry-content">
+          <span class="opportunity-entry-icon is-teal" aria-hidden="true">
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.9"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 3v4M5 10h14M5 10v4M12 10v4M19 10v4"/>
+              <rect x="2" y="14" width="6" height="5" rx="1"/>
+              <rect x="9" y="14" width="6" height="5" rx="1"/>
+              <rect x="16" y="14" width="6" height="5" rx="1"/>
+            </svg>
+          </span>
+
+          <div class="opportunity-entry-copy">
+            <h2 id="sales-process-title">Simplified Sales Process</h2>
+            <p>Standardized, stage-gated process for consistent and repeatable wins.</p>
+          </div>
+
+          <button
+            class="opportunity-entry-arrow"
+            type="button"
+            data-opportunities-action="sales-process"
+            aria-label="Open Simplified Sales Process"
+          >
+            <span aria-hidden="true">›</span>
+          </button>
+
+          <button
+            class="opportunity-entry-link"
+            type="button"
+            data-opportunities-action="sales-process"
+          >
+            <span>View Process</span>
+            <span aria-hidden="true">→</span>
+          </button>
+        </div>
+      </article>
+
+      <!-- Customer Engagement -->
+      <article
+        class="opportunity-entry-card is-engagement"
+        aria-labelledby="customer-engagement-title"
+      >
+        <div class="opportunity-entry-media">
+          <img
+            id="customer-engagement-image"
+            class="opportunity-entry-image"
+            data-image-key="customer-engagement"
+            alt=""
+            width="900"
+            height="300"
+            loading="lazy"
+            decoding="async"
+            fetchpriority="low"
+            hidden
+          >
+          <div
+            id="customer-engagement-fallback"
+            class="image-placeholder opportunity-entry-fallback"
+            data-image-fallback="customer-engagement"
+            role="img"
+            aria-label="Customer Engagement visual unavailable"
+            hidden
+          >
+            Customer Engagement
+          </div>
+          <div class="opportunity-entry-gradient" aria-hidden="true"></div>
+        </div>
+
+        <div class="opportunity-entry-content">
+          <span class="opportunity-entry-icon is-purple" aria-hidden="true">
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.8"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="8" cy="8" r="3"/>
+              <circle cx="17" cy="9" r="2.5"/>
+              <path d="M2.5 19c0-3.2 2.3-5 5.5-5s5.5 1.8 5.5 5M13.5 15c3.5-.4 6 1.2 6 4"/>
+            </svg>
+          </span>
+
+          <div class="opportunity-entry-copy">
+            <h2 id="customer-engagement-title">Customer Engagement</h2>
+            <p>Build stronger relationships at every stage of the customer journey.</p>
+          </div>
+
+          <button
+            class="opportunity-entry-arrow"
+            type="button"
+            data-opportunities-action="customer-engagement"
+            aria-label="Open Customer Engagement lifecycle"
+          >
+            <span aria-hidden="true">›</span>
+          </button>
+
+          <button
+            class="opportunity-entry-link"
+            type="button"
+            data-opportunities-action="customer-engagement"
+          >
+            <span>View Lifecycle</span>
+            <span aria-hidden="true">→</span>
+          </button>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- =======================================================
+       SOLUTIONING TOOLKIT
+  ======================================================== -->
+  <section
+    class="solutioning-toolkit-section opportunities-panel"
+    aria-labelledby="solutioning-toolkit-title"
+  >
+    <header class="opportunities-panel-header">
+      <div class="opportunities-panel-title-group">
+        <span class="opportunities-panel-icon is-toolkit" aria-hidden="true">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14.7 6.3a4 4 0 0 0-5-5L7.8 3.2l3 3 1.9-1.9a2 2 0 0 1 2.8 2.8L13.6 9l3 3 1.9-1.9a4 4 0 0 0-3.8-3.8Z"/>
+            <path d="m2 22 8.5-8.5M13.5 10.5 22 19l-3 3-8.5-8.5"/>
+          </svg>
+        </span>
+
+        <div>
+          <h2 id="solutioning-toolkit-title">Solutioning Toolkit</h2>
+          <p>Everything you need to craft the right solution, faster.</p>
+        </div>
+      </div>
+
+      <button
+        class="opportunities-view-all"
+        type="button"
+        data-opportunities-action="view-all-templates"
+      >
+        <span>View All Templates</span>
+        <span aria-hidden="true">→</span>
+      </button>
+    </header>
+
+    <div id="solutioning-toolkit-grid" class="solutioning-toolkit-grid" aria-live="polite">
+
+      <button
+        class="toolkit-card is-blue"
+        type="button"
+        data-opportunities-action="discovery-template"
+      >
+        <span class="toolkit-card-icon" aria-hidden="true">
+          <svg width="29" height="29" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.8">
+            <path d="M6 2h9l4 4v16H6z"/>
+            <path d="M14 2v5h5M9 12h7M9 16h7"/>
+          </svg>
+        </span>
+        <span class="toolkit-card-label">Discovery<br>Template</span>
+        <span class="toolkit-card-arrow" aria-hidden="true">›</span>
+      </button>
+
+      <button
+        class="toolkit-card is-teal"
+        type="button"
+        data-opportunities-action="conceptual-strategy-template"
+      >
+        <span class="toolkit-card-icon" aria-hidden="true">
+          <svg width="29" height="29" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.8"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 18h6M10 22h4"/>
+            <path d="M8.2 14.5A7 7 0 1 1 15.8 14.5C14.7 15.3 14 16.4 14 18h-4c0-1.6-.7-2.7-1.8-3.5Z"/>
+          </svg>
+        </span>
+        <span class="toolkit-card-label">Conceptual<br>Strategy<br>Template</span>
+        <span class="toolkit-card-arrow" aria-hidden="true">›</span>
+      </button>
+
+      <button
+        class="toolkit-card is-blue"
+        type="button"
+        data-opportunities-action="solution-blueprint-template"
+      >
+        <span class="toolkit-card-icon" aria-hidden="true">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.8"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="m12 3 8 4.5v9L12 21l-8-4.5v-9z"/>
+            <path d="m4 7.5 8 4.5 8-4.5M12 12v9"/>
+          </svg>
+        </span>
+        <span class="toolkit-card-label">Solution<br>Blueprint<br>Template</span>
+        <span class="toolkit-card-arrow" aria-hidden="true">›</span>
+      </button>
+
+      <button
+        class="toolkit-card is-purple"
+        type="button"
+        data-opportunities-action="bom-estimation-template"
+      >
+        <span class="toolkit-card-icon" aria-hidden="true">
+          <svg width="29" height="29" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.8">
+            <rect x="5" y="2" width="14" height="20" rx="2"/>
+            <path d="M8 6h8M8 10h2M12 10h2M16 10h.01M8 14h2M12 14h2M16 14h.01M8 18h2M12 18h2M16 18h.01"/>
+          </svg>
+        </span>
+        <span class="toolkit-card-label">BOM &amp;<br>Estimation<br>Template</span>
+        <span class="toolkit-card-arrow" aria-hidden="true">›</span>
+      </button>
+
+      <button
+        class="toolkit-card is-blue"
+        type="button"
+        data-opportunities-action="proposal-template"
+      >
+        <span class="toolkit-card-icon" aria-hidden="true">
+          <svg width="29" height="29" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.8">
+            <path d="M6 2h9l4 4v16H6z"/>
+            <path d="M14 2v5h5M9 12h7M9 16h7"/>
+          </svg>
+        </span>
+        <span class="toolkit-card-label">Proposal<br>Template</span>
+        <span class="toolkit-card-arrow" aria-hidden="true">›</span>
+      </button>
+
+      <button
+        class="toolkit-card is-teal"
+        type="button"
+        data-opportunities-action="sow-template"
+      >
+        <span class="toolkit-card-icon" aria-hidden="true">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.8"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 3h10l4 4v14H5z"/>
+            <path d="M14 3v5h5M8 12h6M8 16h5M17 12l2 2-4 4-2 .5.5-2Z"/>
+          </svg>
+        </span>
+        <span class="toolkit-card-label">SOW<br>Template</span>
+        <span class="toolkit-card-arrow" aria-hidden="true">›</span>
+      </button>
+
+      <button
+        class="toolkit-card is-purple"
+        type="button"
+        data-opportunities-action="poc-pov-template"
+      >
+        <span class="toolkit-card-icon" aria-hidden="true">
+          <svg width="29" height="29" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.8"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 1.8 3h10.4A2 2 0 0 0 19 18l-5-9V3"/>
+            <path d="M8 16h8"/>
+          </svg>
+        </span>
+        <span class="toolkit-card-label">POC/POV<br>Template</span>
+        <span class="toolkit-card-arrow" aria-hidden="true">›</span>
+      </button>
+
+      <button
+        class="toolkit-card is-orange"
+        type="button"
+        data-opportunities-action="technical-handover-checklist"
+      >
+        <span class="toolkit-card-icon" aria-hidden="true">
+          <svg width="29" height="29" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.8"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 4h6M9 2h6v4H9z"/>
+            <rect x="5" y="4" width="14" height="18" rx="2"/>
+            <path d="m8 11 1.5 1.5L12 10M8 16l1.5 1.5L12 15M14 11h2M14 16h2"/>
+          </svg>
+        </span>
+        <span class="toolkit-card-label">Technical<br>Handover<br>Checklist</span>
+        <span class="toolkit-card-arrow" aria-hidden="true">›</span>
+      </button>
+    </div>
+  </section>
+
+
+  <!-- =======================================================
+       KNOWLEDGE + RETROSPECTIVE
+  ======================================================== -->
+  <section
+    class="opportunities-repository-grid"
+    aria-label="Opportunity knowledge repositories"
+  >
+    <!-- Sales Pillars Knowledge Repository -->
+    <article
+      class="opportunities-panel sales-pillars-panel"
+      aria-labelledby="sales-pillars-title"
+    >
+      <header class="opportunities-panel-header">
+        <div class="opportunities-panel-title-group">
+          <span class="opportunities-panel-icon is-repository" aria-hidden="true">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.9">
+              <ellipse cx="12" cy="5" rx="7" ry="3"/>
+              <path d="M5 5v6c0 1.7 3.1 3 7 3s7-1.3 7-3V5M5 11v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/>
+            </svg>
+          </span>
+
+          <div>
+            <h2 id="sales-pillars-title">Sales Pillars Knowledge Repository</h2>
+            <p>Industry-specific documents, knowledge, insights, and references.</p>
+          </div>
+        </div>
+      </header>
+
+      <div id="sales-pillars-grid" class="sales-pillars-grid" aria-live="polite">
+        <button
+          class="sales-pillar-card"
+          type="button"
+          data-opportunities-action="sales-pillar-tudi"
+        >
+          <span class="sales-pillar-media">
+            <img
+              id="sales-pillar-tudi-image"
+              data-image-key="sales-pillar-tudi"
+              alt=""
+              width="320"
+              height="180"
+              loading="lazy"
+              decoding="async"
+              fetchpriority="low"
+              hidden
+            >
+            <span
+              id="sales-pillar-tudi-fallback"
+              class="image-placeholder sales-pillar-fallback"
+              data-image-fallback="sales-pillar-tudi"
+              role="img"
+              aria-label="TUDI repository visual unavailable"
+              hidden
+            >
+              TUDI
+            </span>
+          </span>
+          <strong>TUDI</strong>
+          <span class="sales-pillar-arrow" aria-hidden="true">›</span>
+        </button>
+
+        <button
+          class="sales-pillar-card"
+          type="button"
+          data-opportunities-action="sales-pillar-bfsi"
+        >
+          <span class="sales-pillar-media">
+            <img
+              id="sales-pillar-bfsi-image"
+              data-image-key="sales-pillar-bfsi"
+              alt=""
+              width="320"
+              height="180"
+              loading="lazy"
+              decoding="async"
+              fetchpriority="low"
+              hidden
+            >
+            <span
+              id="sales-pillar-bfsi-fallback"
+              class="image-placeholder sales-pillar-fallback"
+              data-image-fallback="sales-pillar-bfsi"
+              role="img"
+              aria-label="BFSI repository visual unavailable"
+              hidden
+            >
+              BFSI
+            </span>
+          </span>
+          <strong>BFSI</strong>
+          <span class="sales-pillar-arrow" aria-hidden="true">›</span>
+        </button>
+
+        <button
+          class="sales-pillar-card"
+          type="button"
+          data-opportunities-action="sales-pillar-cg"
+        >
+          <span class="sales-pillar-media">
+            <img
+              id="sales-pillar-cg-image"
+              data-image-key="sales-pillar-cg"
+              alt=""
+              width="320"
+              height="180"
+              loading="lazy"
+              decoding="async"
+              fetchpriority="low"
+              hidden
+            >
+            <span
+              id="sales-pillar-cg-fallback"
+              class="image-placeholder sales-pillar-fallback"
+              data-image-fallback="sales-pillar-cg"
+              role="img"
+              aria-label="C&G repository visual unavailable"
+              hidden
+            >
+              C&amp;G
+            </span>
+          </span>
+          <strong>C&amp;G</strong>
+          <span class="sales-pillar-arrow" aria-hidden="true">›</span>
+        </button>
+      </div>
+    </article>
+
+    <!-- Deal Retrospective -->
+    <article
+      class="opportunities-panel deal-retrospective-panel"
+      aria-labelledby="deal-retrospective-title"
+    >
+      <header class="opportunities-panel-header">
+        <div class="opportunities-panel-title-group">
+          <span class="opportunities-panel-icon is-retrospective" aria-hidden="true">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.9"
+                 stroke-linecap="round">
+              <path d="M4 20V11M9 20V6M14 20v-8M19 20V3"/>
+              <path d="M2 20h20"/>
+            </svg>
+          </span>
+
+          <div>
+            <h2 id="deal-retrospective-title">Deal Retrospective &amp; Win/Loss Repository</h2>
+            <p>Capture learnings from wins and losses to continuously improve.</p>
+          </div>
+        </div>
+      </header>
+
+      <div id="deal-retrospective-grid" class="deal-retrospective-grid" aria-live="polite">
+        <button
+          class="deal-retrospective-card is-win"
+          type="button"
+          data-opportunities-action="win-repository"
+        >
+          <span class="deal-retrospective-icon" aria-hidden="true">
+            <svg width="35" height="35" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.8"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <path d="M8 4h8v4c0 4-2 6-4 7-2-1-4-3-4-7z"/>
+              <path d="M8 6H4c0 3 1 5 4 5M16 6h4c0 3-1 5-4 5M12 15v4M9 21h6"/>
+            </svg>
+          </span>
+          <span class="deal-retrospective-copy">
+            <strong>Win Repository</strong>
+            <span>Insights, success factors,<br>and best practices.</span>
+          </span>
+          <span class="deal-retrospective-arrow" aria-hidden="true">›</span>
+        </button>
+
+        <button
+          class="deal-retrospective-card is-loss"
+          type="button"
+          data-opportunities-action="loss-repository"
+        >
+          <span class="deal-retrospective-icon" aria-hidden="true">
+            <svg width="35" height="35" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.9"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="7"/>
+              <circle cx="12" cy="12" r="3"/>
+              <path d="m17 7 4-4M17 3h4v4"/>
+            </svg>
+          </span>
+          <span class="deal-retrospective-copy">
+            <strong>Loss Repository</strong>
+            <span>Challenges, lessons learned,<br>and improvement opportunities.</span>
+          </span>
+          <span class="deal-retrospective-arrow" aria-hidden="true">›</span>
+        </button>
+      </div>
+    </article>
+  </section>
+
+  <!-- =======================================================
+       QUICK ACCESS
+  ======================================================== -->
+  <section
+    class="opportunities-quick-access opportunities-panel"
+    aria-labelledby="opportunities-quick-access-title"
+  >
+    <header class="opportunities-quick-access-header">
+      <div class="opportunities-quick-access-title-group">
+        <span class="quick-access-bolt" aria-hidden="true">ϟ</span>
+        <h2 id="opportunities-quick-access-title">Quick Access</h2>
+        <p>Jump to frequently used resources.</p>
+      </div>
+    </header>
+
+    <div id="opportunities-quick-access-grid" class="opportunities-quick-access-grid" aria-live="polite">
+
+      <button type="button" class="opportunities-quick-card is-blue"
+              data-opportunities-action="account-plans">
+        <span class="opportunities-quick-icon" aria-hidden="true">
+          <svg width="25" height="25" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.9">
+            <circle cx="12" cy="8" r="4"/>
+            <path d="M5 21c0-4 2.7-6 7-6s7 2 7 6"/>
+          </svg>
+        </span>
+        <span>Account Plans</span>
+        <span class="opportunities-quick-arrow" aria-hidden="true">›</span>
+      </button>
+
+      <button type="button" class="opportunities-quick-card is-blue"
+              data-opportunities-action="key-contacts">
+        <span class="opportunities-quick-icon" aria-hidden="true">
+          <svg width="25" height="25" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.8">
+            <circle cx="9" cy="8" r="3"/>
+            <circle cx="17" cy="9" r="2"/>
+            <path d="M3 20c0-3.4 2.3-5.5 6-5.5s6 2.1 6 5.5M14 15c3.4-.4 5.5 1.4 5.5 4"/>
+          </svg>
+        </span>
+        <span>Key Contacts</span>
+        <span class="opportunities-quick-arrow" aria-hidden="true">›</span>
+      </button>
+
+      <button type="button" class="opportunities-quick-card is-blue"
+              data-opportunities-action="competitors">
+        <span class="opportunities-quick-icon" aria-hidden="true">
+          <svg width="25" height="25" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.9">
+            <path d="M4 20V11M10 20V5M16 20v-7M22 20V8"/>
+          </svg>
+        </span>
+        <span>Competitors</span>
+        <span class="opportunities-quick-arrow" aria-hidden="true">›</span>
+      </button>
+
+      <button type="button" class="opportunities-quick-card is-blue"
+              data-opportunities-action="products-solutions">
+        <span class="opportunities-quick-icon" aria-hidden="true">
+          <svg width="25" height="25" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.8"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="m12 3 8 4.5v9L12 21l-8-4.5v-9z"/>
+            <path d="m4 7.5 8 4.5 8-4.5M12 12v9"/>
+          </svg>
+        </span>
+        <span>Products &amp; Solutions</span>
+        <span class="opportunities-quick-arrow" aria-hidden="true">›</span>
+      </button>
+
+      <button type="button" class="opportunities-quick-card is-blue"
+              data-opportunities-action="case-studies">
+        <span class="opportunities-quick-icon" aria-hidden="true">
+          <svg width="25" height="25" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.8">
+            <path d="M6 2h9l4 4v16H6z"/>
+            <path d="M14 2v5h5M9 12h7M9 16h7"/>
+          </svg>
+        </span>
+        <span>Case Studies</span>
+        <span class="opportunities-quick-arrow" aria-hidden="true">›</span>
+      </button>
+
+      <button type="button" class="opportunities-quick-card is-purple"
+              data-opportunities-action="partner-ecosystem">
+        <span class="opportunities-quick-icon" aria-hidden="true">
+          <svg width="25" height="25" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.8"
+               stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="5" cy="12" r="2"/>
+            <circle cx="18" cy="5" r="2"/>
+            <circle cx="18" cy="19" r="2"/>
+            <path d="m7 11 9-5M7 13l9 5"/>
+          </svg>
+        </span>
+        <span>Partner Ecosystem</span>
+        <span class="opportunities-quick-arrow" aria-hidden="true">›</span>
+      </button>
+    </div>
+  </section>
+
+
+
+  <p
+    id="opportunities-status"
+    class="opportunities-status"
+    role="status"
+    aria-live="polite"
+  ></p>
+
 </section>

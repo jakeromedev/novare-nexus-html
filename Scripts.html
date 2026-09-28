@@ -3,7 +3,8 @@
   "use strict";
 
   // 1. CONFIGURATION
-  const config = { defaultRoute: "home" };
+  const config = { defaultRoute: "home", useServerHomeContent: false };
+  const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
   const mobileQuery = window.matchMedia("(max-width: 767px)");
   const tabletQuery = window.matchMedia("(min-width: 768px) and (max-width: 1199px)");
   const state = { route: null, filter: "all", mobileOpen: false, tabletExpanded: false };
@@ -32,6 +33,7 @@
     app: document.getElementById("nexus-app"),
     sidebar: document.getElementById("nexus-sidebar"),
     workspace: document.getElementById("nexus-workspace"),
+    topbar: document.getElementById("nexus-topbar"),
     overlay: document.getElementById("sidebar-overlay"),
     toggle: document.getElementById("sidebar-toggle"),
     sidebarClose: document.getElementById("sidebar-close"),
@@ -135,56 +137,107 @@
   function bindImageCandidates(image, fallback, candidates) {
     if (!image) return;
 
-    const urls = Array.from(new Set((candidates || []).filter(Boolean)));
+    const key = image.dataset.imageKey || image.alt || "image";
+    const cacheKey = "nexus.asset.success." + key;
+    let urls = Array.from(new Set((candidates || []).filter(Boolean)));
+
+    try {
+      const cachedUrl = window.sessionStorage.getItem(cacheKey);
+      if (cachedUrl && urls.includes(cachedUrl)) {
+        urls = [cachedUrl].concat(urls.filter(function (url) { return url !== cachedUrl; }));
+      }
+    } catch (error) {
+      // Storage can be unavailable in some iframe/privacy modes; image loading still works without it.
+    }
+
     let index = 0;
+    let currentUrl = "";
+    let loadTimer = null;
+
+    function clearLoadTimer() {
+      if (loadTimer) {
+        window.clearTimeout(loadTimer);
+        loadTimer = null;
+      }
+    }
 
     function showFallback() {
+      clearLoadTimer();
+      image.dataset.assetState = "error";
       image.hidden = true;
       image.style.visibility = "";
       image.removeAttribute("src");
       if (fallback) fallback.hidden = false;
-
-      const key = image.dataset.imageKey || image.alt || "image";
       console.warn("Nexus asset could not be loaded:", key, urls);
     }
 
     function tryNext() {
+      clearLoadTimer();
       if (index >= urls.length) {
         showFallback();
         return;
       }
 
-      const url = urls[index++];
+      currentUrl = urls[index++];
+      image.dataset.assetState = "loading";
 
-      // IMPORTANT: do not keep lazy-loaded images display:none/hidden while
-      // assigning src. Browsers can defer a hidden lazy image indefinitely,
-      // which means neither load nor error fires. Keep it in layout but
-      // visually hidden until the request succeeds.
+      // Do not keep a lazy-loaded image display:none/hidden while assigning src.
+      // Browsers may otherwise defer it indefinitely and never fire load/error.
       image.hidden = false;
       image.style.visibility = "hidden";
       if (fallback) fallback.hidden = false;
 
       image.removeAttribute("src");
-      image.src = url;
+      image.src = currentUrl;
+
+      // Prevent a stalled third-party image request from leaving an empty card forever.
+      loadTimer = window.setTimeout(function () {
+        if (image.dataset.assetState === "loading") tryNext();
+      }, 10000);
     }
 
+    function retryAll() {
+      index = 0;
+      currentUrl = "";
+      tryNext();
+    }
+
+    image._nexusRetryAsset = retryAll;
+
     image.onload = function () {
+      clearLoadTimer();
       if (!image.naturalWidth) {
         tryNext();
         return;
       }
 
+      image.dataset.assetState = "loaded";
       image.hidden = false;
       image.style.visibility = "visible";
       if (fallback) fallback.hidden = true;
+
+      try {
+        if (currentUrl) window.sessionStorage.setItem(cacheKey, currentUrl);
+      } catch (error) {
+        // Ignore storage failures; successful image display is sufficient.
+      }
     };
 
     image.onerror = function () {
+      clearLoadTimer();
       tryNext();
     };
 
     tryNext();
   }
+
+  function retryFailedHomeAssets(pageRoot) {
+    if (!pageRoot) return;
+    pageRoot.querySelectorAll('img[data-asset-state="error"]').forEach(function (image) {
+      if (typeof image._nexusRetryAsset === "function") image._nexusRetryAsset();
+    });
+  }
+
 
   function bindHomeAsset(image, fallback, width) {
     if (!image) return;
@@ -208,13 +261,6 @@
     bindImageCandidates(image, fallback, getDriveImageCandidates(asset, 900));
   }
 
-  const aiQuickActions = [
-    "Summarize a document",
-    "Find a template",
-    "Compare offerings",
-    "Create a playbook"
-  ];
-
   const aiActionIcons = [
     '<path d="M5 3h10l4 4v14H5ZM14 3v5h5M8 12h2v6H8Zm5-2h2v8h-2Z"/>',
     '<path d="M4 5h7v6H4Zm9 0h7v6h-7ZM4 13h7v6H4Zm9 0h7v6h-7Z"/>',
@@ -222,135 +268,156 @@
     '<path d="M9 18h6m-5 3h4M8 14a6 6 0 1 1 8 0l-1 3H9Z"/>'
   ];
 
-  const quickAccessItems = [
-    {
-      id: "templates",
-      title: "Templates & Playbooks",
-      description: "SOWs, proposals, frameworks and more",
-      theme: "blue",
-      icon: '<path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6M9 13h8M9 17h6"/>'
-    },
-    {
-      id: "deal-tools",
-      title: "Deal Tools",
-      description: "Calculators, matrices and estimators",
-      theme: "orange",
-      icon: '<rect x="5" y="2" width="14" height="20" rx="2"/><path d="M8 6h8M8 10h2m3 0h2m-7 4h2m3 0h2m-7 4h2m3 0h2"/>'
-    },
-    {
-      id: "guides",
-      title: "Guides & Best Practices",
-      description: "From discovery to deal closure",
-      theme: "purple",
-      icon: '<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H11v17H6.5A2.5 2.5 0 0 0 4 22z"/><path d="M20 5.5A2.5 2.5 0 0 0 17.5 3H13v17h4.5A2.5 2.5 0 0 1 20 22z"/>'
-    },
-    {
-      id: "training",
-      title: "Training & Enablement",
-      description: "Build skills and stay ahead",
-      theme: "green",
-      icon: '<path d="m3 10 9-5 9 5-9 5z"/><path d="M7 12.5V17c2.8 2 7.2 2 10 0v-4.5M21 10v6"/>'
-    }
-  ];
+  // Phase 4: Home content is centralized so Apps Script / Sheets can replace
+  // these arrays later without requiring the HTML structure to be rewritten.
+  const homePageData = {
+    aiActions: [
+      "Summarize a document",
+      "Find a template",
+      "Compare offerings",
+      "Create a playbook"
+    ],
+    quickAccess: [
+      {
+        id: "templates",
+        title: "Templates & Playbooks",
+        description: "SOWs, proposals, frameworks and more",
+        theme: "blue",
+        destinationRoute: "tools",
+        icon: '<path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6M9 13h8M9 17h6"/>'
+      },
+      {
+        id: "deal-tools",
+        title: "Deal Tools",
+        description: "Calculators, matrices and estimators",
+        theme: "orange",
+        icon: '<rect x="5" y="2" width="14" height="20" rx="2"/><path d="M8 6h8M8 10h2m3 0h2m-7 4h2m3 0h2m-7 4h2m3 0h2"/>'
+      },
+      {
+        id: "guides",
+        title: "Guides & Best Practices",
+        description: "From discovery to deal closure",
+        theme: "purple",
+        destinationRoute: "tools",
+        icon: '<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H11v17H6.5A2.5 2.5 0 0 0 4 22z"/><path d="M20 5.5A2.5 2.5 0 0 0 17.5 3H13v17h4.5A2.5 2.5 0 0 1 20 22z"/>'
+      },
+      {
+        id: "training",
+        title: "Training & Enablement",
+        description: "Build skills and stay ahead",
+        theme: "green",
+        icon: '<path d="m3 10 9-5 9 5-9 5z"/><path d="M7 12.5V17c2.8 2 7.2 2 10 0v-4.5M21 10v6"/>'
+      }
+    ],
+    roles: [
+      {
+        id: "execom",
+        title: "Execom",
+        description: "Strategy, performance and key updates",
+        assetKey: "role-execom"
+      },
+      {
+        id: "sales-executives",
+        title: "Sales Executives",
+        description: "Go-to-market, deal resources and enablement",
+        assetKey: "role-sales-executives"
+      },
+      {
+        id: "product-managers",
+        title: "Product Managers",
+        description: "Product strategy, roadmaps and collaterals",
+        assetKey: "role-product-managers"
+      },
+      {
+        id: "solutions-consultants",
+        title: "Solutions Consultants",
+        description: "Architectures, solutioning and technical assets",
+        assetKey: "role-solutions-consultants"
+      },
+      {
+        id: "delivery-risk-finance",
+        title: "Delivery, Risk & Finance",
+        description: "Execution, risk, compliance and financial resources",
+        assetKey: "role-delivery-risk-finance"
+      }
+    ],
+    featured: [
+      {
+        id: "go-to-market",
+        category: "PLAYBOOK",
+        title: "Novare Next Go-to-Market Guide",
+        description: "Strategy, messaging and enablement resources",
+        assetKey: "featured-go-to-market",
+        placeholder: true
+      },
+      {
+        id: "solution-blueprint",
+        category: "TEMPLATE",
+        title: "Solution Blueprint Template",
+        description: "Build compelling and consistent solutions",
+        assetKey: "featured-solution-blueprint",
+        placeholder: true
+      },
+      {
+        id: "customer-engagement",
+        category: "GUIDE",
+        title: "Customer Engagement Lifecycle",
+        description: "From discovery to long-term value",
+        assetKey: "featured-customer-engagement",
+        placeholder: false
+      },
+      {
+        id: "deal-calculator",
+        category: "TOOL",
+        title: "Deal Calculator",
+        description: "Estimate effort, value and resourcing",
+        assetKey: "featured-deal-calculator",
+        placeholder: true
+      }
+    ],
+    whatsNew: [
+      { type: "GUIDELINE", title: "Updated Governance Guidelines", date: "Sep 4, 2026", theme: "orange" },
+      { type: "TEMPLATE", title: "New SOW Template (FY27)", date: "Sep 6, 2026", theme: "blue" },
+      { type: "TOOL", title: "Deal Calculator v2.0", date: "Sep 7, 2026", theme: "orange" },
+      { type: "PLAYBOOK", title: "Novare Next Go-to-Market Guide", date: "Sep 9, 2026", theme: "purple" }
+    ],
+    help: [
+      {
+        id: "ask-nexus",
+        title: "Ask Nexus (AI Assistant)",
+        description: "Get quick answers, find resources, and discover content",
+        theme: "blue",
+        action: "open-nosca",
+        icon: '<path d="m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5ZM20 2v4m-2-2h4"/>'
+      },
+      {
+        id: "submit-request",
+        title: "Submit a Request",
+        description: "Content, access, or technical support",
+        theme: "green",
+        icon: '<path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z"/><path d="M8 10h8M8 14h5"/>'
+      },
+      {
+        id: "user-guide",
+        title: "Nexus User Guide",
+        description: "Learn how to make the most of Nexus",
+        theme: "blue",
+        icon: '<path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6M9 13h8M9 17h6"/>'
+      }
+    ]
+  };
 
-  const roleItems = [
-    {
-      id: "execom",
-      title: "Execom",
-      description: "Strategy, performance and key updates",
-      assetKey: "role-execom"
-    },
-    {
-      id: "sales-executives",
-      title: "Sales Executives",
-      description: "Go-to-market, deal resources and enablement",
-      assetKey: "role-sales-executives"
-    },
-    {
-      id: "product-managers",
-      title: "Product Managers",
-      description: "Product strategy, roadmaps and collaterals",
-      assetKey: "role-product-managers"
-    },
-    {
-      id: "solutions-consultants",
-      title: "Solutions Consultants",
-      description: "Architectures, solutioning and technical assets",
-      assetKey: "role-solutions-consultants"
-    },
-    {
-      id: "delivery-risk-finance",
-      title: "Delivery, Risk & Finance",
-      description: "Execution, risk, compliance and financial resources",
-      assetKey: "role-delivery-risk-finance"
-    }
-  ];
+  function cloneData(value) {
+    return JSON.parse(JSON.stringify(value));
+  }
 
-  const featuredItems = [
-    {
-      id: "go-to-market",
-      category: "PLAYBOOK",
-      title: "Novare Next Go-to-Market Guide",
-      description: "Strategy, messaging and enablement resources",
-      assetKey: "featured-go-to-market",
-      placeholder: true
-    },
-    {
-      id: "solution-blueprint",
-      category: "TEMPLATE",
-      title: "Solution Blueprint Template",
-      description: "Build compelling and consistent solutions",
-      assetKey: "featured-solution-blueprint",
-      placeholder: true
-    },
-    {
-      id: "customer-engagement",
-      category: "GUIDE",
-      title: "Customer Engagement Lifecycle",
-      description: "From discovery to long-term value",
-      assetKey: "featured-customer-engagement",
-      placeholder: false
-    },
-    {
-      id: "deal-calculator",
-      category: "TOOL",
-      title: "Deal Calculator",
-      description: "Estimate effort, value and resourcing",
-      assetKey: "featured-deal-calculator",
-      placeholder: true
-    }
-  ];
+  function getStaticHomeContent() {
+    return cloneData(homePageData);
+  }
 
-  const whatsNewItems = [
-    { type: "GUIDELINE", title: "Updated Governance Guidelines", date: "Sep 4, 2026", theme: "orange" },
-    { type: "TEMPLATE", title: "New SOW Template (FY27)", date: "Sep 6, 2026", theme: "blue" },
-    { type: "TOOL", title: "Deal Calculator v2.0", date: "Sep 7, 2026", theme: "orange" },
-    { type: "PLAYBOOK", title: "Novare Next Go-to-Market Guide", date: "Sep 9, 2026", theme: "purple" }
-  ];
-
-  const helpItems = [
-    {
-      id: "ask-nexus",
-      title: "Ask Nexus (AI Assistant)",
-      description: "Get quick answers, find resources, and discover content",
-      theme: "blue",
-      icon: '<path d="m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5ZM20 2v4m-2-2h4"/>'
-    },
-    {
-      id: "submit-request",
-      title: "Submit a Request",
-      description: "Content, access, or technical support",
-      theme: "green",
-      icon: '<path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z"/><path d="M8 10h8M8 14h5"/>'
-    },
-    {
-      id: "user-guide",
-      title: "Nexus User Guide",
-      description: "Learn how to make the most of Nexus",
-      theme: "blue",
-      icon: '<path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6M9 13h8M9 17h6"/>'
-    }
-  ];
+  function getScrollBehavior() {
+    return reducedMotionQuery.matches ? "auto" : "smooth";
+  }
 
 
   function showHomeSectionStatus(pageRoot, message) {
@@ -360,11 +427,24 @@
     status.textContent = message;
   }
 
-  function renderQuickAccess(pageRoot) {
+
+  function navigateToKnownRoute(route) {
+    if (!route || !Object.prototype.hasOwnProperty.call(routes, route)) return false;
+
+    if (window.location.hash.slice(1) === route) {
+      handleRouteChange(true);
+    } else {
+      window.location.hash = route;
+    }
+    return true;
+  }
+
+  function renderQuickAccess(pageRoot, items) {
+    const sourceItems = Array.isArray(items) ? items : homePageData.quickAccess;
     const grid = pageRoot.querySelector("#home-quick-access-grid");
     if (!grid || grid.dataset.rendered === "true") return;
 
-    quickAccessItems.forEach(function (item) {
+    sourceItems.forEach(function (item) {
       const card = document.createElement("button");
       card.type = "button";
       card.className = "quick-access-card";
@@ -390,6 +470,8 @@
       card.querySelector(".quick-access-description").textContent = item.description;
 
       card.addEventListener("click", function () {
+        if (item.destinationRoute && navigateToKnownRoute(item.destinationRoute)) return;
+
         showHomeSectionStatus(
           pageRoot,
           item.title + " is ready for destination wiring in a later phase."
@@ -402,12 +484,13 @@
     grid.dataset.rendered = "true";
   }
 
-  function renderRoleExplorer(pageRoot) {
+  function renderRoleExplorer(pageRoot, items) {
+    const sourceItems = Array.isArray(items) ? items : homePageData.roles;
     const grid = pageRoot.querySelector("#home-role-grid");
     const viewAll = pageRoot.querySelector("#home-role-view-all");
     if (!grid || grid.dataset.rendered === "true") return;
 
-    roleItems.forEach(function (item) {
+    sourceItems.forEach(function (item) {
       const card = document.createElement("button");
       card.type = "button";
       card.className = "role-card";
@@ -425,6 +508,7 @@
       image.height = 400;
       image.loading = "lazy";
       image.decoding = "async";
+      image.fetchPriority = "low";
       image.hidden = true;
 
       const fallback = document.createElement("span");
@@ -488,7 +572,8 @@
   }
 
 
-  function renderFeatured(pageRoot) {
+  function renderFeatured(pageRoot, items) {
+    const sourceItems = Array.isArray(items) ? items : homePageData.featured;
     const track = pageRoot.querySelector("#featured-track");
     const pagination = pageRoot.querySelector("#featured-pagination");
     const prev = pageRoot.querySelector("#featured-prev");
@@ -496,11 +581,11 @@
     const viewAll = pageRoot.querySelector("#home-featured-view-all");
     if (!track || track.dataset.rendered === "true") return;
 
-    featuredItems.forEach(function (item, index) {
+    sourceItems.forEach(function (item, index) {
       const card = document.createElement("article");
       card.className = "featured-card";
       card.dataset.featuredId = item.id;
-      card.tabIndex = 0;
+      card.id = "featured-card-" + item.id;
 
       const media = document.createElement("div");
       media.className = "featured-media";
@@ -513,6 +598,7 @@
       image.height = 360;
       image.loading = "lazy";
       image.decoding = "async";
+      image.fetchPriority = "low";
 
       const fallback = document.createElement("div");
       fallback.className = "image-placeholder featured-image-fallback";
@@ -542,7 +628,9 @@
 
       const title = document.createElement("h3");
       title.className = "featured-title";
+      title.id = "featured-title-" + item.id;
       title.textContent = item.title;
+      card.setAttribute("aria-labelledby", title.id);
 
       const description = document.createElement("p");
       description.className = "featured-description";
@@ -551,6 +639,7 @@
       const cta = document.createElement("button");
       cta.type = "button";
       cta.className = "featured-cta";
+      cta.setAttribute("aria-label", "View " + item.title);
       cta.innerHTML = '<span>View</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
       cta.addEventListener("click", function (event) {
         event.stopPropagation();
@@ -563,15 +652,6 @@
       body.appendChild(cta);
       card.appendChild(media);
       card.appendChild(body);
-      card.addEventListener("click", function () {
-        showHomeSectionStatus(pageRoot, item.title + " will open its Nexus destination when content wiring is added.");
-      });
-      card.addEventListener("keydown", function (event) {
-        if (event.key === "Enter" || event.key === " ") {
-          event.preventDefault();
-          card.click();
-        }
-      });
 
       track.appendChild(card);
 
@@ -579,9 +659,10 @@
         const dot = document.createElement("button");
         dot.type = "button";
         dot.className = "featured-dot";
-        dot.setAttribute("aria-label", "Show featured item " + (index + 1));
+        dot.setAttribute("aria-label", "Show featured item " + (index + 1) + ": " + item.title);
+        dot.setAttribute("aria-controls", card.id);
         dot.addEventListener("click", function () {
-          card.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "start" });
+          card.scrollIntoView({ behavior: getScrollBehavior(), block: "nearest", inline: "start" });
         });
         pagination.appendChild(dot);
       }
@@ -623,12 +704,21 @@
       const card = track.querySelector(".featured-card");
       if (!card) return;
       const gap = parseFloat(getComputedStyle(track).gap) || 12;
-      track.scrollBy({ left: direction * (card.getBoundingClientRect().width + gap), behavior: "smooth" });
+      track.scrollBy({ left: direction * (card.getBoundingClientRect().width + gap), behavior: getScrollBehavior() });
     }
 
     if (prev) prev.addEventListener("click", function () { scrollFeatured(-1); });
     if (next) next.addEventListener("click", function () { scrollFeatured(1); });
     track.addEventListener("scroll", updateCarouselState, { passive: true });
+    track.addEventListener("keydown", function (event) {
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        scrollFeatured(-1);
+      } else if (event.key === "ArrowRight") {
+        event.preventDefault();
+        scrollFeatured(1);
+      }
+    });
     window.addEventListener("resize", updateCarouselState);
 
     if (viewAll) {
@@ -641,12 +731,13 @@
     requestAnimationFrame(updateCarouselState);
   }
 
-  function renderWhatsNew(pageRoot) {
+  function renderWhatsNew(pageRoot, items) {
+    const sourceItems = Array.isArray(items) ? items : homePageData.whatsNew;
     const list = pageRoot.querySelector("#home-whats-new-list");
     const viewAll = pageRoot.querySelector("#home-whats-new-view-all");
     if (!list || list.dataset.rendered === "true") return;
 
-    whatsNewItems.forEach(function (item) {
+    sourceItems.forEach(function (item) {
       const button = document.createElement("button");
       button.type = "button";
       button.className = "whats-new-item";
@@ -681,11 +772,12 @@
     list.dataset.rendered = "true";
   }
 
-  function renderHelpPanel(pageRoot) {
+  function renderHelpPanel(pageRoot, items) {
+    const sourceItems = Array.isArray(items) ? items : homePageData.help;
     const list = pageRoot.querySelector("#home-help-list");
     if (!list || list.dataset.rendered === "true") return;
 
-    helpItems.forEach(function (item) {
+    sourceItems.forEach(function (item) {
       const button = document.createElement("button");
       button.type = "button";
       button.className = "home-help-item";
@@ -699,13 +791,9 @@
       button.querySelector(".home-help-item-title").textContent = item.title;
       button.querySelector(".home-help-description").textContent = item.description;
       button.addEventListener("click", function () {
-        if (item.id === "ask-nexus") {
-          const input = pageRoot.querySelector("#home-ai-input");
-          if (input) {
-            input.focus();
-            input.scrollIntoView({ behavior: "smooth", block: "center" });
-          }
-          showHomeSectionStatus(pageRoot, "Ask Nexus is ready for your question; backend AI integration remains out of scope for this phase.");
+        if (item.action === "open-nosca") {
+          openNoscaPlaceholder();
+          showHomeSectionStatus(pageRoot, "Ask Nexus opened the current Ask Nosca placeholder. Live AI integration remains out of scope.");
           return;
         }
         showHomeSectionStatus(pageRoot, item.title + " will be connected to its support destination in a later phase.");
@@ -719,13 +807,15 @@
   function initializeHomePage(pageRoot) {
     if (!pageRoot || pageRoot.dataset.pageInitialized === "true") return;
 
+    const initialData = getStaticHomeContent();
+
     loadHomeAsset(pageRoot, "home-hero-image", "home-hero-fallback", 2000);
     loadHomeAsset(pageRoot, "hero-handwritten-tagline", "home-handwriting-fallback", 480);
-    renderQuickAccess(pageRoot);
-    renderRoleExplorer(pageRoot);
-    renderFeatured(pageRoot);
-    renderWhatsNew(pageRoot);
-    renderHelpPanel(pageRoot);
+    renderQuickAccess(pageRoot, initialData.quickAccess);
+    renderRoleExplorer(pageRoot, initialData.roles);
+    renderFeatured(pageRoot, initialData.featured);
+    renderWhatsNew(pageRoot, initialData.whatsNew);
+    renderHelpPanel(pageRoot, initialData.help);
 
     const input = pageRoot.querySelector("#home-ai-input");
     const status = pageRoot.querySelector("#home-ai-status");
@@ -735,7 +825,7 @@
 
     if (!input || !status || !track || !form || !next) return;
 
-    aiQuickActions.forEach(function (label, index) {
+    homePageData.aiActions.forEach(function (label, index) {
       const button = document.createElement("button");
       button.type = "button";
       button.className = "button home-ai-action";
@@ -775,6 +865,54 @@
     });
 
     pageRoot.dataset.pageInitialized = "true";
+
+    if (config.useServerHomeContent) {
+      NexusAPI.getHomeContent(function (serverData) {
+        // Phase 4 only prepares the hook. A later backend phase can add a
+        // controlled re-render/diff once the server schema is finalized.
+        pageRoot._nexusServerHomeContent = serverData;
+      });
+    }
+  }
+
+  // 6. HOME STICKY TOPBAR SCROLL EFFECT
+  let topbarScrollFrame = 0;
+
+  function getPageScrollTop() {
+    return Math.max(
+      window.scrollY || 0,
+      document.documentElement ? document.documentElement.scrollTop || 0 : 0,
+      document.body ? document.body.scrollTop || 0 : 0,
+      dom.workspace ? dom.workspace.scrollTop || 0 : 0
+    );
+  }
+
+  function updateHomeTopbarScrollEffect() {
+    topbarScrollFrame = 0;
+    if (!dom.topbar) return;
+
+    if (state.route !== "home") {
+      dom.topbar.style.removeProperty("--home-topbar-opacity");
+      dom.topbar.style.removeProperty("--home-topbar-border-opacity");
+      dom.topbar.style.removeProperty("--home-topbar-shadow-opacity");
+      dom.topbar.style.removeProperty("--home-topbar-blur");
+      return;
+    }
+
+    // At the top the header is transparent. Over the first 180px of scroll,
+    // fade in a frosted surface so dashboard content stays readable beneath it.
+    const progress = Math.max(0, Math.min(1, getPageScrollTop() / 180));
+    const eased = 1 - Math.pow(1 - progress, 2);
+
+    dom.topbar.style.setProperty("--home-topbar-opacity", (eased * 0.94).toFixed(3));
+    dom.topbar.style.setProperty("--home-topbar-border-opacity", (eased * 0.72).toFixed(3));
+    dom.topbar.style.setProperty("--home-topbar-shadow-opacity", (eased * 0.08).toFixed(3));
+    dom.topbar.style.setProperty("--home-topbar-blur", (eased * 14).toFixed(1) + "px");
+  }
+
+  function scheduleHomeTopbarScrollEffect() {
+    if (topbarScrollFrame) return;
+    topbarScrollFrame = window.requestAnimationFrame(updateHomeTopbarScrollEffect);
   }
 
   // 6. SPA ROUTING
@@ -813,6 +951,7 @@
     pageCache.forEach(function (element) { element.hidden = true; });
     const activePage = ensurePage(route);
     if (activePage) activePage.hidden = false;
+    if (route === "home" && activePage) retryFailedHomeAssets(activePage);
 
     dom.app.classList.toggle("home-route", route === "home");
     if (dom.search) {
@@ -852,6 +991,7 @@
     state.route = route;
     setActiveNavigation(route);
     renderRoute(route);
+    updateHomeTopbarScrollEffect();
 
     const drawerWasOpen = state.mobileOpen;
     if (drawerWasOpen) setMobileSidebar(false, false);
@@ -1010,6 +1150,84 @@
         .withSuccessHandler(onSuccess || function () {})
         .withFailureHandler(onFailure || console.error)
         .getServerStatus();
+    },
+
+    // Phase 4 hooks. These are intentionally optional: the static Home data
+    // remains the fallback until matching Code.gs functions are implemented.
+    getHomeContent(onSuccess, onFailure) {
+      const fallback = getStaticHomeContent();
+      if (!this.isAppsScriptAvailable()) {
+        if (onSuccess) onSuccess(fallback);
+        return;
+      }
+
+      google.script.run
+        .withSuccessHandler(function (data) {
+          if (onSuccess) onSuccess(data || fallback);
+        })
+        .withFailureHandler(function (error) {
+          console.warn("getHomeContent is not available yet; using static Home data.", error);
+          if (onFailure) onFailure(error);
+          if (onSuccess) onSuccess(fallback);
+        })
+        .getHomeContent();
+    },
+
+    getWhatsNew(onSuccess, onFailure) {
+      const fallback = cloneData(homePageData.whatsNew);
+      if (!this.isAppsScriptAvailable()) {
+        if (onSuccess) onSuccess(fallback);
+        return;
+      }
+
+      google.script.run
+        .withSuccessHandler(function (data) {
+          if (onSuccess) onSuccess(Array.isArray(data) ? data : fallback);
+        })
+        .withFailureHandler(function (error) {
+          console.warn("getWhatsNew is not available yet; using static data.", error);
+          if (onFailure) onFailure(error);
+          if (onSuccess) onSuccess(fallback);
+        })
+        .getWhatsNew();
+    },
+
+    getFeaturedContent(onSuccess, onFailure) {
+      const fallback = cloneData(homePageData.featured);
+      if (!this.isAppsScriptAvailable()) {
+        if (onSuccess) onSuccess(fallback);
+        return;
+      }
+
+      google.script.run
+        .withSuccessHandler(function (data) {
+          if (onSuccess) onSuccess(Array.isArray(data) ? data : fallback);
+        })
+        .withFailureHandler(function (error) {
+          console.warn("getFeaturedContent is not available yet; using static data.", error);
+          if (onFailure) onFailure(error);
+          if (onSuccess) onSuccess(fallback);
+        })
+        .getFeaturedContent();
+    },
+
+    getRoleContent(roleId, onSuccess, onFailure) {
+      const fallback = cloneData(homePageData.roles.find(function (item) { return item.id === roleId; }) || null);
+      if (!this.isAppsScriptAvailable()) {
+        if (onSuccess) onSuccess(fallback);
+        return;
+      }
+
+      google.script.run
+        .withSuccessHandler(function (data) {
+          if (onSuccess) onSuccess(data || fallback);
+        })
+        .withFailureHandler(function (error) {
+          console.warn("getRoleContent is not available yet; using static role data.", error);
+          if (onFailure) onFailure(error);
+          if (onSuccess) onSuccess(fallback);
+        })
+        .getRoleContent(roleId);
     }
   };
 
@@ -1090,6 +1308,8 @@
     }
 
     window.addEventListener("hashchange", function () { handleRouteChange(true); });
+    window.addEventListener("scroll", scheduleHomeTopbarScrollEffect, { passive: true });
+    if (dom.workspace) dom.workspace.addEventListener("scroll", scheduleHomeTopbarScrollEffect, { passive: true });
     document.addEventListener("keydown", handleKeyboard);
     mobileQuery.addEventListener("change", handleViewportChange);
     tabletQuery.addEventListener("change", handleViewportChange);

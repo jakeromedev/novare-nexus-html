@@ -178,6 +178,9 @@
 
     /* 6. TOPBAR */
     #nexus-topbar {
+      position: sticky;
+      top: 0;
+      z-index: 40;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -185,8 +188,10 @@
       min-height: var(--topbar-height);
       padding: 14px 24px;
       border-bottom: 1px solid var(--border-light);
-      background: rgb(255 255 255 / 90%);
-      backdrop-filter: blur(12px);
+      background: rgb(255 255 255 / 92%);
+      box-shadow: 0 8px 22px rgb(7 27 75 / 5%);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
     }
 
     /* 7. SEARCH */
@@ -1044,9 +1049,23 @@
 
     /* Home-only header styling leaves the other shell routes unchanged. */
     #nexus-app.home-route #nexus-topbar {
-      position: absolute; inset: 0 0 auto 0; z-index: 20;
-      min-height: 96px; padding: 22px 36px; gap: 20px;
-      border-bottom: 0; box-shadow: none; background: transparent; backdrop-filter: none;
+      --home-topbar-opacity: 0;
+      --home-topbar-border-opacity: 0;
+      --home-topbar-shadow-opacity: 0;
+      --home-topbar-blur: 0px;
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      min-height: 96px;
+      margin-bottom: -96px;
+      padding: 22px 36px;
+      gap: 20px;
+      border-bottom: 1px solid rgb(215 232 245 / var(--home-topbar-border-opacity));
+      background: rgb(244 250 254 / var(--home-topbar-opacity));
+      box-shadow: 0 8px 24px rgb(7 27 75 / var(--home-topbar-shadow-opacity));
+      backdrop-filter: blur(var(--home-topbar-blur));
+      -webkit-backdrop-filter: blur(var(--home-topbar-blur));
+      transition: background-color .12s linear, border-color .12s linear, box-shadow .12s linear, backdrop-filter .12s linear;
     }
     #nexus-app.home-route .global-search {
       flex: 1 1 760px; max-width: 1020px; height: 46px; gap: 8px; padding: 0 14px;
@@ -1090,12 +1109,27 @@
       .home-ai-actions { padding: 0 6px; }
       .home-ai-action { font-size: .75rem; }
       #nexus-app.home-route #nexus-topbar {
-        position: relative; inset: auto; z-index: auto; min-height: var(--topbar-height);
-        padding: 14px 16px; background: rgb(255 255 255 / 90%); backdrop-filter: blur(12px);
+        position: sticky;
+        top: 0;
+        inset-inline: auto;
+        z-index: 40;
+        min-height: var(--topbar-height);
+        margin-bottom: calc(-1 * var(--topbar-height));
+        padding: 14px 16px;
+        border-bottom-color: rgb(215 232 245 / var(--home-topbar-border-opacity));
+        background: rgb(244 250 254 / var(--home-topbar-opacity));
+        box-shadow: 0 8px 22px rgb(7 27 75 / var(--home-topbar-shadow-opacity));
+        backdrop-filter: blur(var(--home-topbar-blur));
+        -webkit-backdrop-filter: blur(var(--home-topbar-blur));
+      }
+      #nexus-app.home-route .home-hero {
+        padding-top: calc(28px + var(--topbar-height));
       }
       #nexus-app.home-route .global-search { flex: 1 1 360px; max-width: none; box-shadow: none; }
     }
     @media (max-width: 767px) {
+      #nexus-app.home-route #nexus-topbar { margin-bottom: 0; }
+      #nexus-app.home-route .home-hero { padding-top: 24px; }
       .home-page { padding-inline: 10px; }
       .home-hero { display: block; padding: 24px 20px 0; }
       .home-hero-copy { width: 100%; }
@@ -1213,4 +1247,69 @@
     @media (max-width: 380px) {
       .user-details { display: none; }
     }
+  
+
+    /* HOME PHASE 4 — INTERACTION, ACCESSIBILITY, RESPONSIVE QA */
+    .home-page section,
+    .home-page aside { scroll-margin-top: 96px; }
+
+    .featured-card { cursor: default; }
+    .featured-card:focus-visible { outline: none; }
+    .featured-cta:focus-visible,
+    .featured-dot:focus-visible,
+    .featured-carousel-button:focus-visible,
+    .home-view-all:focus-visible {
+      outline: 3px solid #0877EA;
+      outline-offset: 2px;
+    }
+
+    .featured-track:focus-visible {
+      outline: 3px solid #0877EA;
+      outline-offset: 3px;
+      border-radius: 10px;
+    }
+
+    .role-image,
+    .featured-image,
+    .home-hero-image,
+    .hero-handwritten-tagline,
+    .sidebar-logo {
+      contain: paint;
+    }
+
+    @media (max-width: 1199px) {
+      .home-right-rail { margin-top: 4px; }
+    }
+
+    @media (max-width: 767px) {
+      .home-dashboard-content { padding-bottom: 12px; }
+      .home-right-rail { margin-top: 24px; }
+      .home-utility-panel { width: 100%; }
+      .featured-track { scroll-padding-inline: 2px; }
+      .home-ai-track { overscroll-behavior-inline: contain; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .quick-access-card,
+      .role-card,
+      .role-card-arrow,
+      .featured-card,
+      .featured-dot,
+      .featured-carousel-button,
+      .home-help-item,
+      .whats-new-item,
+      .home-view-all,
+      .nav-row,
+      .button,
+      .icon-button {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+      }
+
+      .featured-track,
+      .role-grid,
+      .home-ai-track { scroll-behavior: auto !important; }
+    }
+
   </style>

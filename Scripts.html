@@ -47,88 +47,165 @@
     skipLink: document.querySelector(".skip-link")
   };
 
-  // 5. HOME PAGE ASSETS / INTERACTIONS
+  // 5. HOME / SHELL ASSETS + INTERACTIONS
+  // Drive /view links are kept as the source-of-truth references.
+  // The browser never assigns those /view links directly to <img src>.
   const homeAssetRegistry = {
-          "home-hero": {
-              fileId: "1xAJNZvkEYW8QIb5Mlo42VAK_eTSbaP39",
-              viewerUrl: "https://drive.google.com/file/d/1xAJNZvkEYW8QIb5Mlo42VAK_eTSbaP39/view?usp=sharing",
-              phase: 1
-          },
+    "home-hero": {
+      fileId: "1xAJNZvkEYW8QIb5Mlo42VAK_eTSbaP39",
+      viewerUrl: "https://drive.google.com/file/d/1xAJNZvkEYW8QIb5Mlo42VAK_eTSbaP39/view?usp=sharing",
+      phase: 1
+    },
+    "hero-handwritten-tagline": {
+      fileId: "1_UDHDOmycZdBWaWyvTWXw8KYE2RWtSJ8",
+      viewerUrl: "https://drive.google.com/file/d/1_UDHDOmycZdBWaWyvTWXw8KYE2RWtSJ8/view?usp=drive_link",
+      phase: 1
+    },
+    "role-execom": {
+      fileId: "10YqCyORiRaCKQr5rCPGUe3pa7Tn4J4b0",
+      viewerUrl: "https://drive.google.com/file/d/10YqCyORiRaCKQr5rCPGUe3pa7Tn4J4b0/view?usp=drive_link",
+      phase: 2
+    },
+    "role-sales-executives": {
+      fileId: "19H5dCRkUJr15Z7Q0wVVJHSHy_j1UYoyU",
+      viewerUrl: "https://drive.google.com/file/d/19H5dCRkUJr15Z7Q0wVVJHSHy_j1UYoyU/view?usp=drive_link",
+      phase: 2
+    },
+    "role-product-managers": {
+      fileId: "1E4i3IK6B-O-VqMVKpSmtrs0qFroo1Uvk",
+      viewerUrl: "https://drive.google.com/file/d/1E4i3IK6B-O-VqMVKpSmtrs0qFroo1Uvk/view?usp=drive_link",
+      phase: 2
+    },
+    "role-solutions-consultants": {
+      fileId: "1W-eADrnR6RwZf8e2AZHIC8E2Y331NG5A",
+      viewerUrl: "https://drive.google.com/file/d/1W-eADrnR6RwZf8e2AZHIC8E2Y331NG5A/view?usp=drive_link",
+      phase: 2
+    },
+    "role-delivery-risk-finance": {
+      fileId: "15B-4VMLDEJ9rd_eHkHrp383ZPB0fCGD2",
+      viewerUrl: "https://drive.google.com/file/d/15B-4VMLDEJ9rd_eHkHrp383ZPB0fCGD2/view?usp=drive_link",
+      phase: 2
+    },
+    "featured-customer-engagement": {
+      fileId: "1tjTiPzeA1Iyl9IE2lKtiHWcNp97t_BzQ",
+      viewerUrl: "https://drive.google.com/file/d/1tjTiPzeA1Iyl9IE2lKtiHWcNp97t_BzQ/view?usp=drive_link",
+      phase: 3
+    }
+  };
 
-          "hero-handwritten-tagline": {
-              fileId: "1_UDHDOmycZdBWaWyvTWXw8KYE2RWtSJ8",
-              viewerUrl: "https://drive.google.com/file/d/1_UDHDOmycZdBWaWyvTWXw8KYE2RWtSJ8/view?usp=drive_link",
-              phase: 1
-          },
+  // IMPORTANT: paste the Google Drive/share URL for your Nexus logo here.
+  // This intentionally replaces the old Base64 bitmap embedded in Component_Sidebar.html.
+  const shellAssetRegistry = {
+    "nexus-logo": {
+      viewerUrl: "https://drive.google.com/file/d/1Bd_y884skBv0TUHV7kXjzZWZRnTQ6EGU/view?usp=drive_link"
+    }
+  };
 
-          "role-execom": {
-              fileId: "10YqCyORiRaCKQr5rCPGUe3pa7Tn4J4b0",
-              viewerUrl: "https://drive.google.com/file/d/10YqCyORiRaCKQr5rCPGUe3pa7Tn4J4b0/view?usp=drive_link",
-              phase: 2
-          },
+  function extractDriveFileId(value) {
+    if (!value) return "";
+    const text = String(value).trim();
+    if (/^[A-Za-z0-9_-]{20,}$/.test(text)) return text;
 
-          "role-sales-executives": {
-              fileId: "19H5dCRkUJr15Z7Q0wVVJHSHy_j1UYoyU",
-              viewerUrl: "https://drive.google.com/file/d/19H5dCRkUJr15Z7Q0wVVJHSHy_j1UYoyU/view?usp=drive_link",
-              phase: 2
-          },
+    const fileMatch = text.match(/\/file\/d\/([A-Za-z0-9_-]+)/);
+    if (fileMatch) return fileMatch[1];
 
-          "role-product-managers": {
-              fileId: "1E4i3IK6B-O-VqMVKpSmtrs0qFroo1Uvk",
-              viewerUrl: "https://drive.google.com/file/d/1E4i3IK6B-O-VqMVKpSmtrs0qFroo1Uvk/view?usp=drive_link",
-              phase: 2
-          },
-
-          "role-solutions-consultants": {
-              fileId: "1W-eADrnR6RwZf8e2AZHIC8E2Y331NG5A",
-              viewerUrl: "https://drive.google.com/file/d/1W-eADrnR6RwZf8e2AZHIC8E2Y331NG5A/view?usp=drive_link",
-              phase: 2
-          },
-
-          "role-delivery-risk-finance": {
-              fileId: "15B-4VMLDEJ9rd_eHkHrp383ZPB0fCGD2",
-              viewerUrl: "https://drive.google.com/file/d/15B-4VMLDEJ9rd_eHkHrp383ZPB0fCGD2/view?usp=drive_link",
-              phase: 2
-          },
-
-          "featured-customer-engagement": {
-              fileId: "1tjTiPzeA1Iyl9IE2lKtiHWcNp97t_BzQ",
-              viewerUrl: "https://drive.google.com/file/d/1tjTiPzeA1Iyl9IE2lKtiHWcNp97t_BzQ/view?usp=drive_link",
-              phase: 3
-          }
-      };
-
-  function getDriveImageUrl(fileId, width = 1600) {
-    return "https://drive.google.com/thumbnail?id=" + encodeURIComponent(fileId) + "&sz=w" + width;
+    const idMatch = text.match(/[?&]id=([A-Za-z0-9_-]+)/);
+    return idMatch ? idMatch[1] : "";
   }
 
-  function loadHomeAsset(imageId, fallbackId, width) {
-    const image = document.getElementById(imageId);
-    const fallback = document.getElementById(fallbackId);
-    if (!image || !fallback) return;
-    const asset = homeAssetRegistry[image.dataset.imageKey];
+  function getDriveImageCandidates(assetOrUrl, width = 1600) {
+    const fileId = typeof assetOrUrl === "object"
+      ? (assetOrUrl.fileId || extractDriveFileId(assetOrUrl.viewerUrl))
+      : extractDriveFileId(assetOrUrl);
+
+    if (!fileId) return [];
+
+    const encodedId = encodeURIComponent(fileId);
+    const safeWidth = Math.max(64, Math.round(Number(width) || 1600));
+
+    // Try more than one Google-hosted image endpoint. Different Workspace /
+    // iframe / sharing configurations can behave differently across endpoints.
+    return [
+      "https://drive.google.com/thumbnail?id=" + encodedId + "&sz=w" + safeWidth,
+      "https://lh3.googleusercontent.com/d/" + encodedId + "=w" + safeWidth,
+      "https://drive.google.com/uc?export=view&id=" + encodedId
+    ];
+  }
+
+  function bindImageCandidates(image, fallback, candidates) {
+    if (!image) return;
+
+    const urls = Array.from(new Set((candidates || []).filter(Boolean)));
+    let index = 0;
 
     function showFallback() {
       image.hidden = true;
-      fallback.hidden = false;
+      image.style.visibility = "";
+      image.removeAttribute("src");
+      if (fallback) fallback.hidden = false;
+
+      const key = image.dataset.imageKey || image.alt || "image";
+      console.warn("Nexus asset could not be loaded:", key, urls);
     }
 
-    if (!asset) {
-      showFallback();
-      return;
-    }
-
-    image.addEventListener("load", function () {
-      if (!image.naturalWidth) {
+    function tryNext() {
+      if (index >= urls.length) {
         showFallback();
         return;
       }
-      image.hidden = false;
-      fallback.hidden = true;
-    }, { once: true });
 
-    image.addEventListener("error", showFallback, { once: true });
-    image.src = getDriveImageUrl(asset.fileId, width);
+      const url = urls[index++];
+
+      // IMPORTANT: do not keep lazy-loaded images display:none/hidden while
+      // assigning src. Browsers can defer a hidden lazy image indefinitely,
+      // which means neither load nor error fires. Keep it in layout but
+      // visually hidden until the request succeeds.
+      image.hidden = false;
+      image.style.visibility = "hidden";
+      if (fallback) fallback.hidden = false;
+
+      image.removeAttribute("src");
+      image.src = url;
+    }
+
+    image.onload = function () {
+      if (!image.naturalWidth) {
+        tryNext();
+        return;
+      }
+
+      image.hidden = false;
+      image.style.visibility = "visible";
+      if (fallback) fallback.hidden = true;
+    };
+
+    image.onerror = function () {
+      tryNext();
+    };
+
+    tryNext();
+  }
+
+  function bindHomeAsset(image, fallback, width) {
+    if (!image) return;
+    const asset = homeAssetRegistry[image.dataset.imageKey];
+    bindImageCandidates(image, fallback, getDriveImageCandidates(asset, width));
+  }
+
+  function loadHomeAsset(pageRoot, imageId, fallbackId, width) {
+    const root = pageRoot || document;
+    const image = root.querySelector("#" + imageId);
+    const fallback = root.querySelector("#" + fallbackId);
+    bindHomeAsset(image, fallback, width);
+  }
+
+  function initializeShellAssets() {
+    const image = document.getElementById("nexus-logo-image");
+    const fallback = document.getElementById("nexus-logo-fallback");
+    if (!image) return;
+
+    const asset = shellAssetRegistry[image.dataset.imageKey];
+    bindImageCandidates(image, fallback, getDriveImageCandidates(asset, 900));
   }
 
   const aiQuickActions = [
@@ -145,11 +222,211 @@
     '<path d="M9 18h6m-5 3h4M8 14a6 6 0 1 1 8 0l-1 3H9Z"/>'
   ];
 
+  const quickAccessItems = [
+    {
+      id: "templates",
+      title: "Templates & Playbooks",
+      description: "SOWs, proposals, frameworks and more",
+      theme: "blue",
+      icon: '<path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6M9 13h8M9 17h6"/>'
+    },
+    {
+      id: "deal-tools",
+      title: "Deal Tools",
+      description: "Calculators, matrices and estimators",
+      theme: "orange",
+      icon: '<rect x="5" y="2" width="14" height="20" rx="2"/><path d="M8 6h8M8 10h2m3 0h2m-7 4h2m3 0h2m-7 4h2m3 0h2"/>'
+    },
+    {
+      id: "guides",
+      title: "Guides & Best Practices",
+      description: "From discovery to deal closure",
+      theme: "purple",
+      icon: '<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H11v17H6.5A2.5 2.5 0 0 0 4 22z"/><path d="M20 5.5A2.5 2.5 0 0 0 17.5 3H13v17h4.5A2.5 2.5 0 0 1 20 22z"/>'
+    },
+    {
+      id: "training",
+      title: "Training & Enablement",
+      description: "Build skills and stay ahead",
+      theme: "green",
+      icon: '<path d="m3 10 9-5 9 5-9 5z"/><path d="M7 12.5V17c2.8 2 7.2 2 10 0v-4.5M21 10v6"/>'
+    }
+  ];
+
+  const roleItems = [
+    {
+      id: "execom",
+      title: "Execom",
+      description: "Strategy, performance and key updates",
+      assetKey: "role-execom"
+    },
+    {
+      id: "sales-executives",
+      title: "Sales Executives",
+      description: "Go-to-market, deal resources and enablement",
+      assetKey: "role-sales-executives"
+    },
+    {
+      id: "product-managers",
+      title: "Product Managers",
+      description: "Product strategy, roadmaps and collaterals",
+      assetKey: "role-product-managers"
+    },
+    {
+      id: "solutions-consultants",
+      title: "Solutions Consultants",
+      description: "Architectures, solutioning and technical assets",
+      assetKey: "role-solutions-consultants"
+    },
+    {
+      id: "delivery-risk-finance",
+      title: "Delivery, Risk & Finance",
+      description: "Execution, risk, compliance and financial resources",
+      assetKey: "role-delivery-risk-finance"
+    }
+  ];
+
+  function showHomeSectionStatus(pageRoot, message) {
+    const status = pageRoot.querySelector("#home-phase2-status");
+    if (!status) return;
+
+    status.textContent = message;
+  }
+
+  function renderQuickAccess(pageRoot) {
+    const grid = pageRoot.querySelector("#home-quick-access-grid");
+    if (!grid || grid.dataset.rendered === "true") return;
+
+    quickAccessItems.forEach(function (item) {
+      const card = document.createElement("button");
+      card.type = "button";
+      card.className = "quick-access-card";
+      card.dataset.theme = item.theme;
+      card.dataset.quickAccessId = item.id;
+      card.setAttribute("aria-label", item.title + ": " + item.description);
+
+      card.innerHTML =
+        '<span class="quick-access-icon" aria-hidden="true">' +
+          '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' +
+            item.icon +
+          '</svg>' +
+        '</span>' +
+        '<span class="quick-access-copy">' +
+          '<span class="quick-access-title"></span>' +
+          '<span class="quick-access-description"></span>' +
+        '</span>' +
+        '<span class="quick-access-arrow" aria-hidden="true">' +
+          '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>' +
+        '</span>';
+
+      card.querySelector(".quick-access-title").textContent = item.title;
+      card.querySelector(".quick-access-description").textContent = item.description;
+
+      card.addEventListener("click", function () {
+        showHomeSectionStatus(
+          pageRoot,
+          item.title + " is ready for destination wiring in a later phase."
+        );
+      });
+
+      grid.appendChild(card);
+    });
+
+    grid.dataset.rendered = "true";
+  }
+
+  function renderRoleExplorer(pageRoot) {
+    const grid = pageRoot.querySelector("#home-role-grid");
+    const viewAll = pageRoot.querySelector("#home-role-view-all");
+    if (!grid || grid.dataset.rendered === "true") return;
+
+    roleItems.forEach(function (item) {
+      const card = document.createElement("button");
+      card.type = "button";
+      card.className = "role-card";
+      card.dataset.roleId = item.id;
+      card.setAttribute("aria-label", "Explore resources for " + item.title);
+
+      const imageFrame = document.createElement("span");
+      imageFrame.className = "role-image-frame";
+
+      const image = document.createElement("img");
+      image.className = "role-image";
+      image.dataset.imageKey = item.assetKey;
+      image.alt = item.title;
+      image.width = 680;
+      image.height = 400;
+      image.loading = "lazy";
+      image.decoding = "async";
+      image.hidden = true;
+
+      const fallback = document.createElement("span");
+      fallback.className = "image-placeholder role-image-fallback";
+      fallback.setAttribute("role", "img");
+      fallback.setAttribute("aria-label", item.title + " image unavailable");
+      fallback.textContent = item.title;
+      fallback.hidden = true;
+
+      imageFrame.appendChild(image);
+      imageFrame.appendChild(fallback);
+
+      const body = document.createElement("span");
+      body.className = "role-card-body";
+
+      const copy = document.createElement("span");
+      copy.className = "role-card-copy";
+
+      const title = document.createElement("span");
+      title.className = "role-card-title";
+      title.textContent = item.title;
+
+      const description = document.createElement("span");
+      description.className = "role-card-description";
+      description.textContent = item.description;
+
+      const arrow = document.createElement("span");
+      arrow.className = "role-card-arrow";
+      arrow.setAttribute("aria-hidden", "true");
+      arrow.innerHTML = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>';
+
+      copy.appendChild(title);
+      copy.appendChild(description);
+      body.appendChild(copy);
+      body.appendChild(arrow);
+
+      card.appendChild(imageFrame);
+      card.appendChild(body);
+
+      card.addEventListener("click", function () {
+        showHomeSectionStatus(
+          pageRoot,
+          item.title + " role content will be connected to its destination in a later phase."
+        );
+      });
+
+      grid.appendChild(card);
+      bindHomeAsset(image, fallback, 720);
+    });
+
+    if (viewAll) {
+      viewAll.addEventListener("click", function () {
+        showHomeSectionStatus(
+          pageRoot,
+          "The complete role directory will be connected in a later phase."
+        );
+      });
+    }
+
+    grid.dataset.rendered = "true";
+  }
+
   function initializeHomePage(pageRoot) {
     if (!pageRoot || pageRoot.dataset.pageInitialized === "true") return;
 
-    loadHomeAsset("home-hero-image", "home-hero-fallback", 2000);
-    loadHomeAsset("hero-handwritten-tagline", "home-handwriting-fallback", 480);
+    loadHomeAsset(pageRoot, "home-hero-image", "home-hero-fallback", 2000);
+    loadHomeAsset(pageRoot, "hero-handwritten-tagline", "home-handwriting-fallback", 480);
+    renderQuickAccess(pageRoot);
+    renderRoleExplorer(pageRoot);
 
     const input = pageRoot.querySelector("#home-ai-input");
     const status = pageRoot.querySelector("#home-ai-status");
@@ -520,7 +797,8 @@
 
     updateSidebar();
     setSearchFilter(state.filter);
-    handleRouteChange(false);
+    initializeShellAssets();
+  handleRouteChange(false);
     dom.app.dataset.initialized = "true";
   }
 

@@ -34,5 +34,48 @@
         </div>
         <p id="home-ai-status" class="home-ai-status" role="status" aria-live="polite"></p>
       </section>
-      <!-- Quick Access, roles, Featured, and the utility rail are added in Phases 2–3. -->
+      <div class="home-dashboard-content">
+        <section class="home-section home-quick-access" aria-labelledby="home-quick-access-title">
+          <div class="home-section-header">
+            <h2 id="home-quick-access-title" class="home-section-title">
+              <span class="home-section-title-icon home-section-title-icon--quick" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="m13 2-8 11h6l-1 9 9-12h-6z"/>
+                </svg>
+              </span>
+              Quick Access
+            </h2>
+          </div>
+
+          <div id="home-quick-access-grid" class="quick-access-grid" aria-label="Quick Access resources"></div>
+        </section>
+
+        <section class="home-section home-role-explorer" aria-labelledby="home-role-title">
+          <div class="home-section-header">
+            <h2 id="home-role-title" class="home-section-title">
+              <span class="home-section-title-icon home-section-title-icon--roles" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                  <circle cx="9" cy="7" r="4"/>
+                  <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+              </span>
+              Explore by Role
+            </h2>
+
+            <button id="home-role-view-all" class="home-view-all" type="button">
+              <span>View All</span>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M5 12h14M13 6l6 6-6 6"/>
+              </svg>
+            </button>
+          </div>
+
+          <div id="home-role-grid" class="role-grid" aria-label="Explore Nexus resources by role"></div>
+        </section>
+
+        <p id="home-phase2-status" class="home-section-status" role="status" aria-live="polite"></p>
+      </div>
+
+      <!-- Featured content and the right utility rail are added in Phase 3. -->
     </section>

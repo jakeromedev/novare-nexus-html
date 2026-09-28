@@ -1,0 +1,47 @@
+<script>
+(function () {
+  "use strict";
+  window.NEXUS_ENV = "local";
+  // Add functions here as frontend features acquire server endpoints.
+  const methods = Object.assign(Object.create(null), {
+    getServerStatus: function () {
+      return {
+        ok: true,
+        app: "Novare Nexus 2026",
+        environment: "local",
+        timestamp: new Date().toISOString()
+      };
+    }
+  });
+  window.NexusLocalMocks = methods;
+
+  function runner(success, failure, userObject) {
+    return new Proxy({}, {
+      get: function (_, name) {
+        if (name === "withSuccessHandler") return function (handler) { return runner(handler, failure, userObject); };
+        if (name === "withFailureHandler") return function (handler) { return runner(success, handler, userObject); };
+        if (name === "withUserObject") return function (value) { return runner(success, failure, value); };
+        if (name === "then" || typeof name !== "string") return undefined;
+        return function () {
+          const args = Array.from(arguments);
+          // Async dispatch and independent chains mirror google.script.run usage.
+          Promise.resolve().then(function () {
+            if (!Object.prototype.hasOwnProperty.call(methods, name)) {
+              throw new Error("No local mock for " + name + ". Add it to LocalDevShim.html (NexusLocalMocks).");
+            }
+            return methods[name].apply(null, args);
+          }).then(function (result) {
+            if (typeof success === "function") success(result, userObject);
+          }, function (error) {
+            if (typeof failure === "function") failure(error, userObject);
+            else console.warn("[Nexus local] Mock failed:", error);
+          });
+        };
+      }
+    });
+  }
+  window.google = window.google || {};
+  window.google.script = window.google.script || {};
+  if (!window.google.script.run) window.google.script.run = runner();
+}());
+</script>

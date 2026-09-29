@@ -3,7 +3,7 @@
   "use strict";
 
   // 1. CONFIGURATION
-  const config = { defaultRoute: "home", useServerHomeContent: false, useServerOverviewContent: false, useServerOfferingsContent: false, useServerOpportunitiesContent: false, useServerProgramsContent: false, useServerDeliveryContent: false };
+  const config = { defaultRoute: "home", useServerHomeContent: false, useServerOverviewContent: false, useServerOfferingsContent: false, useServerOpportunitiesContent: false, useServerProgramsContent: false, useServerDeliveryContent: false, useServerGovernanceContent: false };
   const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
   const mobileQuery = window.matchMedia("(max-width: 767px)");
   const tabletQuery = window.matchMedia("(min-width: 768px) and (max-width: 1199px)");
@@ -117,6 +117,278 @@
       viewerUrl: "https://drive.google.com/file/d/1Bd_y884skBv0TUHV7kXjzZWZRnTQ6EGU/view?usp=drive_link"
     }
   };
+
+  // H6 GOVERNANCE — Phase 1–2 asset registry.
+  const governanceAssetRegistry = {
+    "governance-hero": {
+      fileId: "1TIUxIfPqQ4KX8deywO-qFfdWVajwPVbs",
+      viewerUrl: "https://drive.google.com/file/d/1TIUxIfPqQ4KX8deywO-qFfdWVajwPVbs/view?usp=drive_link",
+      phase: 1
+    },
+    "governance-iso-compliance": {
+      fileId: "1WxJJeWTMEggRNt1XvyaIC-3WQJtvQVX6",
+      viewerUrl: "https://drive.google.com/file/d/1WxJJeWTMEggRNt1XvyaIC-3WQJtvQVX6/view?usp=drive_link",
+      phase: 1
+    },
+    "governance-operating-guidelines": {
+      fileId: "1EJMx-ov3iSrSXOB2pd0607GR4zgGM8Fg",
+      viewerUrl: "https://drive.google.com/file/d/1EJMx-ov3iSrSXOB2pd0607GR4zgGM8Fg/view?usp=drive_link",
+      phase: 1
+    },
+    "governance-architecture": {
+      fileId: "15SUjYLpW9emD9zGyoJtKYMClPpyxhMKp",
+      viewerUrl: "https://drive.google.com/file/d/15SUjYLpW9emD9zGyoJtKYMClPpyxhMKp/view?usp=drive_link",
+      phase: 1
+    },
+    "governance-prb": {
+      fileId: "18jE9ZB0PrSN3bSZV-GwTdK5EaO9DY_xg",
+      viewerUrl: "https://drive.google.com/file/d/18jE9ZB0PrSN3bSZV-GwTdK5EaO9DY_xg/view?usp=drive_link",
+      phase: 1
+    },
+    "governance-risk-finance": {
+      fileId: "1AEPKPCEg4F7E5PFohKJ4YbiA0tm3ASg0",
+      viewerUrl: "https://drive.google.com/file/d/1AEPKPCEg4F7E5PFohKJ4YbiA0tm3ASg0/view?usp=drive_link",
+      phase: 1
+    },
+    "governance-talent-success": {
+      fileId: "1hos9QI9rcgmSsfJhf2_VwOLJIAQaDUiP",
+      viewerUrl: "https://drive.google.com/file/d/1hos9QI9rcgmSsfJhf2_VwOLJIAQaDUiP/view?usp=drive_link",
+      phase: 1
+    }
+  };
+
+  // H6 GOVERNANCE — Phase 2 centralized content model.
+  const governancePageData = {
+    frameworks: [
+      {
+        id: "iso-compliance",
+        number: "01",
+        titleLines: ["ISO CERTIFICATION", "& COMPLIANCE"],
+        description: "Maintain strong information security, compliance and certification standards across our operations.",
+        imageKey: "governance-iso-compliance",
+        themeClass: "is-teal",
+        resources: [
+          "ISO Management System",
+          "Policies & Standards",
+          "Audit & Assessment",
+          "Compliance Requirements"
+        ],
+        cta: "View Resources"
+      },
+      {
+        id: "operating-guidelines",
+        number: "02",
+        titleLines: ["SC&A OPERATING", "GUIDELINES"],
+        description: "Core operating principles and standards for how we work.",
+        imageKey: "governance-operating-guidelines",
+        themeClass: "is-blue",
+        resources: [
+          "Operating Principles",
+          "Ways of Working",
+          "Roles & Responsibilities",
+          "Governance Documents"
+        ],
+        cta: "View Guidelines"
+      },
+      {
+        id: "architecture-governance",
+        number: "03",
+        titleLines: ["ARCHITECTURE", "GOVERNANCE"],
+        description: "Ensure architectural quality, consistency and compliance across solutions and deliveries.",
+        imageKey: "governance-architecture",
+        themeClass: "is-purple",
+        resources: [
+          "Architecture Principles",
+          "Reference Architecture",
+          "Standards & Compliance",
+          "Review Checklists"
+        ],
+        cta: "View Framework"
+      },
+      {
+        id: "proposal-review-board",
+        number: "04",
+        titleLines: ["PROPOSAL REVIEW", "BOARD"],
+        description: "Quality gate for proposals to ensure winnability, value and alignment.",
+        imageKey: "governance-prb",
+        themeClass: "is-orange",
+        resources: [
+          "PRB Process",
+          "Submission Guidelines",
+          "Decision Criteria",
+          "PRB Portal"
+        ],
+        cta: "Go to PRB Portal"
+      },
+      {
+        id: "risk-finance-guidelines",
+        number: "05",
+        titleLines: ["RISK & FINANCE", "GUIDELINES"],
+        description: "Guidelines for risk management, pricing, commercial terms and financial governance.",
+        imageKey: "governance-risk-finance",
+        themeClass: "is-cyan",
+        resources: [
+          "Risk Management",
+          "Pricing Principles",
+          "Commercial Terms",
+          "Approval Matrix"
+        ],
+        cta: "View Guidelines"
+      },
+      {
+        id: "talent-success-enablement",
+        number: "06",
+        titleLines: ["TALENT SUCCESS", "ENABLEMENT"],
+        description: "Build the right skills, capabilities and career pathways for a high-performing team.",
+        imageKey: "governance-talent-success",
+        themeClass: "is-blue",
+        resources: [
+          "Competency Framework",
+          "Learning Paths",
+          "Certification Guide",
+          "Talent Development"
+        ],
+        cta: "View Framework"
+      }
+    ],
+
+    quickAccess: [
+      { id: "account-plans", label: "Account Plans", icon: "document", themeClass: "" },
+      { id: "key-contacts", label: "Key Contacts", icon: "contacts", themeClass: "" },
+      { id: "competitors", label: "Competitors", icon: "trophy", themeClass: "" },
+      { id: "products-solutions", label: "Products & Solutions", icon: "cube", themeClass: "" },
+      { id: "case-studies", label: "Case Studies", icon: "document", themeClass: "" },
+      { id: "partner-ecosystem", label: "Partner Ecosystem", icon: "partners", themeClass: "" }
+    ]
+  };
+
+  function getStaticGovernanceContent() {
+    return cloneData(governancePageData);
+  }
+
+  function normalizeGovernanceContent(value) {
+    const fallback = getStaticGovernanceContent();
+    if (!value || typeof value !== "object") return fallback;
+
+    return {
+      frameworks: Array.isArray(value.frameworks) && value.frameworks.length
+        ? value.frameworks
+        : fallback.frameworks,
+      quickAccess: Array.isArray(value.quickAccess) && value.quickAccess.length
+        ? value.quickAccess
+        : fallback.quickAccess
+    };
+  }
+
+  function escapeGovernanceHtml(value) {
+    return String(value == null ? "" : value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  function governanceIconSvg(type, size) {
+    const iconSize = Number(size) || 25;
+    const attrs = 'width="' + iconSize + '" height="' + iconSize + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"';
+
+    const paths = {
+      document: '<path d="M6 3h9l3 3v15H6z"/><path d="M14 3v4h4M9 12h6M9 16h6"/>',
+      contacts: '<circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2"/><path d="M3 20c0-3.4 2.3-5.5 6-5.5s6 2.1 6 5.5M14 15c3.4-.4 5.5 1.4 5.5 4"/>',
+      trophy: '<path d="M8 4h8v4c0 4-2 6-4 7-2-1-4-3-4-7z"/><path d="M8 6H4c0 3 1 5 4 5M16 6h4c0 3-1 5-4 5M12 15v4M9 21h6"/>',
+      cube: '<path d="m12 3 8 4.5v9L12 21l-8-4.5v-9z"/><path d="m4 7.5 8 4.5 8-4.5M12 12v9"/>',
+      partners: '<circle cx="5" cy="12" r="2"/><circle cx="18" cy="5" r="2"/><circle cx="18" cy="19" r="2"/><path d="m7 11 9-5M7 13l9 5"/>'
+    };
+
+    return '<svg ' + attrs + '>' + (paths[type] || paths.document) + '</svg>';
+  }
+
+  function renderGovernanceFrameworks(pageRoot, items) {
+    if (!pageRoot) return;
+    const grid = pageRoot.querySelector("#governance-frameworks-grid");
+    if (!grid || !Array.isArray(items)) return;
+
+    grid.innerHTML = items.map(function (item) {
+      const id = escapeGovernanceHtml(item.id);
+      const imageKey = escapeGovernanceHtml(item.imageKey);
+      const titleLines = Array.isArray(item.titleLines) ? item.titleLines : [item.title || ""];
+      const titleText = titleLines.join(" ");
+      const resources = Array.isArray(item.resources) ? item.resources : [];
+
+      return '<article class="governance-framework-card ' + escapeGovernanceHtml(item.themeClass || "") + '" aria-labelledby="governance-' + id + '-title">' +
+        '<span class="governance-card-number" aria-hidden="true">' + escapeGovernanceHtml(item.number) + '</span>' +
+        '<div class="governance-card-visual">' +
+          '<img id="governance-' + id + '-image" data-image-key="' + imageKey + '" alt="" width="720" height="420" loading="lazy" decoding="async" fetchpriority="low">' +
+          '<div id="governance-' + id + '-fallback" class="image-placeholder governance-card-fallback" data-image-fallback="' + imageKey + '" role="img" aria-label="' + escapeGovernanceHtml(titleText) + ' visual unavailable" hidden>' +
+            escapeGovernanceHtml(titleText) +
+          '</div>' +
+        '</div>' +
+        '<div class="governance-card-body">' +
+          '<h3 id="governance-' + id + '-title">' + titleLines.map(escapeGovernanceHtml).join("<br>") + '</h3>' +
+          '<p class="governance-card-description">' + escapeGovernanceHtml(item.description) + '</p>' +
+          '<ul class="governance-resource-list">' +
+            resources.map(function (resource) {
+              return '<li>' +
+                '<span class="governance-resource-icon" aria-hidden="true">' +
+                  governanceIconSvg("document", 14) +
+                '</span>' +
+                '<span>' + escapeGovernanceHtml(resource) + '</span>' +
+              '</li>';
+            }).join("") +
+          '</ul>' +
+          '<button class="governance-card-cta" type="button" data-governance-action="' + id + '">' +
+            '<span>' + escapeGovernanceHtml(item.cta) + '</span>' +
+            '<span aria-hidden="true">→</span>' +
+          '</button>' +
+        '</div>' +
+      '</article>';
+    }).join("");
+  }
+
+  function renderGovernanceQuickAccess(pageRoot, items) {
+    if (!pageRoot) return;
+    const grid = pageRoot.querySelector("#governance-quick-access-grid");
+    if (!grid || !Array.isArray(items)) return;
+
+    grid.innerHTML = items.map(function (item) {
+      return '<button class="governance-quick-card ' + escapeGovernanceHtml(item.themeClass || "") + '" type="button" data-governance-action="' + escapeGovernanceHtml(item.id) + '">' +
+        '<span class="governance-quick-icon" aria-hidden="true">' + governanceIconSvg(item.icon, 25) + '</span>' +
+        '<span>' + escapeGovernanceHtml(item.label) + '</span>' +
+        '<span class="governance-quick-arrow" aria-hidden="true">→</span>' +
+      '</button>';
+    }).join("");
+  }
+
+  function bindGovernancePageAssets(pageRoot) {
+    if (!pageRoot) return;
+
+    bindGovernanceAsset(
+      pageRoot.querySelector("#governance-hero-image"),
+      pageRoot.querySelector("#governance-hero-fallback"),
+      2400
+    );
+
+    governancePageData.frameworks.forEach(function (item) {
+      bindGovernanceAsset(
+        pageRoot.querySelector("#governance-" + item.id + "-image"),
+        pageRoot.querySelector("#governance-" + item.id + "-fallback"),
+        900
+      );
+    });
+  }
+
+  function renderGovernanceContent(pageRoot, content) {
+    if (!pageRoot) return;
+    const normalized = normalizeGovernanceContent(content);
+
+    governancePageData.frameworks = cloneData(normalized.frameworks);
+    governancePageData.quickAccess = cloneData(normalized.quickAccess);
+
+    renderGovernanceFrameworks(pageRoot, governancePageData.frameworks);
+    renderGovernanceQuickAccess(pageRoot, governancePageData.quickAccess);
+    bindGovernancePageAssets(pageRoot);
+  }
 
   // H5 DELIVERY — Phase 1–2 asset registry.
   const deliveryAssetRegistry = {
@@ -1920,6 +2192,103 @@
   }
 
 
+  function bindGovernanceAsset(image, fallback, width) {
+    if (!image) return;
+    const asset = governanceAssetRegistry[image.dataset.imageKey];
+    bindImageCandidates(image, fallback, getDriveImageCandidates(asset, width));
+  }
+
+  function retryFailedGovernanceAssets(pageRoot) {
+    if (!pageRoot) return;
+    pageRoot.querySelectorAll('img[data-asset-state="error"]').forEach(function (image) {
+      if (typeof image._nexusRetryAsset === "function") image._nexusRetryAsset();
+    });
+  }
+
+  function showGovernanceStatus(pageRoot, message) {
+    if (!pageRoot) return;
+    const status = pageRoot.querySelector("#governance-status");
+    if (!status) return;
+
+    status.textContent = message || "";
+    status.classList.add("is-visible");
+
+    window.clearTimeout(status._nexusStatusTimer);
+    status._nexusStatusTimer = window.setTimeout(function () {
+      status.classList.remove("is-visible");
+    }, 2500);
+  }
+
+  function getGovernanceActionLabel(action) {
+    const labels = {
+      "iso-compliance": "ISO Certification & Compliance",
+      "operating-guidelines": "SC&A Operating Guidelines",
+      "architecture-governance": "Architecture Governance",
+      "proposal-review-board": "Proposal Review Board",
+      "risk-finance-guidelines": "Risk & Finance Guidelines",
+      "talent-success-enablement": "Talent Success Enablement",
+      "account-plans": "Account Plans",
+      "key-contacts": "Key Contacts",
+      "competitors": "Competitors",
+      "products-solutions": "Products & Solutions",
+      "case-studies": "Case Studies",
+      "partner-ecosystem": "Partner Ecosystem"
+    };
+
+    return labels[action] || "This Governance resource";
+  }
+
+  function handleGovernanceAction(pageRoot, action) {
+    if (!pageRoot || !action) return;
+
+    showGovernanceStatus(
+      pageRoot,
+      getGovernanceActionLabel(action) +
+        " will open when its destination is connected."
+    );
+  }
+
+  function initializeGovernanceActions(pageRoot) {
+    if (!pageRoot || pageRoot.dataset.governanceActionsInitialized === "true") return;
+
+    pageRoot.addEventListener("click", function (event) {
+      const trigger = event.target.closest("[data-governance-action]");
+      if (!trigger || !pageRoot.contains(trigger)) return;
+
+      handleGovernanceAction(pageRoot, trigger.dataset.governanceAction || "");
+    });
+
+    pageRoot.dataset.governanceActionsInitialized = "true";
+  }
+
+  function refreshGovernanceFromServer(pageRoot) {
+    if (!pageRoot || !config.useServerGovernanceContent) return;
+
+    NexusAPI.getGovernanceContent(
+      function (data) {
+        renderGovernanceContent(pageRoot, data);
+        retryFailedGovernanceAssets(pageRoot);
+      },
+      function () {
+        // Static Governance content remains available as the safe fallback.
+      }
+    );
+  }
+
+  function initializeGovernancePage(pageRoot) {
+    if (!pageRoot) return;
+
+    if (pageRoot.dataset.pageInitialized !== "true") {
+      renderGovernanceContent(pageRoot, getStaticGovernanceContent());
+      initializeGovernanceActions(pageRoot);
+      pageRoot.dataset.pageInitialized = "true";
+      refreshGovernanceFromServer(pageRoot);
+      return;
+    }
+
+    retryFailedGovernanceAssets(pageRoot);
+  }
+
   function bindDeliveryAsset(image, fallback, width) {
     if (!image) return;
     const asset = deliveryAssetRegistry[image.dataset.imageKey];
@@ -3320,6 +3689,7 @@
     if (route === "opportunities") initializeOpportunitiesPage(wrapper);
     if (route === "programs") initializeProgramsPage(wrapper);
     if (route === "delivery") initializeDeliveryPage(wrapper);
+    if (route === "governance") initializeGovernancePage(wrapper);
     return wrapper;
   }
 
@@ -3336,6 +3706,7 @@
     if (route === "opportunities" && activePage) retryFailedOpportunitiesAssets(activePage);
     if (route === "programs" && activePage) retryFailedProgramsAssets(activePage);
     if (route === "delivery" && activePage) retryFailedDeliveryAssets(activePage);
+    if (route === "governance" && activePage) retryFailedGovernanceAssets(activePage);
 
     const hasPageHero = Boolean(activePage && activePage.querySelector("[data-page-hero]"));
     dom.app.classList.toggle("hero-route", hasPageHero);
@@ -3925,6 +4296,68 @@
           if (onSuccess) onSuccess(fallback);
         })
         .getDeliveryCaseStudies();
+    },
+
+    // H6 Governance Phase 2 hooks. Disabled by default until matching
+    // Code.gs functions exist.
+    getGovernanceContent(onSuccess, onFailure) {
+      const fallback = getStaticGovernanceContent();
+
+      if (!this.isAppsScriptAvailable()) {
+        if (onSuccess) onSuccess(fallback);
+        return;
+      }
+
+      google.script.run
+        .withSuccessHandler(function (data) {
+          if (onSuccess) onSuccess(normalizeGovernanceContent(data));
+        })
+        .withFailureHandler(function (error) {
+          console.warn("getGovernanceContent is not available yet; using static Governance data.", error);
+          if (onFailure) onFailure(error);
+          if (onSuccess) onSuccess(fallback);
+        })
+        .getGovernanceContent();
+    },
+
+    getGovernanceFrameworks(onSuccess, onFailure) {
+      const fallback = cloneData(governancePageData.frameworks);
+
+      if (!this.isAppsScriptAvailable()) {
+        if (onSuccess) onSuccess(fallback);
+        return;
+      }
+
+      google.script.run
+        .withSuccessHandler(function (data) {
+          if (onSuccess) onSuccess(Array.isArray(data) ? data : fallback);
+        })
+        .withFailureHandler(function (error) {
+          console.warn("getGovernanceFrameworks is not available yet; using static Governance data.", error);
+          if (onFailure) onFailure(error);
+          if (onSuccess) onSuccess(fallback);
+        })
+        .getGovernanceFrameworks();
+    },
+
+    getGovernanceQuickAccess(onSuccess, onFailure) {
+      const fallback = cloneData(governancePageData.quickAccess);
+
+      if (!this.isAppsScriptAvailable()) {
+        if (onSuccess) onSuccess(fallback);
+        return;
+      }
+
+      google.script.run
+        .withSuccessHandler(function (data) {
+          if (onSuccess) onSuccess(Array.isArray(data) ? data : fallback);
+        })
+        .withFailureHandler(function (error) {
+          console.warn("getGovernanceQuickAccess is not available yet; using static Governance data.", error);
+          if (onFailure) onFailure(error);
+          if (onSuccess) onSuccess(fallback);
+        })
+        .getGovernanceQuickAccess();
     }
   };
 

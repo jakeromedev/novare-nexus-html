@@ -27,7 +27,7 @@
 
   // 3. CURRENT USER FALLBACK
   // Production identity is loaded from Code.gs -> getCurrentUser().
-  const currentUser = { name: "Novare User", email: "", department: "OneSCA" };
+  const currentUser = { name: "Novare User", email: "" };
 
   // 4. GLOBAL SHELL DOM REFERENCES
   const dom = {
@@ -2136,7 +2136,6 @@
         description: "API orchestration, integration patterns\nand design systems.",
         imageKey: "overview-group-experience",
         themeClass: "is-experience",
-        action: "experience",
         videoAction: "experience-overview-video",
         capabilities: [
           {
@@ -2160,7 +2159,6 @@
         description: "AI models, machine learning,\nand cloud infrastructure.",
         imageKey: "overview-group-intelligence",
         themeClass: "is-intelligence",
-        action: "intelligence",
         videoAction: "intelligence-overview-video",
         capabilities: [
           {
@@ -2184,7 +2182,6 @@
         description: "Hardware blueprints, netsec\nand edge platforms.",
         imageKey: "overview-group-modernization",
         themeClass: "is-modernization",
-        action: "modernization",
         videoAction: "modernization-overview-video",
         capabilities: [
           {
@@ -2378,9 +2375,6 @@
               '<span>Watch Overview Video</span>' +
             '</button>' +
           '</div>' +
-          '<button class="overview-solution-arrow" type="button" data-overview-action="' + escapeOverviewHtml(group.action) + '" aria-label="Open ' + title + ' Solutions Group">' +
-            overviewArrowSvg(24) +
-          '</button>' +
         '</div>' +
         '<div class="' + capabilityClass + '">' + capabilityMarkup + '</div>' +
       '</article>';
@@ -2424,6 +2418,11 @@
 
     renderOverviewReferenceCards(pageRoot, overviewPageData.referenceCards);
     renderOverviewSolutionGroups(pageRoot, overviewPageData.solutionGroups);
+
+    if (window.NexusOverviewLinks) {
+      window.NexusOverviewLinks.applyLinkKeys(pageRoot);
+    }
+
     bindOverviewPageAssets(pageRoot);
   }
 
@@ -3505,7 +3504,6 @@
       "sca-directory": "SC&A Directory",
       "accounts-directory": "Accounts Directory",
       "partners-directory": "Partners Directory",
-      "view-all-solution-groups": "Novare Solutions Groups",
       "experience": "Experience Solutions Group",
       "experience-overview-video": "Experience overview video",
       "cx": "CX",
@@ -3542,7 +3540,7 @@
   function handleOverviewAction(pageRoot, action) {
     if (!pageRoot || !action) return;
 
-    if (action === "novare-solution-groups" || action === "view-all-solution-groups") {
+    if (action === "novare-solution-groups") {
       focusOverviewSection(pageRoot.querySelector("#overview-solution-groups-title"));
       return;
     }
@@ -3589,6 +3587,11 @@
 
     if (pageRoot.dataset.pageInitialized !== "true") {
       renderOverviewContent(pageRoot, getStaticOverviewContent());
+
+      if (window.NexusOverviewLinks) {
+        window.NexusOverviewLinks.initialize(pageRoot);
+      }
+
       initializeOverviewActions(pageRoot);
       pageRoot.dataset.pageInitialized = "true";
       refreshOverviewFromServer(pageRoot);
@@ -4518,8 +4521,7 @@
     getCurrentUserFallback() {
       return {
         name: currentUser.name,
-        email: currentUser.email,
-        department: currentUser.department
+        email: currentUser.email
       };
     },
 
@@ -4536,8 +4538,7 @@
           const normalized = user && typeof user === "object"
             ? {
                 name: String(user.name || "").trim(),
-                email: String(user.email || "").trim(),
-                department: String(user.department || fallback.department).trim() || fallback.department
+                email: String(user.email || "").trim()
               }
             : fallback;
 
@@ -5188,10 +5189,9 @@
     const fallback = NexusAPI.getCurrentUserFallback();
     const resolved = user && typeof user === "object" ? user : fallback;
     const displayName = String(resolved.name || resolved.email || fallback.name).trim() || fallback.name;
-    const department = String(resolved.department || fallback.department).trim() || fallback.department;
     const email = String(resolved.email || "").trim();
     const userName = document.getElementById("user-name");
-    const userDepartment = document.getElementById("user-department");
+    const userEmail = document.getElementById("user-email");
     const userAvatar = document.getElementById("user-avatar");
     const userProfile = document.querySelector("[data-user-profile]");
 
@@ -5201,7 +5201,11 @@
       else userName.removeAttribute("title");
     }
 
-    if (userDepartment) userDepartment.textContent = department;
+    if (userEmail) {
+      userEmail.textContent = email || "Email unavailable";
+      if (email) userEmail.title = email;
+      else userEmail.removeAttribute("title");
+    }
 
     if (userAvatar) {
       userAvatar.textContent = getUserInitials({ name: displayName, email: email });

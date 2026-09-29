@@ -1,0 +1,427 @@
+<script>
+(function () {
+  "use strict";
+
+  /*
+   * ONESCA — Overview page link module
+   *
+   * This file owns Overview-specific link-key behavior.
+   * Later, the Google Sheet fetching/binding logic for Overview
+   * can be added here without growing the global Scripts.html.
+   *
+   * data-link-key is the single key that will match the Google Sheet.
+   * data-overview-action remains only for the page's existing
+   * placeholder/internal action behavior.
+   */
+
+  const OVERVIEW_LINK_KEYS = Object.freeze({
+    "about-novare": "ov-an-open",
+    "corporate-overview": "ov-co",
+    "novare-solution-groups": "ov-nsg",
+    "accounts-industry-focus": "ov-aif",
+    "partner-ecosystem": "ov-pe",
+    "corporate-pitchbook": "ov-cpb",
+
+    "about-sca": "ov-asca-open",
+    "charter-mandate": "ov-cm",
+    "strategy-practice-vision": "ov-spv",
+    "presales-operating-model": "ov-psom",
+    "organization-roles": "ov-or",
+    "ways-of-working": "ov-wow",
+    "performance-okrs": "ov-pokr",
+    "sca-general-guidelines": "ov-scagg",
+
+    "directories": "ov-dir-open",
+    "sca-directory": "ov-scad",
+    "accounts-directory": "ov-ad",
+    "partners-directory": "ov-pd",
+
+    "experience-overview-video": "ov-eov",
+
+    "cx": "ov-cx",
+    "api": "ov-api",
+
+    "intelligence-overview-video": "ov-iov",
+
+    "data": "ov-data",
+    "cloud": "ov-cloud",
+
+    "modernization-overview-video": "ov-mov",
+
+    "edge": "ov-edge",
+    "infra": "ov-infra",
+    "netsec": "ov-netsec"
+  });
+
+  function applyLinkKeys(pageRoot) {
+    if (!pageRoot) return;
+
+    pageRoot.querySelectorAll("[data-overview-action]").forEach(function (element) {
+      const action = String(element.dataset.overviewAction || "").trim();
+      const linkKey = OVERVIEW_LINK_KEYS[action];
+
+      if (linkKey) {
+        element.dataset.linkKey = linkKey;
+      }
+    });
+  }
+
+  function getLinkKeyForAction(action) {
+    return OVERVIEW_LINK_KEYS[String(action || "").trim()] || "";
+  }
+
+  function getConfiguredLinkKeys() {
+    return Object.values(OVERVIEW_LINK_KEYS);
+  }
+
+  const state = {
+    links: Object.create(null),
+    loaded: false,
+    loading: false,
+    missing: [],
+    duplicates: [],
+    invalid: [],
+    meta: {
+      connected: false,
+      spreadsheetId: "",
+      sheetName: "",
+      rowsScanned: 0,
+      requestedCount: 0,
+      matchedCount: 0
+    }
+  };
+
+  function normalizeServerResponse(response) {
+    const source = response && typeof response === "object" ? response : {};
+    const sourceLinks =
+      source.links && typeof source.links === "object"
+        ? source.links
+        : {};
+
+    const links = Object.create(null);
+
+    Object.keys(sourceLinks).forEach(function (key) {
+      const url = String(sourceLinks[key] || "").trim();
+
+      if (/^https?:\/\/\S+$/i.test(url)) {
+        links[key] = url;
+      }
+    });
+
+    const sourceMeta =
+      source.meta && typeof source.meta === "object"
+        ? source.meta
+        : {};
+
+    return {
+      links: links,
+      missing: Array.isArray(source.missing) ? source.missing.slice() : [],
+      duplicates: Array.isArray(source.duplicates) ? source.duplicates.slice() : [],
+      invalid: Array.isArray(source.invalid) ? source.invalid.slice() : [],
+      meta: {
+        connected: sourceMeta.connected === true,
+        spreadsheetId: String(sourceMeta.spreadsheetId || ""),
+        sheetName: String(sourceMeta.sheetName || ""),
+        rowsScanned: Number(sourceMeta.rowsScanned || 0),
+        requestedCount: Number(sourceMeta.requestedCount || 0),
+        matchedCount: Number(sourceMeta.matchedCount || 0)
+      }
+    };
+  }
+
+  function fetchLinks(pageRoot) {
+    if (state.loading) return;
+
+    const requestedKeys = getConfiguredLinkKeys();
+
+    state.loading = true;
+
+    console.info(
+      "[ONESCA Overview] Connecting to Google Sheet link registry...",
+      {
+        sheet: "06_Assets",
+        keyColumn: "B",
+        urlColumn: "I",
+        requestedKeys: requestedKeys.length
+      }
+    );
+
+    google.script.run
+      .withSuccessHandler(function (response) {
+        const normalized = normalizeServerResponse(response);
+
+        state.links = normalized.links;
+        state.missing = normalized.missing;
+        state.duplicates = normalized.duplicates;
+        state.invalid = normalized.invalid;
+        state.meta = normalized.meta;
+        state.loaded = true;
+        state.loading = false;
+
+        if (state.meta.connected) {
+          console.info(
+            "✅ [ONESCA Overview] Google Sheet connected successfully.",
+            {
+              spreadsheetId: state.meta.spreadsheetId,
+              sheet: state.meta.sheetName,
+              rowsScanned: state.meta.rowsScanned,
+              requestedKeys: state.meta.requestedCount,
+              matchedLinks: state.meta.matchedCount,
+              missingLinks: state.missing.length,
+              duplicateKeys: state.duplicates.length,
+              invalidUrls: state.invalid.length
+            }
+          );
+        } else {
+          console.warn(
+            "⚠️ [ONESCA Overview] Link request completed, but no real Google Sheet connection was reported."
+          );
+        }
+
+        if (state.missing.length) {
+          console.warn(
+            "[ONESCA Overview] No usable URL was returned for these keys:",
+            state.missing
+          );
+        }
+
+        applyResolvedState(pageRoot);
+
+        if (state.duplicates.length) {
+          console.warn(
+            "[ONESCA Overview] Duplicate link keys found in 06_Assets:",
+            state.duplicates
+          );
+        }
+
+        if (state.invalid.length) {
+          console.warn(
+            "[ONESCA Overview] Invalid link URLs found in 06_Assets:",
+            state.invalid
+          );
+        }
+      })
+      .withFailureHandler(function (error) {
+        state.loading = false;
+        state.loaded = false;
+
+        console.error(
+          "❌ [ONESCA Overview] Google Sheet connection failed.",
+          error
+        );
+      })
+      .getManagedLinks(requestedKeys);
+  }
+
+  function applyResolvedState(pageRoot) {
+    if (!pageRoot) return;
+
+    pageRoot.querySelectorAll("[data-link-key]").forEach(function (element) {
+      const key = String(element.dataset.linkKey || "").trim();
+      const url = state.links[key] || "";
+
+      if (url) {
+        element.dataset.managedLinkReady = "true";
+        element.removeAttribute("data-managed-link-missing");
+      } else {
+        delete element.dataset.managedLinkReady;
+        element.dataset.managedLinkMissing = "true";
+      }
+    });
+  }
+
+  function getUrl(linkKey) {
+    const key = String(linkKey || "").trim();
+    return state.links[key] || "";
+  }
+
+  function getTriggerLabel(trigger) {
+    if (!trigger) return "This resource";
+
+    const ariaLabel = String(
+      trigger.getAttribute("aria-label") || ""
+    ).trim();
+
+    if (ariaLabel) {
+      return ariaLabel
+        .replace(/^Open\s+/i, "")
+        .replace(/^View\s+/i, "")
+        .trim();
+    }
+
+    const text = String(trigger.textContent || "")
+      .replace(/\s+/g, " ")
+      .trim();
+
+    return text || "This resource";
+  }
+
+  function ensureComingSoonDialog() {
+    let dialog = document.getElementById(
+      "overview-managed-link-coming-soon"
+    );
+
+    if (dialog) return dialog;
+
+    dialog = document.createElement("dialog");
+    dialog.id = "overview-managed-link-coming-soon";
+    dialog.className = "overview-coming-soon-dialog";
+    dialog.setAttribute(
+      "aria-labelledby",
+      "overview-coming-soon-title"
+    );
+    dialog.setAttribute(
+      "aria-describedby",
+      "overview-coming-soon-message"
+    );
+
+    dialog.innerHTML =
+      '<div class="overview-coming-soon-card">' +
+        '<button class="overview-coming-soon-close" type="button" ' +
+          'data-overview-coming-soon-close aria-label="Close">' +
+          '<svg viewBox="0 0 24 24" aria-hidden="true">' +
+            '<path d="M6 6l12 12M18 6L6 18"></path>' +
+          '</svg>' +
+        '</button>' +
+
+        '<div class="overview-coming-soon-icon" aria-hidden="true">' +
+          '<svg viewBox="0 0 24 24">' +
+            '<path d="M12 3l1.85 4.15L18 9l-4.15 1.85L12 15l-1.85-4.15L6 9l4.15-1.85L12 3Z"></path>' +
+            '<path d="M18.5 14.5l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9.9-2.1Z"></path>' +
+          '</svg>' +
+        '</div>' +
+
+        '<p class="overview-coming-soon-eyebrow">COMING SOON</p>' +
+        '<h2 id="overview-coming-soon-title">Something great is on the way.</h2>' +
+        '<p id="overview-coming-soon-resource" class="overview-coming-soon-resource"></p>' +
+        '<p id="overview-coming-soon-message" class="overview-coming-soon-message">' +
+          'We’re preparing the latest approved resource for OneSCA so you get the best, most up-to-date material. Check back soon!' +
+        '</p>' +
+
+        '<button class="overview-coming-soon-action" type="button" ' +
+          'data-overview-coming-soon-close>' +
+          'Got it — I’ll check back' +
+        '</button>' +
+      '</div>';
+
+    dialog
+      .querySelectorAll("[data-overview-coming-soon-close]")
+      .forEach(function (button) {
+        button.addEventListener("click", function () {
+          dialog.close();
+        });
+      });
+
+    dialog.addEventListener("click", function (event) {
+      if (event.target === dialog) {
+        dialog.close();
+      }
+    });
+
+    document.body.appendChild(dialog);
+
+    return dialog;
+  }
+
+  function showComingSoonDialog(trigger) {
+    const dialog = ensureComingSoonDialog();
+    const resource = dialog.querySelector(
+      "#overview-coming-soon-resource"
+    );
+    const label = getTriggerLabel(trigger);
+
+    if (resource) {
+      resource.textContent =
+        label === "This resource"
+          ? "This resource is getting ready for launch."
+          : label + " is getting ready for launch.";
+    }
+
+    if (typeof dialog.showModal === "function") {
+      if (!dialog.open) {
+        dialog.showModal();
+      }
+      return;
+    }
+
+    dialog.setAttribute("open", "");
+  }
+
+  function handleManagedLinkClick(event, pageRoot) {
+    const trigger = event.target.closest("[data-link-key]");
+
+    if (!trigger || !pageRoot.contains(trigger)) {
+      return;
+    }
+
+    const linkKey = String(trigger.dataset.linkKey || "").trim();
+    const url = getUrl(linkKey);
+
+    if (!url) {
+      // Only treat it as "coming soon" after the Sheet request has
+      // completed successfully enough to establish the managed-link state.
+      // If fetching failed, keep the existing Overview fallback behavior.
+      if (state.loaded) {
+        event.preventDefault();
+        event.stopPropagation();
+        showComingSoonDialog(trigger);
+      }
+
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    window.open(
+      url,
+      "_blank",
+      "noopener,noreferrer"
+    );
+  }
+
+  function bindManagedLinkClicks(pageRoot) {
+    if (
+      !pageRoot ||
+      pageRoot.dataset.overviewManagedLinksBound === "true"
+    ) {
+      return;
+    }
+
+    // Capture phase lets a resolved managed link run before the existing
+    // Overview placeholder click handler in the global Scripts.html.
+    pageRoot.addEventListener(
+      "click",
+      function (event) {
+        handleManagedLinkClick(event, pageRoot);
+      },
+      true
+    );
+
+    pageRoot.dataset.overviewManagedLinksBound = "true";
+  }
+
+  function initialize(pageRoot) {
+    if (!pageRoot) return;
+
+    applyLinkKeys(pageRoot);
+    bindManagedLinkClicks(pageRoot);
+
+    if (state.loaded) {
+      applyResolvedState(pageRoot);
+      return;
+    }
+
+    fetchLinks(pageRoot);
+  }
+
+  window.NexusOverviewLinks = Object.freeze({
+    initialize: initialize,
+    applyLinkKeys: applyLinkKeys,
+    getLinkKeyForAction: getLinkKeyForAction,
+    getConfiguredLinkKeys: getConfiguredLinkKeys,
+    getUrl: getUrl,
+    fetchLinks: fetchLinks
+  });
+}());
+</script>

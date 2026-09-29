@@ -3,6 +3,13 @@
   "use strict";
   window.NEXUS_ENV = "local";
   // Add functions here as frontend features acquire server endpoints.
+  //
+  // Add local test URLs here if you want managed Overview links to open
+  // while running ONESCA outside Apps Script.
+  const localManagedLinks = Object.freeze({
+    // "ov-co": "https://example.com/"
+  });
+
   const methods = Object.assign(Object.create(null), {
     getServerStatus: function () {
       return {
@@ -10,6 +17,55 @@
         app: "Novare Nexus 2026",
         environment: "local",
         timestamp: new Date().toISOString()
+      };
+    },
+    getCurrentUser: function () {
+      return {
+        name: "Local Novare User",
+        email: "local.user@novare.com.ph",
+        department: "OneSCA"
+      };
+    },
+
+    getManagedLinks: function (linkKeys) {
+      const requested = Array.isArray(linkKeys) ? linkKeys : [];
+      const links = {};
+
+      requested.forEach(function (key) {
+        const normalized = String(key || "").trim();
+        const url = localManagedLinks[normalized];
+
+        if (normalized && url) {
+          links[normalized] = url;
+        }
+      });
+
+      const missing = requested.filter(function (key) {
+        return !links[String(key || "").trim()];
+      });
+
+      console.info(
+        "🧪 [ONESCA LocalDevShim] getManagedLinks() is using local mock data. No real Google Sheet connection is being made.",
+        {
+          requestedKeys: requested.length,
+          matchedLinks: Object.keys(links).length,
+          missingLinks: missing.length
+        }
+      );
+
+      return {
+        links: links,
+        missing: missing,
+        duplicates: [],
+        invalid: [],
+        meta: {
+          connected: false,
+          spreadsheetId: "",
+          sheetName: "LOCAL MOCK",
+          rowsScanned: 0,
+          requestedCount: requested.length,
+          matchedCount: Object.keys(links).length
+        }
       };
     }
   });

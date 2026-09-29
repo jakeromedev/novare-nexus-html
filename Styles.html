@@ -12760,4 +12760,360 @@
       }
     }
 
+
+    /* =========================================================
+       H1 OVERVIEW — MANAGED LINK / COMING SOON STATES
+       Gray treatment is applied only after the link registry has
+       resolved and no usable URL exists for a configured key.
+    ========================================================== */
+
+    .overview-page [data-managed-link-missing="true"] {
+      --overview-missing-bg: #F2F5F8;
+      --overview-missing-border: #D7DEE7;
+      --overview-missing-text: #6E7C8D;
+      --overview-missing-icon: #8190A2;
+
+      cursor: pointer !important;
+      filter: saturate(.22);
+      opacity: .78;
+      border-color: var(--overview-missing-border) !important;
+      box-shadow: none !important;
+      transition:
+        opacity 160ms ease,
+        transform 160ms ease,
+        background-color 160ms ease,
+        border-color 160ms ease;
+    }
+
+    .overview-page [data-managed-link-missing="true"]:hover {
+      opacity: .94;
+      transform: translateY(-1px);
+      border-color: #C7D0DA !important;
+    }
+
+    .overview-page .overview-reference-row[data-managed-link-missing="true"],
+    .overview-page .overview-capability-card[data-managed-link-missing="true"],
+    .overview-page .overview-card-arrow[data-managed-link-missing="true"],
+    .overview-page .overview-solution-arrow[data-managed-link-missing="true"],
+    .overview-page .overview-video-button[data-managed-link-missing="true"] {
+      color: var(--overview-missing-text) !important;
+    }
+
+    .overview-page .overview-reference-row[data-managed-link-missing="true"] {
+      background: var(--overview-missing-bg) !important;
+    }
+
+    .overview-page .overview-reference-row[data-managed-link-missing="true"] strong,
+    .overview-page .overview-reference-row[data-managed-link-missing="true"] span,
+    .overview-page .overview-reference-row[data-managed-link-missing="true"] svg {
+      color: var(--overview-missing-text) !important;
+      stroke: var(--overview-missing-icon) !important;
+    }
+
+    .overview-page .overview-reference-row.is-highlighted[data-managed-link-missing="true"] {
+      background:
+        linear-gradient(135deg, #F2F5F8 0%, #E9EEF3 100%) !important;
+      border-color: #D5DDE6 !important;
+    }
+
+    .overview-page .overview-reference-row.is-highlighted[data-managed-link-missing="true"] strong::after {
+      content: "SOON";
+      color: #69798A;
+      background: #E2E7EC;
+      border-color: #CCD5DE;
+    }
+
+    .overview-page .overview-capability-card[data-managed-link-missing="true"] {
+      background: #F3F6F8 !important;
+    }
+
+    .overview-page .overview-video-button[data-managed-link-missing="true"],
+    .overview-page .overview-card-arrow[data-managed-link-missing="true"],
+    .overview-page .overview-solution-arrow[data-managed-link-missing="true"] {
+      background: #EEF2F5 !important;
+    }
+
+    /* Coming-soon dialog */
+    .overview-coming-soon-dialog {
+      width: min(92vw, 470px);
+      max-width: 470px;
+      margin: auto;
+      padding: 0;
+      border: 0;
+      border-radius: 22px;
+      overflow: visible;
+      color: #0A2757;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .overview-coming-soon-dialog::backdrop {
+      background: rgb(4 20 43 / 55%);
+      backdrop-filter: blur(7px);
+      -webkit-backdrop-filter: blur(7px);
+    }
+
+    .overview-coming-soon-card {
+      position: relative;
+      overflow: hidden;
+      padding: 36px 34px 30px;
+      border: 1px solid rgb(199 222 241 / 82%);
+      border-radius: 22px;
+      text-align: center;
+      background:
+        radial-gradient(circle at 85% 4%, rgb(0 183 255 / 15%), transparent 32%),
+        radial-gradient(circle at 12% 88%, rgb(86 69 255 / 9%), transparent 34%),
+        linear-gradient(145deg, #FFFFFF 0%, #F6FBFF 100%);
+      box-shadow:
+        0 28px 80px rgb(0 28 70 / 24%),
+        inset 0 1px 0 rgb(255 255 255 / 90%);
+    }
+
+    .overview-coming-soon-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 12%;
+      right: 12%;
+      height: 3px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #156BFF, #00C9E8, #8B61FF);
+    }
+
+    .overview-coming-soon-close {
+      position: absolute;
+      z-index: 2;
+      top: 15px;
+      right: 15px;
+      display: grid;
+      width: 34px;
+      height: 34px;
+      place-items: center;
+      padding: 0;
+      border: 1px solid #DFE9F2;
+      border-radius: 50%;
+      color: #69809A;
+      background: rgb(255 255 255 / 76%);
+      cursor: pointer;
+      transition:
+        color 150ms ease,
+        background-color 150ms ease,
+        transform 150ms ease;
+    }
+
+    .overview-coming-soon-close:hover {
+      color: #174CA0;
+      background: #FFFFFF;
+      transform: rotate(4deg);
+    }
+
+    .overview-coming-soon-close svg {
+      width: 16px;
+      height: 16px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+    }
+
+    .overview-coming-soon-icon {
+      display: grid;
+      width: 66px;
+      height: 66px;
+      margin: 0 auto 17px;
+      place-items: center;
+      border-radius: 20px;
+      color: #096AF2;
+      background:
+        linear-gradient(145deg, #EAF5FF 0%, #E8F9FB 100%);
+      box-shadow:
+        inset 0 0 0 1px rgb(150 204 245 / 38%),
+        0 9px 24px rgb(0 91 194 / 10%);
+    }
+
+    .overview-coming-soon-icon svg {
+      width: 37px;
+      height: 37px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.55;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .overview-coming-soon-eyebrow {
+      margin: 0 0 8px;
+      color: #0877E8;
+      font-size: .68rem;
+      font-weight: 850;
+      letter-spacing: .14em;
+    }
+
+    .overview-coming-soon-dialog h2 {
+      margin: 0;
+      color: #0A2C62;
+      font-size: clamp(1.25rem, 3vw, 1.55rem);
+      line-height: 1.12;
+      font-weight: 850;
+      letter-spacing: -.025em;
+    }
+
+    .overview-coming-soon-resource {
+      margin: 13px 0 5px;
+      color: #135FC0;
+      font-size: .86rem;
+      font-weight: 760;
+      line-height: 1.35;
+    }
+
+    .overview-coming-soon-message {
+      max-width: 370px;
+      margin: 0 auto;
+      color: #61758C;
+      font-size: .79rem;
+      line-height: 1.55;
+    }
+
+    .overview-coming-soon-action {
+      min-height: 40px;
+      margin-top: 22px;
+      padding: 9px 18px;
+      border: 0;
+      border-radius: 999px;
+      color: #FFFFFF;
+      font-size: .76rem;
+      font-weight: 780;
+      background:
+        linear-gradient(90deg, #0C67E8 0%, #058EDB 100%);
+      box-shadow: 0 9px 20px rgb(7 104 217 / 19%);
+      cursor: pointer;
+      transition:
+        transform 150ms ease,
+        box-shadow 150ms ease;
+    }
+
+    .overview-coming-soon-action:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 24px rgb(7 104 217 / 24%);
+    }
+
+    @media (max-width: 560px) {
+      .overview-coming-soon-card {
+        padding: 32px 22px 24px;
+        border-radius: 18px;
+      }
+
+      .overview-coming-soon-dialog {
+        width: min(94vw, 470px);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .overview-page [data-managed-link-missing="true"],
+      .overview-coming-soon-close,
+      .overview-coming-soon-action {
+        transition: none;
+      }
+    }
+
+
+    /* =========================================================
+       H1 OVERVIEW — SOLUTION CAPABILITY READABILITY FIX
+       Prevents EDGE / INFRA / NETSEC labels and descriptions from
+       breaking character-by-character inside compact capability cards.
+    ========================================================== */
+
+    .overview-page .overview-capability-copy {
+      min-width: 0;
+      overflow-wrap: normal !important;
+      word-break: normal !important;
+      hyphens: none;
+    }
+
+    .overview-page .overview-capability-copy strong {
+      display: block;
+      width: 100%;
+      white-space: nowrap;
+      overflow-wrap: normal !important;
+      word-break: keep-all !important;
+      line-height: 1.12;
+    }
+
+    .overview-page .overview-capability-copy > span {
+      display: block;
+      width: 100%;
+      overflow-wrap: normal !important;
+      word-break: normal !important;
+      hyphens: none;
+      line-height: 1.32;
+    }
+
+    /* Give the copy more room in 3-item capability rows. */
+    .overview-page .overview-capability-grid-3 .overview-capability-card {
+      grid-template-columns: 30px minmax(0, 1fr) 10px;
+      gap: 7px;
+      padding: 10px 8px;
+    }
+
+    .overview-page .overview-capability-grid-3 .overview-capability-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+    }
+
+    .overview-page .overview-capability-grid-3 .overview-capability-copy strong {
+      font-size: .70rem;
+    }
+
+    .overview-page .overview-capability-grid-3 .overview-capability-copy > span {
+      font-size: .57rem;
+    }
+
+    .overview-page .overview-capability-grid-3 .overview-capability-chevron {
+      font-size: 1.18rem;
+    }
+
+    /* At narrower widths, two columns are more readable than squeezing
+       three capability cards into a narrow row. */
+    @media (max-width: 900px) and (min-width: 541px) {
+      .overview-page .overview-capability-grid-3,
+      .overview-page .overview-solution-card.is-modernization .overview-capability-grid-3 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .overview-page .overview-capability-grid-3 .overview-capability-card {
+        grid-template-columns: 38px minmax(0, 1fr) 14px;
+        min-height: 82px;
+        padding: 10px 11px;
+      }
+
+      .overview-page .overview-capability-grid-3 .overview-capability-icon {
+        width: 38px;
+        height: 38px;
+      }
+
+      .overview-page .overview-capability-grid-3 .overview-capability-copy strong {
+        font-size: .76rem;
+      }
+
+      .overview-page .overview-capability-grid-3 .overview-capability-copy > span {
+        font-size: .64rem;
+      }
+    }
+
+    /* On phone widths, keep the existing single-column behavior but
+       explicitly preserve normal word wrapping. */
+    @media (max-width: 540px) {
+      .overview-page .overview-capability-copy strong {
+        white-space: normal;
+      }
+
+      .overview-page .overview-capability-copy,
+      .overview-page .overview-capability-copy > span,
+      .overview-page .overview-capability-copy strong {
+        overflow-wrap: normal !important;
+        word-break: normal !important;
+      }
+    }
+
   </style>

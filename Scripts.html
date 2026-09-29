@@ -2092,9 +2092,9 @@
           { label: "Corporate Overview", action: "corporate-overview" },
           { label: "Novare Solutions Groups", action: "novare-solution-groups" },
           { label: "Accounts & Industry Focus", action: "accounts-industry-focus" },
-          { label: "Partner Ecosystem", action: "partner-ecosystem" }
-        ],
-        featuredItem: { label: "Corporate PitchBook", action: "corporate-pitchbook" }
+          { label: "Partner Ecosystem", action: "partner-ecosystem" },
+          { label: "Corporate PitchBook", action: "corporate-pitchbook", highlighted: true, strong: true }
+        ]
       },
       {
         id: "about-sca",
@@ -2108,9 +2108,9 @@
           { label: "PreSales Operating Model", action: "presales-operating-model" },
           { label: "Organization & Roles", action: "organization-roles" },
           { label: "Ways of Working", action: "ways-of-working" },
-          { label: "Performance & OKRs", action: "performance-okrs" }
-        ],
-        featuredItem: { label: "SC&A General Guidelines", action: "sca-general-guidelines" }
+          { label: "Performance & OKRs", action: "performance-okrs" },
+          { label: "SC&A General Guidelines", action: "sca-general-guidelines", highlighted: true, strong: true }
+        ]
       },
       {
         id: "directories",
@@ -2285,25 +2285,34 @@
       const cardClasses = "overview-reference-card" + (isDirectory ? " overview-directory-card" : "");
       const linksClasses = "overview-reference-links" + (isDirectory ? " overview-directory-links" : "");
 
-      const items = (card.items || []).map(function (item) {
-        return '<button class="overview-reference-row' + (isDirectory ? ' overview-directory-row' : '') + '" type="button" data-overview-action="' +
+      const rowItems = Array.isArray(card.items) ? card.items.slice() : [];
+
+      // Backward compatibility for server payloads that still return the
+      // older separated featuredItem shape: keep it inside the group and
+      // render it as a highlighted final row.
+      if (card.featuredItem) {
+        rowItems.push({
+          label: card.featuredItem.label,
+          action: card.featuredItem.action,
+          highlighted: true,
+          strong: true
+        });
+      }
+
+      const items = rowItems.map(function (item) {
+        const rowClasses = "overview-reference-row" +
+          (isDirectory ? " overview-directory-row" : "") +
+          (item.highlighted ? " is-highlighted" : "");
+
+        return '<button class="' + rowClasses + '" type="button" data-overview-action="' +
           escapeOverviewHtml(item.action) + '">' +
           '<span class="overview-reference-row-icon" aria-hidden="true">' + overviewDocumentIconSvg() + '</span>' +
-          (item.strong
+          (item.strong || item.highlighted
             ? '<strong>' + escapeOverviewHtml(item.label) + '</strong>'
             : '<span>' + escapeOverviewHtml(item.label) + '</span>') +
           '<span class="overview-reference-chevron" aria-hidden="true">›</span>' +
           '</button>';
       }).join("");
-
-      const featured = card.featuredItem
-        ? '<button class="overview-reference-featured-link" type="button" data-overview-action="' +
-          escapeOverviewHtml(card.featuredItem.action) + '">' +
-          '<span class="overview-reference-featured-icon" aria-hidden="true">' + overviewDocumentIconSvg() + '</span>' +
-          '<strong>' + escapeOverviewHtml(card.featuredItem.label) + '</strong>' +
-          '<span class="overview-reference-chevron" aria-hidden="true">›</span>' +
-          '</button>'
-        : "";
 
       return '<article class="' + cardClasses + '" aria-labelledby="overview-' + id + '-title">' +
         '<header class="overview-reference-card-header">' +
@@ -2320,7 +2329,6 @@
           '</button>' +
         '</header>' +
         '<div class="' + linksClasses + '">' + items + '</div>' +
-        featured +
       '</article>';
     }).join("");
   }

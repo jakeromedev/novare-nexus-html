@@ -3,7 +3,7 @@
   "use strict";
 
   // 1. CONFIGURATION
-  const config = { defaultRoute: "home", useServerHomeContent: false, useServerOverviewContent: false, useServerOfferingsContent: false, useServerOpportunitiesContent: false, useServerProgramsContent: false };
+  const config = { defaultRoute: "home", useServerHomeContent: false, useServerOverviewContent: false, useServerOfferingsContent: false, useServerOpportunitiesContent: false, useServerProgramsContent: false, useServerDeliveryContent: false };
   const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
   const mobileQuery = window.matchMedia("(max-width: 767px)");
   const tabletQuery = window.matchMedia("(min-width: 768px) and (max-width: 1199px)");
@@ -117,6 +117,178 @@
       viewerUrl: "https://drive.google.com/file/d/1Bd_y884skBv0TUHV7kXjzZWZRnTQ6EGU/view?usp=drive_link"
     }
   };
+
+  // H5 DELIVERY — Phase 1–2 asset registry.
+  const deliveryAssetRegistry = {
+    "delivery-hero": {
+      fileId: "17xUUrIOtdNaaZfuzaMka-Lfhg4GVmYUF",
+      viewerUrl: "https://drive.google.com/file/d/17xUUrIOtdNaaZfuzaMka-Lfhg4GVmYUF/view?usp=drive_link",
+      phase: 1
+    },
+    "delivery-closing-banner": {
+      fileId: "1rP3N3F_oUhNpsSGnGzkFg0Nd5Ri2X04J",
+      viewerUrl: "https://drive.google.com/file/d/1rP3N3F_oUhNpsSGnGzkFg0Nd5Ri2X04J/view?usp=drive_link",
+      phase: 2
+    }
+  };
+
+  // H5 DELIVERY — Phase 2 centralized content model.
+  // Static data remains the safe fallback until matching Code.gs functions exist.
+  const deliveryPageData = {
+    methodologies: [
+      { id: "delivery-methodologies", labelLines: ["Delivery", "Methodologies"], icon: "methodology" },
+      { id: "implementation-frameworks", labelLines: ["Implementation", "Frameworks"], icon: "layers" },
+      { id: "project-program-management", labelLines: ["Project / Program", "Management"], icon: "clipboard" },
+      { id: "agile-hybrid-delivery", labelLines: ["Agile & Hybrid", "Delivery"], icon: "refresh" },
+      { id: "architecture-engineering-practices", labelLines: ["Architecture &", "Engineering Practices"], icon: "architecture" },
+      { id: "quality-delivery-assurance", labelLines: ["Quality &", "Delivery Assurance"], icon: "shield" },
+      { id: "handover-transition", labelLines: ["Handover &", "Transition"], icon: "handover" },
+      { id: "delivery-checklists-playbooks", labelLines: ["Delivery Checklists", "& Playbooks"], icon: "checklist" }
+    ],
+
+    caseStudies: [
+      { id: "client-case-studies", labelLines: ["Client", "Case Studies"], icon: "contacts" },
+      { id: "solution-case-studies", labelLines: ["Solution", "Case Studies"], icon: "idea" },
+      { id: "industry-case-studies", labelLines: ["Industry", "Case Studies"], icon: "chart" },
+      { id: "delivery-success-stories", labelLines: ["Delivery", "Success Stories"], icon: "trophy" },
+      { id: "lessons-learned", labelLines: ["Lessons", "Learned"], icon: "book" },
+      { id: "reusable-delivery-patterns", labelLines: ["Reusable", "Delivery Patterns"], icon: "network" }
+    ],
+
+    quickAccess: [
+      { id: "delivery-templates", label: "Delivery Templates", icon: "document", themeClass: "" },
+      { id: "tools-checklists", label: "Tools & Checklists", icon: "tools", themeClass: "" },
+      { id: "standards-guidelines", label: "Standards & Guidelines", icon: "shield", themeClass: "" },
+      { id: "training-enablement", label: "Training & Enablement", icon: "training", themeClass: "" },
+      { id: "delivery-community", label: "Delivery Community", icon: "contacts", themeClass: "" },
+      { id: "ask-nosca", label: "Ask Nosca", icon: "spark", themeClass: "is-purple" }
+    ]
+  };
+
+  function getStaticDeliveryContent() {
+    return cloneData(deliveryPageData);
+  }
+
+  function normalizeDeliveryContent(value) {
+    const fallback = getStaticDeliveryContent();
+    if (!value || typeof value !== "object") return fallback;
+
+    return {
+      methodologies: Array.isArray(value.methodologies) && value.methodologies.length
+        ? value.methodologies
+        : fallback.methodologies,
+      caseStudies: Array.isArray(value.caseStudies) && value.caseStudies.length
+        ? value.caseStudies
+        : fallback.caseStudies,
+      quickAccess: Array.isArray(value.quickAccess) && value.quickAccess.length
+        ? value.quickAccess
+        : fallback.quickAccess
+    };
+  }
+
+  function escapeDeliveryHtml(value) {
+    return String(value == null ? "" : value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  function deliveryIconSvg(type, size) {
+    const iconSize = Number(size) || 27;
+    const attrs = 'width="' + iconSize + '" height="' + iconSize + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"';
+
+    const paths = {
+      methodology: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>',
+      layers: '<path d="m12 3 8 4-8 4-8-4z"/><path d="m4 12 8 4 8-4M4 17l8 4 8-4"/>',
+      clipboard: '<rect x="5" y="4" width="14" height="16" rx="2"/><path d="M9 2v4M15 2v4M9 10h6M9 14h5"/>',
+      refresh: '<path d="M20 6v5h-5"/><path d="M4 18v-5h5"/><path d="M6.5 8A7 7 0 0 1 19 9M17.5 16A7 7 0 0 1 5 15"/>',
+      architecture: '<rect x="4" y="15" width="6" height="5" rx="1"/><rect x="14" y="15" width="6" height="5" rx="1"/><rect x="9" y="4" width="6" height="5" rx="1"/><path d="M12 9v3M7 15v-3h10v3"/>',
+      shield: '<path d="M12 3 19 6v5c0 5-3 8-7 10-4-2-7-5-7-10V6z"/><path d="m9 12 2 2 4-4"/>',
+      handover: '<path d="M4 17h6v3H4zM14 4h6v3h-6z"/><path d="M7 17v-4h10V7M17 13l3-3M17 13l-3-3"/>',
+      checklist: '<rect x="6" y="3" width="12" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h6"/>',
+      contacts: '<circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2"/><path d="M3 20c0-3.4 2.3-5.5 6-5.5s6 2.1 6 5.5M14 15c3.4-.4 5.5 1.4 5.5 4"/>',
+      idea: '<path d="M9 18h6M10 22h4"/><path d="M8.2 14.5A7 7 0 1 1 15.8 14.5C14.7 15.3 14 16.4 14 18h-4c0-1.6-.7-2.7-1.8-3.5Z"/>',
+      chart: '<path d="M4 20V11M10 20V5M16 20v-7M22 20V8"/>',
+      trophy: '<path d="M8 4h8v4c0 4-2 6-4 7-2-1-4-3-4-7z"/><path d="M8 6H4c0 3 1 5 4 5M16 6h4c0 3-1 5-4 5M12 15v4M9 21h6"/>',
+      book: '<path d="M4 5h6c2 0 3 1 3 3v11c0-2-1-3-3-3H4z"/><path d="M20 5h-6c-2 0-3 1-3 3v11c0-2 1-3 3-3h6z"/>',
+      network: '<circle cx="5" cy="12" r="2"/><circle cx="18" cy="5" r="2"/><circle cx="18" cy="19" r="2"/><path d="m7 11 9-5M7 13l9 5"/>',
+      document: '<path d="M6 3h9l3 3v15H6z"/><path d="M14 3v4h4M9 12h6M9 16h6"/>',
+      tools: '<path d="M14 6 18 2l4 4-4 4M10 18l-4 4-4-4 4-4"/><path d="m8 16 8-8M6 8l-4-4 4-4 4 4"/>',
+      training: '<path d="m12 3 9 5-9 5-9-5z"/><path d="M6 11v5c3 2 9 2 12 0v-5"/>',
+      spark: '<path d="M12 2c1.2 5.1 3.8 7.8 9 9-5.2 1.2-7.8 3.8-9 9-1.2-5.2-3.8-7.8-9-9 5.2-1.2 7.8-3.9 9-9Z"/>'
+    };
+
+    return '<svg ' + attrs + '>' + (paths[type] || paths.document) + '</svg>';
+  }
+
+  function renderDeliveryResourceCards(pageRoot, selector, items, purple) {
+    if (!pageRoot) return;
+    const grid = pageRoot.querySelector(selector);
+    if (!grid || !Array.isArray(items)) return;
+
+    grid.innerHTML = items.map(function (item) {
+      const labelLines = Array.isArray(item.labelLines) ? item.labelLines : [item.label || ""];
+      return '<button class="delivery-resource-card ' + (purple ? 'is-purple' : '') + '" type="button" data-delivery-action="' + escapeDeliveryHtml(item.id) + '">' +
+        '<span class="delivery-resource-icon" aria-hidden="true">' + deliveryIconSvg(item.icon, 27) + '</span>' +
+        '<span class="delivery-resource-label">' + labelLines.map(escapeDeliveryHtml).join("<br>") + '</span>' +
+        '<span class="delivery-resource-arrow" aria-hidden="true">→</span>' +
+      '</button>';
+    }).join("");
+  }
+
+  function renderDeliveryMethodologies(pageRoot, items) {
+    renderDeliveryResourceCards(pageRoot, "#delivery-methodologies-grid", items, false);
+  }
+
+  function renderDeliveryCaseStudies(pageRoot, items) {
+    renderDeliveryResourceCards(pageRoot, "#delivery-case-studies-grid", items, true);
+  }
+
+  function renderDeliveryQuickAccess(pageRoot, items) {
+    if (!pageRoot) return;
+    const grid = pageRoot.querySelector("#delivery-quick-access-grid");
+    if (!grid || !Array.isArray(items)) return;
+
+    grid.innerHTML = items.map(function (item) {
+      return '<button class="delivery-quick-card ' + escapeDeliveryHtml(item.themeClass || "") + '" type="button" data-delivery-action="' + escapeDeliveryHtml(item.id) + '">' +
+        '<span class="delivery-quick-icon" aria-hidden="true">' + deliveryIconSvg(item.icon, 25) + '</span>' +
+        '<span>' + escapeDeliveryHtml(item.label) + '</span>' +
+        '<span class="delivery-quick-arrow" aria-hidden="true">→</span>' +
+      '</button>';
+    }).join("");
+  }
+
+  function bindDeliveryPageAssets(pageRoot) {
+    if (!pageRoot) return;
+
+    bindDeliveryAsset(
+      pageRoot.querySelector("#delivery-hero-image"),
+      pageRoot.querySelector("#delivery-hero-fallback"),
+      2400
+    );
+
+    bindDeliveryAsset(
+      pageRoot.querySelector("#delivery-closing-image"),
+      pageRoot.querySelector("#delivery-closing-fallback"),
+      2200
+    );
+  }
+
+  function renderDeliveryContent(pageRoot, content) {
+    if (!pageRoot) return;
+    const normalized = normalizeDeliveryContent(content);
+
+    deliveryPageData.methodologies = cloneData(normalized.methodologies);
+    deliveryPageData.caseStudies = cloneData(normalized.caseStudies);
+    deliveryPageData.quickAccess = cloneData(normalized.quickAccess);
+
+    renderDeliveryMethodologies(pageRoot, deliveryPageData.methodologies);
+    renderDeliveryCaseStudies(pageRoot, deliveryPageData.caseStudies);
+    renderDeliveryQuickAccess(pageRoot, deliveryPageData.quickAccess);
+    bindDeliveryPageAssets(pageRoot);
+  }
 
   // H4 PROGRAMS — Phase 1–4 asset registry.
   const programsAssetRegistry = {
@@ -1748,6 +1920,137 @@
   }
 
 
+  function bindDeliveryAsset(image, fallback, width) {
+    if (!image) return;
+    const asset = deliveryAssetRegistry[image.dataset.imageKey];
+    bindImageCandidates(image, fallback, getDriveImageCandidates(asset, width));
+  }
+
+  function retryFailedDeliveryAssets(pageRoot) {
+    if (!pageRoot) return;
+    pageRoot.querySelectorAll('img[data-asset-state="error"]').forEach(function (image) {
+      if (typeof image._nexusRetryAsset === "function") image._nexusRetryAsset();
+    });
+  }
+
+  function showDeliveryStatus(pageRoot, message) {
+    if (!pageRoot) return;
+    const status = pageRoot.querySelector("#delivery-status");
+    if (!status) return;
+
+    status.textContent = message || "";
+    status.classList.add("is-visible");
+
+    window.clearTimeout(status._nexusStatusTimer);
+    status._nexusStatusTimer = window.setTimeout(function () {
+      status.classList.remove("is-visible");
+    }, 2500);
+  }
+
+  function getDeliveryActionLabel(action) {
+    const labels = {
+      "delivery-methodologies": "Delivery Methodologies",
+      "implementation-frameworks": "Implementation Frameworks",
+      "project-program-management": "Project / Program Management",
+      "agile-hybrid-delivery": "Agile & Hybrid Delivery",
+      "architecture-engineering-practices": "Architecture & Engineering Practices",
+      "quality-delivery-assurance": "Quality & Delivery Assurance",
+      "handover-transition": "Handover & Transition",
+      "delivery-checklists-playbooks": "Delivery Checklists & Playbooks",
+      "explore-methodologies": "All Methodologies",
+      "client-case-studies": "Client Case Studies",
+      "solution-case-studies": "Solution Case Studies",
+      "industry-case-studies": "Industry Case Studies",
+      "delivery-success-stories": "Delivery Success Stories",
+      "lessons-learned": "Lessons Learned",
+      "reusable-delivery-patterns": "Reusable Delivery Patterns",
+      "explore-case-studies": "All Case Studies",
+      "delivery-templates": "Delivery Templates",
+      "tools-checklists": "Tools & Checklists",
+      "standards-guidelines": "Standards & Guidelines",
+      "training-enablement": "Training & Enablement",
+      "delivery-community": "Delivery Community",
+      "ask-nosca": "Ask Nosca"
+    };
+
+    return labels[action] || "This Delivery resource";
+  }
+
+  function handleDeliveryAction(pageRoot, action) {
+    if (!pageRoot || !action) return;
+
+    if (action === "explore-methodologies") {
+      const title = pageRoot.querySelector("#delivery-methodologies-title");
+      if (title && typeof title.scrollIntoView === "function") {
+        title.scrollIntoView({
+          behavior: reducedMotionQuery.matches ? "auto" : "smooth",
+          block: "start"
+        });
+      }
+      showDeliveryStatus(pageRoot, "Showing Delivery Methodologies.");
+      return;
+    }
+
+    if (action === "explore-case-studies") {
+      const title = pageRoot.querySelector("#delivery-case-studies-title");
+      if (title && typeof title.scrollIntoView === "function") {
+        title.scrollIntoView({
+          behavior: reducedMotionQuery.matches ? "auto" : "smooth",
+          block: "start"
+        });
+      }
+      showDeliveryStatus(pageRoot, "Showing Delivery Case Studies.");
+      return;
+    }
+
+    showDeliveryStatus(
+      pageRoot,
+      getDeliveryActionLabel(action) +
+        " will open when its destination is connected."
+    );
+  }
+
+  function initializeDeliveryActions(pageRoot) {
+    if (!pageRoot || pageRoot.dataset.deliveryActionsInitialized === "true") return;
+
+    pageRoot.addEventListener("click", function (event) {
+      const trigger = event.target.closest("[data-delivery-action]");
+      if (!trigger || !pageRoot.contains(trigger)) return;
+
+      handleDeliveryAction(pageRoot, trigger.dataset.deliveryAction || "");
+    });
+
+    pageRoot.dataset.deliveryActionsInitialized = "true";
+  }
+
+  function refreshDeliveryFromServer(pageRoot) {
+    if (!pageRoot || !config.useServerDeliveryContent) return;
+
+    NexusAPI.getDeliveryContent(
+      function (data) {
+        renderDeliveryContent(pageRoot, data);
+        retryFailedDeliveryAssets(pageRoot);
+      },
+      function () {
+        // Static Delivery content remains available as the safe fallback.
+      }
+    );
+  }
+
+  function initializeDeliveryPage(pageRoot) {
+    if (!pageRoot) return;
+
+    if (pageRoot.dataset.pageInitialized !== "true") {
+      renderDeliveryContent(pageRoot, getStaticDeliveryContent());
+      initializeDeliveryActions(pageRoot);
+      pageRoot.dataset.pageInitialized = "true";
+      refreshDeliveryFromServer(pageRoot);
+      return;
+    }
+
+    retryFailedDeliveryAssets(pageRoot);
+  }
+
   function bindProgramsAsset(image, fallback, width) {
     if (!image) return;
     const asset = programsAssetRegistry[image.dataset.imageKey];
@@ -3016,6 +3319,7 @@
     if (route === "offerings") initializeOfferingsPage(wrapper);
     if (route === "opportunities") initializeOpportunitiesPage(wrapper);
     if (route === "programs") initializeProgramsPage(wrapper);
+    if (route === "delivery") initializeDeliveryPage(wrapper);
     return wrapper;
   }
 
@@ -3031,6 +3335,7 @@
     if (route === "offerings" && activePage) retryFailedOfferingsAssets(activePage);
     if (route === "opportunities" && activePage) retryFailedOpportunitiesAssets(activePage);
     if (route === "programs" && activePage) retryFailedProgramsAssets(activePage);
+    if (route === "delivery" && activePage) retryFailedDeliveryAssets(activePage);
 
     const hasPageHero = Boolean(activePage && activePage.querySelector("[data-page-hero]"));
     dom.app.classList.toggle("hero-route", hasPageHero);
@@ -3558,6 +3863,68 @@
           if (onSuccess) onSuccess(fallback);
         })
         .getProgramQuickAccess();
+    },
+
+    // H5 Delivery Phase 2 hooks. Disabled by default through
+    // config.useServerDeliveryContent until matching Code.gs functions exist.
+    getDeliveryContent(onSuccess, onFailure) {
+      const fallback = getStaticDeliveryContent();
+
+      if (!this.isAppsScriptAvailable()) {
+        if (onSuccess) onSuccess(fallback);
+        return;
+      }
+
+      google.script.run
+        .withSuccessHandler(function (data) {
+          if (onSuccess) onSuccess(normalizeDeliveryContent(data));
+        })
+        .withFailureHandler(function (error) {
+          console.warn("getDeliveryContent is not available yet; using static Delivery data.", error);
+          if (onFailure) onFailure(error);
+          if (onSuccess) onSuccess(fallback);
+        })
+        .getDeliveryContent();
+    },
+
+    getDeliveryMethodologies(onSuccess, onFailure) {
+      const fallback = cloneData(deliveryPageData.methodologies);
+
+      if (!this.isAppsScriptAvailable()) {
+        if (onSuccess) onSuccess(fallback);
+        return;
+      }
+
+      google.script.run
+        .withSuccessHandler(function (data) {
+          if (onSuccess) onSuccess(Array.isArray(data) ? data : fallback);
+        })
+        .withFailureHandler(function (error) {
+          console.warn("getDeliveryMethodologies is not available yet; using static Delivery data.", error);
+          if (onFailure) onFailure(error);
+          if (onSuccess) onSuccess(fallback);
+        })
+        .getDeliveryMethodologies();
+    },
+
+    getDeliveryCaseStudies(onSuccess, onFailure) {
+      const fallback = cloneData(deliveryPageData.caseStudies);
+
+      if (!this.isAppsScriptAvailable()) {
+        if (onSuccess) onSuccess(fallback);
+        return;
+      }
+
+      google.script.run
+        .withSuccessHandler(function (data) {
+          if (onSuccess) onSuccess(Array.isArray(data) ? data : fallback);
+        })
+        .withFailureHandler(function (error) {
+          console.warn("getDeliveryCaseStudies is not available yet; using static Delivery data.", error);
+          if (onFailure) onFailure(error);
+          if (onSuccess) onSuccess(fallback);
+        })
+        .getDeliveryCaseStudies();
     }
   };
 

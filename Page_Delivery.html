@@ -1,7 +1,637 @@
-<section class="page-container" aria-labelledby="delivery-page-title">
-  <div class="page-development-placeholder">
-    <span class="section-label">H5: DELIVERY</span>
-    <h1 id="delivery-page-title" data-page-title tabindex="-1">Delivery</h1>
-    <p>Page content will be implemented separately.</p>
-  </div>
+<!-- =========================================================
+     H5: DELIVERY
+     Novare Nexus / ONESCA
+     Semantic structure based strictly on the supplied reference.
+     Styles belong in Styles.html.
+     Behavior/data binding belongs in Scripts.html.
+========================================================== -->
+
+<section
+  class="delivery-page"
+  data-page="delivery"
+  aria-labelledby="delivery-title"
+>
+
+  <!-- =======================================================
+       HERO
+       Global nav contract: data-page-hero
+  ======================================================== -->
+  <section
+    class="delivery-hero page-hero"
+    data-page-hero
+    aria-labelledby="delivery-title"
+  >
+    <div class="delivery-hero-media" aria-hidden="true">
+      <img
+        id="delivery-hero-image"
+        class="delivery-hero-image"
+        data-image-key="delivery-hero"
+        alt=""
+        width="2200"
+        height="620"
+        loading="eager"
+        decoding="async"
+        fetchpriority="high"
+        hidden
+      >
+
+      <div
+        id="delivery-hero-fallback"
+        class="image-placeholder delivery-hero-fallback"
+        data-image-fallback="delivery-hero"
+        role="img"
+        aria-label="Delivery hero visual unavailable"
+        hidden
+      >
+        H5: Delivery
+      </div>
+
+      <div class="delivery-hero-overlay"></div>
+    </div>
+
+    <div class="delivery-hero-content">
+      <div class="delivery-hero-copy">
+        <p class="delivery-eyebrow">H5 : DELIVERY</p>
+
+        <h1 id="delivery-title" data-page-title tabindex="-1">
+          <span>Turn Plans into</span>
+          <span><strong>Real Outcomes</strong></span>
+        </h1>
+
+        <p class="delivery-hero-description">
+          Practical delivery frameworks, proven approaches,
+          and real-world lessons for successful execution.
+        </p>
+
+        <div class="delivery-hero-tagline">
+          <span class="delivery-hero-tagline-rule" aria-hidden="true"></span>
+          <span>People. Execution. Lasting Impact.</span>
+        </div>
+      </div>
+<div class="delivery-hero-message">
+        <div class="delivery-hero-message-primary">
+          <span>DISCIPLINED</span>
+          <span>EXECUTION.</span>
+          <span>MEASURABLE</span>
+          <span>IMPACT.</span>
+        </div>
+
+        <span class="delivery-hero-message-rule" aria-hidden="true"></span>
+
+        <div
+          class="delivery-hero-message-script"
+          aria-label="From Delivery to a Brighter Tomorrow."
+        >
+          <span>From</span>
+          <span>Delivery</span>
+          <span>to a Brighter</span>
+          <span>Tomorrow.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =======================================================
+       MAIN DELIVERY KNOWLEDGE PANELS
+  ======================================================== -->
+  <section
+    class="delivery-knowledge-section"
+    aria-label="Delivery methodologies and case studies"
+  >
+    <div class="delivery-knowledge-grid">
+
+      <!-- ===================================================
+           01 METHODOLOGIES
+      ==================================================== -->
+      <section
+        class="delivery-panel methodologies-panel"
+        aria-labelledby="delivery-methodologies-title"
+      >
+        <header class="delivery-panel-header">
+          <span class="delivery-panel-number" aria-hidden="true">01</span>
+
+          <span class="delivery-panel-icon is-methodologies" aria-hidden="true">
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.8"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <path d="m12 3 8 4.5v9L12 21l-8-4.5v-9z"/>
+              <path d="m4 7.5 8 4.5 8-4.5M12 12v9"/>
+            </svg>
+          </span>
+
+          <div class="delivery-panel-heading">
+            <h2 id="delivery-methodologies-title">Methodologies</h2>
+            <p>How we deliver.</p>
+          </div>
+
+          <p class="delivery-panel-description">
+            Structured methodologies and frameworks to ensure consistent,
+            high-quality delivery.
+          </p>
+
+          <button
+            class="delivery-panel-arrow"
+            type="button"
+            data-delivery-action="explore-methodologies"
+            aria-label="Explore all Methodologies"
+          >
+            <span aria-hidden="true">→</span>
+          </button>
+        </header>
+
+        <div
+          id="delivery-methodologies-grid"
+          class="delivery-resource-grid methodologies-grid"
+          aria-live="polite"
+        >
+          <button
+            class="delivery-resource-card"
+            type="button"
+            data-delivery-action="delivery-methodologies"
+          >
+            <span class="delivery-resource-icon" aria-hidden="true">
+              <svg width="27" height="27" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="1.9">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>
+              </svg>
+            </span>
+            <span class="delivery-resource-label">Delivery<br>Methodologies</span>
+            <span class="delivery-resource-arrow" aria-hidden="true">→</span>
+          </button>
+
+          <button
+            class="delivery-resource-card"
+            type="button"
+            data-delivery-action="implementation-frameworks"
+          >
+            <span class="delivery-resource-icon" aria-hidden="true">
+              <svg width="27" height="27" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="1.9">
+                <path d="m12 3 8 4-8 4-8-4z"/>
+                <path d="m4 12 8 4 8-4M4 17l8 4 8-4"/>
+              </svg>
+            </span>
+            <span class="delivery-resource-label">Implementation<br>Frameworks</span>
+            <span class="delivery-resource-arrow" aria-hidden="true">→</span>
+          </button>
+
+          <button
+            class="delivery-resource-card"
+            type="button"
+            data-delivery-action="project-program-management"
+          >
+            <span class="delivery-resource-icon" aria-hidden="true">
+              <svg width="27" height="27" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="1.9"
+                   stroke-linecap="round" stroke-linejoin="round">
+                <rect x="5" y="4" width="14" height="16" rx="2"/>
+                <path d="M9 2v4M15 2v4M9 10h6M9 14h5"/>
+              </svg>
+            </span>
+            <span class="delivery-resource-label">Project / Program<br>Management</span>
+            <span class="delivery-resource-arrow" aria-hidden="true">→</span>
+          </button>
+
+          <button
+            class="delivery-resource-card"
+            type="button"
+            data-delivery-action="agile-hybrid-delivery"
+          >
+            <span class="delivery-resource-icon" aria-hidden="true">
+              <svg width="27" height="27" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="1.9"
+                   stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 6v5h-5"/>
+                <path d="M4 18v-5h5"/>
+                <path d="M6.5 8A7 7 0 0 1 19 9M17.5 16A7 7 0 0 1 5 15"/>
+              </svg>
+            </span>
+            <span class="delivery-resource-label">Agile &amp; Hybrid<br>Delivery</span>
+            <span class="delivery-resource-arrow" aria-hidden="true">→</span>
+          </button>
+
+          <button
+            class="delivery-resource-card"
+            type="button"
+            data-delivery-action="architecture-engineering-practices"
+          >
+            <span class="delivery-resource-icon" aria-hidden="true">
+              <svg width="27" height="27" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="1.9">
+                <rect x="4" y="15" width="6" height="5" rx="1"/>
+                <rect x="14" y="15" width="6" height="5" rx="1"/>
+                <rect x="9" y="4" width="6" height="5" rx="1"/>
+                <path d="M12 9v3M7 15v-3h10v3"/>
+              </svg>
+            </span>
+            <span class="delivery-resource-label">Architecture &amp;<br>Engineering Practices</span>
+            <span class="delivery-resource-arrow" aria-hidden="true">→</span>
+          </button>
+
+          <button
+            class="delivery-resource-card"
+            type="button"
+            data-delivery-action="quality-delivery-assurance"
+          >
+            <span class="delivery-resource-icon" aria-hidden="true">
+              <svg width="27" height="27" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="1.9"
+                   stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 3 19 6v5c0 5-3 8-7 10-4-2-7-5-7-10V6z"/>
+                <path d="m9 12 2 2 4-4"/>
+              </svg>
+            </span>
+            <span class="delivery-resource-label">Quality &amp;<br>Delivery Assurance</span>
+            <span class="delivery-resource-arrow" aria-hidden="true">→</span>
+          </button>
+
+          <button
+            class="delivery-resource-card"
+            type="button"
+            data-delivery-action="handover-transition"
+          >
+            <span class="delivery-resource-icon" aria-hidden="true">
+              <svg width="27" height="27" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="1.9"
+                   stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 17h6v3H4zM14 4h6v3h-6z"/>
+                <path d="M7 17v-4h10V7M17 13l3-3M17 13l-3-3"/>
+              </svg>
+            </span>
+            <span class="delivery-resource-label">Handover &amp;<br>Transition</span>
+            <span class="delivery-resource-arrow" aria-hidden="true">→</span>
+          </button>
+
+          <button
+            class="delivery-resource-card"
+            type="button"
+            data-delivery-action="delivery-checklists-playbooks"
+          >
+            <span class="delivery-resource-icon" aria-hidden="true">
+              <svg width="27" height="27" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="1.9"
+                   stroke-linecap="round" stroke-linejoin="round">
+                <rect x="6" y="3" width="12" height="18" rx="2"/>
+                <path d="M9 8h6M9 12h6M9 16h6"/>
+              </svg>
+            </span>
+            <span class="delivery-resource-label">Delivery Checklists<br>&amp; Playbooks</span>
+            <span class="delivery-resource-arrow" aria-hidden="true">→</span>
+          </button>
+        </div>
+
+        <button
+          class="delivery-panel-footer-action"
+          type="button"
+          data-delivery-action="explore-methodologies"
+        >
+          <span>Explore All Methodologies</span>
+          <span aria-hidden="true">→</span>
+        </button>
+      </section>
+
+      <!-- ===================================================
+           02 CASE STUDIES
+      ==================================================== -->
+      <section
+        class="delivery-panel case-studies-panel"
+        aria-labelledby="delivery-case-studies-title"
+      >
+        <header class="delivery-panel-header">
+          <span class="delivery-panel-number" aria-hidden="true">02</span>
+
+          <span class="delivery-panel-icon is-case-studies" aria-hidden="true">
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.8"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 4h14v16H5z"/>
+              <path d="m8 15 3-3 2 2 3-4"/>
+            </svg>
+          </span>
+
+          <div class="delivery-panel-heading">
+            <h2 id="delivery-case-studies-title">Case Studies</h2>
+            <p>How we’ve delivered.</p>
+          </div>
+
+          <p class="delivery-panel-description">
+            Real-world experiences that demonstrate our capabilities,
+            impact, and lessons learned.
+          </p>
+
+          <button
+            class="delivery-panel-arrow"
+            type="button"
+            data-delivery-action="explore-case-studies"
+            aria-label="Explore all Case Studies"
+          >
+            <span aria-hidden="true">→</span>
+          </button>
+        </header>
+
+        <div
+          id="delivery-case-studies-grid"
+          class="delivery-resource-grid case-studies-grid"
+          aria-live="polite"
+        >
+          <button
+            class="delivery-resource-card is-purple"
+            type="button"
+            data-delivery-action="client-case-studies"
+          >
+            <span class="delivery-resource-icon" aria-hidden="true">
+              <svg width="27" height="27" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="1.9">
+                <circle cx="9" cy="8" r="3"/>
+                <circle cx="17" cy="9" r="2"/>
+                <path d="M3 20c0-3.4 2.3-5.5 6-5.5s6 2.1 6 5.5M14 15c3.4-.4 5.5 1.4 5.5 4"/>
+              </svg>
+            </span>
+            <span class="delivery-resource-label">Client<br>Case Studies</span>
+            <span class="delivery-resource-arrow" aria-hidden="true">→</span>
+          </button>
+
+          <button
+            class="delivery-resource-card is-purple"
+            type="button"
+            data-delivery-action="solution-case-studies"
+          >
+            <span class="delivery-resource-icon" aria-hidden="true">
+              <svg width="27" height="27" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="1.9"
+                   stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 18h6M10 22h4"/>
+                <path d="M8.2 14.5A7 7 0 1 1 15.8 14.5C14.7 15.3 14 16.4 14 18h-4c0-1.6-.7-2.7-1.8-3.5Z"/>
+              </svg>
+            </span>
+            <span class="delivery-resource-label">Solution<br>Case Studies</span>
+            <span class="delivery-resource-arrow" aria-hidden="true">→</span>
+          </button>
+
+          <button
+            class="delivery-resource-card is-purple"
+            type="button"
+            data-delivery-action="industry-case-studies"
+          >
+            <span class="delivery-resource-icon" aria-hidden="true">
+              <svg width="27" height="27" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="1.9">
+                <path d="M4 20V11M10 20V5M16 20v-7M22 20V8"/>
+              </svg>
+            </span>
+            <span class="delivery-resource-label">Industry<br>Case Studies</span>
+            <span class="delivery-resource-arrow" aria-hidden="true">→</span>
+          </button>
+
+          <button
+            class="delivery-resource-card is-purple"
+            type="button"
+            data-delivery-action="delivery-success-stories"
+          >
+            <span class="delivery-resource-icon" aria-hidden="true">
+              <svg width="27" height="27" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="1.9">
+                <path d="M8 4h8v4c0 4-2 6-4 7-2-1-4-3-4-7z"/>
+                <path d="M8 6H4c0 3 1 5 4 5M16 6h4c0 3-1 5-4 5M12 15v4M9 21h6"/>
+              </svg>
+            </span>
+            <span class="delivery-resource-label">Delivery<br>Success Stories</span>
+            <span class="delivery-resource-arrow" aria-hidden="true">→</span>
+          </button>
+
+          <button
+            class="delivery-resource-card is-purple"
+            type="button"
+            data-delivery-action="lessons-learned"
+          >
+            <span class="delivery-resource-icon" aria-hidden="true">
+              <svg width="27" height="27" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="1.9"
+                   stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 5h6c2 0 3 1 3 3v11c0-2-1-3-3-3H4z"/>
+                <path d="M20 5h-6c-2 0-3 1-3 3v11c0-2 1-3 3-3h6z"/>
+              </svg>
+            </span>
+            <span class="delivery-resource-label">Lessons<br>Learned</span>
+            <span class="delivery-resource-arrow" aria-hidden="true">→</span>
+          </button>
+
+          <button
+            class="delivery-resource-card is-purple"
+            type="button"
+            data-delivery-action="reusable-delivery-patterns"
+          >
+            <span class="delivery-resource-icon" aria-hidden="true">
+              <svg width="27" height="27" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="1.9"
+                   stroke-linecap="round">
+                <circle cx="5" cy="12" r="2"/>
+                <circle cx="18" cy="5" r="2"/>
+                <circle cx="18" cy="19" r="2"/>
+                <path d="m7 11 9-5M7 13l9 5"/>
+              </svg>
+            </span>
+            <span class="delivery-resource-label">Reusable<br>Delivery Patterns</span>
+            <span class="delivery-resource-arrow" aria-hidden="true">→</span>
+          </button>
+        </div>
+
+        <button
+          class="delivery-panel-footer-action is-purple"
+          type="button"
+          data-delivery-action="explore-case-studies"
+        >
+          <span>Explore All Case Studies</span>
+          <span aria-hidden="true">→</span>
+        </button>
+      </section>
+    </div>
+  </section>
+
+
+  <!-- =======================================================
+       QUICK ACCESS
+  ======================================================== -->
+  <section
+    class="delivery-quick-access delivery-panel"
+    aria-labelledby="delivery-quick-access-title"
+  >
+    <header class="delivery-quick-access-header">
+      <div class="delivery-quick-access-title-group">
+        <span class="delivery-quick-bolt" aria-hidden="true">ϟ</span>
+        <h2 id="delivery-quick-access-title">Quick Access</h2>
+        <p>Jump to frequently used delivery resources.</p>
+      </div>
+    </header>
+
+    <div
+      id="delivery-quick-access-grid"
+      class="delivery-quick-access-grid"
+      aria-live="polite"
+    >
+      <button
+        class="delivery-quick-card"
+        type="button"
+        data-delivery-action="delivery-templates"
+      >
+        <span class="delivery-quick-icon" aria-hidden="true">
+          <svg width="25" height="25" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.9">
+            <path d="M6 3h9l3 3v15H6z"/>
+            <path d="M14 3v4h4M9 12h6M9 16h6"/>
+          </svg>
+        </span>
+        <span>Delivery Templates</span>
+        <span class="delivery-quick-arrow" aria-hidden="true">→</span>
+      </button>
+
+      <button
+        class="delivery-quick-card"
+        type="button"
+        data-delivery-action="tools-checklists"
+      >
+        <span class="delivery-quick-icon" aria-hidden="true">
+          <svg width="25" height="25" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.9"
+               stroke-linecap="round">
+            <path d="M14 6 18 2l4 4-4 4M10 18l-4 4-4-4 4-4"/>
+            <path d="m8 16 8-8M6 8l-4-4 4-4 4 4"/>
+          </svg>
+        </span>
+        <span>Tools &amp; Checklists</span>
+        <span class="delivery-quick-arrow" aria-hidden="true">→</span>
+      </button>
+
+      <button
+        class="delivery-quick-card"
+        type="button"
+        data-delivery-action="standards-guidelines"
+      >
+        <span class="delivery-quick-icon" aria-hidden="true">
+          <svg width="25" height="25" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.9">
+            <path d="M12 3 19 6v5c0 5-3 8-7 10-4-2-7-5-7-10V6z"/>
+            <path d="m9 12 2 2 4-4"/>
+          </svg>
+        </span>
+        <span>Standards &amp; Guidelines</span>
+        <span class="delivery-quick-arrow" aria-hidden="true">→</span>
+      </button>
+
+      <button
+        class="delivery-quick-card"
+        type="button"
+        data-delivery-action="training-enablement"
+      >
+        <span class="delivery-quick-icon" aria-hidden="true">
+          <svg width="25" height="25" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.9"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="m12 3 9 5-9 5-9-5z"/>
+            <path d="M6 11v5c3 2 9 2 12 0v-5"/>
+          </svg>
+        </span>
+        <span>Training &amp; Enablement</span>
+        <span class="delivery-quick-arrow" aria-hidden="true">→</span>
+      </button>
+
+      <button
+        class="delivery-quick-card"
+        type="button"
+        data-delivery-action="delivery-community"
+      >
+        <span class="delivery-quick-icon" aria-hidden="true">
+          <svg width="25" height="25" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.9">
+            <circle cx="9" cy="8" r="3"/>
+            <circle cx="17" cy="9" r="2"/>
+            <path d="M3 20c0-3.4 2.3-5.5 6-5.5s6 2.1 6 5.5M14 15c3.4-.4 5.5 1.4 5.5 4"/>
+          </svg>
+        </span>
+        <span>Delivery Community</span>
+        <span class="delivery-quick-arrow" aria-hidden="true">→</span>
+      </button>
+
+      <button
+        class="delivery-quick-card is-purple"
+        type="button"
+        data-delivery-action="ask-nosca"
+      >
+        <span class="delivery-quick-icon" aria-hidden="true">
+          <svg width="25" height="25" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.9">
+            <path d="M12 2c1.2 5.1 3.8 7.8 9 9-5.2 1.2-7.8 3.8-9 9-1.2-5.2-3.8-7.8-9-9 5.2-1.2 7.8-3.9 9-9Z"/>
+          </svg>
+        </span>
+        <span>Ask Nosca</span>
+        <span class="delivery-quick-arrow" aria-hidden="true">→</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- =======================================================
+       CLOSING BANNER
+  ======================================================== -->
+  <section
+    class="delivery-closing-banner"
+    aria-label="Delivery closing message"
+  >
+    <div class="delivery-closing-media" aria-hidden="true">
+      <img
+        id="delivery-closing-image"
+        class="delivery-closing-image"
+        data-image-key="delivery-closing-banner"
+        alt=""
+        width="2200"
+        height="430"
+        loading="lazy"
+        decoding="async"
+        fetchpriority="low"
+        hidden
+      >
+
+      <div
+        id="delivery-closing-fallback"
+        class="image-placeholder delivery-closing-fallback"
+        data-image-fallback="delivery-closing-banner"
+        role="img"
+        aria-label="Delivery closing banner visual unavailable"
+        hidden
+      >
+        Delivering today. A brighter tomorrow.
+      </div>
+
+      <div class="delivery-closing-overlay"></div>
+    </div>
+
+    <div class="delivery-closing-content">
+      <div class="delivery-closing-script" aria-label="Different Together">
+        <span>Different</span>
+        <span>Together</span>
+      </div>
+
+      <div class="delivery-closing-copy">
+        <span>Delivering today.</span>
+        <strong>A brighter tomorrow.</strong>
+      </div>
+
+      <div class="delivery-closing-brand">
+        <span>PEOPLE</span>
+        <span>SOLUTIONS</span>
+        <span>IMPACT</span>
+        <span class="delivery-closing-brand-rule" aria-hidden="true"></span>
+      </div>
+    </div>
+  </section>
+
+
+
+  <p
+    id="delivery-status"
+    class="delivery-status"
+    role="status"
+    aria-live="polite"
+  ></p>
+
 </section>

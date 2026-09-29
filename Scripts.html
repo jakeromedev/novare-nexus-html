@@ -3,7 +3,7 @@
   "use strict";
 
   // 1. CONFIGURATION
-  const config = { defaultRoute: "home", useServerHomeContent: false, useServerOverviewContent: false, useServerOfferingsContent: false, useServerOpportunitiesContent: false, useServerProgramsContent: false, useServerDeliveryContent: false, useServerGovernanceContent: false, useServerToolsContent: false };
+  const config = { defaultRoute: "home", useServerHomeContent: false, useServerOverviewContent: false, useServerOfferingsContent: false, useServerOpportunitiesContent: false, useServerProgramsContent: false, useServerDeliveryContent: false, useServerGovernanceContent: false, useServerToolsContent: false, useServerSupportContent: false };
   const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
   const mobileQuery = window.matchMedia("(max-width: 767px)");
   const tabletQuery = window.matchMedia("(min-width: 768px) and (max-width: 1199px)");
@@ -117,6 +117,182 @@
       viewerUrl: "https://drive.google.com/file/d/1Bd_y884skBv0TUHV7kXjzZWZRnTQ6EGU/view?usp=drive_link"
     }
   };
+
+  // HELP & SUPPORT — Phase 1–2 approved asset registry.
+  const supportAssetRegistry = {
+    "support-hero": {
+      fileId: "1u5M5BGox2kR62RK_0qf1uLIF9TbCJO57",
+      viewerUrl: "https://drive.google.com/file/d/1u5M5BGox2kR62RK_0qf1uLIF9TbCJO57/view?usp=drive_link",
+      phase: 1
+    }
+  };
+
+  // HELP & SUPPORT — Phase 2 centralized content model.
+  const supportPageData = {
+    options: [
+      {
+        id: "ask-nosca",
+        title: "Ask Nosca",
+        description: "Get instant answers with our AI-powered assistant.",
+        icon: "chat",
+        themeClass: "is-blue"
+      },
+      {
+        id: "contact-support",
+        title: "Contact Support",
+        description: "Reach our support team for further assistance.",
+        icon: "people",
+        themeClass: "is-green"
+      },
+      {
+        id: "guides-resources",
+        title: "Guides & Resources",
+        description: "Explore user guides, FAQs and how-to resources.",
+        icon: "book",
+        themeClass: "is-purple"
+      },
+      {
+        id: "service-status",
+        title: "Service Status",
+        description: "Check the status of our key systems and applications.",
+        icon: "shield",
+        themeClass: "is-orange"
+      }
+    ],
+
+    faqs: [
+      { id: "faq-system-access", label: "How do I request system access?" },
+      { id: "faq-latest-templates", label: "Where can I find the latest templates?" },
+      { id: "faq-operating-guidelines", label: "What are the SC&A operating guidelines?" },
+      { id: "faq-solutioning-toolkit", label: "How do I use the solutioning toolkit?" }
+    ],
+
+    quickLinks: [
+      { id: "user-guides", label: "User Guides", icon: "document", themeClass: "is-blue" },
+      { id: "video-tutorials", label: "Video Tutorials", icon: "video", themeClass: "is-green" },
+      { id: "release-notes", label: "Release Notes", icon: "megaphone", themeClass: "is-orange" },
+      { id: "tools-templates", label: "Tools & Templates", icon: "tools", themeClass: "is-blue" },
+      { id: "policies-guidelines", label: "Policies & Guidelines", icon: "shield", themeClass: "is-purple" },
+      { id: "process-howtos", label: "Process & How-to's", icon: "gear", themeClass: "is-blue" }
+    ]
+  };
+
+  function getStaticSupportContent() {
+    return cloneData(supportPageData);
+  }
+
+  function normalizeSupportContent(value) {
+    const fallback = getStaticSupportContent();
+    if (!value || typeof value !== "object") return fallback;
+
+    return {
+      options: Array.isArray(value.options) && value.options.length
+        ? value.options
+        : fallback.options,
+      faqs: Array.isArray(value.faqs) && value.faqs.length
+        ? value.faqs
+        : fallback.faqs,
+      quickLinks: Array.isArray(value.quickLinks) && value.quickLinks.length
+        ? value.quickLinks
+        : fallback.quickLinks
+    };
+  }
+
+  function escapeSupportHtml(value) {
+    return String(value == null ? "" : value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  function supportIconSvg(type, size) {
+    const iconSize = Number(size) || 25;
+    const attrs = 'width="' + iconSize + '" height="' + iconSize + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"';
+
+    const paths = {
+      chat: '<path d="M4 5h16v11H9l-5 4z"/><circle cx="9" cy="10.5" r=".7" fill="currentColor" stroke="none"/><circle cx="12" cy="10.5" r=".7" fill="currentColor" stroke="none"/><circle cx="15" cy="10.5" r=".7" fill="currentColor" stroke="none"/>',
+      people: '<circle cx="8.5" cy="8" r="3"/><circle cx="16.5" cy="8.5" r="2.5"/><path d="M3 20c0-3.5 2.2-5.5 5.5-5.5S14 16.5 14 20"/><path d="M13.5 15c3.5-.4 6 1.4 6 5"/>',
+      book: '<path d="M4 5h6c2 0 3 1 3 3v11c0-2-1-3-3-3H4z"/><path d="M20 5h-6c-2 0-3 1-3 3v11c0-2 1-3 3-3h6z"/>',
+      shield: '<path d="M12 3 19 6v5c0 5-3 8-7 10-4-2-7-5-7-10V6z"/><path d="m9 12 2 2 4-4"/>',
+      document: '<path d="M6 3h9l3 3v15H6z"/><path d="M14 3v4h4M9 12h6M9 16h6"/>',
+      video: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m10 9 5 3-5 3z"/>',
+      megaphone: '<path d="m4 12 12-6v12L4 12z"/><path d="M16 9h3v6h-3M5 13l1 6h4l-2-5"/>',
+      tools: '<path d="M14 6 18 2l4 4-4 4"/><path d="M10 18l-4 4-4-4 4-4"/><path d="m8 16 8-8"/>',
+      gear: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>'
+    };
+
+    return '<svg ' + attrs + '>' + (paths[type] || paths.document) + '</svg>';
+  }
+
+  function renderSupportOptions(pageRoot, items) {
+    if (!pageRoot) return;
+    const grid = pageRoot.querySelector("#support-options-grid");
+    if (!grid || !Array.isArray(items)) return;
+
+    grid.innerHTML = items.map(function (item) {
+      return '<button class="support-option-card ' + escapeSupportHtml(item.themeClass || "") + '" type="button" data-support-action="' + escapeSupportHtml(item.id) + '">' +
+        '<span class="support-option-icon" aria-hidden="true">' + supportIconSvg(item.icon, 44) + '</span>' +
+        '<span class="support-option-copy">' +
+          '<strong>' + escapeSupportHtml(item.title) + '</strong>' +
+          '<span>' + escapeSupportHtml(item.description) + '</span>' +
+        '</span>' +
+        '<span class="support-option-arrow" aria-hidden="true">→</span>' +
+      '</button>';
+    }).join("");
+  }
+
+  function renderSupportFaqs(pageRoot, items) {
+    if (!pageRoot) return;
+    const list = pageRoot.querySelector("#support-faq-list");
+    if (!list || !Array.isArray(items)) return;
+
+    list.innerHTML = items.map(function (item) {
+      return '<button class="support-faq-item" type="button" data-support-action="' + escapeSupportHtml(item.id) + '">' +
+        '<span>' + escapeSupportHtml(item.label) + '</span>' +
+        '<span aria-hidden="true">›</span>' +
+      '</button>';
+    }).join("");
+  }
+
+  function renderSupportQuickLinks(pageRoot, items) {
+    if (!pageRoot) return;
+    const grid = pageRoot.querySelector("#support-quick-links-grid");
+    if (!grid || !Array.isArray(items)) return;
+
+    grid.innerHTML = items.map(function (item) {
+      return '<button class="support-link-card ' + escapeSupportHtml(item.themeClass || "") + '" type="button" data-support-action="' + escapeSupportHtml(item.id) + '">' +
+        '<span class="support-link-icon" aria-hidden="true">' + supportIconSvg(item.icon, 25) + '</span>' +
+        '<span>' + escapeSupportHtml(item.label) + '</span>' +
+        '<span class="support-link-arrow" aria-hidden="true">›</span>' +
+      '</button>';
+    }).join("");
+  }
+
+  function bindSupportPageAssets(pageRoot) {
+    if (!pageRoot) return;
+
+    bindSupportAsset(
+      pageRoot.querySelector("#support-hero-image"),
+      pageRoot.querySelector("#support-hero-fallback"),
+      2400
+    );
+  }
+
+  function renderSupportContent(pageRoot, content) {
+    if (!pageRoot) return;
+    const normalized = normalizeSupportContent(content);
+
+    supportPageData.options = cloneData(normalized.options);
+    supportPageData.faqs = cloneData(normalized.faqs);
+    supportPageData.quickLinks = cloneData(normalized.quickLinks);
+
+    renderSupportOptions(pageRoot, supportPageData.options);
+    renderSupportFaqs(pageRoot, supportPageData.faqs);
+    renderSupportQuickLinks(pageRoot, supportPageData.quickLinks);
+    bindSupportPageAssets(pageRoot);
+  }
 
   // TOOLS & TEMPLATES — Phase 1–2 approved asset registry.
   const toolsAssetRegistry = {
@@ -2378,6 +2554,132 @@
   }
 
 
+  function bindSupportAsset(image, fallback, width) {
+    if (!image) return;
+    const asset = supportAssetRegistry[image.dataset.imageKey];
+    bindImageCandidates(image, fallback, getDriveImageCandidates(asset, width));
+  }
+
+  function retryFailedSupportAssets(pageRoot) {
+    if (!pageRoot) return;
+    pageRoot.querySelectorAll('img[data-asset-state="error"]').forEach(function (image) {
+      if (typeof image._nexusRetryAsset === "function") image._nexusRetryAsset();
+    });
+  }
+
+  function showSupportStatus(pageRoot, message) {
+    if (!pageRoot) return;
+    const status = pageRoot.querySelector("#support-status");
+    if (!status) return;
+
+    status.textContent = message || "";
+    status.classList.add("is-visible");
+
+    window.clearTimeout(status._nexusStatusTimer);
+    status._nexusStatusTimer = window.setTimeout(function () {
+      status.classList.remove("is-visible");
+    }, 2500);
+  }
+
+  function getSupportActionLabel(action) {
+    const labels = {
+      "ask-nosca": "Ask Nosca",
+      "contact-support": "Contact Support",
+      "guides-resources": "Guides & Resources",
+      "service-status": "Service Status",
+      "view-all-faqs": "All FAQs",
+      "faq-system-access": "System Access FAQ",
+      "faq-latest-templates": "Latest Templates FAQ",
+      "faq-operating-guidelines": "SC&A Operating Guidelines FAQ",
+      "faq-solutioning-toolkit": "Solutioning Toolkit FAQ",
+      "view-all-resources": "All Support Resources",
+      "user-guides": "User Guides",
+      "video-tutorials": "Video Tutorials",
+      "release-notes": "Release Notes",
+      "tools-templates": "Tools & Templates",
+      "policies-guidelines": "Policies & Guidelines",
+      "process-howtos": "Process & How-to's",
+      "submit-support-request": "Support Request"
+    };
+
+    return labels[action] || "This Help & Support resource";
+  }
+
+  function handleSupportAction(pageRoot, action) {
+    if (!pageRoot || !action) return;
+
+    if (action === "guides-resources" || action === "view-all-resources") {
+      const title = pageRoot.querySelector("#support-links-title");
+      if (title && typeof title.scrollIntoView === "function") {
+        title.scrollIntoView({
+          behavior: reducedMotionQuery.matches ? "auto" : "smooth",
+          block: "start"
+        });
+      }
+      showSupportStatus(pageRoot, "Showing Quick Links and support resources.");
+      return;
+    }
+
+    if (action === "view-all-faqs") {
+      const title = pageRoot.querySelector("#support-faq-title");
+      if (title && typeof title.scrollIntoView === "function") {
+        title.scrollIntoView({
+          behavior: reducedMotionQuery.matches ? "auto" : "smooth",
+          block: "start"
+        });
+      }
+      showSupportStatus(pageRoot, "Showing frequently asked questions.");
+      return;
+    }
+
+    showSupportStatus(
+      pageRoot,
+      getSupportActionLabel(action) +
+        " will open when its destination is connected."
+    );
+  }
+
+  function initializeSupportActions(pageRoot) {
+    if (!pageRoot || pageRoot.dataset.supportActionsInitialized === "true") return;
+
+    pageRoot.addEventListener("click", function (event) {
+      const trigger = event.target.closest("[data-support-action]");
+      if (!trigger || !pageRoot.contains(trigger)) return;
+
+      handleSupportAction(pageRoot, trigger.dataset.supportAction || "");
+    });
+
+    pageRoot.dataset.supportActionsInitialized = "true";
+  }
+
+  function refreshSupportFromServer(pageRoot) {
+    if (!pageRoot || !config.useServerSupportContent) return;
+
+    NexusAPI.getSupportContent(
+      function (data) {
+        renderSupportContent(pageRoot, data);
+        retryFailedSupportAssets(pageRoot);
+      },
+      function () {
+        // Static Support content remains available as the safe fallback.
+      }
+    );
+  }
+
+  function initializeSupportPage(pageRoot) {
+    if (!pageRoot) return;
+
+    if (pageRoot.dataset.pageInitialized !== "true") {
+      renderSupportContent(pageRoot, getStaticSupportContent());
+      initializeSupportActions(pageRoot);
+      pageRoot.dataset.pageInitialized = "true";
+      refreshSupportFromServer(pageRoot);
+      return;
+    }
+
+    retryFailedSupportAssets(pageRoot);
+  }
+
   function bindToolsAsset(image, fallback, width) {
     if (!image) return;
     const asset = toolsAssetRegistry[image.dataset.imageKey];
@@ -3999,6 +4301,7 @@
     if (route === "delivery") initializeDeliveryPage(wrapper);
     if (route === "governance") initializeGovernancePage(wrapper);
     if (route === "tools") initializeToolsPage(wrapper);
+    if (route === "support") initializeSupportPage(wrapper);
     return wrapper;
   }
 
@@ -4017,6 +4320,7 @@
     if (route === "delivery" && activePage) retryFailedDeliveryAssets(activePage);
     if (route === "governance" && activePage) retryFailedGovernanceAssets(activePage);
     if (route === "tools" && activePage) retryFailedToolsAssets(activePage);
+    if (route === "support" && activePage) retryFailedSupportAssets(activePage);
 
     const hasPageHero = Boolean(activePage && activePage.querySelector("[data-page-hero]"));
     dom.app.classList.toggle("hero-route", hasPageHero);
@@ -4730,6 +5034,88 @@
           if (onSuccess) onSuccess(fallback);
         })
         .getConnectedDigitalStack();
+    },
+
+    // Help & Support Phase 2 hooks. Disabled by default until matching
+    // Code.gs functions exist.
+    getSupportContent(onSuccess, onFailure) {
+      const fallback = getStaticSupportContent();
+
+      if (!this.isAppsScriptAvailable()) {
+        if (onSuccess) onSuccess(fallback);
+        return;
+      }
+
+      google.script.run
+        .withSuccessHandler(function (data) {
+          if (onSuccess) onSuccess(normalizeSupportContent(data));
+        })
+        .withFailureHandler(function (error) {
+          console.warn("getSupportContent is not available yet; using static Support data.", error);
+          if (onFailure) onFailure(error);
+          if (onSuccess) onSuccess(fallback);
+        })
+        .getSupportContent();
+    },
+
+    getSupportOptions(onSuccess, onFailure) {
+      const fallback = cloneData(supportPageData.options);
+
+      if (!this.isAppsScriptAvailable()) {
+        if (onSuccess) onSuccess(fallback);
+        return;
+      }
+
+      google.script.run
+        .withSuccessHandler(function (data) {
+          if (onSuccess) onSuccess(Array.isArray(data) ? data : fallback);
+        })
+        .withFailureHandler(function (error) {
+          console.warn("getSupportOptions is not available yet; using static Support data.", error);
+          if (onFailure) onFailure(error);
+          if (onSuccess) onSuccess(fallback);
+        })
+        .getSupportOptions();
+    },
+
+    getSupportFaqs(onSuccess, onFailure) {
+      const fallback = cloneData(supportPageData.faqs);
+
+      if (!this.isAppsScriptAvailable()) {
+        if (onSuccess) onSuccess(fallback);
+        return;
+      }
+
+      google.script.run
+        .withSuccessHandler(function (data) {
+          if (onSuccess) onSuccess(Array.isArray(data) ? data : fallback);
+        })
+        .withFailureHandler(function (error) {
+          console.warn("getSupportFaqs is not available yet; using static Support data.", error);
+          if (onFailure) onFailure(error);
+          if (onSuccess) onSuccess(fallback);
+        })
+        .getSupportFaqs();
+    },
+
+    getSupportQuickLinks(onSuccess, onFailure) {
+      const fallback = cloneData(supportPageData.quickLinks);
+
+      if (!this.isAppsScriptAvailable()) {
+        if (onSuccess) onSuccess(fallback);
+        return;
+      }
+
+      google.script.run
+        .withSuccessHandler(function (data) {
+          if (onSuccess) onSuccess(Array.isArray(data) ? data : fallback);
+        })
+        .withFailureHandler(function (error) {
+          console.warn("getSupportQuickLinks is not available yet; using static Support data.", error);
+          if (onFailure) onFailure(error);
+          if (onSuccess) onSuccess(fallback);
+        })
+        .getSupportQuickLinks();
     }
   };
 

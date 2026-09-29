@@ -1,7 +1,459 @@
-<section class="page-container" aria-labelledby="support-page-title">
-  <div class="page-development-placeholder">
-    <span class="section-label">HELP & SUPPORT</span>
-    <h1 id="support-page-title" data-page-title tabindex="-1">Help & Support</h1>
-    <p>Page content will be implemented separately.</p>
-  </div>
+<!-- =========================================================
+     HELP & SUPPORT
+     Novare Nexus / ONESCA
+     Semantic structure based strictly on the supplied reference.
+     Styles belong in Styles.html.
+     Behavior/data binding belongs in Scripts.html.
+========================================================== -->
+
+<section
+  class="support-page"
+  data-page="support"
+  aria-labelledby="support-title"
+>
+
+  <!-- =======================================================
+       HERO
+       Global nav contract: data-page-hero
+  ======================================================== -->
+  <section
+    class="support-hero page-hero"
+    data-page-hero
+    aria-labelledby="support-title"
+  >
+    <div class="support-hero-media" aria-hidden="true">
+      <img
+        id="support-hero-image"
+        class="support-hero-image"
+        data-image-key="support-hero"
+        alt=""
+        width="2200"
+        height="620"
+        loading="eager"
+        decoding="async"
+        fetchpriority="high"
+        hidden
+      >
+
+      <div
+        id="support-hero-fallback"
+        class="image-placeholder support-hero-fallback"
+        data-image-fallback="support-hero"
+        role="img"
+        aria-label="Help and Support hero visual unavailable"
+        hidden
+      >
+        Help &amp; Support
+      </div>
+
+      <div class="support-hero-overlay"></div>
+    </div>
+
+    <div class="support-hero-content">
+      <div class="support-hero-copy">
+        <p class="support-eyebrow">HELP &amp; SUPPORT</p>
+
+        <h1 id="support-title" data-page-title tabindex="-1">
+          <span>We’re Here to Help.</span>
+          <span><strong>Together, Further.</strong></span>
+        </h1>
+
+        <p class="support-hero-description">
+          Get the answers, guidance and support you need
+          to work smarter and move faster.
+        </p>
+
+        <div class="support-hero-tagline">
+          <span class="support-hero-tagline-rule" aria-hidden="true"></span>
+          <span>People. Solutions. Greater Impact.</span>
+        </div>
+      </div>
+
+      <div class="support-hero-message">
+        <div
+          class="support-hero-message-script"
+          aria-label="Questions today. Greater possibilities tomorrow."
+        >
+          <span>Questions</span>
+          <span>today.</span>
+          <span>Greater</span>
+          <span>possibilities</span>
+          <span>tomorrow.</span>
+        </div>
+
+        <span class="support-hero-message-rule" aria-hidden="true"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- =======================================================
+       PRIMARY SUPPORT OPTIONS
+  ======================================================== -->
+  <section
+    class="support-options"
+    aria-label="Primary support options"
+  >
+    <div
+      id="support-options-grid"
+      class="support-options-grid"
+      aria-live="polite"
+    >
+      <!-- Ask Nosca -->
+      <button
+        class="support-option-card is-blue"
+        type="button"
+        data-support-action="ask-nosca"
+      >
+        <span class="support-option-icon" aria-hidden="true">
+          <svg width="44" height="44" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.9"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 5h16v11H9l-5 4z"/>
+            <circle cx="9" cy="10.5" r=".7" fill="currentColor" stroke="none"/>
+            <circle cx="12" cy="10.5" r=".7" fill="currentColor" stroke="none"/>
+            <circle cx="15" cy="10.5" r=".7" fill="currentColor" stroke="none"/>
+          </svg>
+        </span>
+
+        <span class="support-option-copy">
+          <strong>Ask Nosca</strong>
+          <span>Get instant answers<br>with our AI-powered<br>assistant.</span>
+        </span>
+
+        <span class="support-option-arrow" aria-hidden="true">→</span>
+      </button>
+
+      <!-- Contact Support -->
+      <button
+        class="support-option-card is-green"
+        type="button"
+        data-support-action="contact-support"
+      >
+        <span class="support-option-icon" aria-hidden="true">
+          <svg width="44" height="44" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.9"
+               stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="8.5" cy="8" r="3"/>
+            <circle cx="16.5" cy="8.5" r="2.5"/>
+            <path d="M3 20c0-3.5 2.2-5.5 5.5-5.5S14 16.5 14 20"/>
+            <path d="M13.5 15c3.5-.4 6 1.4 6 5"/>
+          </svg>
+        </span>
+
+        <span class="support-option-copy">
+          <strong>Contact Support</strong>
+          <span>Reach our support<br>team for further<br>assistance.</span>
+        </span>
+
+        <span class="support-option-arrow" aria-hidden="true">→</span>
+      </button>
+
+      <!-- Guides & Resources -->
+      <button
+        class="support-option-card is-purple"
+        type="button"
+        data-support-action="guides-resources"
+      >
+        <span class="support-option-icon" aria-hidden="true">
+          <svg width="44" height="44" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.9"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 5h6c2 0 3 1 3 3v11c0-2-1-3-3-3H4z"/>
+            <path d="M20 5h-6c-2 0-3 1-3 3v11c0-2 1-3 3-3h6z"/>
+          </svg>
+        </span>
+
+        <span class="support-option-copy">
+          <strong>Guides &amp; Resources</strong>
+          <span>Explore user guides,<br>FAQs and how-to<br>resources.</span>
+        </span>
+
+        <span class="support-option-arrow" aria-hidden="true">→</span>
+      </button>
+
+      <!-- Service Status -->
+      <button
+        class="support-option-card is-orange"
+        type="button"
+        data-support-action="service-status"
+      >
+        <span class="support-option-icon" aria-hidden="true">
+          <svg width="44" height="44" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.9"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3 19 6v5c0 5-3 8-7 10-4-2-7-5-7-10V6z"/>
+            <path d="m9 12 2 2 4-4"/>
+          </svg>
+        </span>
+
+        <span class="support-option-copy">
+          <strong>Service Status</strong>
+          <span>Check the status of<br>our key systems and<br>applications.</span>
+        </span>
+
+        <span class="support-option-arrow" aria-hidden="true">→</span>
+      </button>
+    </div>
+  </section>
+
+
+  <!-- =======================================================
+       FAQ + QUICK LINKS
+  ======================================================== -->
+  <section
+    class="support-content-grid"
+    aria-label="Help resources"
+  >
+    <!-- Frequently Asked Questions -->
+    <section
+      class="support-faq support-panel"
+      aria-labelledby="support-faq-title"
+    >
+      <header class="support-section-header">
+        <div class="support-section-title-group">
+          <span class="support-section-icon" aria-hidden="true">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.9"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 5h6c2 0 3 1 3 3v11c0-2-1-3-3-3H4z"/>
+              <path d="M20 5h-6c-2 0-3 1-3 3v11c0-2 1-3 3-3h6z"/>
+            </svg>
+          </span>
+
+          <h2 id="support-faq-title">Frequently Asked Questions</h2>
+        </div>
+
+        <button
+          class="support-view-all"
+          type="button"
+          data-support-action="view-all-faqs"
+        >
+          <span>View All FAQs</span>
+          <span aria-hidden="true">→</span>
+        </button>
+      </header>
+
+      <div
+        id="support-faq-list"
+        class="support-faq-list"
+        aria-live="polite"
+      >
+        <button
+          class="support-faq-item"
+          type="button"
+          data-support-action="faq-system-access"
+        >
+          <span>How do I request system access?</span>
+          <span aria-hidden="true">›</span>
+        </button>
+
+        <button
+          class="support-faq-item"
+          type="button"
+          data-support-action="faq-latest-templates"
+        >
+          <span>Where can I find the latest templates?</span>
+          <span aria-hidden="true">›</span>
+        </button>
+
+        <button
+          class="support-faq-item"
+          type="button"
+          data-support-action="faq-operating-guidelines"
+        >
+          <span>What are the SC&amp;A operating guidelines?</span>
+          <span aria-hidden="true">›</span>
+        </button>
+
+        <button
+          class="support-faq-item"
+          type="button"
+          data-support-action="faq-solutioning-toolkit"
+        >
+          <span>How do I use the solutioning toolkit?</span>
+          <span aria-hidden="true">›</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Quick Links -->
+    <section
+      class="support-links support-panel"
+      aria-labelledby="support-links-title"
+    >
+      <header class="support-section-header">
+        <div class="support-section-title-group">
+          <span class="support-section-icon" aria-hidden="true">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.9"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/>
+              <path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/>
+            </svg>
+          </span>
+
+          <h2 id="support-links-title">Quick Links</h2>
+        </div>
+
+        <button
+          class="support-view-all"
+          type="button"
+          data-support-action="view-all-resources"
+        >
+          <span>View All Resources</span>
+          <span aria-hidden="true">→</span>
+        </button>
+      </header>
+
+      <div
+        id="support-quick-links-grid"
+        class="support-quick-links-grid"
+        aria-live="polite"
+      >
+        <button
+          class="support-link-card is-blue"
+          type="button"
+          data-support-action="user-guides"
+        >
+          <span class="support-link-icon" aria-hidden="true">
+            <svg width="25" height="25" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.9">
+              <path d="M6 3h9l3 3v15H6z"/>
+              <path d="M14 3v4h4M9 12h6M9 16h6"/>
+            </svg>
+          </span>
+          <span>User Guides</span>
+          <span class="support-link-arrow" aria-hidden="true">›</span>
+        </button>
+
+        <button
+          class="support-link-card is-green"
+          type="button"
+          data-support-action="video-tutorials"
+        >
+          <span class="support-link-icon" aria-hidden="true">
+            <svg width="25" height="25" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.9">
+              <rect x="3" y="5" width="18" height="14" rx="2"/>
+              <path d="m10 9 5 3-5 3z"/>
+            </svg>
+          </span>
+          <span>Video Tutorials</span>
+          <span class="support-link-arrow" aria-hidden="true">›</span>
+        </button>
+
+        <button
+          class="support-link-card is-orange"
+          type="button"
+          data-support-action="release-notes"
+        >
+          <span class="support-link-icon" aria-hidden="true">
+            <svg width="25" height="25" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.9"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <path d="m4 12 12-6v12L4 12z"/>
+              <path d="M16 9h3v6h-3M5 13l1 6h4l-2-5"/>
+            </svg>
+          </span>
+          <span>Release Notes</span>
+          <span class="support-link-arrow" aria-hidden="true">›</span>
+        </button>
+
+        <button
+          class="support-link-card is-blue"
+          type="button"
+          data-support-action="tools-templates"
+        >
+          <span class="support-link-icon" aria-hidden="true">
+            <svg width="25" height="25" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.9"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 6 18 2l4 4-4 4"/>
+              <path d="M10 18l-4 4-4-4 4-4"/>
+              <path d="m8 16 8-8"/>
+            </svg>
+          </span>
+          <span>Tools &amp; Templates</span>
+          <span class="support-link-arrow" aria-hidden="true">›</span>
+        </button>
+
+        <button
+          class="support-link-card is-purple"
+          type="button"
+          data-support-action="policies-guidelines"
+        >
+          <span class="support-link-icon" aria-hidden="true">
+            <svg width="25" height="25" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.9"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 3 19 6v5c0 5-3 8-7 10-4-2-7-5-7-10V6z"/>
+              <path d="m9 12 2 2 4-4"/>
+            </svg>
+          </span>
+          <span>Policies &amp; Guidelines</span>
+          <span class="support-link-arrow" aria-hidden="true">›</span>
+        </button>
+
+        <button
+          class="support-link-card is-blue"
+          type="button"
+          data-support-action="process-howtos"
+        >
+          <span class="support-link-icon" aria-hidden="true">
+            <svg width="25" height="25" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.9"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>
+            </svg>
+          </span>
+          <span>Process &amp; How-to's</span>
+          <span class="support-link-arrow" aria-hidden="true">›</span>
+        </button>
+      </div>
+    </section>
+  </section>
+
+  <!-- =======================================================
+       BOTTOM SUPPORT CTA
+  ======================================================== -->
+  <section
+    class="support-bottom-cta"
+    aria-labelledby="support-bottom-title"
+  >
+    <div class="support-bottom-left">
+      <span class="support-bottom-icon" aria-hidden="true">
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="1.9"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 18h6M10 22h4"/>
+          <path d="M8.2 14.5A7 7 0 1 1 15.8 14.5C14.7 15.3 14 16.4 14 18h-4c0-1.6-.7-2.7-1.8-3.5Z"/>
+        </svg>
+      </span>
+
+      <div>
+        <h2 id="support-bottom-title">Still need help?</h2>
+        <p>Can’t find what you’re looking for? Reach out and we’ll get you to the right people.</p>
+      </div>
+    </div>
+
+    <button
+      class="support-bottom-button"
+      type="button"
+      data-support-action="submit-support-request"
+    >
+      <span>Submit a Support Request</span>
+      <span aria-hidden="true">→</span>
+    </button>
+  </section>
+
+
+
+  <p
+    id="support-status"
+    class="support-status"
+    role="status"
+    aria-live="polite"
+  ></p>
+
 </section>

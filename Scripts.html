@@ -25,8 +25,9 @@
     support:       { title: "Help & Support",       templateId: "page-support-template",       showSearchFilters: true }
   };
 
-  // 3. CURRENT USER (prototype fallback; connect to your real identity source later)
-  const currentUser = { name: "Davin Zen", department: "SC&A" };
+  // 3. CURRENT USER FALLBACK
+  // Production identity is loaded from Code.gs -> getCurrentUser().
+  const currentUser = { name: "Novare User", email: "", department: "OneSCA" };
 
   // 4. GLOBAL SHELL DOM REFERENCES
   const dom = {
@@ -4515,7 +4516,44 @@
     },
 
     getCurrentUserFallback() {
-      return { name: currentUser.name, department: currentUser.department };
+      return {
+        name: currentUser.name,
+        email: currentUser.email,
+        department: currentUser.department
+      };
+    },
+
+    getCurrentUser(onSuccess, onFailure) {
+      const fallback = this.getCurrentUserFallback();
+
+      if (!this.isAppsScriptAvailable()) {
+        if (onSuccess) onSuccess(fallback);
+        return;
+      }
+
+      google.script.run
+        .withSuccessHandler(function (user) {
+          const normalized = user && typeof user === "object"
+            ? {
+                name: String(user.name || "").trim(),
+                email: String(user.email || "").trim(),
+                department: String(user.department || fallback.department).trim() || fallback.department
+              }
+            : fallback;
+
+          if (!normalized.name && normalized.email) {
+            normalized.name = normalized.email;
+          }
+
+          if (!normalized.name) normalized.name = fallback.name;
+          if (onSuccess) onSuccess(normalized);
+        })
+        .withFailureHandler(function (error) {
+          console.warn("Unable to load the signed-in Google user; using navbar fallback.", error);
+          if (onFailure) onFailure(error);
+          if (onSuccess) onSuccess(fallback);
+        })
+        .getCurrentUser();
     },
 
     getServerStatus(onSuccess, onFailure) {
@@ -5128,23 +5166,65 @@
   };
 
   // 12. INITIALIZATION
-  function initializeUser() {
-    const user = NexusAPI.getCurrentUserFallback();
+  function getUserInitials(user) {
+    const name = String(user && user.name || "").trim();
+    const email = String(user && user.email || "").trim();
+    const source = name || email || "User";
+
+    if (source.indexOf("@") !== -1) {
+      return source.charAt(0).toUpperCase();
+    }
+
+    return source
+      .split(/\s+/)
+      .filter(Boolean)
+      .map(function (part) { return part.charAt(0); })
+      .slice(0, 2)
+      .join("")
+      .toUpperCase() || "U";
+  }
+
+  function renderCurrentUser(user) {
+    const fallback = NexusAPI.getCurrentUserFallback();
+    const resolved = user && typeof user === "object" ? user : fallback;
+    const displayName = String(resolved.name || resolved.email || fallback.name).trim() || fallback.name;
+    const department = String(resolved.department || fallback.department).trim() || fallback.department;
+    const email = String(resolved.email || "").trim();
     const userName = document.getElementById("user-name");
     const userDepartment = document.getElementById("user-department");
     const userAvatar = document.getElementById("user-avatar");
+    const userProfile = document.querySelector("[data-user-profile]");
 
-    if (userName) userName.textContent = user.name;
-    if (userDepartment) userDepartment.textContent = user.department;
-    if (userAvatar) {
-      userAvatar.textContent = user.name
-        .split(/\s+/)
-        .map(function (part) { return part.charAt(0); })
-        .slice(0, 2)
-        .join("")
-        .toUpperCase();
-      userAvatar.setAttribute("aria-label", user.name + " avatar placeholder");
+    if (userName) {
+      userName.textContent = displayName;
+      if (email) userName.title = email;
+      else userName.removeAttribute("title");
     }
+
+    if (userDepartment) userDepartment.textContent = department;
+
+    if (userAvatar) {
+      userAvatar.textContent = getUserInitials({ name: displayName, email: email });
+      userAvatar.setAttribute("aria-label", displayName + " avatar");
+    }
+
+    if (userProfile) {
+      userProfile.setAttribute(
+        "aria-label",
+        email ? (displayName + ", " + email) : displayName
+      );
+    }
+  }
+
+  function initializeUser() {
+    NexusAPI.getCurrentUser(
+      function (user) {
+        renderCurrentUser(user);
+      },
+      function () {
+        // NexusAPI already renders the neutral fallback through onSuccess.
+      }
+    );
   }
 
   function initializeApp() {

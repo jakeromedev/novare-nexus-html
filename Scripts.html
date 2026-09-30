@@ -2616,6 +2616,12 @@
   function handleSupportAction(pageRoot, action) {
     if (!pageRoot || !action) return;
 
+    if (action === "ask-nosca") {
+      openNoscaChat();
+      showSupportStatus(pageRoot, "Ask NOSCA opened.");
+      return;
+    }
+
     if (action === "guides-resources" || action === "view-all-resources") {
       const title = pageRoot.querySelector("#support-links-title");
       if (title && typeof title.scrollIntoView === "function") {
@@ -4156,8 +4162,8 @@
       button.querySelector(".home-help-description").textContent = item.description;
       button.addEventListener("click", function () {
         if (item.action === "open-nosca") {
-          openNoscaPlaceholder();
-          showHomeSectionStatus(pageRoot, "Ask Nexus opened the current Ask Nosca placeholder. Live AI integration remains out of scope.");
+          openNoscaChat();
+          showHomeSectionStatus(pageRoot, "Ask NOSCA opened.");
           return;
         }
         showHomeSectionStatus(pageRoot, item.title + " will be connected to its support destination in a later phase.");
@@ -4210,10 +4216,20 @@
 
     form.addEventListener("submit", function (event) {
       event.preventDefault();
-      status.textContent = input.value.trim()
-        ? "Ask Nexus will be implemented in a later phase. Your prompt has not been sent."
-        : "Enter a question or choose a suggested action to get started.";
-      if (!input.value.trim()) input.focus();
+
+      const question = input.value.trim();
+
+      if (!question) {
+        status.textContent = "Enter a question or choose a suggested action to get started.";
+        input.focus();
+        return;
+      }
+
+      status.textContent = "";
+      openNoscaChat({
+        draft: question,
+        submit: true
+      });
     });
 
     next.addEventListener("click", function () {
@@ -4503,13 +4519,31 @@
     }
   }
 
-  // 10. ASK NOSCA PLACEHOLDER
-  function openNoscaPlaceholder() {
-    if (dom.dialog && !dom.dialog.open) dom.dialog.showModal();
+  // 10. ASK NOSCA CHAT
+  function openNoscaChat(options) {
+    if (
+      window.NexusNosca &&
+      typeof window.NexusNosca.open === "function"
+    ) {
+      window.NexusNosca.open(options || {});
+      return;
+    }
+
+    console.warn("Ask NOSCA chat controller is unavailable.");
   }
 
-  function closeNoscaPlaceholder() {
-    if (dom.dialog && dom.dialog.open) dom.dialog.close();
+  function closeNoscaChat() {
+    if (
+      window.NexusNosca &&
+      typeof window.NexusNosca.close === "function"
+    ) {
+      window.NexusNosca.close();
+      return;
+    }
+
+    if (dom.dialog && dom.dialog.open) {
+      dom.dialog.close();
+    }
   }
 
   // 11. APPS SCRIPT API ADAPTER
@@ -5266,24 +5300,9 @@
       });
     }
 
-    if (dom.launcher) dom.launcher.addEventListener("click", openNoscaPlaceholder);
-
-    if (dom.dialogClose) {
-      dom.dialogClose.addEventListener("click", function (event) {
-        event.preventDefault();
-        closeNoscaPlaceholder();
-      });
-    }
-
-    if (dom.dialog) {
-      dom.dialog.addEventListener("cancel", function (event) {
-        event.preventDefault();
-        closeNoscaPlaceholder();
-      });
-
-      dom.dialog.addEventListener("close", function () {
-        if (mobileQuery.matches && !state.mobileOpen && dom.toggle) dom.toggle.focus();
-        else if (dom.launcher) dom.launcher.focus();
+    if (dom.launcher) {
+      dom.launcher.addEventListener("click", function () {
+        openNoscaChat();
       });
     }
 

@@ -27,6 +27,85 @@
       };
     },
 
+    askNosca: function (question) {
+      const cleanQuestion = String(question || "").trim();
+
+      if (!cleanQuestion) {
+        throw new Error("Please enter a question for Ask NOSCA.");
+      }
+
+      console.info(
+        "🧪 [ONESCA LocalDevShim] askNosca() is returning a local mock response. No Gemini or Drive request is being made.",
+        { question: cleanQuestion }
+      );
+
+      return {
+        ok: true,
+        requestId:
+          "LOCAL-" +
+          Date.now().toString(36).toUpperCase(),
+        grounded: true,
+        answer:
+          "This is a local Ask NOSCA mock response for: “" +
+          cleanQuestion +
+          "”\n\nIn the deployed Apps Script version, this message will be replaced by the Phase 4 grounded answer generated from the approved NOSCA knowledge sources.",
+        sources: [
+          {
+            sourceIndex: 1,
+            fileName: "Local Mock Knowledge Source",
+            folderPath: "/Local Development",
+            mimeType: "application/vnd.google-apps.document",
+            driveUrl: "https://drive.google.com/"
+          }
+        ],
+        model: "LOCAL MOCK",
+        usage: {
+          promptTokenCount: 0,
+          candidatesTokenCount: 0,
+          totalTokenCount: 0
+        },
+        diagnostics: {
+          retrievalCandidateCount: 1,
+          contextChunkCount: 1,
+          contextChars: 0,
+          retrievalWarnings: []
+        },
+        elapsedMs: 180
+      };
+    },
+
+    submitNoscaFeedback: function (
+      requestId,
+      helpful,
+      comment
+    ) {
+      const normalizedRequestId =
+        String(requestId || "").trim();
+
+      if (!normalizedRequestId) {
+        throw new Error(
+          "Local feedback mock requires a Request ID."
+        );
+      }
+
+      console.info(
+        "🧪 [ONESCA LocalDevShim] submitNoscaFeedback() saved local mock feedback only.",
+        {
+          requestId: normalizedRequestId,
+          helpful: helpful ? "Yes" : "No",
+          comment: String(comment || "").trim()
+        }
+      );
+
+      return {
+        ok: true,
+        requestId: normalizedRequestId,
+        helpful: helpful ? "Yes" : "No",
+        commentSaved:
+          Boolean(String(comment || "").trim())
+      };
+    },
+
     getManagedLinks: function (linkKeys) {
       const requested = Array.isArray(linkKeys) ? linkKeys : [];
       const links = {};

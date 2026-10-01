@@ -17737,4 +17737,174 @@
       }
     }
 
+
+    /* =========================================================
+       GLOBAL HERO — STICKY SCROLL DISSOLVE
+       The hero stays pinned briefly while scrolling, then fades
+       and softly zooms away as the frosted navbar takes over.
+       ========================================================= */
+
+    [data-page-hero] {
+      --hero-scroll-opacity: 1;
+      --hero-copy-opacity: 1;
+      --hero-media-scale: 1;
+      --hero-copy-offset: 0px;
+
+      position: sticky !important;
+      top: 0;
+      z-index: 0;
+
+      opacity:
+        var(--hero-scroll-opacity);
+
+      transform:
+        translateZ(0);
+
+      will-change:
+        opacity;
+
+      transition:
+        opacity 28ms linear;
+    }
+
+    /*
+      Hero artwork scales independently from the hero container so
+      sticky positioning remains stable.
+    */
+    [data-page-hero]
+      > [class*="-hero-media"],
+    .home-hero[data-page-hero]
+      .home-hero-media {
+      transform:
+        scale(
+          var(--hero-media-scale)
+        );
+
+      transform-origin:
+        center center;
+
+      will-change:
+        transform;
+
+      transition:
+        transform 28ms linear;
+    }
+
+    /*
+      Foreground copy fades slightly faster than the artwork and moves
+      upward just a few pixels for a polished dissolve.
+    */
+    .home-hero[data-page-hero]
+      .home-hero-copy,
+    .home-hero[data-page-hero]
+      .home-hero-message,
+    .home-hero[data-page-hero]
+      .home-handwriting-frame,
+    .overview-hero[data-page-hero]
+      .overview-hero-copy,
+    .offerings-hero[data-page-hero]
+      .offerings-hero-content,
+    .opportunities-hero[data-page-hero]
+      .opportunities-hero-content,
+    .programs-hero[data-page-hero]
+      .programs-hero-content,
+    .delivery-hero[data-page-hero]
+      .delivery-hero-content,
+    .governance-hero[data-page-hero]
+      .governance-hero-content,
+    .tools-hero[data-page-hero]
+      .tools-hero-content,
+    .support-hero[data-page-hero]
+      .support-hero-content,
+    .search-hero[data-page-hero]
+      .search-hero-content {
+      opacity:
+        var(--hero-copy-opacity);
+
+      transform:
+        translateY(
+          var(--hero-copy-offset)
+        );
+
+      will-change:
+        opacity,
+        transform;
+
+      transition:
+        opacity 28ms linear,
+        transform 28ms linear;
+    }
+
+    /*
+      Once fully faded, the invisible sticky hero must not intercept
+      clicks intended for content scrolling underneath it.
+    */
+    [data-page-hero].is-scroll-faded {
+      pointer-events: none;
+    }
+
+    /*
+      Give following page content its own paint layer so it can visually
+      take over from the fading sticky hero instead of appearing trapped
+      behind it.
+    */
+    [data-page-hero] + * {
+      position: relative;
+      z-index: 1;
+    }
+
+    /*
+      Home's Ask Nexus command already intentionally overlaps the hero;
+      keep its existing stronger stacking level.
+    */
+    .home-hero[data-page-hero]
+      + .home-ai-command {
+      z-index: 5;
+    }
+
+    /*
+      Reduced motion keeps the hero layout stable and disables the
+      scale/offset animation while preserving a simple opacity fade.
+    */
+    @media (prefers-reduced-motion: reduce) {
+      [data-page-hero] {
+        position: relative !important;
+        top: auto;
+        transform: none !important;
+        transition: none !important;
+      }
+
+      [data-page-hero]
+        > [class*="-hero-media"],
+      .home-hero[data-page-hero]
+        .home-hero-media,
+      .home-hero[data-page-hero]
+        .home-hero-copy,
+      .home-hero[data-page-hero]
+        .home-hero-message,
+      .home-hero[data-page-hero]
+        .home-handwriting-frame,
+      .overview-hero[data-page-hero]
+        .overview-hero-copy,
+      .offerings-hero[data-page-hero]
+        .offerings-hero-content,
+      .opportunities-hero[data-page-hero]
+        .opportunities-hero-content,
+      .programs-hero[data-page-hero]
+        .programs-hero-content,
+      .delivery-hero[data-page-hero]
+        .delivery-hero-content,
+      .governance-hero[data-page-hero]
+        .governance-hero-content,
+      .tools-hero[data-page-hero]
+        .tools-hero-content,
+      .support-hero[data-page-hero]
+        .support-hero-content,
+      .search-hero[data-page-hero]
+        .search-hero-content {
+        transform: none !important;
+        transition: none !important;
+      }
+    }
+
 </style>

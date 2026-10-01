@@ -4373,28 +4373,184 @@
     );
   }
 
+  function getActivePageHero() {
+    const page =
+      pageCache.get(state.route);
+
+    return page
+      ? page.querySelector(
+          "[data-page-hero]"
+        )
+      : null;
+  }
+
+  function resetHeroScrollEffect(hero) {
+    if (!hero) return;
+
+    hero.style.removeProperty(
+      "--hero-scroll-opacity"
+    );
+    hero.style.removeProperty(
+      "--hero-copy-opacity"
+    );
+    hero.style.removeProperty(
+      "--hero-media-scale"
+    );
+    hero.style.removeProperty(
+      "--hero-copy-offset"
+    );
+
+    hero.classList.remove(
+      "is-scroll-faded"
+    );
+  }
+
+  function updateHeroScrollEffect(
+    scrollTop
+  ) {
+    const hero =
+      getActivePageHero();
+
+    if (!hero) {
+      return;
+    }
+
+    const fadeDistance =
+      mobileQuery.matches
+        ? 190
+        : 240;
+
+    const rawProgress =
+      Math.max(
+        0,
+        Math.min(
+          1,
+          scrollTop /
+          fadeDistance
+        )
+      );
+
+    const eased =
+      1 -
+      Math.pow(
+        1 - rawProgress,
+        2
+      );
+
+    // Background / artwork fades gradually.
+    const heroOpacity =
+      Math.max(
+        0,
+        1 - eased
+      );
+
+    // Copy disappears a little earlier so text does not linger
+    // awkwardly over the next content section.
+    const copyOpacity =
+      Math.max(
+        0,
+        1 -
+        rawProgress * 1.32
+      );
+
+    // Very subtle scale-up gives the hero a polished parallax-like feel.
+    const mediaScale =
+      1 +
+      eased * 0.026;
+
+    const copyOffset =
+      Math.round(
+        eased * -12
+      );
+
+    hero.style.setProperty(
+      "--hero-scroll-opacity",
+      heroOpacity.toFixed(3)
+    );
+
+    hero.style.setProperty(
+      "--hero-copy-opacity",
+      copyOpacity.toFixed(3)
+    );
+
+    hero.style.setProperty(
+      "--hero-media-scale",
+      mediaScale.toFixed(4)
+    );
+
+    hero.style.setProperty(
+      "--hero-copy-offset",
+      copyOffset + "px"
+    );
+
+    hero.classList.toggle(
+      "is-scroll-faded",
+      rawProgress >= 0.985
+    );
+  }
+
   function updateNavHeaderScrollEffect() {
     navHeaderScrollFrame = 0;
     if (!dom.navHeader) return;
+
+    const scrollTop =
+      getPageScrollTop();
 
     if (!dom.app.classList.contains("hero-route")) {
       dom.navHeader.style.removeProperty("--nav-header-opacity");
       dom.navHeader.style.removeProperty("--nav-header-border-opacity");
       dom.navHeader.style.removeProperty("--nav-header-shadow-opacity");
       dom.navHeader.style.removeProperty("--nav-header-blur");
+
+      resetHeroScrollEffect(
+        getActivePageHero()
+      );
+
       return;
     }
 
-    // When the active route has a page hero, the global header is transparent at the top.
-    // Over the first 180px of scroll,
-    // fade in a frosted surface so dashboard content stays readable beneath it.
-    const progress = Math.max(0, Math.min(1, getPageScrollTop() / 180));
-    const eased = 1 - Math.pow(1 - progress, 2);
+    // Keep the navbar transition synchronized with the hero dissolve.
+    // The navbar becomes frosted while the hero fades away underneath it.
+    const progress =
+      Math.max(
+        0,
+        Math.min(
+          1,
+          scrollTop / 180
+        )
+      );
 
-    dom.navHeader.style.setProperty("--nav-header-opacity", (eased * 0.94).toFixed(3));
-    dom.navHeader.style.setProperty("--nav-header-border-opacity", (eased * 0.72).toFixed(3));
-    dom.navHeader.style.setProperty("--nav-header-shadow-opacity", (eased * 0.08).toFixed(3));
-    dom.navHeader.style.setProperty("--nav-header-blur", (eased * 14).toFixed(1) + "px");
+    const eased =
+      1 -
+      Math.pow(
+        1 - progress,
+        2
+      );
+
+    dom.navHeader.style.setProperty(
+      "--nav-header-opacity",
+      (eased * 0.94).toFixed(3)
+    );
+
+    dom.navHeader.style.setProperty(
+      "--nav-header-border-opacity",
+      (eased * 0.72).toFixed(3)
+    );
+
+    dom.navHeader.style.setProperty(
+      "--nav-header-shadow-opacity",
+      (eased * 0.08).toFixed(3)
+    );
+
+    dom.navHeader.style.setProperty(
+      "--nav-header-blur",
+      (eased * 14).toFixed(1) +
+      "px"
+    );
+
+    updateHeroScrollEffect(
+      scrollTop
+    );
   }
 
   function scheduleNavHeaderScrollEffect() {

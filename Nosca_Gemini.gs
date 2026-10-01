@@ -187,55 +187,325 @@ function callNoscaGemini_(request) {
     Number(NOSCA_CONFIG.gemini.maxAttempts || 1),
     1
   );
+  const baseDelayMs = Math.max(
+    Number(NOSCA_CONFIG.gemini.retryDelayMs || 2000),
+    0
+  );
+  const maxDelayMs = Math.max(
+    Number(NOSCA_CONFIG.gemini.retryMaxDelayMs || 8000),
+    baseDelayMs
+  );
+  const maxServerDelayMs = Math.max(
+    Number(NOSCA_CONFIG.gemini.maxServerRetryDelayMs || 30000),
+    maxDelayMs
+  );
 
-  let lastError = null;
+  let lastFailure = null;
 
   for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    const attemptStartedAt = Date.now();
+
     try {
       const response = UrlFetchApp.fetch(url, options);
-      const status = response.getResponseCode();
+      const status = Number(response.getResponseCode() || 0);
       const body = response.getContentText() || '';
 
       if (status >= 200 && status < 300) {
-        return parseNoscaGeminiResponse_(
-          body,
-          model
-        );
+        if (attempt > 1) {
+          console.log(
+            '[Ask NOSCA][Gemini] Request recovered | attempt=' +
+              attempt +
+              '/' +
+              maxAttempts +
+              ' | http=' +
+              status +
+              ' | elapsedMs=' +
+              (Date.now() - attemptStartedAt)
+          );
+        }
+
+        return parseNoscaGeminiResponse_(body, model);
       }
 
-      const apiError = parseNoscaGeminiApiError_(
-        body,
-        status
+      const apiError = parseNoscaGeminiApiError_(body, status);
+      const retryable = isNoscaGeminiRetryableStatus_(status);
+      const retryAfterMs = getNoscaGeminiRetryAfterMs_(
+        response,
+        apiError,
+        maxServerDelayMs
       );
 
-      lastError = new Error(apiError.message);
+      lastFailure = {
+        kind: 'http',
+        status: status,
+        apiStatus: apiError.apiStatus,
+        apiMessage: apiError.apiMessage,
+        retryable: retryable,
+        retryAfterMs: retryAfterMs
+      };
 
-      const retryable =
-        status === 429 ||
-        status === 408 ||
-        status >= 500;
+      console.warn(
+        '[Ask NOSCA][Gemini] Request failed | attempt=' +
+          attempt +
+          '/' +
+          maxAttempts +
+          ' | http=' +
+          status +
+          ' | apiStatus=' +
+          (apiError.apiStatus || 'unknown') +
+          ' | retryable=' +
+          retryable +
+          ' | message=' +
+          truncateNoscaGeminiLogText_(apiError.apiMessage, 500)
+      );
 
       if (!retryable || attempt >= maxAttempts) {
-        throw lastError;
+        throw createNoscaGeminiFinalError_(lastFailure);
       }
+
+      const delayMs = getNoscaGeminiBackoffMs_(
+        attempt,
+        baseDelayMs,
+        maxDelayMs,
+        retryAfterMs
+      );
+
+      console.warn(
+        '[Ask NOSCA][Gemini] Retrying | nextAttempt=' +
+          (attempt + 1) +
+          '/' +
+          maxAttempts +
+          ' | waitMs=' +
+          delayMs +
+          (retryAfterMs > 0 ? ' | serverRetryAfterMs=' + retryAfterMs : '')
+      );
+
+      Utilities.sleep(delayMs);
+      continue;
     } catch (error) {
-      lastError = error;
+      if (error && error.noscaGeminiFinal === true) {
+        throw error;
+      }
+
+      lastFailure = {
+        kind: 'transport',
+        status: 0,
+        apiStatus: '',
+        apiMessage: getNoscaErrorMessage_(error),
+        retryable: true,
+        retryAfterMs: 0
+      };
+
+      console.warn(
+        '[Ask NOSCA][Gemini] Transport failure | attempt=' +
+          attempt +
+          '/' +
+          maxAttempts +
+          ' | retryable=true | message=' +
+          truncateNoscaGeminiLogText_(lastFailure.apiMessage, 500)
+      );
 
       if (attempt >= maxAttempts) {
-        break;
+        throw createNoscaGeminiFinalError_(lastFailure);
       }
-    }
 
-    Utilities.sleep(
-      Number(NOSCA_CONFIG.gemini.retryDelayMs || 900) *
-      attempt
-    );
+      const delayMs = getNoscaGeminiBackoffMs_(
+        attempt,
+        baseDelayMs,
+        maxDelayMs,
+        0
+      );
+
+      console.warn(
+        '[Ask NOSCA][Gemini] Retrying transport failure | nextAttempt=' +
+          (attempt + 1) +
+          '/' +
+          maxAttempts +
+          ' | waitMs=' +
+          delayMs
+      );
+
+      Utilities.sleep(delayMs);
+    }
   }
 
-  throw new Error(
-    'Gemini request failed. ' +
-    getNoscaErrorMessage_(lastError)
+  throw createNoscaGeminiFinalError_(lastFailure || {
+    kind: 'unknown',
+    status: 0,
+    apiStatus: '',
+    apiMessage: 'Unknown Gemini request failure.',
+    retryable: false,
+    retryAfterMs: 0
+  });
+}
+
+/**
+ * Only retry transient server/rate-limit responses. Permanent request,
+ * authentication, permission, and not-found errors fail immediately.
+ */
+function isNoscaGeminiRetryableStatus_(status) {
+  return [429, 500, 503, 504].indexOf(Number(status)) !== -1;
+}
+
+/**
+ * Exponential backoff: base, base*2, base*4 ... capped by retryMaxDelayMs.
+ * If Gemini supplies Retry-After / RetryInfo, wait at least that long.
+ */
+function getNoscaGeminiBackoffMs_(
+  failedAttempt,
+  baseDelayMs,
+  maxDelayMs,
+  retryAfterMs
+) {
+  const exponent = Math.max(Number(failedAttempt || 1) - 1, 0);
+  const exponentialMs = Math.min(
+    baseDelayMs * Math.pow(2, exponent),
+    maxDelayMs
   );
+
+  return Math.max(
+    Math.round(exponentialMs),
+    Math.max(Number(retryAfterMs || 0), 0)
+  );
+}
+
+/**
+ * Reads Retry-After HTTP header or google.rpc.RetryInfo from Gemini's error
+ * response. The delay is capped to preserve Apps Script execution headroom.
+ */
+function getNoscaGeminiRetryAfterMs_(response, apiError, maxServerDelayMs) {
+  let delayMs = 0;
+
+  try {
+    const headers = response && response.getAllHeaders
+      ? response.getAllHeaders()
+      : {};
+
+    Object.keys(headers || {}).some(function (key) {
+      if (String(key).toLowerCase() !== 'retry-after') {
+        return false;
+      }
+
+      const rawValue = Array.isArray(headers[key])
+        ? headers[key][0]
+        : headers[key];
+      const parsed = parseNoscaRetryAfterValueMs_(rawValue);
+
+      if (parsed > 0) {
+        delayMs = parsed;
+      }
+
+      return true;
+    });
+  } catch (error) {
+    // Retry-After is optional; ignore header parsing failures.
+  }
+
+  if (
+    !delayMs &&
+    apiError &&
+    Number(apiError.retryDelayMs || 0) > 0
+  ) {
+    delayMs = Number(apiError.retryDelayMs);
+  }
+
+  return Math.min(
+    Math.max(Math.round(delayMs), 0),
+    Math.max(Number(maxServerDelayMs || 30000), 0)
+  );
+}
+
+function parseNoscaRetryAfterValueMs_(value) {
+  if (value === null || value === undefined || value === '') {
+    return 0;
+  }
+
+  const text = String(value).trim();
+  const seconds = Number(text);
+
+  if (Number.isFinite(seconds) && seconds >= 0) {
+    return Math.round(seconds * 1000);
+  }
+
+  const dateMs = Date.parse(text);
+  if (!Number.isNaN(dateMs)) {
+    return Math.max(dateMs - Date.now(), 0);
+  }
+
+  return 0;
+}
+
+function parseNoscaGoogleRetryDelayMs_(value) {
+  if (!value) {
+    return 0;
+  }
+
+  const text = String(value).trim();
+  const match = text.match(/^([0-9]+(?:\.[0-9]+)?)s$/i);
+
+  if (!match) {
+    return 0;
+  }
+
+  return Math.round(Number(match[1]) * 1000);
+}
+
+/**
+ * Produces a user-safe final error. Detailed HTTP/API information has already
+ * been written to the server execution log and is not exposed to the browser.
+ */
+function createNoscaGeminiFinalError_(failure) {
+  const status = Number(failure && failure.status || 0);
+  let message;
+
+  if (status === 429) {
+    message =
+      'Gemini API rate limit reached. Please wait briefly and try your ' +
+      'question again.';
+  } else if ([500, 503, 504].indexOf(status) !== -1) {
+    message =
+      'Gemini is temporarily unavailable. NOSCA found relevant sources, ' +
+      'but answer generation could not complete. Please try again shortly.';
+  } else if (status === 401 || status === 403) {
+    message =
+      'Gemini API authentication or permission failed. Please contact the ' +
+      'NOSCA administrator.';
+  } else if (status === 404) {
+    message =
+      'The configured Gemini model or endpoint was not found. Please ' +
+      'contact the NOSCA administrator.';
+  } else if (status >= 400 && status < 500) {
+    message =
+      'Gemini rejected the request. Please try rephrasing your question. ' +
+      'If the issue continues, contact the NOSCA administrator.';
+  } else if (failure && failure.kind === 'transport') {
+    message =
+      'Gemini could not be reached after several attempts. Please try again ' +
+      'shortly.';
+  } else {
+    message =
+      'Gemini could not complete the request. Please try again shortly.';
+  }
+
+  const error = new Error(message);
+  error.noscaGeminiFinal = true;
+  error.noscaGeminiStatus = status;
+  error.noscaGeminiApiStatus = String(
+    failure && failure.apiStatus || ''
+  );
+
+  return error;
+}
+
+function truncateNoscaGeminiLogText_(value, maxChars) {
+  const text = String(value || '').replace(/\s+/g, ' ').trim();
+  const limit = Math.max(Number(maxChars || 0), 0);
+
+  if (!limit || text.length <= limit) {
+    return text;
+  }
+
+  return text.slice(0, limit - 1) + '…';
 }
 
 /**
@@ -320,28 +590,51 @@ function parseNoscaGeminiResponse_(body, model) {
  * leaking the API key.
  */
 function parseNoscaGeminiApiError_(body, status) {
-  let message =
+  let apiStatus = '';
+  let apiMessage =
     'Gemini API request failed with HTTP ' +
     status +
     '.';
+  let retryDelayMs = 0;
 
   try {
     const data = JSON.parse(body);
+    const apiError = data && data.error ? data.error : {};
 
-    if (
-      data &&
-      data.error &&
-      data.error.message
-    ) {
-      message += ' ' + String(data.error.message);
+    if (apiError.status) {
+      apiStatus = String(apiError.status);
     }
+
+    if (apiError.message) {
+      apiMessage = String(apiError.message);
+    }
+
+    const details = Array.isArray(apiError.details)
+      ? apiError.details
+      : [];
+
+    details.some(function (detail) {
+      if (!detail || !detail.retryDelay) {
+        return false;
+      }
+
+      const parsed = parseNoscaGoogleRetryDelayMs_(detail.retryDelay);
+      if (parsed > 0) {
+        retryDelayMs = parsed;
+        return true;
+      }
+
+      return false;
+    });
   } catch (error) {
-    // Keep the generic message.
+    // Keep generic values when Gemini does not return JSON.
   }
 
   return {
-    status: status,
-    message: message
+    status: Number(status || 0),
+    apiStatus: apiStatus,
+    apiMessage: apiMessage,
+    retryDelayMs: retryDelayMs
   };
 }
 

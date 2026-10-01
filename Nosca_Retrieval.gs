@@ -54,6 +54,8 @@ function previewNoscaRetrieval(question) {
         fileId: candidate.fileId,
         fileName: candidate.fileName,
         folderPath: candidate.folderPath,
+        documentType: candidate.documentType,
+        fileFormat: candidate.fileFormat,
         mimeType: candidate.mimeType,
         driveUrl: candidate.driveUrl,
         metadataScore: candidate.metadataScore,
@@ -91,6 +93,21 @@ function retrieveNoscaContext_(question) {
   const startedAt = Date.now();
   const normalizedQuestion = normalizeNoscaQuery_(question);
 
+  noscaDebugLog_(
+    'Retrieval started',
+    {
+      questionLength: normalizedQuestion.text.length,
+      queryTerms: normalizedQuestion.terms,
+      phraseCount: normalizedQuestion.phrases.length,
+      minMetadataScore:
+        NOSCA_CONFIG.retrieval.minMetadataScore,
+      minChunkScore:
+        NOSCA_CONFIG.retrieval.minChunkScore,
+      maxCandidateFiles:
+        NOSCA_CONFIG.retrieval.maxCandidateFiles
+    }
+  );
+
   if (!normalizedQuestion.text) {
     throw new Error(
       'Ask NOSCA requires a non-empty question.'
@@ -104,9 +121,34 @@ function retrieveNoscaContext_(question) {
   }
 
   const existing = loadNoscaExistingIndex_();
+
+  noscaDebugLog_(
+    'NOSCA_Index summary',
+    summarizeNoscaIndexForDebug_(existing)
+  );
+
   const rankedCandidates = rankNoscaIndexRecords_(
     existing,
     normalizedQuestion
+  );
+
+  noscaDebugLog_(
+    'Top metadata-ranked candidates BEFORE threshold',
+    rankedCandidates
+      .slice(
+        0,
+        NOSCA_CONFIG.debug.maxCandidatesToLog
+      )
+      .map(function (candidate) {
+        return {
+          fileName: candidate.fileName,
+          folderPath: candidate.folderPath,
+          mimeType: candidate.mimeType,
+          metadataScore: candidate.metadataScore,
+          matchedTerms: candidate.matchedTerms,
+          status: candidate.status
+        };
+      })
   );
 
   const candidateLimit = NOSCA_CONFIG.retrieval.maxCandidateFiles;
@@ -119,7 +161,41 @@ function retrieveNoscaContext_(question) {
     })
     .slice(0, candidateLimit);
 
+  noscaDebugLog_(
+    'Candidates AFTER metadata threshold',
+    {
+      selectedCount: candidates.length,
+      rejectedByThreshold:
+        Math.max(
+          rankedCandidates.length - candidates.length,
+          0
+        ),
+      candidates: candidates.map(function (candidate) {
+        return {
+          fileName: candidate.fileName,
+          mimeType: candidate.mimeType,
+          metadataScore: candidate.metadataScore,
+          matchedTerms: candidate.matchedTerms
+        };
+      })
+    }
+  );
+
   if (!candidates.length) {
+    noscaDebugWarn_(
+      'Retrieval stopped: no candidate met minMetadataScore.',
+      {
+        minMetadataScore:
+          NOSCA_CONFIG.retrieval.minMetadataScore,
+        activeSupportedIndexRecords:
+          rankedCandidates.length,
+        highestMetadataScore:
+          rankedCandidates.length
+            ? rankedCandidates[0].metadataScore
+            : null
+      }
+    );
+
     return {
       ok: true,
       question: normalizedQuestion.text,
@@ -139,7 +215,27 @@ function retrieveNoscaContext_(question) {
 
   candidates.forEach(function (candidate) {
     try {
+      noscaDebugLog_(
+        'Extracting candidate',
+        {
+          fileName: candidate.fileName,
+          mimeType: candidate.mimeType,
+          metadataScore: candidate.metadataScore
+        }
+      );
+
       const extraction = extractNoscaFileContent_(candidate);
+
+      noscaDebugLog_(
+        'Extraction completed',
+        {
+          fileName: candidate.fileName,
+          charCount: extraction.charCount,
+          truncated: extraction.truncated,
+          warningCount:
+            (extraction.warnings || []).length
+        }
+      );
 
       (extraction.warnings || []).forEach(function (warning) {
         warnings.push(
@@ -153,7 +249,15 @@ function retrieveNoscaContext_(question) {
         NOSCA_CONFIG.retrieval.chunkOverlapChars
       );
 
-      const rankedFileChunks = chunks
+      noscaDebugLog_(
+        'Chunks created for candidate',
+        {
+          fileName: candidate.fileName,
+          chunkCount: chunks.length
+        }
+      );
+
+      const allScoredFileChunks = chunks
         .map(function (text, index) {
           const scoreResult = scoreNoscaContentChunk_(
             text,
@@ -165,6 +269,8 @@ function retrieveNoscaContext_(question) {
             fileId: candidate.fileId,
             fileName: candidate.fileName,
             folderPath: candidate.folderPath,
+            documentType: candidate.documentType,
+            fileFormat: candidate.fileFormat,
             mimeType: candidate.mimeType,
             driveUrl: candidate.driveUrl,
             metadataScore: candidate.metadataScore,
@@ -174,6 +280,27 @@ function retrieveNoscaContext_(question) {
             text: text
           };
         })
+        .sort(compareNoscaChunks_);
+
+      noscaDebugLog_(
+        'Top chunk scores BEFORE chunk threshold',
+        allScoredFileChunks
+          .slice(
+            0,
+            NOSCA_CONFIG.debug.maxChunksToLog
+          )
+          .map(function (chunk) {
+            return {
+              fileName: chunk.fileName,
+              chunkIndex: chunk.chunkIndex,
+              score: chunk.score,
+              metadataScore: chunk.metadataScore,
+              matchedTerms: chunk.matchedTerms
+            };
+          })
+      );
+
+      const rankedFileChunks = allScoredFileChunks
         .filter(function (chunk) {
           return (
             chunk.score >= NOSCA_CONFIG.retrieval.minChunkScore ||
@@ -186,15 +313,39 @@ function retrieveNoscaContext_(question) {
           NOSCA_CONFIG.retrieval.maxChunksPerFile
         );
 
+      noscaDebugLog_(
+        'Chunks AFTER chunk threshold',
+        {
+          fileName: candidate.fileName,
+          retainedCount: rankedFileChunks.length,
+          minChunkScore:
+            NOSCA_CONFIG.retrieval.minChunkScore,
+          metadataBypass:
+            candidate.metadataScore >= 12
+        }
+      );
+
       Array.prototype.push.apply(
         scoredChunks,
         rankedFileChunks
       );
     } catch (error) {
+      const errorMessage =
+        getNoscaErrorMessage_(error);
+
+      noscaDebugError_(
+        'Candidate extraction failed',
+        {
+          fileName: candidate.fileName,
+          mimeType: candidate.mimeType,
+          error: errorMessage
+        }
+      );
+
       warnings.push(
         candidate.fileName +
         ': extraction failed — ' +
-        getNoscaErrorMessage_(error)
+        errorMessage
       );
     }
   });
@@ -212,6 +363,47 @@ function retrieveNoscaContext_(question) {
     candidates
   );
 
+  noscaDebugLog_(
+    'Final bounded retrieval context',
+    {
+      totalScoredChunksBeforeBounding:
+        scoredChunks.length,
+      selectedContextChunks:
+        bounded.contextChunks.length,
+      totalContextChars:
+        bounded.totalChars,
+      warnings: warnings,
+      selected: bounded.contextChunks.map(
+        function (chunk) {
+          return {
+            sourceIndex: chunk.sourceIndex,
+            fileName: chunk.fileName,
+            chunkIndex: chunk.chunkIndex,
+            score: chunk.score,
+            matchedTerms: chunk.matchedTerms,
+            textLength: chunk.text.length
+          };
+        }
+      )
+    }
+  );
+
+  if (!bounded.contextChunks.length) {
+    noscaDebugWarn_(
+      'Retrieval ended with ZERO context chunks.',
+      {
+        candidateCount: candidates.length,
+        scoredChunkCount: scoredChunks.length,
+        likelyCauses: [
+          'selected files extracted no text',
+          'all chunks scored below minChunkScore',
+          'source MIME types/extraction failed',
+          'question terms did not appear in extracted content'
+        ]
+      }
+    );
+  }
+
   return {
     ok: true,
     question: normalizedQuestion.text,
@@ -221,6 +413,224 @@ function retrieveNoscaContext_(question) {
     totalContextChars: bounded.totalChars,
     warnings: warnings,
     elapsedMs: Date.now() - startedAt
+  };
+}
+
+
+/**
+ * Detects navigation-style requests where the user primarily wants files,
+ * document locations, or a list of available materials rather than a
+ * synthesized content answer.
+ */
+function isNoscaDocumentLookupQuestion_(question) {
+  const value = normalizeNoscaSearchText_(question);
+
+  if (!value) return false;
+
+  const hasNavigationVerb =
+    /\b(where|find|show|list|locate)\b/.test(value);
+
+  if (hasNavigationVerb) {
+    return true;
+  }
+
+  const hasDocumentNoun =
+    /\b(document|documents|file|files|materials|deck|decks)\b/.test(value);
+
+  const hasKnowledgeIntent =
+    /\b(what|how|why|explain|summarize|summary|describe|compare|content|say)\b/.test(
+      value
+    );
+
+  const wordCount = value.split(/\s+/).filter(Boolean).length;
+
+  return (
+    hasDocumentNoun &&
+    !hasKnowledgeIntent &&
+    wordCount <= 8
+  );
+}
+
+/**
+ * Returns metadata-only document matches from NOSCA_Index.
+ *
+ * Unlike normal grounded retrieval, this can return Unsupported records
+ * (for example PPTX/DOCX/PDF) because the user is asking to find documents,
+ * not necessarily extract their contents.
+ */
+function findNoscaIndexedDocuments_(question) {
+  const normalizedQuestion = normalizeNoscaQuery_(question);
+  const existing = loadNoscaExistingIndex_();
+  const requestedTypes = detectNoscaRequestedDocumentTypes_(
+    normalizedQuestion.text
+  );
+
+  const records = Object.keys(existing)
+    .map(function (fileId) {
+      return existing[fileId];
+    })
+    .filter(function (record) {
+      return (
+        record.status !== NOSCA_CONFIG.statuses.skipped &&
+        record.status !== NOSCA_CONFIG.statuses.error
+      );
+    })
+    .map(function (record) {
+      const scoreResult = scoreNoscaMetadataRecord_(
+        record,
+        normalizedQuestion
+      );
+
+      return {
+        fileId: record.fileId,
+        fileName: record.fileName,
+        folderPath: record.folderPath,
+        documentType:
+          record.documentType || NOSCA_CONFIG.documentTypes.other,
+        fileFormat:
+          record.fileFormat || NOSCA_CONFIG.fileFormats.other,
+        mimeType: record.mimeType,
+        driveUrl: record.driveUrl,
+        keywords: record.keywords,
+        indexedAt: record.indexedAt,
+        status: record.status,
+        notes: record.notes,
+        metadataScore: scoreResult.score,
+        matchedTerms: scoreResult.matchedTerms
+      };
+    })
+    .filter(function (record) {
+      if (record.metadataScore < NOSCA_CONFIG.retrieval.minMetadataScore) {
+        return false;
+      }
+
+      if (!requestedTypes.length) {
+        return true;
+      }
+
+      return requestedTypes.indexOf(record.documentType) !== -1;
+    })
+    .sort(compareNoscaCandidates_);
+
+  const limit = Math.max(
+    Number(NOSCA_CONFIG.retrieval.maxDocumentLookupResults || 12),
+    1
+  );
+
+  const selected = requestedTypes.length
+    ? records.slice(0, limit)
+    : selectNoscaDiversifiedDocumentResults_(records, limit);
+
+  selected.forEach(function (record, index) {
+    record.sourceIndex = index + 1;
+  });
+
+  return {
+    ok: true,
+    question: normalizedQuestion.text,
+    queryTerms: normalizedQuestion.terms,
+    requestedDocumentTypes: requestedTypes,
+    totalMatches: records.length,
+    results: selected,
+    summary: summarizeNoscaDocumentLookupResults_(selected)
+  };
+}
+
+function detectNoscaRequestedDocumentTypes_(question) {
+  const value = ' ' + normalizeNoscaSearchText_(question) + ' ';
+  const types = NOSCA_CONFIG.documentTypes;
+  const requested = [];
+
+  function add(type) {
+    if (requested.indexOf(type) === -1) {
+      requested.push(type);
+    }
+  }
+
+  if (
+    /(^|\s)ee(\s|$)/.test(value) ||
+    value.indexOf(' effort estimate ') !== -1 ||
+    value.indexOf(' effort estimation ') !== -1
+  ) {
+    add(types.ee);
+  }
+
+  if (
+    value.indexOf(' proposal ') !== -1 ||
+    value.indexOf(' bid ') !== -1 ||
+    value.indexOf(' rfp ') !== -1 ||
+    value.indexOf(' rfi ') !== -1 ||
+    value.indexOf(' rfq ') !== -1
+  ) {
+    add(types.proposal);
+  }
+
+  if (
+    value.indexOf(' presentation ') !== -1 ||
+    value.indexOf(' deck ') !== -1 ||
+    value.indexOf(' slides ') !== -1 ||
+    value.indexOf(' ppt ') !== -1 ||
+    value.indexOf(' pptx ') !== -1 ||
+    value.indexOf(' powerpoint ') !== -1
+  ) {
+    add(types.presentation);
+  }
+
+  return requested;
+}
+
+/**
+ * For broad "PJL documents"-style requests, prevent one file family from
+ * monopolizing all results. Take the best EE, Proposal, Presentation, then
+ * fill remaining slots by overall metadata score.
+ */
+function selectNoscaDiversifiedDocumentResults_(records, limit) {
+  const selected = [];
+  const seen = {};
+  const preferredTypes = [
+    NOSCA_CONFIG.documentTypes.ee,
+    NOSCA_CONFIG.documentTypes.proposal,
+    NOSCA_CONFIG.documentTypes.presentation
+  ];
+
+  preferredTypes.forEach(function (type) {
+    const match = records.find(function (record) {
+      return record.documentType === type && !seen[record.fileId];
+    });
+
+    if (match && selected.length < limit) {
+      selected.push(match);
+      seen[match.fileId] = true;
+    }
+  });
+
+  records.forEach(function (record) {
+    if (selected.length >= limit || seen[record.fileId]) {
+      return;
+    }
+
+    selected.push(record);
+    seen[record.fileId] = true;
+  });
+
+  return selected;
+}
+
+function summarizeNoscaDocumentLookupResults_(records) {
+  const byDocumentType = {};
+
+  (records || []).forEach(function (record) {
+    const type = String(
+      record.documentType || NOSCA_CONFIG.documentTypes.other
+    );
+
+    byDocumentType[type] =
+      (byDocumentType[type] || 0) + 1;
+  });
+
+  return {
+    returned: (records || []).length,
+    byDocumentType: byDocumentType
   };
 }
 
@@ -250,6 +660,8 @@ function rankNoscaIndexRecords_(existing, query) {
         fileId: record.fileId,
         fileName: record.fileName,
         folderPath: record.folderPath,
+        documentType: record.documentType,
+        fileFormat: record.fileFormat,
         mimeType: record.mimeType,
         driveUrl: record.driveUrl,
         keywords: record.keywords,
@@ -270,6 +682,12 @@ function scoreNoscaMetadataRecord_(record, query) {
   const name = normalizeNoscaSearchText_(record.fileName);
   const keywords = normalizeNoscaSearchText_(record.keywords);
   const folder = normalizeNoscaSearchText_(record.folderPath);
+  const documentType = normalizeNoscaSearchText_(
+    record.documentType
+  );
+  const fileFormat = normalizeNoscaSearchText_(
+    record.fileFormat
+  );
 
   let score = 0;
   const matched = {};
@@ -292,6 +710,16 @@ function scoreNoscaMetadataRecord_(record, query) {
       matchedTerm = true;
     }
 
+    if (containsNoscaSearchTerm_(documentType, term)) {
+      score += 8;
+      matchedTerm = true;
+    }
+
+    if (containsNoscaSearchTerm_(fileFormat, term)) {
+      score += 4;
+      matchedTerm = true;
+    }
+
     if (matchedTerm) {
       matched[term] = true;
     }
@@ -310,6 +738,14 @@ function scoreNoscaMetadataRecord_(record, query) {
 
     if (folder.indexOf(phrase) !== -1) {
       score += 3;
+    }
+
+    if (documentType.indexOf(phrase) !== -1) {
+      score += 10;
+    }
+
+    if (fileFormat.indexOf(phrase) !== -1) {
+      score += 5;
     }
   });
 
@@ -503,6 +939,8 @@ function buildNoscaBoundedContext_(
       fileId: chunk.fileId,
       fileName: chunk.fileName,
       folderPath: chunk.folderPath,
+      documentType: chunk.documentType,
+      fileFormat: chunk.fileFormat,
       mimeType: chunk.mimeType,
       driveUrl: chunk.driveUrl,
       chunkIndex: chunk.chunkIndex,
@@ -626,6 +1064,11 @@ function isNoscaMeaningfulQueryTerm_(term) {
     could: true,
     do: true,
     does: true,
+    document: true,
+    documents: true,
+    file: true,
+    files: true,
+    find: true,
     for: true,
     from: true,
     have: true,
@@ -640,6 +1083,7 @@ function isNoscaMeaningfulQueryTerm_(term) {
     on: true,
     our: true,
     please: true,
+    show: true,
     tell: true,
     that: true,
     the: true,
@@ -648,6 +1092,7 @@ function isNoscaMeaningfulQueryTerm_(term) {
     to: true,
     us: true,
     what: true,
+    where: true,
     which: true,
     who: true,
     with: true,
@@ -765,6 +1210,12 @@ function buildNoscaContextText_(retrievalResult) {
         chunk.sourceIndex +
         ': ' +
         chunk.fileName +
+        ' | Type: ' +
+        String(chunk.documentType || 'Other') +
+        ' | Format: ' +
+        String(chunk.fileFormat || '') +
+        ' | Path: ' +
+        String(chunk.folderPath || '') +
         ' | Chunk ' +
         chunk.chunkIndex +
         ']\n' +
@@ -772,6 +1223,93 @@ function buildNoscaContextText_(retrievalResult) {
       );
     })
     .join('\n\n---\n\n');
+}
+
+/**
+ * Debug-only summary of the current NOSCA_Index without logging document text.
+ */
+function summarizeNoscaIndexForDebug_(existing) {
+  const summary = {
+    totalRows: 0,
+    byStatus: {},
+    byMimeType: {},
+    byDocumentType: {},
+    activeSupported: 0,
+    activeUnsupportedMime: 0
+  };
+
+  Object.keys(existing || {}).forEach(function (fileId) {
+    const record = existing[fileId] || {};
+    const status =
+      String(record.status || '(blank)');
+    const mime =
+      String(record.mimeType || '(blank)');
+
+    summary.totalRows += 1;
+    summary.byStatus[status] =
+      (summary.byStatus[status] || 0) + 1;
+    summary.byMimeType[mime] =
+      (summary.byMimeType[mime] || 0) + 1;
+
+    const documentType =
+      String(record.documentType || '(blank)');
+    summary.byDocumentType[documentType] =
+      (summary.byDocumentType[documentType] || 0) + 1;
+
+    if (status === NOSCA_CONFIG.statuses.active) {
+      if (
+        NOSCA_SUPPORTED_CONTENT_MIME_TYPES.indexOf(mime) !== -1
+      ) {
+        summary.activeSupported += 1;
+      } else {
+        summary.activeUnsupportedMime += 1;
+      }
+    }
+  });
+
+  return summary;
+}
+
+function noscaDebugLog_(label, data) {
+  if (
+    !NOSCA_CONFIG.debug ||
+    !NOSCA_CONFIG.debug.enabled
+  ) {
+    return;
+  }
+
+  console.log(
+    '[Ask NOSCA DEBUG] ' + label,
+    data
+  );
+}
+
+function noscaDebugWarn_(label, data) {
+  if (
+    !NOSCA_CONFIG.debug ||
+    !NOSCA_CONFIG.debug.enabled
+  ) {
+    return;
+  }
+
+  console.warn(
+    '[Ask NOSCA DEBUG] ' + label,
+    data
+  );
+}
+
+function noscaDebugError_(label, data) {
+  if (
+    !NOSCA_CONFIG.debug ||
+    !NOSCA_CONFIG.debug.enabled
+  ) {
+    return;
+  }
+
+  console.error(
+    '[Ask NOSCA DEBUG] ' + label,
+    data
+  );
 }
 
 /**
@@ -800,6 +1338,8 @@ function getNoscaRetrievedSources_(retrievalResult) {
       fileId: chunk.fileId,
       fileName: chunk.fileName,
       folderPath: chunk.folderPath,
+      documentType: chunk.documentType,
+      fileFormat: chunk.fileFormat,
       mimeType: chunk.mimeType,
       driveUrl: chunk.driveUrl
     });

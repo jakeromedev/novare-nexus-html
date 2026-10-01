@@ -25,6 +25,68 @@ function testNoscaDataSheetAccess() {
   return result;
 }
 
+
+/**
+ * Prepares the NOSCA_Index header row for document classification.
+ *
+ * Safety rule: this refuses to change the header while data rows still
+ * exist. Clear rows 2+ first, then run this once before the new full index.
+ *
+ * @return {Object}
+ */
+function prepareNoscaIndexDocumentClassificationSchema() {
+  const spreadsheet = SpreadsheetApp.openById(
+    NOSCA_CONFIG.dataSpreadsheetId
+  );
+  const sheet = spreadsheet.getSheetByName(
+    NOSCA_CONFIG.sheets.index
+  );
+
+  if (!sheet) {
+    throw new Error(
+      'Required sheet "' +
+      NOSCA_CONFIG.sheets.index +
+      '" was not found.'
+    );
+  }
+
+  if (sheet.getLastRow() > 1) {
+    throw new Error(
+      'NOSCA_Index still has data rows. Clear rows 2+ first, then run ' +
+      'prepareNoscaIndexDocumentClassificationSchema() again.'
+    );
+  }
+
+  const headers = NOSCA_CONFIG.indexHeaders.slice();
+
+  if (sheet.getMaxColumns() < headers.length) {
+    sheet.insertColumnsAfter(
+      sheet.getMaxColumns(),
+      headers.length - sheet.getMaxColumns()
+    );
+  }
+
+  sheet
+    .getRange(1, 1, 1, headers.length)
+    .setValues([headers]);
+
+  SpreadsheetApp.flush();
+
+  const result = {
+    ok: true,
+    sheetName: sheet.getName(),
+    columns: headers.length,
+    headers: headers
+  };
+
+  console.log(
+    '[Ask NOSCA] NOSCA_Index document-classification schema prepared:',
+    result
+  );
+
+  return result;
+}
+
 /**
  * Opens and validates the NOSCA_Index sheet.
  */
@@ -127,13 +189,15 @@ function loadNoscaExistingIndex_() {
       fileId: fileId,
       fileName: String(row[1] || '').trim(),
       folderPath: String(row[2] || '').trim(),
-      mimeType: String(row[3] || '').trim(),
-      modifiedAt: normalizeNoscaComparableDate_(row[4]),
-      driveUrl: String(row[5] || '').trim(),
-      keywords: String(row[6] || '').trim(),
-      indexedAt: normalizeNoscaDateValue_(row[7]),
-      status: String(row[8] || '').trim(),
-      notes: String(row[9] || '').trim()
+      documentType: String(row[3] || '').trim(),
+      fileFormat: String(row[4] || '').trim(),
+      mimeType: String(row[5] || '').trim(),
+      modifiedAt: normalizeNoscaComparableDate_(row[6]),
+      driveUrl: String(row[7] || '').trim(),
+      keywords: String(row[8] || '').trim(),
+      indexedAt: normalizeNoscaDateValue_(row[9]),
+      status: String(row[10] || '').trim(),
+      notes: String(row[11] || '').trim()
     };
   });
 
@@ -176,6 +240,111 @@ function writeNoscaIndexRows_(rows) {
     .setValues(rows);
 
   SpreadsheetApp.flush();
+}
+
+
+/**
+ * Clears all NOSCA_Index data rows while preserving:
+ * - the header row
+ * - sheet formatting
+ * - the NOSCA_Logs sheet
+ * - the NOSCA_Feedback sheet
+ *
+ * It also clears any saved full-index traversal checkpoint so the next
+ * refreshNoscaIndex() starts cleanly from the knowledge root.
+ *
+ * This is an administrator/manual maintenance function.
+ *
+ * @return {Object}
+ */
+function clearNoscaIndexTable() {
+  const lock = LockService.getScriptLock();
+
+  if (!lock.tryLock(5000)) {
+    throw new Error(
+      'Another Ask NOSCA index operation is already running. Try again shortly.'
+    );
+  }
+
+  try {
+    const sheet = getNoscaIndexSheet_();
+    const previousLastRow = sheet.getLastRow();
+    const clearedRows = Math.max(previousLastRow - 1, 0);
+
+    if (clearedRows > 0) {
+      // Clear every populated column below the header, not only the current
+      // schema width. This also removes leftover values from older schemas.
+      const columnsToClear = Math.max(
+        sheet.getLastColumn(),
+        NOSCA_CONFIG.indexHeaders.length
+      );
+
+      sheet
+        .getRange(2, 1, clearedRows, columnsToClear)
+        .clearContent();
+    }
+
+    // A clean index must not resume an old partial traversal.
+    if (typeof clearNoscaIndexScanState_ === 'function') {
+      clearNoscaIndexScanState_();
+    }
+
+    // Safe even before the planned cache layer is fully implemented.
+    try {
+      CacheService.getScriptCache().remove('NOSCA_INDEX_METADATA');
+    } catch (cacheError) {
+      console.warn(
+        '[Ask NOSCA] Index cleared, but cache cleanup was skipped:',
+        getNoscaErrorMessage_(cacheError)
+      );
+    }
+
+    SpreadsheetApp.flush();
+
+    const result = {
+      ok: true,
+      sheetName: sheet.getName(),
+      clearedRows: clearedRows,
+      headerPreserved: true,
+      checkpointCleared: true,
+      message:
+        'NOSCA_Index data rows were cleared. Header row was preserved. ' +
+        'The next refreshNoscaIndex() will start a new full scan.'
+    };
+
+    console.log('[Ask NOSCA] NOSCA_Index cleared:', result);
+
+    return result;
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+
+/**
+ * Convenience reset for the new document-classification schema.
+ *
+ * Use this when you want to completely reset the index and immediately
+ * restore the current NOSCA_CONFIG.indexHeaders.
+ *
+ * @return {Object}
+ */
+function clearAndPrepareNoscaIndexTable() {
+  const cleared = clearNoscaIndexTable();
+  const prepared = prepareNoscaIndexDocumentClassificationSchema();
+
+  const result = {
+    ok: true,
+    clearedRows: cleared.clearedRows,
+    columns: prepared.columns,
+    headers: prepared.headers,
+    message:
+      'NOSCA_Index was cleared and prepared with the current schema.'
+  };
+
+  console.log('[Ask NOSCA] NOSCA_Index reset and prepared:', result);
+
+  return result;
 }
 
 function normalizeNoscaComparableDate_(value) {

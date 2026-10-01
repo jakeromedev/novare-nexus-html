@@ -220,6 +220,13 @@
       return;
     }
 
+    console.log(
+      "[Ask NOSCA DEBUG] Sending question to Apps Script",
+      {
+        questionLength: normalized.length
+      }
+    );
+
     hideWelcome();
     appendUserMessage(normalized);
 
@@ -249,6 +256,33 @@
       result && typeof result === "object"
         ? result
         : {};
+
+    console.log(
+      "[Ask NOSCA DEBUG] Backend response received",
+      {
+        requestId: String(response.requestId || ""),
+        ok: response.ok,
+        grounded: response.grounded,
+        sourceCount: Array.isArray(response.sources)
+          ? response.sources.length
+          : 0,
+        diagnostics: response.diagnostics || null,
+        model: response.model || "",
+        elapsedMs: Number(response.elapsedMs || 0)
+      }
+    );
+
+    if (
+      response.grounded === false
+    ) {
+      console.warn(
+        "[Ask NOSCA DEBUG] Backend returned no grounded context.",
+        {
+          requestId: String(response.requestId || ""),
+          diagnostics: response.diagnostics || null
+        }
+      );
+    }
 
     const answer = String(response.answer || "").trim();
 
@@ -281,6 +315,11 @@
   }
 
   function handleNoscaFailure(question, error) {
+    console.error(
+      "[Ask NOSCA DEBUG] Backend request failed",
+      error
+    );
+
     const message = getErrorMessage(error);
 
     appendErrorMessage(
@@ -545,9 +584,16 @@
         String(source.fileName || "Novare source");
 
       const path = document.createElement("span");
-      path.textContent =
+      const sourceMeta = [
+        String(source.documentType || "").trim(),
+        String(source.fileFormat || "").trim(),
         String(source.folderPath || "").trim() ||
-        getReadableMimeType(source.mimeType);
+          getReadableMimeType(source.mimeType)
+      ].filter(function (value, index, array) {
+        return value && array.indexOf(value) === index;
+      });
+
+      path.textContent = sourceMeta.join(" · ");
 
       copy.appendChild(name);
       copy.appendChild(path);

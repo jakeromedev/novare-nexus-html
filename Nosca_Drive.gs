@@ -4,8 +4,10 @@
  * Requires the Advanced Drive Service:
  * Apps Script Editor > Services > + > Drive API > Add
  *
- * Uses Drive API v3-compatible methods so shared-drive content can be
- * traversed with supportsAllDrives/includeItemsFromAllDrives.
+ * This version supports:
+ * - fast previews that stop as soon as enough files are found
+ * - batched/resumable full-tree scans
+ * - heartbeat/progress logging while a scan is running
  */
 
 /**
@@ -49,25 +51,22 @@ function testNoscaKnowledgeSourceAccess() {
 }
 
 /**
- * Recursively discovers files below the configured NOSCA knowledge root.
+ * Quick read-only preview. Stops as soon as the requested number of files is
+ * found instead of walking the entire Shared Drive.
  *
- * Folders themselves are not written to NOSCA_Index. Their names are used
- * to build Folder Path values for discovered files.
- *
- * @return {{
- *   root: Object,
- *   files: Object[],
- *   folderCount: number,
- *   elapsedMs: number
- * }}
+ * @param {number} limit
+ * @return {Object}
  */
-function scanNoscaKnowledgeTree_() {
+function scanNoscaKnowledgePreview_(limit) {
   assertNoscaAdvancedDriveService_();
 
-  const startedAt = Date.now();
-  const deadline =
-    startedAt + Number(NOSCA_CONFIG.scanExecutionBudgetMs || 240000);
+  const settings = getNoscaIndexingSettings_();
+  const requestedLimit = Math.min(
+    Math.max(Number(limit || settings.previewDefaultLimit), 1),
+    settings.previewMaxLimit
+  );
 
+  const startedAt = Date.now();
   const root = getNoscaDriveItem_(NOSCA_CONFIG.knowledgeRootId);
 
   if (!root || root.mimeType !== NOSCA_CONFIG.mimeTypes.folder) {
@@ -77,65 +76,85 @@ function scanNoscaKnowledgeTree_() {
   }
 
   const rootPath = '/' + sanitizeNoscaPathPart_(root.name || 'NOSCA Knowledge');
-
-  const foldersToVisit = [
-    {
-      id: root.id,
-      path: rootPath
-    }
-  ];
-
+  const queue = [{ id: root.id, path: rootPath, pageToken: '' }];
   const files = [];
   let folderCount = 0;
+  let lastHeartbeatAt = startedAt;
 
-  while (foldersToVisit.length) {
-    assertNoscaScanBudget_(startedAt, deadline, files.length);
+  console.log(
+    '[Ask NOSCA][Preview] Started | targetFiles=' +
+    requestedLimit +
+    ' | root=' +
+    rootPath
+  );
 
-    const currentFolder = foldersToVisit.shift();
-    folderCount += 1;
+  while (queue.length && files.length < requestedLimit) {
+    const current = queue.shift();
+    const isFirstPage = !current.pageToken;
 
-    let pageToken = null;
+    if (isFirstPage) {
+      folderCount += 1;
+    }
 
-    do {
-      assertNoscaScanBudget_(startedAt, deadline, files.length);
+    const page = listNoscaFolderChildren_(
+      current.id,
+      settings.drivePageSize,
+      current.pageToken || ''
+    );
 
-      const page = listNoscaFolderChildren_(
-        currentFolder.id,
-        NOSCA_CONFIG.drivePageSize,
-        pageToken
-      );
+    for (let i = 0; i < page.items.length; i += 1) {
+      const item = page.items[i];
 
-      page.items.forEach(function (item) {
-        assertNoscaScanBudget_(startedAt, deadline, files.length);
+      if (item.mimeType === NOSCA_CONFIG.mimeTypes.folder) {
+        queue.push({
+          id: item.id,
+          path:
+            current.path +
+            '/' +
+            sanitizeNoscaPathPart_(item.name || 'Untitled Folder'),
+          pageToken: ''
+        });
+        continue;
+      }
 
-        if (item.mimeType === NOSCA_CONFIG.mimeTypes.folder) {
-          foldersToVisit.push({
-            id: item.id,
-            path:
-              currentFolder.path +
-              '/' +
-              sanitizeNoscaPathPart_(item.name || 'Untitled Folder')
-          });
+      files.push(normalizeNoscaDriveFile_(item, current.path));
 
-          return;
-        }
+      if (files.length >= requestedLimit) {
+        break;
+      }
+    }
 
-        files.push(
-          normalizeNoscaDriveFile_(item, currentFolder.path)
-        );
-
-        if (files.length > NOSCA_CONFIG.maxIndexedFilesPerRun) {
-          throw new Error(
-            'Ask NOSCA scan stopped because the configured maximum of ' +
-            NOSCA_CONFIG.maxIndexedFilesPerRun +
-            ' files was exceeded. Narrow the knowledge scope or increase ' +
-            'maxIndexedFilesPerRun deliberately.'
-          );
-        }
+    if (files.length < requestedLimit && page.nextPageToken) {
+      queue.unshift({
+        id: current.id,
+        path: current.path,
+        pageToken: page.nextPageToken
       });
+    }
 
-      pageToken = page.nextPageToken || null;
-    } while (pageToken);
+    const now = Date.now();
+
+    if (
+      now - lastHeartbeatAt >= settings.heartbeatMs ||
+      (
+        isFirstPage &&
+        folderCount % settings.heartbeatEveryFolders === 0
+      )
+    ) {
+      console.log(
+        '[Ask NOSCA][Preview] Heartbeat | folders=' +
+        folderCount +
+        ' | files=' +
+        files.length +
+        ' | queued=' +
+        queue.length +
+        ' | current=' +
+        current.path +
+        ' | elapsed=' +
+        formatNoscaElapsed_(now - startedAt)
+      );
+      lastHeartbeatAt = now;
+    }
   }
 
   const result = {
@@ -145,18 +164,198 @@ function scanNoscaKnowledgeTree_() {
       path: rootPath,
       driveId: root.driveId || ''
     },
-    files: files,
+    files: files.slice(0, requestedLimit),
     folderCount: folderCount,
+    reachedLimit: files.length >= requestedLimit,
+    treeExhausted: queue.length === 0,
     elapsedMs: Date.now() - startedAt
   };
 
   console.log(
-    '[Ask NOSCA] Drive scan complete. Folders:',
-    folderCount,
-    '| Files:',
-    files.length,
-    '| Elapsed ms:',
-    result.elapsedMs
+    '[Ask NOSCA][Preview] Complete | folders=' +
+    result.folderCount +
+    ' | files=' +
+    result.files.length +
+    ' | reachedLimit=' +
+    result.reachedLimit +
+    ' | elapsed=' +
+    formatNoscaElapsed_(result.elapsedMs)
+  );
+
+  return result;
+}
+
+/**
+ * Processes one resumable Drive traversal batch.
+ *
+ * The caller owns checkpoint persistence. This function mutates and returns
+ * the supplied state only in memory.
+ *
+ * @param {Object} state
+ * @return {Object}
+ */
+function scanNoscaKnowledgeBatch_(state) {
+  assertNoscaAdvancedDriveService_();
+
+  if (!state || !Array.isArray(state.queue)) {
+    throw new Error('Ask NOSCA index scan state is missing or invalid.');
+  }
+
+  const settings = getNoscaIndexingSettings_();
+  const startedAt = Date.now();
+  const deadline = startedAt + settings.batchExecutionBudgetMs;
+  const batchFiles = [];
+  let batchFoldersStarted = 0;
+  let lastHeartbeatAt = startedAt;
+  let stopReason = 'tree_complete';
+
+  state.totals = state.totals || {
+    batches: 0,
+    foldersScanned: 0,
+    filesDiscovered: 0
+  };
+
+  console.log(
+    '[Ask NOSCA][Index ' +
+    state.scanId +
+    '] Batch ' +
+    (Number(state.totals.batches || 0) + 1) +
+    ' started | queued=' +
+    state.queue.length +
+    ' | totalFolders=' +
+    Number(state.totals.foldersScanned || 0) +
+    ' | totalFiles=' +
+    Number(state.totals.filesDiscovered || 0)
+  );
+
+  while (state.queue.length) {
+    if (batchFiles.length >= settings.batchMaxFiles) {
+      stopReason = 'batch_file_limit';
+      break;
+    }
+
+    if (Date.now() >= deadline) {
+      stopReason = 'time_budget';
+      break;
+    }
+
+    const current = state.queue.shift();
+    const isFirstPage = !current.pageToken;
+
+    if (isFirstPage) {
+      state.totals.foldersScanned += 1;
+      batchFoldersStarted += 1;
+
+      if (
+        batchFoldersStarted === 1 ||
+        state.totals.foldersScanned % settings.heartbeatEveryFolders === 0
+      ) {
+        console.log(
+          '[Ask NOSCA][Index ' +
+          state.scanId +
+          '] Scanning folder #' +
+          state.totals.foldersScanned +
+          ': ' +
+          current.path +
+          ' | queued=' +
+          state.queue.length
+        );
+      }
+    }
+
+    const page = listNoscaFolderChildren_(
+      current.id,
+      settings.drivePageSize,
+      current.pageToken || ''
+    );
+
+    for (let i = 0; i < page.items.length; i += 1) {
+      const item = page.items[i];
+
+      if (item.mimeType === NOSCA_CONFIG.mimeTypes.folder) {
+        state.queue.push({
+          id: item.id,
+          path:
+            current.path +
+            '/' +
+            sanitizeNoscaPathPart_(item.name || 'Untitled Folder'),
+          pageToken: ''
+        });
+        continue;
+      }
+
+      batchFiles.push(normalizeNoscaDriveFile_(item, current.path));
+      state.totals.filesDiscovered += 1;
+    }
+
+    if (page.nextPageToken) {
+      state.queue.unshift({
+        id: current.id,
+        path: current.path,
+        pageToken: page.nextPageToken
+      });
+    }
+
+    const now = Date.now();
+
+    if (now - lastHeartbeatAt >= settings.heartbeatMs) {
+      console.log(
+        '[Ask NOSCA][Index ' +
+        state.scanId +
+        '] Heartbeat | batchFiles=' +
+        batchFiles.length +
+        ' | totalFiles=' +
+        state.totals.filesDiscovered +
+        ' | totalFolders=' +
+        state.totals.foldersScanned +
+        ' | queued=' +
+        state.queue.length +
+        ' | current=' +
+        current.path +
+        ' | elapsed=' +
+        formatNoscaElapsed_(now - startedAt)
+      );
+      lastHeartbeatAt = now;
+    }
+  }
+
+  const complete = state.queue.length === 0;
+
+  if (complete) {
+    stopReason = 'tree_complete';
+  }
+
+  state.totals.batches = Number(state.totals.batches || 0) + 1;
+  state.updatedAt = new Date().toISOString();
+
+  const result = {
+    files: batchFiles,
+    complete: complete,
+    stopReason: stopReason,
+    batchFoldersStarted: batchFoldersStarted,
+    batchFilesDiscovered: batchFiles.length,
+    queuedFolders: state.queue.length,
+    elapsedMs: Date.now() - startedAt,
+    state: state
+  };
+
+  console.log(
+    '[Ask NOSCA][Index ' +
+    state.scanId +
+    '] Batch ' +
+    state.totals.batches +
+    ' scan complete | batchFiles=' +
+    result.batchFilesDiscovered +
+    ' | totalFiles=' +
+    state.totals.filesDiscovered +
+    ' | totalFolders=' +
+    state.totals.foldersScanned +
+    ' | queued=' +
+    result.queuedFolders +
+    ' | stopReason=' +
+    result.stopReason +
+    ' | elapsed=' +
+    formatNoscaElapsed_(result.elapsedMs)
   );
 
   return result;
@@ -277,22 +476,55 @@ function assertNoscaAdvancedDriveService_() {
   }
 }
 
-/**
- * Stops large scans before the Apps Script execution deadline is reached.
- */
-function assertNoscaScanBudget_(startedAt, deadline, fileCount) {
-  if (Date.now() <= deadline) {
-    return;
+function getNoscaIndexingSettings_() {
+  const configured = NOSCA_CONFIG.indexing || {};
+
+  return {
+    previewDefaultLimit: Math.max(
+      Number(configured.previewDefaultLimit || 20),
+      1
+    ),
+    previewMaxLimit: Math.max(
+      Number(configured.previewMaxLimit || 100),
+      1
+    ),
+    drivePageSize: Math.min(
+      Math.max(
+        Number(configured.drivePageSize || NOSCA_CONFIG.drivePageSize || 250),
+        1
+      ),
+      1000
+    ),
+    batchMaxFiles: Math.max(
+      Number(configured.batchMaxFiles || 500),
+      1
+    ),
+    batchExecutionBudgetMs: Math.max(
+      Number(configured.batchExecutionBudgetMs || 180000),
+      30000
+    ),
+    heartbeatMs: Math.max(
+      Number(configured.heartbeatMs || 10000),
+      1000
+    ),
+    heartbeatEveryFolders: Math.max(
+      Number(configured.heartbeatEveryFolders || 10),
+      1
+    )
+  };
+}
+
+function formatNoscaElapsed_(elapsedMs) {
+  const seconds = Math.max(Math.round(Number(elapsedMs || 0) / 1000), 0);
+
+  if (seconds < 60) {
+    return seconds + 's';
   }
 
-  throw new Error(
-    'Ask NOSCA Drive scan reached its safety execution budget after ' +
-    fileCount +
-    ' discovered files and ' +
-    (Date.now() - startedAt) +
-    ' ms. No partial index was written. Narrow the source scope or ' +
-    'implement batched continuation before indexing a larger corpus.'
-  );
+  const minutes = Math.floor(seconds / 60);
+  const remainder = seconds % 60;
+
+  return minutes + 'm ' + remainder + 's';
 }
 
 function escapeNoscaDriveQueryValue_(value) {

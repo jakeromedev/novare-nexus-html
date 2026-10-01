@@ -21,6 +21,8 @@ const NOSCA_CONFIG = Object.freeze({
     'File ID',
     'File Name',
     'Folder Path',
+    'Document Type',
+    'File Format',
     'MIME Type',
     'Modified At',
     'Drive URL',
@@ -29,6 +31,30 @@ const NOSCA_CONFIG = Object.freeze({
     'Status',
     'Error / Notes'
   ]),
+
+  documentTypes: Object.freeze({
+    ee: 'EE',
+    proposal: 'Proposal',
+    presentation: 'Presentation',
+    document: 'Document',
+    spreadsheet: 'Spreadsheet',
+    pdf: 'PDF',
+    text: 'Text',
+    other: 'Other'
+  }),
+
+  fileFormats: Object.freeze({
+    googleDoc: 'Google Doc',
+    googleSheet: 'Google Sheet',
+    googleSlides: 'Google Slides',
+    word: 'Word',
+    excel: 'Excel',
+    powerpoint: 'PowerPoint',
+    pdf: 'PDF',
+    text: 'Text',
+    csv: 'CSV',
+    other: 'Other'
+  }),
 
   statuses: Object.freeze({
     active: 'Active',
@@ -42,10 +68,63 @@ const NOSCA_CONFIG = Object.freeze({
     document: 'application/vnd.google-apps.document',
     presentation: 'application/vnd.google-apps.presentation',
     spreadsheet: 'application/vnd.google-apps.spreadsheet',
-    text: 'text/plain'
+    text: 'text/plain',
+    csv: 'text/csv',
+    pdf: 'application/pdf',
+    word:
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    wordLegacy: 'application/msword',
+    excel:
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    excelLegacy: 'application/vnd.ms-excel',
+    powerpoint:
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    powerpointLegacy: 'application/vnd.ms-powerpoint'
   }),
 
-  drivePageSize: 1000,
+  drivePageSize: 250,
+
+  metadataAliases: Object.freeze([
+    Object.freeze({
+      matchAny: Object.freeze([
+        'pj lhuillier',
+        'cebuana lhuillier',
+        'cebuana',
+        'cash hub',
+        'cashhub'
+      ]),
+      add: Object.freeze([
+        'pjl',
+        'pj lhuillier',
+        'cebuana',
+        'cebuana lhuillier',
+        'cashhub',
+        'cash hub'
+      ])
+    })
+  ]),
+
+  indexing: Object.freeze({
+    // Quick preview returns as soon as this many files are found.
+    previewDefaultLimit: 20,
+    previewMaxLimit: 100,
+
+    // Full index refresh processes one bounded batch per execution.
+    // Re-run refreshNoscaIndex() while needsAnotherRun === true.
+    batchMaxFiles: 500,
+    batchExecutionBudgetMs: 180000,
+
+    // Drive list page size. Smaller pages make checkpoints more responsive.
+    drivePageSize: 250,
+
+    // Progress logging so long Drive traversals visibly remain active.
+    heartbeatMs: 10000,
+    heartbeatEveryFolders: 10,
+
+    // Script Properties values are sharded to stay below per-value limits.
+    checkpointChunkChars: 6000,
+    checkpointMaxChars: 350000
+  }),
 
   // Leave a safety margin below Apps Script's execution limit.
   scanExecutionBudgetMs: 240000,
@@ -76,8 +155,12 @@ const NOSCA_CONFIG = Object.freeze({
   }),
 
   retrieval: Object.freeze({
-    // Number of metadata-ranked files to extract for one question.
+    // Number of metadata-ranked files to extract for one knowledge question.
     maxCandidateFiles: 5,
+
+    // Number of index-only results returned for "find/show/list documents"
+    // requests. These may include Office/PDF files that are metadata-only.
+    maxDocumentLookupResults: 12,
 
     // Chunking settings after a candidate file has been extracted.
     chunkChars: 2600,
@@ -114,9 +197,15 @@ const NOSCA_CONFIG = Object.freeze({
     temperature: 0.2,
     maxOutputTokens: 1400,
 
-    // One initial call + one retry for transient 429/5xx failures.
-    maxAttempts: 2,
-    retryDelayMs: 900,
+    // Gemini resilience: one initial request + up to three retries for
+    // transient API failures. Backoff is 2s -> 4s -> 8s by default.
+    maxAttempts: 4,
+    retryDelayMs: 2000,
+    retryMaxDelayMs: 8000,
+
+    // Retry-After / google.rpc.RetryInfo delays are honored when present,
+    // but capped to preserve Apps Script execution headroom.
+    maxServerRetryDelayMs: 30000,
 
     // Public-question guardrail.
     maxQuestionChars: 2000
@@ -154,6 +243,15 @@ const NOSCA_CONFIG = Object.freeze({
     maxLoggedSourcesChars: 12000,
     maxLoggedErrorChars: 1200,
     maxFeedbackCommentChars: 1000
+  }),
+
+  debug: Object.freeze({
+    // Temporary diagnostic switch. Set to false after retrieval is healthy.
+    enabled: true,
+
+    // Prevent excessively large execution logs.
+    maxCandidatesToLog: 12,
+    maxChunksToLog: 12
   })
 });
 

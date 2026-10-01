@@ -5,12 +5,17 @@
   const NOSCA_CONTEXT_STORAGE_KEY =
     "onesca.nosca.conversationContext.v1";
 
+  const NOSCA_VIEW_STORAGE_KEY =
+    "onesca.nosca.panelView.v1";
+
   const state = {
     initialized: false,
     pending: false,
     previousFocus: null,
     messages: [],
-    conversationContext: null
+    conversationContext: null,
+    viewMode: "closed",
+    unread: false
   };
 
   const dom = {};
@@ -24,7 +29,9 @@
     dom.input = document.getElementById("nosca-input");
     dom.send = document.getElementById("nosca-send");
     dom.clear = document.getElementById("nosca-clear");
+    dom.minimize = document.getElementById("nosca-minimize");
     dom.close = document.getElementById("nosca-close");
+    dom.launcher = document.getElementById("nosca-launcher");
     dom.suggestions = Array.from(
       document.querySelectorAll("[data-nosca-suggestion]")
     );
@@ -75,6 +82,12 @@
       });
     }
 
+    if (dom.minimize) {
+      dom.minimize.addEventListener("click", function () {
+        minimize();
+      });
+    }
+
     if (dom.close) {
       dom.close.addEventListener("click", function () {
         close();
@@ -96,27 +109,44 @@
       });
     });
 
-    dom.dialog.addEventListener("click", function (event) {
-      if (event.target === dom.dialog) {
-        close();
-      }
-    });
-
     dom.dialog.addEventListener("cancel", function (event) {
       event.preventDefault();
-      close();
+      minimize();
     });
 
     dom.dialog.addEventListener("close", function () {
-      setBusy(false);
-      restoreFocus();
+      syncPanelAttributes();
+    });
+
+    document.addEventListener("keydown", function (event) {
+      if (
+        event.key === "Escape" &&
+        dom.dialog.open &&
+        !event.defaultPrevented
+      ) {
+        event.preventDefault();
+        minimize();
+      }
     });
 
     state.conversationContext =
       loadConversationContext();
 
+    state.viewMode =
+      loadPanelViewState();
+
+    // Never force the floating panel open after a full browser refresh.
+    // "open" is restored as minimized, while SPA route changes naturally
+    // preserve the live panel and conversation because the shell persists.
+    if (state.viewMode === "open") {
+      state.viewMode = "minimized";
+      savePanelViewState();
+    }
+
     updateComposerState();
     autoSizeComposer();
+    syncPanelAttributes();
+    updateLauncherState();
 
     state.initialized = true;
     return true;
@@ -130,18 +160,29 @@
         ? options
         : {};
 
+    dom.dialog.classList.remove(
+      "is-closing",
+      "is-minimizing"
+    );
+
     if (!dom.dialog.open) {
       state.previousFocus =
         document.activeElement instanceof HTMLElement
           ? document.activeElement
           : null;
 
-      if (typeof dom.dialog.showModal === "function") {
-        dom.dialog.showModal();
+      if (typeof dom.dialog.show === "function") {
+        dom.dialog.show();
       } else {
         dom.dialog.setAttribute("open", "");
       }
     }
+
+    state.viewMode = "open";
+    state.unread = false;
+    savePanelViewState();
+    syncPanelAttributes();
+    updateLauncherState();
 
     if (typeof settings.draft === "string") {
       dom.input.value = settings.draft.slice(0, 2000);
@@ -150,9 +191,15 @@
     }
 
     window.setTimeout(function () {
+      scrollMessagesToBottom();
+
       if (settings.submit) {
         sendCurrentQuestion();
-      } else {
+      } else if (
+        settings.focus !== false &&
+        dom.input &&
+        !dom.input.disabled
+      ) {
         dom.input.focus();
         dom.input.setSelectionRange(
           dom.input.value.length,
@@ -162,16 +209,92 @@
     }, 0);
   }
 
+  function minimize() {
+    if (!initialize()) return;
+
+    hidePanel_("minimized");
+  }
+
   function close() {
     if (!initialize()) return;
 
-    if (dom.dialog.open && typeof dom.dialog.close === "function") {
-      dom.dialog.close();
+    hidePanel_("closed");
+  }
+
+  function hidePanel_(targetView) {
+    const nextView =
+      targetView === "minimized"
+        ? "minimized"
+        : "closed";
+
+    state.viewMode = nextView;
+
+    if (nextView === "closed") {
+      state.unread = false;
+    }
+
+    savePanelViewState();
+    updateLauncherState();
+
+    if (!dom.dialog.open) {
+      syncPanelAttributes();
+      restoreFocus();
       return;
     }
 
-    dom.dialog.removeAttribute("open");
-    setBusy(false);
+    const reducedMotion =
+      window.matchMedia &&
+      window.matchMedia(
+        "(prefers-reduced-motion: reduce)"
+      ).matches;
+
+    if (reducedMotion) {
+      finishPanelClose_();
+      return;
+    }
+
+    dom.dialog.classList.remove(
+      "is-closing",
+      "is-minimizing"
+    );
+
+    dom.dialog.classList.add(
+      "is-closing"
+    );
+
+    if (nextView === "minimized") {
+      dom.dialog.classList.add(
+        "is-minimizing"
+      );
+    }
+
+    window.setTimeout(
+      finishPanelClose_,
+      190
+    );
+  }
+
+  function finishPanelClose_() {
+    if (!dom.dialog) return;
+
+    if (
+      dom.dialog.open &&
+      typeof dom.dialog.close === "function"
+    ) {
+      dom.dialog.close();
+    } else {
+      dom.dialog.removeAttribute(
+        "open"
+      );
+    }
+
+    dom.dialog.classList.remove(
+      "is-closing",
+      "is-minimizing"
+    );
+
+    syncPanelAttributes();
+    updateLauncherState();
     restoreFocus();
   }
 
@@ -188,8 +311,14 @@
       return;
     }
 
-    const launcher = document.getElementById("nosca-launcher");
-    if (launcher && typeof launcher.focus === "function") {
+    const launcher =
+      dom.launcher ||
+      document.getElementById("nosca-launcher");
+
+    if (
+      launcher &&
+      typeof launcher.focus === "function"
+    ) {
       launcher.focus();
     }
   }
@@ -349,7 +478,12 @@
 
     setStatus("", "");
     scrollMessagesToBottom();
-    dom.input.focus();
+
+    if (state.viewMode !== "open") {
+      markUnread();
+    } else if (dom.input && !dom.input.disabled) {
+      dom.input.focus();
+    }
   }
 
   function handleNoscaFailure(question, error) {
@@ -374,6 +508,10 @@
     );
 
     scrollMessagesToBottom();
+
+    if (state.viewMode !== "open") {
+      markUnread();
+    }
   }
 
   function appendUserMessage(question) {
@@ -1211,7 +1349,152 @@
     updateComposerState();
     setStatus("", "");
     scrollMessagesToTop();
-    dom.input.focus();
+
+    state.unread = false;
+    updateLauncherState();
+
+    if (
+      state.viewMode === "open" &&
+      dom.input &&
+      !dom.input.disabled
+    ) {
+      dom.input.focus();
+    }
+  }
+
+
+  function loadPanelViewState() {
+    try {
+      const value =
+        String(
+          window.sessionStorage.getItem(
+            NOSCA_VIEW_STORAGE_KEY
+          ) || ""
+        ).trim();
+
+      return (
+        value === "open" ||
+        value === "minimized" ||
+        value === "closed"
+      )
+        ? value
+        : "closed";
+    } catch (error) {
+      return "closed";
+    }
+  }
+
+  function savePanelViewState() {
+    try {
+      window.sessionStorage.setItem(
+        NOSCA_VIEW_STORAGE_KEY,
+        state.viewMode
+      );
+    } catch (error) {
+      // The chat remains fully usable even when sessionStorage is blocked.
+    }
+  }
+
+  function syncPanelAttributes() {
+    if (!dom.dialog) return;
+
+    dom.dialog.dataset.noscaView =
+      state.viewMode;
+
+    dom.dialog.setAttribute(
+      "aria-hidden",
+      String(!dom.dialog.open)
+    );
+  }
+
+  function markUnread() {
+    state.unread = true;
+    updateLauncherState();
+  }
+
+  function updateLauncherState() {
+    const launcher =
+      dom.launcher ||
+      document.getElementById(
+        "nosca-launcher"
+      );
+
+    if (!launcher) return;
+
+    const isOpen =
+      state.viewMode === "open";
+
+    const isThinking =
+      state.viewMode === "minimized" &&
+      state.pending;
+
+    const hasReadyAnswer =
+      !state.pending &&
+      state.unread;
+
+    launcher.classList.toggle(
+      "has-unread",
+      hasReadyAnswer
+    );
+
+    launcher.classList.toggle(
+      "is-thinking",
+      isThinking
+    );
+
+    launcher.classList.toggle(
+      "is-chat-open",
+      isOpen
+    );
+
+    launcher.classList.toggle(
+      "is-minimized",
+      state.viewMode === "minimized"
+    );
+
+    const label =
+      launcher.querySelector("span");
+
+    if (label) {
+      label.textContent =
+        isThinking
+          ? "Thinking…"
+          : (
+              hasReadyAnswer
+                ? "Answer ready"
+                : "Ask NOSCA"
+            );
+    }
+
+    launcher.setAttribute(
+      "aria-expanded",
+      String(isOpen)
+    );
+
+    launcher.setAttribute(
+      "aria-busy",
+      String(isThinking)
+    );
+
+    launcher.setAttribute(
+      "aria-label",
+      isThinking
+        ? "Ask NOSCA is thinking"
+        : (
+            hasReadyAnswer
+              ? "Ask NOSCA — answer ready"
+              : "Ask NOSCA"
+          )
+    );
+
+    launcher.title =
+      isThinking
+        ? "Ask NOSCA is thinking"
+        : (
+            hasReadyAnswer
+              ? "Ask NOSCA — answer ready"
+              : "Ask NOSCA"
+          );
   }
 
   function hideWelcome() {
@@ -1223,7 +1506,7 @@
   function setBusy(isBusy) {
     state.pending = Boolean(isBusy);
 
-    if (!initialize()) return;
+    if (!dom.dialog) return;
 
     dom.dialog.setAttribute(
       "aria-busy",
@@ -1238,6 +1521,13 @@
     }
 
     updateComposerState();
+
+    if (
+      state.pending ||
+      state.viewMode !== "minimized"
+    ) {
+      updateLauncherState();
+    }
   }
 
   function updateComposerState() {
@@ -1351,6 +1641,7 @@
   window.NexusNosca = Object.freeze({
     initialize: initialize,
     open: open,
+    minimize: minimize,
     close: close,
     ask: function (question) {
       open({
@@ -1360,7 +1651,17 @@
     },
     clear: clearConversation,
     isOpen: function () {
-      return Boolean(dom.dialog && dom.dialog.open);
+      return Boolean(
+        dom.dialog &&
+        dom.dialog.open &&
+        state.viewMode === "open"
+      );
+    },
+    isMinimized: function () {
+      return state.viewMode === "minimized";
+    },
+    hasUnread: function () {
+      return state.unread;
     },
     isBusy: function () {
       return state.pending;

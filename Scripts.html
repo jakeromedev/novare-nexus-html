@@ -4549,7 +4549,7 @@
 
   // 8. SEARCH
   function focusGlobalSearch() {
-    if (!dom.search || (dom.dialog && dom.dialog.open)) return;
+    if (!dom.search) return;
     if (state.mobileOpen) setMobileSidebar(false, false);
     dom.search.focus();
   }
@@ -4570,8 +4570,6 @@
     state.mobileOpen = false;
     if (!tabletQuery.matches) state.tabletExpanded = false;
     updateSidebar();
-
-    if (dom.dialog && dom.dialog.open) return;
 
     if ((mobileQuery.matches && focusWasInSidebar) || active === dom.sidebarClose) {
       if ((mobileQuery.matches || tabletQuery.matches) && dom.toggle) dom.toggle.focus();
@@ -5349,6 +5347,15 @@
       userProfile.setAttribute(
         "aria-label",
         email ? (displayName + ", " + email) : displayName
+      );
+
+      userProfile.classList.remove(
+        "is-loading"
+      );
+
+      userProfile.setAttribute(
+        "aria-busy",
+        "false"
       );
     }
   }

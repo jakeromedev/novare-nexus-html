@@ -1,0 +1,152 @@
+<script>
+(function () {
+  "use strict";
+
+  /*
+   * ONESCA — H3 Opportunities managed-link configuration
+   *
+   * The Opportunities page already exposes readable
+   * data-opportunities-action values. This module maps external/resource
+   * actions to stable op-* keys in the existing 06_Assets registry.
+   *
+   * Internal UI actions such as "view-all-templates" are intentionally
+   * not included here; they remain owned by Scripts.html.
+   */
+
+  const OPPORTUNITIES_LINKS =
+    Object.freeze({
+      // ---------------------------------------------------------
+      // ENTRY POINTS
+      // ---------------------------------------------------------
+      "opportunity-dashboard":
+        "op-dashboard",
+
+      "sales-process":
+        "op-sales-process",
+
+      "customer-engagement":
+        "op-customer-engagement",
+
+      // ---------------------------------------------------------
+      // SOLUTIONING TOOLKIT
+      // ---------------------------------------------------------
+      "discovery-template":
+        "op-discovery-template",
+
+      "conceptual-strategy-template":
+        "op-conceptual-strategy-template",
+
+      "solution-blueprint-template":
+        "op-solution-blueprint-template",
+
+      "bom-estimation-template":
+        "op-bom-estimation-template",
+
+      "proposal-template":
+        "op-proposal-template",
+
+      "sow-template":
+        "op-sow-template",
+
+      "poc-pov-template":
+        "op-poc-pov-template",
+
+      "technical-handover-checklist":
+        "op-technical-handover-checklist",
+
+      // ---------------------------------------------------------
+      // SALES PILLARS KNOWLEDGE REPOSITORY
+      // ---------------------------------------------------------
+      "sales-pillar-tudi":
+        "op-tudi",
+
+      "sales-pillar-bfsi":
+        "op-bfsi",
+
+      "sales-pillar-cg":
+        "op-cg",
+
+      // ---------------------------------------------------------
+      // WIN / LOSS REPOSITORIES
+      // ---------------------------------------------------------
+      "win-repository":
+        "op-win-repository",
+
+      "loss-repository":
+        "op-loss-repository",
+
+      // ---------------------------------------------------------
+      // QUICK KNOWLEDGE ACCESS
+      // ---------------------------------------------------------
+      "account-plans":
+        "op-account-plans",
+
+      "key-contacts":
+        "op-key-contacts",
+
+      "competitors":
+        "op-competitors",
+
+      "products-solutions":
+        "op-products-solutions",
+
+      "case-studies":
+        "op-case-studies",
+
+      "partner-ecosystem":
+        "op-partner-ecosystem"
+    });
+
+  const OPPORTUNITIES_CONFIG =
+    Object.freeze({
+      namespace: "opportunities",
+      pageLabel: "Opportunities",
+      actionAttribute:
+        "data-opportunities-action",
+      links: OPPORTUNITIES_LINKS
+    });
+
+  function initialize(pageRoot) {
+    if (
+      !pageRoot ||
+      !window.NexusManagedLinks
+    ) {
+      return;
+    }
+
+    window.NexusManagedLinks
+      .initialize(
+        pageRoot,
+        OPPORTUNITIES_CONFIG
+      );
+  }
+
+  function refresh(pageRoot) {
+    if (
+      !pageRoot ||
+      !window.NexusManagedLinks
+    ) {
+      return;
+    }
+
+    window.NexusManagedLinks
+      .refresh(pageRoot);
+  }
+
+  function getConfiguredLinkKeys() {
+    return Object.keys(
+      OPPORTUNITIES_LINKS
+    ).map(function (action) {
+      return OPPORTUNITIES_LINKS[action];
+    });
+  }
+
+  window.NexusOpportunitiesLinks =
+    Object.freeze({
+      initialize: initialize,
+      refresh: refresh,
+      getConfiguredLinkKeys:
+        getConfiguredLinkKeys
+    });
+}());
+</script>

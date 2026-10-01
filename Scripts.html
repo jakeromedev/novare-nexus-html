@@ -3347,14 +3347,39 @@
     if (!pageRoot) return;
 
     if (pageRoot.dataset.pageInitialized !== "true") {
-      renderOpportunitiesContent(pageRoot, getStaticOpportunitiesContent());
-      initializeOpportunitiesActions(pageRoot);
-      pageRoot.dataset.pageInitialized = "true";
-      refreshOpportunitiesFromServer(pageRoot);
+      renderOpportunitiesContent(
+        pageRoot,
+        getStaticOpportunitiesContent()
+      );
+
+      /*
+       * Managed external resources initialize before the existing
+       * Opportunities action handler. The shared runtime uses capture
+       * phase, so resolved Sheet links take precedence while internal
+       * actions such as view-all-templates still fall through normally.
+       */
+      if (window.NexusOpportunitiesLinks) {
+        window.NexusOpportunitiesLinks
+          .initialize(pageRoot);
+      }
+
+      initializeOpportunitiesActions(
+        pageRoot
+      );
+
+      pageRoot.dataset.pageInitialized =
+        "true";
+
+      refreshOpportunitiesFromServer(
+        pageRoot
+      );
+
       return;
     }
 
-    retryFailedOpportunitiesAssets(pageRoot);
+    retryFailedOpportunitiesAssets(
+      pageRoot
+    );
   }
 
   function bindOfferingsAsset(image, fallback, width) {

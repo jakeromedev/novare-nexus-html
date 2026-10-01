@@ -18350,4 +18350,107 @@
       }
     }
 
+
+    /* =========================================================
+       H3 OPPORTUNITIES — MANAGED LINK STATES
+       Applied only after the central 06_Assets registry has resolved
+       and a configured key has no usable URL.
+       ========================================================= */
+
+    .opportunities-page
+      [data-managed-link-missing="true"] {
+      --opportunities-managed-missing-bg:
+        #F2F5F8;
+      --opportunities-managed-missing-border:
+        #D7DEE7;
+      --opportunities-managed-missing-text:
+        #6E7C8D;
+      --opportunities-managed-missing-icon:
+        #8190A2;
+
+      cursor: pointer !important;
+      filter: saturate(.22);
+      opacity: .78;
+      border-color:
+        var(
+          --opportunities-managed-missing-border
+        ) !important;
+      box-shadow: none !important;
+
+      transition:
+        opacity 160ms ease,
+        transform 160ms ease,
+        background-color 160ms ease,
+        border-color 160ms ease;
+    }
+
+    .opportunities-page
+      [data-managed-link-missing="true"]:hover {
+      opacity: .94;
+      transform:
+        translateY(-1px);
+      border-color:
+        #C7D0DA !important;
+    }
+
+    /*
+      Only clickable resource controls are muted. Parent information
+      cards and section copy remain fully readable.
+    */
+    .opportunities-page
+      .opportunity-entry-arrow[data-managed-link-missing="true"],
+    .opportunities-page
+      .opportunity-entry-link[data-managed-link-missing="true"],
+    .opportunities-page
+      .solutioning-toolkit-card[data-managed-link-missing="true"],
+    .opportunities-page
+      .sales-pillar-card[data-managed-link-missing="true"],
+    .opportunities-page
+      .repository-card[data-managed-link-missing="true"],
+    .opportunities-page
+      .opportunities-quick-card[data-managed-link-missing="true"] {
+      color:
+        var(
+          --opportunities-managed-missing-text
+        ) !important;
+
+      background:
+        var(
+          --opportunities-managed-missing-bg
+        ) !important;
+    }
+
+    .opportunities-page
+      [data-managed-link-missing="true"]
+      svg,
+    .opportunities-page
+      [data-managed-link-missing="true"]
+      [class*="-icon"],
+    .opportunities-page
+      [data-managed-link-missing="true"]
+      [class*="-arrow"] {
+      color:
+        var(
+          --opportunities-managed-missing-icon
+        ) !important;
+
+      stroke:
+        var(
+          --opportunities-managed-missing-icon
+        ) !important;
+    }
+
+    /*
+      view-all-templates is intentionally not a managed resource.
+      It remains the existing internal same-page scroll action.
+    */
+
+    @media (prefers-reduced-motion: reduce) {
+      .opportunities-page
+        [data-managed-link-missing="true"] {
+        transition:
+          none !important;
+      }
+    }
+
 </style>

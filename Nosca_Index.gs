@@ -269,7 +269,7 @@ function getNoscaIndexStatus() {
     }
   });
 
-  return {
+  const result = {
     ok: true,
     rowCount: Object.keys(existing).length,
     statusCounts: statusCounts,
@@ -277,6 +277,13 @@ function getNoscaIndexStatus() {
       latestIndexedAt ? latestIndexedAt.toISOString() : '',
     refresh: getNoscaIndexRefreshStatus()
   };
+
+  console.log(
+    '[Ask NOSCA] Index status:\n' +
+    JSON.stringify(result, null, 2)
+  );
+
+  return result;
 }
 
 function createNoscaIndexScanState_() {

@@ -18747,4 +18747,102 @@
       }
     }
 
+
+    /* =========================================================
+       TOOLS & TEMPLATES — MANAGED LINK STATES
+       Applied only after 06_Assets resolves and a configured
+       Tools key has no usable URL.
+       ========================================================= */
+
+    .tools-page
+      [data-managed-link-missing="true"] {
+      --tools-managed-missing-bg:
+        #F2F5F8;
+      --tools-managed-missing-border:
+        #D7DEE7;
+      --tools-managed-missing-text:
+        #6E7C8D;
+      --tools-managed-missing-icon:
+        #8190A2;
+
+      cursor: pointer !important;
+      filter: saturate(.22);
+      opacity: .78;
+      border-color:
+        var(
+          --tools-managed-missing-border
+        ) !important;
+      box-shadow:
+        none !important;
+
+      transition:
+        opacity 160ms ease,
+        transform 160ms ease,
+        background-color 160ms ease,
+        border-color 160ms ease;
+    }
+
+    .tools-page
+      [data-managed-link-missing="true"]:hover {
+      opacity: .94;
+      transform:
+        translateY(-1px);
+      border-color:
+        #C7D0DA !important;
+    }
+
+    /*
+      Only the actual managed resource controls are muted.
+      Section headers, explanatory copy and parent cards remain readable.
+    */
+    .tools-page
+      .tools-template-card[data-managed-link-missing="true"],
+    .tools-page
+      .tools-stack-arrow[data-managed-link-missing="true"] {
+      color:
+        var(
+          --tools-managed-missing-text
+        ) !important;
+
+      background:
+        var(
+          --tools-managed-missing-bg
+        ) !important;
+    }
+
+    .tools-page
+      [data-managed-link-missing="true"]
+      svg,
+    .tools-page
+      [data-managed-link-missing="true"]
+      [class*="-icon"],
+    .tools-page
+      [data-managed-link-missing="true"]
+      [class*="-arrow"] {
+      color:
+        var(
+          --tools-managed-missing-icon
+        ) !important;
+
+      stroke:
+        var(
+          --tools-managed-missing-icon
+        ) !important;
+    }
+
+    /*
+      These remain internal same-page actions and are intentionally
+      excluded from the managed-link registry:
+      - view-all-templates
+      - browse-all-tools
+    */
+
+    @media (prefers-reduced-motion: reduce) {
+      .tools-page
+        [data-managed-link-missing="true"] {
+        transition:
+          none !important;
+      }
+    }
+
 </style>

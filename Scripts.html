@@ -2873,14 +2873,40 @@
     if (!pageRoot) return;
 
     if (pageRoot.dataset.pageInitialized !== "true") {
-      renderToolsContent(pageRoot, getStaticToolsContent());
-      initializeToolsActions(pageRoot);
-      pageRoot.dataset.pageInitialized = "true";
-      refreshToolsFromServer(pageRoot);
+      renderToolsContent(
+        pageRoot,
+        getStaticToolsContent()
+      );
+
+      /*
+       * Managed Tools & Templates resources initialize before the
+       * existing page action handler. The shared runtime listens in
+       * capture phase, so resolved Sheet links take precedence while
+       * same-page controls such as View All Templates and Browse All
+       * Tools continue using their existing internal scroll behavior.
+       */
+      if (window.NexusToolsLinks) {
+        window.NexusToolsLinks
+          .initialize(pageRoot);
+      }
+
+      initializeToolsActions(
+        pageRoot
+      );
+
+      pageRoot.dataset.pageInitialized =
+        "true";
+
+      refreshToolsFromServer(
+        pageRoot
+      );
+
       return;
     }
 
-    retryFailedToolsAssets(pageRoot);
+    retryFailedToolsAssets(
+      pageRoot
+    );
   }
 
   function bindGovernanceAsset(image, fallback, width) {

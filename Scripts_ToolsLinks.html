@@ -1,0 +1,111 @@
+<script>
+(function () {
+  "use strict";
+
+  /*
+   * ONESCA — Tools & Templates managed-link configuration
+   *
+   * The page already exposes readable data-tools-action values.
+   * External/resource actions are mapped to stable tl-* keys in the
+   * existing 06_Assets registry.
+   *
+   * Internal same-page actions are intentionally excluded:
+   * - view-all-templates
+   * - browse-all-tools
+   */
+
+  const TOOLS_LINKS =
+    Object.freeze({
+      // ---------------------------------------------------------
+      // SOLUTIONING TOOLKIT
+      // ---------------------------------------------------------
+      "discovery-template":
+        "tl-discovery-template",
+
+      "conceptual-strategy-template":
+        "tl-conceptual-strategy-template",
+
+      "solution-blueprint-template":
+        "tl-solution-blueprint-template",
+
+      "bom-estimation-template":
+        "tl-bom-estimation-template",
+
+      "proposal-template":
+        "tl-proposal-template",
+
+      "sow-template":
+        "tl-sow-template",
+
+      "poc-pov-template":
+        "tl-poc-pov-template",
+
+      "technical-handover-checklist":
+        "tl-technical-handover-checklist",
+
+      // ---------------------------------------------------------
+      // CONNECTED DIGITAL STACK
+      // ---------------------------------------------------------
+      "deal-management":
+        "tl-deal-management",
+
+      "google-workspace":
+        "tl-google-workspace",
+
+      "other-tools":
+        "tl-other-tools"
+    });
+
+  const TOOLS_CONFIG =
+    Object.freeze({
+      namespace: "tools",
+      pageLabel: "Tools & Templates",
+      actionAttribute:
+        "data-tools-action",
+      links: TOOLS_LINKS
+    });
+
+  function initialize(pageRoot) {
+    if (
+      !pageRoot ||
+      !window.NexusManagedLinks
+    ) {
+      return;
+    }
+
+    window.NexusManagedLinks
+      .initialize(
+        pageRoot,
+        TOOLS_CONFIG
+      );
+  }
+
+  function refresh(pageRoot) {
+    if (
+      !pageRoot ||
+      !window.NexusManagedLinks
+    ) {
+      return;
+    }
+
+    window.NexusManagedLinks
+      .refresh(pageRoot);
+  }
+
+  function getConfiguredLinkKeys() {
+    return Object.keys(
+      TOOLS_LINKS
+    ).map(function (action) {
+      return TOOLS_LINKS[action];
+    });
+  }
+
+  window.NexusToolsLinks =
+    Object.freeze({
+      initialize: initialize,
+      refresh: refresh,
+      getConfiguredLinkKeys:
+        getConfiguredLinkKeys
+    });
+}());
+</script>

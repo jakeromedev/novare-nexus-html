@@ -883,14 +883,12 @@
   }
 
   function renderSafeAnswer(container, answer) {
-    const text = String(answer || "")
-      .replace(/\r\n?/g, "\n")
-      .trim();
+    const text = cleanNoscaDisplayText(answer);
 
     if (!text) return;
 
-    // Safe lightweight rendering: preserve paragraphs and common bullet
-    // markers without inserting model-generated HTML.
+    // Safe lightweight rendering: preserve paragraphs, bullets and numbered
+    // lists without ever inserting model-generated HTML.
     const blocks = text.split(/\n{2,}/);
 
     blocks.forEach(function (block) {
@@ -906,7 +904,7 @@
       if (!lines.length) return;
 
       const isBulletGroup = lines.every(function (line) {
-        return /^[-*•]\s+/.test(line.trim());
+        return /^[-•]\s+/.test(line.trim());
       });
 
       if (isBulletGroup) {
@@ -917,7 +915,28 @@
           const item = document.createElement("li");
           item.textContent = line
             .trim()
-            .replace(/^[-*•]\s+/, "");
+            .replace(/^[-•]\s+/, "");
+          list.appendChild(item);
+        });
+
+        container.appendChild(list);
+        return;
+      }
+
+      const isNumberedGroup = lines.every(function (line) {
+        return /^\d+[.)]\s+/.test(line.trim());
+      });
+
+      if (isNumberedGroup) {
+        const list = document.createElement("ol");
+        list.className =
+          "nosca-answer-list nosca-answer-list--numbered";
+
+        lines.forEach(function (line) {
+          const item = document.createElement("li");
+          item.textContent = line
+            .trim()
+            .replace(/^\d+[.)]\s+/, "");
           list.appendChild(item);
         });
 
@@ -929,6 +948,19 @@
       paragraph.textContent = lines.join("\n");
       container.appendChild(paragraph);
     });
+  }
+
+  function cleanNoscaDisplayText(value) {
+    return String(value || "")
+      .replace(/\r\n?/g, "\n")
+      .replace(/\*\*([^*]+)\*\*/g, "$1")
+      .replace(/__([^_]+)__/g, "$1")
+      .replace(/`([^`\n]+)`/g, "$1")
+      .replace(/^#{1,6}\s+/gm, "")
+      .replace(/^\s*\*\s+/gm, "- ")
+      .replace(/[ \t]+\n/g, "\n")
+      .replace(/\n{3,}/g, "\n\n")
+      .trim();
   }
 
   function sanitizeClientConversationContext(value) {

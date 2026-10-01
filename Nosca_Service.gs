@@ -98,7 +98,7 @@ function askNosca(request) {
         });
 
         const lookupAnswer =
-          buildNoscaDocumentLookupAnswer_(lookup);
+          buildNoscaDocumentLookupAnswer_(lookup, contextResolution);
 
         const lookupResult = {
           ok: true,
@@ -160,9 +160,10 @@ function askNosca(request) {
         grounded: false,
         responseMode: 'document_lookup',
         answer:
-          'I could not find matching files in the current NOSCA index. ' +
-          'The file may not have been indexed yet, or the search terms may ' +
-          'not match its indexed metadata.',
+          buildNoscaNoDocumentLookupAnswer_(
+            lookup,
+            contextResolution
+          ),
         sources: [],
         conversationContext:
           contextResolution.context,
@@ -408,52 +409,200 @@ function testNoscaGroundedAnswer() {
   );
 }
 
-function buildNoscaDocumentLookupAnswer_(lookup) {
+function buildNoscaDocumentLookupAnswer_(
+  lookup,
+  contextResolution
+) {
   const summary =
     lookup && lookup.summary
       ? lookup.summary
       : { returned: 0, byDocumentType: {} };
 
   const byType = summary.byDocumentType || {};
-  const parts = [];
+  const returned = Number(summary.returned || 0);
 
-  [
-    NOSCA_CONFIG.documentTypes.ee,
-    NOSCA_CONFIG.documentTypes.proposal,
-    NOSCA_CONFIG.documentTypes.presentation
-  ].forEach(function (type) {
+  const context =
+    contextResolution &&
+    contextResolution.context
+      ? contextResolution.context
+      : {};
+
+  const topicLabel =
+    String(context.topicLabel || '').trim();
+
+  const requestedTypes =
+    lookup && Array.isArray(lookup.requestedDocumentTypes)
+      ? lookup.requestedDocumentTypes
+      : [];
+
+  const counts = [];
+
+  function addCount(type, singular, plural) {
     const count = Number(byType[type] || 0);
 
     if (count > 0) {
-      parts.push(
-        count + ' ' + type + (count === 1 ? '' : ' files')
+      counts.push(
+        count + ' ' + (count === 1 ? singular : plural)
       );
     }
-  });
+  }
 
-  const knownPreferredCount =
+  addCount(
+    NOSCA_CONFIG.documentTypes.ee,
+    'EE file',
+    'EE files'
+  );
+  addCount(
+    NOSCA_CONFIG.documentTypes.proposal,
+    'proposal',
+    'proposals'
+  );
+  addCount(
+    NOSCA_CONFIG.documentTypes.presentation,
+    'presentation',
+    'presentations'
+  );
+
+  const knownCount =
     Number(byType[NOSCA_CONFIG.documentTypes.ee] || 0) +
     Number(byType[NOSCA_CONFIG.documentTypes.proposal] || 0) +
     Number(byType[NOSCA_CONFIG.documentTypes.presentation] || 0);
 
   const otherCount =
-    Math.max(Number(summary.returned || 0) - knownPreferredCount, 0);
+    Math.max(returned - knownCount, 0);
 
   if (otherCount > 0) {
-    parts.push(
-      otherCount + ' other document' + (otherCount === 1 ? '' : 's')
+    counts.push(
+      otherCount +
+      ' other ' +
+      (otherCount === 1 ? 'document' : 'documents')
     );
   }
 
-  const countText = parts.length
-    ? parts.join(', ')
-    : String(summary.returned || 0) + ' matching files';
+  let opening = '';
+
+  if (requestedTypes.length === 1) {
+    const requested = requestedTypes[0];
+    let friendlyType = requested;
+
+    if (requested === NOSCA_CONFIG.documentTypes.ee) {
+      friendlyType = 'EE';
+    } else if (
+      requested === NOSCA_CONFIG.documentTypes.presentation
+    ) {
+      friendlyType = 'presentation';
+    } else if (
+      requested === NOSCA_CONFIG.documentTypes.proposal
+    ) {
+      friendlyType = 'proposal';
+    }
+
+    opening =
+      'I found ' +
+      returned +
+      ' ' +
+      friendlyType +
+      (returned === 1 ? ' file' : ' files');
+
+    if (topicLabel) {
+      opening += ' for ' + topicLabel;
+    }
+
+    opening += '.';
+  } else {
+    opening =
+      'I found ' +
+      returned +
+      (returned === 1 ? ' matching file' : ' matching files');
+
+    if (topicLabel) {
+      opening += ' for ' + topicLabel;
+    }
+
+    opening += '.';
+
+    if (counts.length) {
+      opening += ' That includes ' + joinNoscaFriendlyList_(counts) + '.';
+    }
+  }
 
   return (
-    'I found matching files in the NOSCA index (' +
-    countText +
-    '). The strongest matches are listed below with their document type, ' +
-    'file format, and Drive location.'
+    opening +
+    '\n\n' +
+    'I listed the strongest matches below. Open any source card to go ' +
+    'straight to the file in Drive.'
+  );
+}
+
+function buildNoscaNoDocumentLookupAnswer_(
+  lookup,
+  contextResolution
+) {
+  const context =
+    contextResolution &&
+    contextResolution.context
+      ? contextResolution.context
+      : {};
+
+  const topicLabel =
+    String(context.topicLabel || '').trim();
+
+  const requestedTypes =
+    lookup && Array.isArray(lookup.requestedDocumentTypes)
+      ? lookup.requestedDocumentTypes
+      : [];
+
+  let target = 'matching files';
+
+  if (
+    requestedTypes.length === 1 &&
+    requestedTypes[0] === NOSCA_CONFIG.documentTypes.ee
+  ) {
+    target = 'an EE file';
+  } else if (
+    requestedTypes.length === 1 &&
+    requestedTypes[0] === NOSCA_CONFIG.documentTypes.proposal
+  ) {
+    target = 'a proposal';
+  } else if (
+    requestedTypes.length === 1 &&
+    requestedTypes[0] === NOSCA_CONFIG.documentTypes.presentation
+  ) {
+    target = 'a presentation';
+  }
+
+  let message = 'I couldn’t find ' + target;
+
+  if (topicLabel) {
+    message += ' for ' + topicLabel;
+  }
+
+  message +=
+    ' in the current NOSCA index. It may not be indexed yet, or it may ' +
+    'use a different name in Drive.';
+
+  return message;
+}
+
+function joinNoscaFriendlyList_(items) {
+  const values = (items || []).filter(Boolean);
+
+  if (!values.length) {
+    return '';
+  }
+
+  if (values.length === 1) {
+    return values[0];
+  }
+
+  if (values.length === 2) {
+    return values[0] + ' and ' + values[1];
+  }
+
+  return (
+    values.slice(0, -1).join(', ') +
+    ', and ' +
+    values[values.length - 1]
   );
 }
 

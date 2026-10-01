@@ -18656,4 +18656,95 @@
       }
     }
 
+
+    /* =========================================================
+       H6 GOVERNANCE — MANAGED LINK STATES
+       Applied only after 06_Assets resolves and a configured
+       Governance key has no usable URL.
+       ========================================================= */
+
+    .governance-page
+      [data-managed-link-missing="true"] {
+      --governance-managed-missing-bg:
+        #F2F5F8;
+      --governance-managed-missing-border:
+        #D7DEE7;
+      --governance-managed-missing-text:
+        #6E7C8D;
+      --governance-managed-missing-icon:
+        #8190A2;
+
+      cursor: pointer !important;
+      filter: saturate(.22);
+      opacity: .78;
+      border-color:
+        var(
+          --governance-managed-missing-border
+        ) !important;
+      box-shadow:
+        none !important;
+
+      transition:
+        opacity 160ms ease,
+        transform 160ms ease,
+        background-color 160ms ease,
+        border-color 160ms ease;
+    }
+
+    .governance-page
+      [data-managed-link-missing="true"]:hover {
+      opacity: .94;
+      transform:
+        translateY(-1px);
+      border-color:
+        #C7D0DA !important;
+    }
+
+    /*
+      Only clickable resource controls are muted. Framework cards,
+      descriptions and resource lists remain readable.
+    */
+    .governance-page
+      .governance-card-cta[data-managed-link-missing="true"],
+    .governance-page
+      .governance-quick-card[data-managed-link-missing="true"] {
+      color:
+        var(
+          --governance-managed-missing-text
+        ) !important;
+
+      background:
+        var(
+          --governance-managed-missing-bg
+        ) !important;
+    }
+
+    .governance-page
+      [data-managed-link-missing="true"]
+      svg,
+    .governance-page
+      [data-managed-link-missing="true"]
+      [class*="-icon"],
+    .governance-page
+      [data-managed-link-missing="true"]
+      [class*="-arrow"] {
+      color:
+        var(
+          --governance-managed-missing-icon
+        ) !important;
+
+      stroke:
+        var(
+          --governance-managed-missing-icon
+        ) !important;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .governance-page
+        [data-managed-link-missing="true"] {
+        transition:
+          none !important;
+      }
+    }
+
 </style>

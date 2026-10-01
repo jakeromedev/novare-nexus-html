@@ -1,0 +1,111 @@
+<script>
+(function () {
+  "use strict";
+
+  /*
+   * ONESCA — H6 Governance managed-link configuration
+   *
+   * The Governance page already exposes readable
+   * data-governance-action values. This module maps all current
+   * Governance resource actions to globally unique gv-* keys in
+   * the existing 06_Assets registry.
+   */
+
+  const GOVERNANCE_LINKS =
+    Object.freeze({
+      // ---------------------------------------------------------
+      // GOVERNANCE FRAMEWORKS
+      // ---------------------------------------------------------
+      "iso-compliance":
+        "gv-iso-compliance",
+
+      "operating-guidelines":
+        "gv-operating-guidelines",
+
+      "architecture-governance":
+        "gv-architecture",
+
+      "proposal-review-board":
+        "gv-prb",
+
+      "risk-finance-guidelines":
+        "gv-risk-finance",
+
+      "talent-success-enablement":
+        "gv-talent-success",
+
+      // ---------------------------------------------------------
+      // QUICK ACCESS
+      // ---------------------------------------------------------
+      "account-plans":
+        "gv-account-plans",
+
+      "key-contacts":
+        "gv-key-contacts",
+
+      "competitors":
+        "gv-competitors",
+
+      "products-solutions":
+        "gv-products-solutions",
+
+      "case-studies":
+        "gv-case-studies",
+
+      "partner-ecosystem":
+        "gv-partner-ecosystem"
+    });
+
+  const GOVERNANCE_CONFIG =
+    Object.freeze({
+      namespace: "governance",
+      pageLabel: "Governance",
+      actionAttribute:
+        "data-governance-action",
+      links: GOVERNANCE_LINKS
+    });
+
+  function initialize(pageRoot) {
+    if (
+      !pageRoot ||
+      !window.NexusManagedLinks
+    ) {
+      return;
+    }
+
+    window.NexusManagedLinks
+      .initialize(
+        pageRoot,
+        GOVERNANCE_CONFIG
+      );
+  }
+
+  function refresh(pageRoot) {
+    if (
+      !pageRoot ||
+      !window.NexusManagedLinks
+    ) {
+      return;
+    }
+
+    window.NexusManagedLinks
+      .refresh(pageRoot);
+  }
+
+  function getConfiguredLinkKeys() {
+    return Object.keys(
+      GOVERNANCE_LINKS
+    ).map(function (action) {
+      return GOVERNANCE_LINKS[action];
+    });
+  }
+
+  window.NexusGovernanceLinks =
+    Object.freeze({
+      initialize: initialize,
+      refresh: refresh,
+      getConfiguredLinkKeys:
+        getConfiguredLinkKeys
+    });
+}());
+</script>

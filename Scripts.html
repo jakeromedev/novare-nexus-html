@@ -2970,14 +2970,39 @@
     if (!pageRoot) return;
 
     if (pageRoot.dataset.pageInitialized !== "true") {
-      renderGovernanceContent(pageRoot, getStaticGovernanceContent());
-      initializeGovernanceActions(pageRoot);
-      pageRoot.dataset.pageInitialized = "true";
-      refreshGovernanceFromServer(pageRoot);
+      renderGovernanceContent(
+        pageRoot,
+        getStaticGovernanceContent()
+      );
+
+      /*
+       * Managed Governance resources initialize before the existing
+       * Governance action handler. The shared runtime listens in capture
+       * phase, so a resolved Sheet link takes precedence over the legacy
+       * placeholder/status behavior.
+       */
+      if (window.NexusGovernanceLinks) {
+        window.NexusGovernanceLinks
+          .initialize(pageRoot);
+      }
+
+      initializeGovernanceActions(
+        pageRoot
+      );
+
+      pageRoot.dataset.pageInitialized =
+        "true";
+
+      refreshGovernanceFromServer(
+        pageRoot
+      );
+
       return;
     }
 
-    retryFailedGovernanceAssets(pageRoot);
+    retryFailedGovernanceAssets(
+      pageRoot
+    );
   }
 
   function bindDeliveryAsset(image, fallback, width) {

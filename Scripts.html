@@ -3224,14 +3224,39 @@
     if (!pageRoot) return;
 
     if (pageRoot.dataset.pageInitialized !== "true") {
-      renderProgramsContent(pageRoot, getStaticProgramsContent());
-      initializeProgramsActions(pageRoot);
-      pageRoot.dataset.pageInitialized = "true";
-      refreshProgramsFromServer(pageRoot);
+      renderProgramsContent(
+        pageRoot,
+        getStaticProgramsContent()
+      );
+
+      /*
+       * Managed external resources initialize before the existing
+       * Programs action handler. The shared runtime listens in capture
+       * phase, so resolved Sheet links take precedence while internal
+       * actions such as view-all-insights still fall through normally.
+       */
+      if (window.NexusProgramsLinks) {
+        window.NexusProgramsLinks
+          .initialize(pageRoot);
+      }
+
+      initializeProgramsActions(
+        pageRoot
+      );
+
+      pageRoot.dataset.pageInitialized =
+        "true";
+
+      refreshProgramsFromServer(
+        pageRoot
+      );
+
       return;
     }
 
-    retryFailedProgramsAssets(pageRoot);
+    retryFailedProgramsAssets(
+      pageRoot
+    );
   }
 
   function bindOpportunitiesAsset(image, fallback, width) {

@@ -18453,4 +18453,108 @@
       }
     }
 
+
+    /* =========================================================
+       H4 PROGRAMS — MANAGED LINK STATES
+       Applied only after the central 06_Assets registry resolves
+       and a configured Programs key has no usable URL.
+       ========================================================= */
+
+    .programs-page
+      [data-managed-link-missing="true"] {
+      --programs-managed-missing-bg:
+        #F2F5F8;
+      --programs-managed-missing-border:
+        #D7DEE7;
+      --programs-managed-missing-text:
+        #6E7C8D;
+      --programs-managed-missing-icon:
+        #8190A2;
+
+      cursor: pointer !important;
+      filter: saturate(.22);
+      opacity: .78;
+      border-color:
+        var(
+          --programs-managed-missing-border
+        ) !important;
+      box-shadow:
+        none !important;
+
+      transition:
+        opacity 160ms ease,
+        transform 160ms ease,
+        background-color 160ms ease,
+        border-color 160ms ease;
+    }
+
+    .programs-page
+      [data-managed-link-missing="true"]:hover {
+      opacity: .94;
+      transform:
+        translateY(-1px);
+      border-color:
+        #C7D0DA !important;
+    }
+
+    /*
+      Mute only the actionable control. Parent program cards and their
+      informational content remain fully readable.
+    */
+    .programs-page
+      .program-entry-arrow[data-managed-link-missing="true"],
+    .programs-page
+      .innovation-playbook-stages
+      button[data-managed-link-missing="true"],
+    .programs-page
+      .program-toolkit-shortcuts
+      button[data-managed-link-missing="true"],
+    .programs-page
+      .program-insight-cta[data-managed-link-missing="true"],
+    .programs-page
+      .programs-quick-card[data-managed-link-missing="true"] {
+      color:
+        var(
+          --programs-managed-missing-text
+        ) !important;
+
+      background:
+        var(
+          --programs-managed-missing-bg
+        ) !important;
+    }
+
+    .programs-page
+      [data-managed-link-missing="true"]
+      svg,
+    .programs-page
+      [data-managed-link-missing="true"]
+      [class*="-icon"],
+    .programs-page
+      [data-managed-link-missing="true"]
+      [class*="-arrow"] {
+      color:
+        var(
+          --programs-managed-missing-icon
+        ) !important;
+
+      stroke:
+        var(
+          --programs-managed-missing-icon
+        ) !important;
+    }
+
+    /*
+      view-all-insights is intentionally not managed. It remains the
+      existing internal same-page scroll action.
+    */
+
+    @media (prefers-reduced-motion: reduce) {
+      .programs-page
+        [data-managed-link-missing="true"] {
+        transition:
+          none !important;
+      }
+    }
+
 </style>

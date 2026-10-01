@@ -1,0 +1,152 @@
+<script>
+(function () {
+  "use strict";
+
+  /*
+   * ONESCA — H4 Programs managed-link configuration
+   *
+   * The page already uses readable data-programs-action values.
+   * This module maps external/resource actions to globally unique
+   * pg-* keys in the existing 06_Assets registry.
+   *
+   * "view-all-insights" is an internal same-page scroll action and is
+   * intentionally not registered as a managed external resource.
+   */
+
+  const PROGRAMS_LINKS =
+    Object.freeze({
+      // ---------------------------------------------------------
+      // PROGRAM ENTRY POINTS
+      // ---------------------------------------------------------
+      "programs-dashboard":
+        "pg-dashboard",
+
+      "innovation-playbook":
+        "pg-innovation-playbook",
+
+      "program-toolkit-repository":
+        "pg-toolkit-repository",
+
+      // ---------------------------------------------------------
+      // INNOVATION PLAYBOOK STAGES
+      // ---------------------------------------------------------
+      "playbook-ideate":
+        "pg-playbook-ideate",
+
+      "playbook-validate":
+        "pg-playbook-validate",
+
+      "playbook-build":
+        "pg-playbook-build",
+
+      "playbook-scale":
+        "pg-playbook-scale",
+
+      // ---------------------------------------------------------
+      // TOOLKIT & REPOSITORY SHORTCUTS
+      // ---------------------------------------------------------
+      "program-templates":
+        "pg-templates",
+
+      "program-case-studies":
+        "pg-program-case-studies",
+
+      "program-reports":
+        "pg-reports",
+
+      "program-references":
+        "pg-references",
+
+      // ---------------------------------------------------------
+      // MARKET INSIGHTS & BATTLECARDS
+      // ---------------------------------------------------------
+      "market-industry-insights":
+        "pg-market-industry-insights",
+
+      "client-buyer-insights":
+        "pg-client-buyer-insights",
+
+      "business-challenges-solutions":
+        "pg-business-challenges-solutions",
+
+      "ai-opportunity-signals":
+        "pg-ai-opportunity-signals",
+
+      "program-battlecards":
+        "pg-battlecards",
+
+      // ---------------------------------------------------------
+      // QUICK KNOWLEDGE ACCESS
+      // ---------------------------------------------------------
+      "account-plans":
+        "pg-account-plans",
+
+      "key-contacts":
+        "pg-key-contacts",
+
+      "competitors":
+        "pg-competitors",
+
+      "products-solutions":
+        "pg-products-solutions",
+
+      "case-studies":
+        "pg-case-studies",
+
+      "partner-ecosystem":
+        "pg-partner-ecosystem"
+    });
+
+  const PROGRAMS_CONFIG =
+    Object.freeze({
+      namespace: "programs",
+      pageLabel: "Programs",
+      actionAttribute:
+        "data-programs-action",
+      links: PROGRAMS_LINKS
+    });
+
+  function initialize(pageRoot) {
+    if (
+      !pageRoot ||
+      !window.NexusManagedLinks
+    ) {
+      return;
+    }
+
+    window.NexusManagedLinks
+      .initialize(
+        pageRoot,
+        PROGRAMS_CONFIG
+      );
+  }
+
+  function refresh(pageRoot) {
+    if (
+      !pageRoot ||
+      !window.NexusManagedLinks
+    ) {
+      return;
+    }
+
+    window.NexusManagedLinks
+      .refresh(pageRoot);
+  }
+
+  function getConfiguredLinkKeys() {
+    return Object.keys(
+      PROGRAMS_LINKS
+    ).map(function (action) {
+      return PROGRAMS_LINKS[action];
+    });
+  }
+
+  window.NexusProgramsLinks =
+    Object.freeze({
+      initialize: initialize,
+      refresh: refresh,
+      getConfiguredLinkKeys:
+        getConfiguredLinkKeys
+    });
+}());
+</script>

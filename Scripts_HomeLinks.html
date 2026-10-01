@@ -1,0 +1,125 @@
+<script>
+(function () {
+  "use strict";
+
+  /*
+   * ONESCA — Home managed-link configuration
+   *
+   * Only Home controls whose destination is expected to be a
+   * centrally managed resource are included here.
+   *
+   * Internal SPA routes and UI controls remain owned by Scripts.html.
+   */
+
+  const HOME_LINKS =
+    Object.freeze({
+      // Quick Access
+      "deal-tools":
+        "hm-deal-tools",
+
+      "training":
+        "hm-training-enablement",
+
+      // Explore by Role
+      "role-execom":
+        "hm-role-execom",
+
+      "role-sales-executives":
+        "hm-role-sales-executives",
+
+      "role-product-managers":
+        "hm-role-product-managers",
+
+      "role-solutions-consultants":
+        "hm-role-solutions-consultants",
+
+      "role-delivery-risk-finance":
+        "hm-role-delivery-risk-finance",
+
+      // Featured
+      "featured-go-to-market":
+        "hm-featured-go-to-market",
+
+      "featured-solution-blueprint":
+        "hm-featured-solution-blueprint",
+
+      "featured-customer-engagement":
+        "hm-featured-customer-engagement",
+
+      "featured-deal-calculator":
+        "hm-featured-deal-calculator",
+
+      // What's New
+      "whats-new-governance-guidelines":
+        "hm-new-governance-guidelines",
+
+      "whats-new-sow-template-fy27":
+        "hm-new-sow-template-fy27",
+
+      "whats-new-deal-calculator-v2":
+        "hm-new-deal-calculator-v2",
+
+      "whats-new-go-to-market-guide":
+        "hm-new-go-to-market-guide",
+
+      // Need Help
+      "help-submit-request":
+        "hm-submit-request",
+
+      "help-user-guide":
+        "hm-user-guide"
+    });
+
+  const HOME_CONFIG =
+    Object.freeze({
+      namespace: "home",
+      pageLabel: "Home",
+      actionAttribute:
+        "data-home-action",
+      links: HOME_LINKS
+    });
+
+  function initialize(pageRoot) {
+    if (
+      !pageRoot ||
+      !window.NexusManagedLinks
+    ) {
+      return;
+    }
+
+    window.NexusManagedLinks
+      .initialize(
+        pageRoot,
+        HOME_CONFIG
+      );
+  }
+
+  function refresh(pageRoot) {
+    if (
+      !pageRoot ||
+      !window.NexusManagedLinks
+    ) {
+      return;
+    }
+
+    window.NexusManagedLinks
+      .refresh(pageRoot);
+  }
+
+  function getConfiguredLinkKeys() {
+    return Object.keys(
+      HOME_LINKS
+    ).map(function (action) {
+      return HOME_LINKS[action];
+    });
+  }
+
+  window.NexusHomeLinks =
+    Object.freeze({
+      initialize: initialize,
+      refresh: refresh,
+      getConfiguredLinkKeys:
+        getConfiguredLinkKeys
+    });
+}());
+</script>

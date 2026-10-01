@@ -3813,10 +3813,34 @@
       }
     ],
     whatsNew: [
-      { type: "GUIDELINE", title: "Updated Governance Guidelines", date: "Sep 4, 2026", theme: "orange" },
-      { type: "TEMPLATE", title: "New SOW Template (FY27)", date: "Sep 6, 2026", theme: "blue" },
-      { type: "TOOL", title: "Deal Calculator v2.0", date: "Sep 7, 2026", theme: "orange" },
-      { type: "PLAYBOOK", title: "Novare Next Go-to-Market Guide", date: "Sep 9, 2026", theme: "purple" }
+      {
+        id: "governance-guidelines",
+        type: "GUIDELINE",
+        title: "Updated Governance Guidelines",
+        date: "Sep 4, 2026",
+        theme: "orange"
+      },
+      {
+        id: "sow-template-fy27",
+        type: "TEMPLATE",
+        title: "New SOW Template (FY27)",
+        date: "Sep 6, 2026",
+        theme: "blue"
+      },
+      {
+        id: "deal-calculator-v2",
+        type: "TOOL",
+        title: "Deal Calculator v2.0",
+        date: "Sep 7, 2026",
+        theme: "orange"
+      },
+      {
+        id: "go-to-market-guide",
+        type: "PLAYBOOK",
+        title: "Novare Next Go-to-Market Guide",
+        date: "Sep 9, 2026",
+        theme: "purple"
+      }
     ],
     help: [
       {
@@ -3887,6 +3911,7 @@
       card.className = "quick-access-card";
       card.dataset.theme = item.theme;
       card.dataset.quickAccessId = item.id;
+      card.dataset.homeAction = item.id;
       card.setAttribute("aria-label", item.title + ": " + item.description);
 
       card.innerHTML =
@@ -3932,6 +3957,8 @@
       card.type = "button";
       card.className = "role-card";
       card.dataset.roleId = item.id;
+      card.dataset.homeAction =
+        "role-" + item.id;
       card.setAttribute("aria-label", "Explore resources for " + item.title);
 
       const imageFrame = document.createElement("span");
@@ -4076,6 +4103,8 @@
       const cta = document.createElement("button");
       cta.type = "button";
       cta.className = "featured-cta";
+      cta.dataset.homeAction =
+        "featured-" + item.id;
       cta.setAttribute("aria-label", "View " + item.title);
       cta.innerHTML = '<span>View</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
       cta.addEventListener("click", function (event) {
@@ -4179,6 +4208,8 @@
       button.type = "button";
       button.className = "whats-new-item";
       button.dataset.theme = item.theme;
+      button.dataset.homeAction =
+        "whats-new-" + item.id;
       button.setAttribute("aria-label", item.type + ": " + item.title + ", " + item.date);
       button.innerHTML =
         '<span class="whats-new-icon" aria-hidden="true">' +
@@ -4219,6 +4250,8 @@
       button.type = "button";
       button.className = "home-help-item";
       button.dataset.theme = item.theme;
+      button.dataset.homeAction =
+        "help-" + item.id;
       button.setAttribute("aria-label", item.title + ": " + item.description);
       button.innerHTML =
         '<span class="home-help-icon" aria-hidden="true"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + item.icon + '</svg></span>' +
@@ -4253,6 +4286,12 @@
     renderFeatured(pageRoot, initialData.featured);
     renderWhatsNew(pageRoot, initialData.whatsNew);
     renderHelpPanel(pageRoot, initialData.help);
+
+    if (window.NexusHomeLinks) {
+      window.NexusHomeLinks.initialize(
+        pageRoot
+      );
+    }
 
     const input = pageRoot.querySelector("#home-ai-input");
     const status = pageRoot.querySelector("#home-ai-status");

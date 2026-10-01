@@ -1,0 +1,945 @@
+<script>
+(function () {
+  "use strict";
+
+  /*
+   * ONESCA — shared managed-link runtime
+   *
+   * Page modules provide:
+   * - a page namespace
+   * - the page action attribute
+   * - an action -> managed-link-key map
+   *
+   * This module owns:
+   * - getManagedLinks() calls
+   * - URL validation
+   * - ready / missing states
+   * - loading overlay
+   * - Coming Soon fallback
+   * - normal new-tab opening
+   */
+
+  const instances = new WeakMap();
+
+  function normalizeLinkDefinition(value) {
+    if (typeof value === "string") {
+      return {
+        key: value.trim(),
+        type: "external"
+      };
+    }
+
+    if (!value || typeof value !== "object") {
+      return null;
+    }
+
+    return {
+      key: String(value.key || "").trim(),
+      type: String(value.type || "external").trim() || "external"
+    };
+  }
+
+  function normalizeConfig(config) {
+    const source =
+      config && typeof config === "object"
+        ? config
+        : {};
+
+    const rawLinks =
+      source.links &&
+      typeof source.links === "object"
+        ? source.links
+        : {};
+
+    const links = Object.create(null);
+
+    Object.keys(rawLinks).forEach(function (action) {
+      const definition =
+        normalizeLinkDefinition(
+          rawLinks[action]
+        );
+
+      if (
+        definition &&
+        definition.key
+      ) {
+        links[
+          String(action || "").trim()
+        ] = definition;
+      }
+    });
+
+    return {
+      namespace:
+        String(
+          source.namespace || "page"
+        ).trim() || "page",
+
+      pageLabel:
+        String(
+          source.pageLabel || "ONESCA"
+        ).trim() || "ONESCA",
+
+      actionAttribute:
+        String(
+          source.actionAttribute ||
+          "data-managed-action"
+        ).trim(),
+
+      links: links
+    };
+  }
+
+  function getInstance(pageRoot) {
+    return instances.get(pageRoot) || null;
+  }
+
+  function getAction(
+    element,
+    config
+  ) {
+    if (!element || !config) {
+      return "";
+    }
+
+    return String(
+      element.getAttribute(
+        config.actionAttribute
+      ) || ""
+    ).trim();
+  }
+
+  function getDefinition(
+    element,
+    config
+  ) {
+    const action =
+      getAction(
+        element,
+        config
+      );
+
+    return (
+      config.links[action] ||
+      null
+    );
+  }
+
+  function applyLinkKeys(
+    pageRoot,
+    config
+  ) {
+    if (
+      !pageRoot ||
+      !config ||
+      !config.actionAttribute
+    ) {
+      return;
+    }
+
+    const selector =
+      "[" +
+      config.actionAttribute +
+      "]";
+
+    pageRoot
+      .querySelectorAll(selector)
+      .forEach(function (element) {
+        const definition =
+          getDefinition(
+            element,
+            config
+          );
+
+        if (!definition) {
+          return;
+        }
+
+        element.dataset.linkKey =
+          definition.key;
+
+        element.dataset.managedLinkType =
+          definition.type;
+      });
+  }
+
+  function getConfiguredKeys(config) {
+    const seen =
+      Object.create(null);
+
+    return Object.keys(
+      config.links
+    )
+      .map(function (action) {
+        return config.links[action].key;
+      })
+      .filter(function (key) {
+        if (!key || seen[key]) {
+          return false;
+        }
+
+        seen[key] = true;
+        return true;
+      });
+  }
+
+  function normalizeServerResponse(
+    response
+  ) {
+    const source =
+      response &&
+      typeof response === "object"
+        ? response
+        : {};
+
+    const sourceLinks =
+      source.links &&
+      typeof source.links === "object"
+        ? source.links
+        : {};
+
+    const links =
+      Object.create(null);
+
+    Object.keys(
+      sourceLinks
+    ).forEach(function (key) {
+      const url =
+        String(
+          sourceLinks[key] || ""
+        ).trim();
+
+      if (
+        /^https?:\/\/\S+$/i.test(url)
+      ) {
+        links[key] = url;
+      }
+    });
+
+    const sourceMeta =
+      source.meta &&
+      typeof source.meta === "object"
+        ? source.meta
+        : {};
+
+    return {
+      links: links,
+
+      missing:
+        Array.isArray(source.missing)
+          ? source.missing.slice()
+          : [],
+
+      duplicates:
+        Array.isArray(source.duplicates)
+          ? source.duplicates.slice()
+          : [],
+
+      invalid:
+        Array.isArray(source.invalid)
+          ? source.invalid.slice()
+          : [],
+
+      meta: {
+        connected:
+          sourceMeta.connected === true,
+
+        spreadsheetId:
+          String(
+            sourceMeta.spreadsheetId ||
+            ""
+          ),
+
+        sheetName:
+          String(
+            sourceMeta.sheetName ||
+            ""
+          ),
+
+        rowsScanned:
+          Number(
+            sourceMeta.rowsScanned ||
+            0
+          ),
+
+        requestedCount:
+          Number(
+            sourceMeta.requestedCount ||
+            0
+          ),
+
+        matchedCount:
+          Number(
+            sourceMeta.matchedCount ||
+            0
+          )
+      }
+    };
+  }
+
+  function ensureLoader(
+    pageRoot,
+    state
+  ) {
+    let loader =
+      pageRoot.querySelector(
+        "[data-managed-link-loader]"
+      );
+
+    if (loader) {
+      return loader;
+    }
+
+    loader =
+      document.createElement("div");
+
+    loader.className =
+      "managed-link-loader";
+
+    loader.dataset.managedLinkLoader =
+      "true";
+
+    loader.setAttribute(
+      "role",
+      "status"
+    );
+
+    loader.setAttribute(
+      "aria-live",
+      "polite"
+    );
+
+    loader.setAttribute(
+      "aria-label",
+      "Loading ONESCA resource links"
+    );
+
+    loader.innerHTML =
+      '<div class="managed-link-loader-card">' +
+        '<div class="managed-link-loader-mark" aria-hidden="true">' +
+          '<span class="managed-link-loader-ring"></span>' +
+          '<svg viewBox="0 0 24 24">' +
+            '<path d="M7.5 12h9"></path>' +
+            '<path d="m13 8.5 3.5 3.5-3.5 3.5"></path>' +
+          '</svg>' +
+        '</div>' +
+        '<p class="managed-link-loader-eyebrow">ONESCA RESOURCES</p>' +
+        '<h2>Preparing your resources</h2>' +
+        '<p class="managed-link-loader-copy">' +
+          'Connecting to the latest approved links. This will only take a moment.' +
+        '</p>' +
+        '<div class="managed-link-loader-dots" aria-hidden="true">' +
+          '<span></span><span></span><span></span>' +
+        '</div>' +
+      '</div>';
+
+    pageRoot.appendChild(loader);
+
+    state.loader = loader;
+
+    return loader;
+  }
+
+  function showLoader(
+    pageRoot,
+    state
+  ) {
+    const loader =
+      ensureLoader(
+        pageRoot,
+        state
+      );
+
+    pageRoot.classList.add(
+      "is-managed-links-loading"
+    );
+
+    pageRoot.setAttribute(
+      "aria-busy",
+      "true"
+    );
+
+    loader.hidden = false;
+
+    window.requestAnimationFrame(
+      function () {
+        loader.classList.add(
+          "is-visible"
+        );
+      }
+    );
+  }
+
+  function hideLoader(
+    pageRoot,
+    state
+  ) {
+    if (!pageRoot) {
+      return;
+    }
+
+    pageRoot.classList.remove(
+      "is-managed-links-loading"
+    );
+
+    pageRoot.removeAttribute(
+      "aria-busy"
+    );
+
+    const loader =
+      state.loader ||
+      pageRoot.querySelector(
+        "[data-managed-link-loader]"
+      );
+
+    if (!loader) {
+      return;
+    }
+
+    loader.classList.remove(
+      "is-visible"
+    );
+
+    window.setTimeout(
+      function () {
+        if (
+          !pageRoot.classList.contains(
+            "is-managed-links-loading"
+          )
+        ) {
+          loader.hidden = true;
+        }
+      },
+      180
+    );
+  }
+
+  function applyResolvedState(
+    pageRoot,
+    state
+  ) {
+    if (!pageRoot) {
+      return;
+    }
+
+    pageRoot
+      .querySelectorAll(
+        "[data-link-key]"
+      )
+      .forEach(function (element) {
+        const key =
+          String(
+            element.dataset.linkKey ||
+            ""
+          ).trim();
+
+        const url =
+          state.links[key] || "";
+
+        if (url) {
+          element.dataset.managedLinkReady =
+            "true";
+
+          element.removeAttribute(
+            "data-managed-link-missing"
+          );
+        } else {
+          delete element.dataset
+            .managedLinkReady;
+
+          element.dataset
+            .managedLinkMissing =
+              "true";
+        }
+      });
+  }
+
+  function getTriggerLabel(trigger) {
+    if (!trigger) {
+      return "This resource";
+    }
+
+    const ariaLabel =
+      String(
+        trigger.getAttribute(
+          "aria-label"
+        ) || ""
+      ).trim();
+
+    if (ariaLabel) {
+      return ariaLabel
+        .replace(/^Open\s+/i, "")
+        .replace(/^View\s+/i, "")
+        .replace(/^Explore\s+/i, "")
+        .trim();
+    }
+
+    const text =
+      String(
+        trigger.textContent || ""
+      )
+        .replace(/\s+/g, " ")
+        .trim();
+
+    return (
+      text ||
+      "This resource"
+    );
+  }
+
+  function ensureComingSoonDialog() {
+    let dialog =
+      document.getElementById(
+        "managed-link-coming-soon"
+      );
+
+    if (dialog) {
+      return dialog;
+    }
+
+    dialog =
+      document.createElement(
+        "dialog"
+      );
+
+    dialog.id =
+      "managed-link-coming-soon";
+
+    dialog.className =
+      "managed-coming-soon-dialog";
+
+    dialog.setAttribute(
+      "aria-labelledby",
+      "managed-coming-soon-title"
+    );
+
+    dialog.setAttribute(
+      "aria-describedby",
+      "managed-coming-soon-message"
+    );
+
+    dialog.innerHTML =
+      '<div class="managed-coming-soon-card">' +
+        '<button class="managed-coming-soon-close" type="button" ' +
+          'data-managed-coming-soon-close aria-label="Close">' +
+          '<svg viewBox="0 0 24 24" aria-hidden="true">' +
+            '<path d="M6 6l12 12M18 6L6 18"></path>' +
+          '</svg>' +
+        '</button>' +
+
+        '<div class="managed-coming-soon-icon" aria-hidden="true">' +
+          '<svg viewBox="0 0 24 24">' +
+            '<path d="M12 3l1.85 4.15L18 9l-4.15 1.85L12 15l-1.85-4.15L6 9l4.15-1.85L12 3Z"></path>' +
+            '<path d="M18.5 14.5l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9.9-2.1Z"></path>' +
+          '</svg>' +
+        '</div>' +
+
+        '<p class="managed-coming-soon-eyebrow">COMING SOON</p>' +
+        '<h2 id="managed-coming-soon-title">Something great is on the way.</h2>' +
+        '<p id="managed-coming-soon-resource" class="managed-coming-soon-resource"></p>' +
+        '<p id="managed-coming-soon-message" class="managed-coming-soon-message">' +
+          'We’re preparing the latest approved resource for ONESCA so you get the best, most up-to-date material. Check back soon!' +
+        '</p>' +
+
+        '<button class="managed-coming-soon-action" type="button" ' +
+          'data-managed-coming-soon-close>' +
+          'Got it — I’ll check back' +
+        '</button>' +
+      '</div>';
+
+    dialog
+      .querySelectorAll(
+        "[data-managed-coming-soon-close]"
+      )
+      .forEach(function (button) {
+        button.addEventListener(
+          "click",
+          function () {
+            dialog.close();
+          }
+        );
+      });
+
+    dialog.addEventListener(
+      "click",
+      function (event) {
+        if (
+          event.target === dialog
+        ) {
+          dialog.close();
+        }
+      }
+    );
+
+    document.body.appendChild(
+      dialog
+    );
+
+    return dialog;
+  }
+
+  function showComingSoon(
+    trigger
+  ) {
+    const dialog =
+      ensureComingSoonDialog();
+
+    const resource =
+      dialog.querySelector(
+        "#managed-coming-soon-resource"
+      );
+
+    const label =
+      getTriggerLabel(trigger);
+
+    if (resource) {
+      resource.textContent =
+        label === "This resource"
+          ? "This resource is getting ready for launch."
+          : (
+              label +
+              " is getting ready for launch."
+            );
+    }
+
+    if (
+      typeof dialog.showModal ===
+      "function"
+    ) {
+      if (!dialog.open) {
+        dialog.showModal();
+      }
+
+      return;
+    }
+
+    dialog.setAttribute(
+      "open",
+      ""
+    );
+  }
+
+  function openResolvedUrl(
+    url
+  ) {
+    window.open(
+      url,
+      "_blank",
+      "noopener,noreferrer"
+    );
+  }
+
+  function handleManagedClick(
+    event,
+    pageRoot,
+    state
+  ) {
+    const trigger =
+      event.target.closest(
+        "[data-link-key]"
+      );
+
+    if (
+      !trigger ||
+      !pageRoot.contains(trigger)
+    ) {
+      return;
+    }
+
+    const key =
+      String(
+        trigger.dataset.linkKey ||
+        ""
+      ).trim();
+
+    const url =
+      state.links[key] || "";
+
+    if (!url) {
+      if (state.loaded) {
+        event.preventDefault();
+        event.stopPropagation();
+        showComingSoon(trigger);
+      }
+
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    openResolvedUrl(url);
+  }
+
+  function bindManagedClicks(
+    pageRoot,
+    state
+  ) {
+    if (state.bound) {
+      return;
+    }
+
+    pageRoot.addEventListener(
+      "click",
+      function (event) {
+        handleManagedClick(
+          event,
+          pageRoot,
+          state
+        );
+      },
+      true
+    );
+
+    state.bound = true;
+  }
+
+  function fetchLinks(
+    pageRoot,
+    state
+  ) {
+    const requestedKeys =
+      getConfiguredKeys(
+        state.config
+      );
+
+    if (!requestedKeys.length) {
+      state.loaded = true;
+      state.loading = false;
+      hideLoader(
+        pageRoot,
+        state
+      );
+      return;
+    }
+
+    showLoader(
+      pageRoot,
+      state
+    );
+
+    if (state.loading) {
+      return;
+    }
+
+    state.loading = true;
+
+    console.info(
+      "[ONESCA " +
+        state.config.pageLabel +
+        "] Connecting to managed link registry...",
+      {
+        sheet: "06_Assets",
+        keyColumn: "B",
+        urlColumn: "I",
+        requestedKeys:
+          requestedKeys.length
+      }
+    );
+
+    google.script.run
+      .withSuccessHandler(
+        function (response) {
+          const normalized =
+            normalizeServerResponse(
+              response
+            );
+
+          state.links =
+            normalized.links;
+
+          state.missing =
+            normalized.missing;
+
+          state.duplicates =
+            normalized.duplicates;
+
+          state.invalid =
+            normalized.invalid;
+
+          state.meta =
+            normalized.meta;
+
+          state.loaded = true;
+          state.loading = false;
+
+          applyResolvedState(
+            pageRoot,
+            state
+          );
+
+          hideLoader(
+            pageRoot,
+            state
+          );
+
+          if (
+            state.missing.length
+          ) {
+            console.warn(
+              "[ONESCA " +
+                state.config.pageLabel +
+                "] No usable URL was returned for these keys:",
+              state.missing
+            );
+          }
+
+          if (
+            state.duplicates.length
+          ) {
+            console.warn(
+              "[ONESCA " +
+                state.config.pageLabel +
+                "] Duplicate managed-link keys found:",
+              state.duplicates
+            );
+          }
+
+          if (
+            state.invalid.length
+          ) {
+            console.warn(
+              "[ONESCA " +
+                state.config.pageLabel +
+                "] Invalid managed-link URLs found:",
+              state.invalid
+            );
+          }
+        }
+      )
+      .withFailureHandler(
+        function (error) {
+          state.loading = false;
+          state.loaded = false;
+
+          hideLoader(
+            pageRoot,
+            state
+          );
+
+          console.error(
+            "[ONESCA " +
+              state.config.pageLabel +
+              "] Managed-link registry request failed.",
+            error
+          );
+        }
+      )
+      .getManagedLinks(
+        requestedKeys
+      );
+  }
+
+  function initialize(
+    pageRoot,
+    rawConfig
+  ) {
+    if (!pageRoot) {
+      return null;
+    }
+
+    const existing =
+      getInstance(pageRoot);
+
+    if (existing) {
+      applyLinkKeys(
+        pageRoot,
+        existing.config
+      );
+
+      if (existing.loaded) {
+        applyResolvedState(
+          pageRoot,
+          existing
+        );
+      }
+
+      return existing;
+    }
+
+    const config =
+      normalizeConfig(
+        rawConfig
+      );
+
+    const state = {
+      config: config,
+      links:
+        Object.create(null),
+      loaded: false,
+      loading: false,
+      bound: false,
+      missing: [],
+      duplicates: [],
+      invalid: [],
+      loader: null,
+      meta: {
+        connected: false,
+        spreadsheetId: "",
+        sheetName: "",
+        rowsScanned: 0,
+        requestedCount: 0,
+        matchedCount: 0
+      }
+    };
+
+    instances.set(
+      pageRoot,
+      state
+    );
+
+    applyLinkKeys(
+      pageRoot,
+      config
+    );
+
+    bindManagedClicks(
+      pageRoot,
+      state
+    );
+
+    fetchLinks(
+      pageRoot,
+      state
+    );
+
+    return state;
+  }
+
+  function refresh(
+    pageRoot
+  ) {
+    const state =
+      getInstance(
+        pageRoot
+      );
+
+    if (!state) {
+      return;
+    }
+
+    state.loaded = false;
+    state.loading = false;
+    state.links =
+      Object.create(null);
+
+    applyLinkKeys(
+      pageRoot,
+      state.config
+    );
+
+    fetchLinks(
+      pageRoot,
+      state
+    );
+  }
+
+  window.NexusManagedLinks =
+    Object.freeze({
+      initialize: initialize,
+      refresh: refresh,
+      showComingSoon:
+        showComingSoon
+    });
+}());
+</script>

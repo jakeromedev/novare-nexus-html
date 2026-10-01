@@ -3101,14 +3101,40 @@
     if (!pageRoot) return;
 
     if (pageRoot.dataset.pageInitialized !== "true") {
-      renderDeliveryContent(pageRoot, getStaticDeliveryContent());
-      initializeDeliveryActions(pageRoot);
-      pageRoot.dataset.pageInitialized = "true";
-      refreshDeliveryFromServer(pageRoot);
+      renderDeliveryContent(
+        pageRoot,
+        getStaticDeliveryContent()
+      );
+
+      /*
+       * Managed Delivery resources initialize before the existing
+       * Delivery action handler. The shared runtime listens in capture
+       * phase, so resolved Sheet links take precedence while internal
+       * actions such as the Explore buttons and Ask NOSCA still fall
+       * through to the page's existing interaction behavior.
+       */
+      if (window.NexusDeliveryLinks) {
+        window.NexusDeliveryLinks
+          .initialize(pageRoot);
+      }
+
+      initializeDeliveryActions(
+        pageRoot
+      );
+
+      pageRoot.dataset.pageInitialized =
+        "true";
+
+      refreshDeliveryFromServer(
+        pageRoot
+      );
+
       return;
     }
 
-    retryFailedDeliveryAssets(pageRoot);
+    retryFailedDeliveryAssets(
+      pageRoot
+    );
   }
 
   function bindProgramsAsset(image, fallback, width) {

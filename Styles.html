@@ -18557,4 +18557,103 @@
       }
     }
 
+
+    /* =========================================================
+       H5 DELIVERY — MANAGED LINK STATES
+       Applied only after 06_Assets resolves and a configured
+       Delivery key has no usable URL.
+       ========================================================= */
+
+    .delivery-page
+      [data-managed-link-missing="true"] {
+      --delivery-managed-missing-bg:
+        #F2F5F8;
+      --delivery-managed-missing-border:
+        #D7DEE7;
+      --delivery-managed-missing-text:
+        #6E7C8D;
+      --delivery-managed-missing-icon:
+        #8190A2;
+
+      cursor: pointer !important;
+      filter: saturate(.22);
+      opacity: .78;
+      border-color:
+        var(
+          --delivery-managed-missing-border
+        ) !important;
+      box-shadow:
+        none !important;
+
+      transition:
+        opacity 160ms ease,
+        transform 160ms ease,
+        background-color 160ms ease,
+        border-color 160ms ease;
+    }
+
+    .delivery-page
+      [data-managed-link-missing="true"]:hover {
+      opacity: .94;
+      transform:
+        translateY(-1px);
+      border-color:
+        #C7D0DA !important;
+    }
+
+    /*
+      Only actionable Delivery controls are muted. Informational panel
+      headings, descriptions and the closing banner remain unchanged.
+    */
+    .delivery-page
+      .delivery-resource-card[data-managed-link-missing="true"],
+    .delivery-page
+      .delivery-quick-card[data-managed-link-missing="true"] {
+      color:
+        var(
+          --delivery-managed-missing-text
+        ) !important;
+
+      background:
+        var(
+          --delivery-managed-missing-bg
+        ) !important;
+    }
+
+    .delivery-page
+      [data-managed-link-missing="true"]
+      svg,
+    .delivery-page
+      [data-managed-link-missing="true"]
+      [class*="-icon"],
+    .delivery-page
+      [data-managed-link-missing="true"]
+      [class*="-arrow"] {
+      color:
+        var(
+          --delivery-managed-missing-icon
+        ) !important;
+
+      stroke:
+        var(
+          --delivery-managed-missing-icon
+        ) !important;
+    }
+
+    /*
+      These remain internal UI actions and are intentionally excluded
+      from the managed-link registry:
+      - explore-methodologies
+      - explore-case-studies
+      - ask-nosca
+    */
+
+    @media (prefers-reduced-motion: reduce) {
+      .delivery-page
+        [data-managed-link-missing="true"] {
+        transition:
+          none !important;
+      }
+    }
+
 </style>

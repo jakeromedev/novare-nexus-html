@@ -3519,15 +3519,44 @@
     if (!pageRoot) return;
 
     if (pageRoot.dataset.pageInitialized !== "true") {
-      renderOfferingsContent(pageRoot, getStaticOfferingsContent());
-      initializeOfferingsInteractions(pageRoot);
-      applyOfferingsFilter(pageRoot, "", false);
-      pageRoot.dataset.pageInitialized = "true";
-      refreshOfferingsFromServer(pageRoot);
+      renderOfferingsContent(
+        pageRoot,
+        getStaticOfferingsContent()
+      );
+
+      /*
+       * Managed resources are initialized before the legacy Offerings
+       * placeholder click behavior. The shared runtime listens in the
+       * capture phase, so a resolved Sheet link wins cleanly.
+       */
+      if (window.NexusOfferingsLinks) {
+        window.NexusOfferingsLinks
+          .initialize(pageRoot);
+      }
+
+      initializeOfferingsInteractions(
+        pageRoot
+      );
+
+      applyOfferingsFilter(
+        pageRoot,
+        "",
+        false
+      );
+
+      pageRoot.dataset.pageInitialized =
+        "true";
+
+      refreshOfferingsFromServer(
+        pageRoot
+      );
+
       return;
     }
 
-    retryFailedOfferingsAssets(pageRoot);
+    retryFailedOfferingsAssets(
+      pageRoot
+    );
   }
 
   function bindOverviewAsset(image, fallback, width) {
@@ -4558,7 +4587,221 @@
     navHeaderScrollFrame = window.requestAnimationFrame(updateNavHeaderScrollEffect);
   }
 
-  // 6. SPA ROUTING
+  // 6. DEFAULT PAGE LOADER
+  // Reuses the same visual language as the H1 Overview resource loader.
+  // Managed-link pages may keep the loader visible longer while their
+  // resource registry is resolving.
+  const DEFAULT_PAGE_LOADER_MIN_MS = 520;
+  const pageLoaderTimers = new WeakMap();
+
+  function getExistingPageLoader(pageRoot) {
+    if (!pageRoot) return null;
+
+    return pageRoot.querySelector(
+      ".overview-link-loader, .managed-link-loader, [data-default-page-loader]"
+    );
+  }
+
+  function ensureDefaultPageLoader(pageRoot) {
+    if (!pageRoot) return null;
+
+    const existing =
+      getExistingPageLoader(pageRoot);
+
+    if (existing) {
+      return existing;
+    }
+
+    const loader =
+      document.createElement("div");
+
+    loader.className =
+      "overview-link-loader";
+
+    loader.dataset.defaultPageLoader =
+      "true";
+
+    loader.setAttribute(
+      "role",
+      "status"
+    );
+
+    loader.setAttribute(
+      "aria-live",
+      "polite"
+    );
+
+    loader.setAttribute(
+      "aria-label",
+      "Loading ONESCA page"
+    );
+
+    loader.hidden = true;
+
+    loader.innerHTML =
+      '<div class="overview-link-loader-card">' +
+        '<div class="overview-link-loader-mark" aria-hidden="true">' +
+          '<span class="overview-link-loader-ring"></span>' +
+          '<svg viewBox="0 0 24 24">' +
+            '<path d="M7.5 12h9"></path>' +
+            '<path d="m13 8.5 3.5 3.5-3.5 3.5"></path>' +
+          '</svg>' +
+        '</div>' +
+        '<p class="overview-link-loader-eyebrow">ONESCA RESOURCES</p>' +
+        '<h2>Preparing your resources</h2>' +
+        '<p class="overview-link-loader-copy">' +
+          'Connecting to the latest approved links. This will only take a moment.' +
+        '</p>' +
+        '<div class="overview-link-loader-dots" aria-hidden="true">' +
+          '<span></span><span></span><span></span>' +
+        '</div>' +
+      '</div>';
+
+    pageRoot.appendChild(loader);
+
+    return loader;
+  }
+
+  function clearDefaultPageLoaderTimer(
+    pageRoot
+  ) {
+    const timer =
+      pageLoaderTimers.get(
+        pageRoot
+      );
+
+    if (timer) {
+      window.clearTimeout(timer);
+      pageLoaderTimers.delete(
+        pageRoot
+      );
+    }
+  }
+
+  function showDefaultPageLoader(
+    pageRoot
+  ) {
+    if (!pageRoot) return;
+
+    clearDefaultPageLoaderTimer(
+      pageRoot
+    );
+
+    const loader =
+      ensureDefaultPageLoader(
+        pageRoot
+      );
+
+    if (!loader) return;
+
+    pageRoot.classList.add(
+      "is-default-page-loading"
+    );
+
+    pageRoot.setAttribute(
+      "aria-busy",
+      "true"
+    );
+
+    loader.hidden = false;
+
+    window.requestAnimationFrame(
+      function () {
+        loader.classList.add(
+          "is-visible"
+        );
+      }
+    );
+  }
+
+  function hideDefaultPageLoader(
+    pageRoot
+  ) {
+    if (!pageRoot) return;
+
+    /*
+      Overview and any page using managed links owns the loader while
+      its async resource registry is still resolving. Do not hide it
+      prematurely just because the route transition finished.
+    */
+    if (
+      pageRoot.classList.contains(
+        "is-managed-links-loading"
+      )
+    ) {
+      pageRoot.classList.remove(
+        "is-default-page-loading"
+      );
+
+      return;
+    }
+
+    const loader =
+      getExistingPageLoader(
+        pageRoot
+      );
+
+    pageRoot.classList.remove(
+      "is-default-page-loading"
+    );
+
+    pageRoot.removeAttribute(
+      "aria-busy"
+    );
+
+    if (!loader) return;
+
+    loader.classList.remove(
+      "is-visible"
+    );
+
+    window.setTimeout(
+      function () {
+        if (
+          !pageRoot.classList.contains(
+            "is-default-page-loading"
+          ) &&
+          !pageRoot.classList.contains(
+            "is-managed-links-loading"
+          )
+        ) {
+          loader.hidden = true;
+        }
+      },
+      180
+    );
+  }
+
+  function scheduleDefaultPageLoaderHide(
+    pageRoot
+  ) {
+    if (!pageRoot) return;
+
+    clearDefaultPageLoaderTimer(
+      pageRoot
+    );
+
+    const timer =
+      window.setTimeout(
+        function () {
+          pageLoaderTimers.delete(
+            pageRoot
+          );
+
+          hideDefaultPageLoader(
+            pageRoot
+          );
+        },
+        DEFAULT_PAGE_LOADER_MIN_MS
+      );
+
+    pageLoaderTimers.set(
+      pageRoot,
+      timer
+    );
+  }
+
+  // 7. SPA ROUTING
   function setActiveNavigation(route) {
     dom.navItems.forEach(function (item) {
       const active = item.dataset.route === route;
@@ -4609,7 +4852,28 @@
 
     pageCache.forEach(function (element) { element.hidden = true; });
     const activePage = ensurePage(route);
-    if (activePage) activePage.hidden = false;
+
+    if (activePage) {
+      activePage.hidden = false;
+
+      /*
+       * The default page loader is a first-access experience only.
+       * ONESCA keeps SPA pages in pageCache, so once a route has loaded
+       * successfully we do not replay the loader when the user returns.
+       */
+      if (
+        activePage.dataset.defaultPageLoaderShown !==
+        "true"
+      ) {
+        activePage.dataset.defaultPageLoaderShown =
+          "true";
+
+        showDefaultPageLoader(
+          activePage
+        );
+      }
+    }
+
     if (route === "home" && activePage) retryFailedHomeAssets(activePage);
     if (route === "overview" && activePage) retryFailedOverviewAssets(activePage);
     if (route === "offerings" && activePage) retryFailedOfferingsAssets(activePage);
@@ -4652,6 +4916,17 @@
     // The navigation header is global, so its source filters remain visible on every route.
     if (dom.filters) dom.filters.hidden = false;
     document.title = page.title + " | Novare Nexus 2026";
+
+    if (
+      activePage &&
+      activePage.classList.contains(
+        "is-default-page-loading"
+      )
+    ) {
+      scheduleDefaultPageLoaderHide(
+        activePage
+      );
+    }
   }
 
   function getCurrentPageTitle() {

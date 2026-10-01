@@ -1,0 +1,205 @@
+<script>
+(function () {
+  "use strict";
+
+  /*
+   * ONESCA — H2 Offerings managed-link configuration
+   *
+   * The page markup already exposes readable data-offerings-action
+   * identifiers. This module maps those actions to stable managed-link
+   * keys in the existing 06_Assets registry.
+   *
+   * The shared Scripts_ManagedLinks.html runtime owns:
+   * - getManagedLinks()
+   * - URL validation
+   * - ready / missing states
+   * - loader behavior
+   * - Coming Soon
+   * - new-tab opening
+   */
+
+  const OFFERINGS_LINKS =
+    Object.freeze({
+      // ---------------------------------------------------------
+      // CORE OFFERINGS — SOFA 2.0
+      // ---------------------------------------------------------
+      "sofa-pitchbook":
+        "of-sofa-pb",
+
+      "sofa-discovery-guide":
+        "of-sofa-dg",
+
+      "sofa-standard-proposal":
+        "of-sofa-sp",
+
+      "explore-sofa":
+        "of-sofa",
+
+      // ---------------------------------------------------------
+      // CORE OFFERINGS — RAFA
+      // ---------------------------------------------------------
+      "rafa-pitchbook":
+        "of-rafa-pb",
+
+      "rafa-discovery-guide":
+        "of-rafa-dg",
+
+      "rafa-standard-proposal":
+        "of-rafa-sp",
+
+      "explore-rafa":
+        "of-rafa",
+
+      // ---------------------------------------------------------
+      // CORE OFFERINGS — MCLOUD
+      // ---------------------------------------------------------
+      "mcloud-pitchbook":
+        "of-mcloud-pb",
+
+      "mcloud-discovery-guide":
+        "of-mcloud-dg",
+
+      "mcloud-standard-proposal":
+        "of-mcloud-sp",
+
+      "explore-mcloud":
+        "of-mcloud",
+
+      // ---------------------------------------------------------
+      // CORE OFFERINGS — MSOC
+      // ---------------------------------------------------------
+      "msoc-pitchbook":
+        "of-msoc-pb",
+
+      "msoc-discovery-guide":
+        "of-msoc-dg",
+
+      "msoc-standard-proposal":
+        "of-msoc-sp",
+
+      "explore-msoc":
+        "of-msoc",
+
+      // ---------------------------------------------------------
+      // CORE OFFERINGS — MS
+      // ---------------------------------------------------------
+      "ms-pitchbook":
+        "of-ms-pb",
+
+      "ms-discovery-guide":
+        "of-ms-dg",
+
+      "ms-standard-proposal":
+        "of-ms-sp",
+
+      "explore-ms":
+        "of-ms",
+
+      // ---------------------------------------------------------
+      // AI ACCELERATOR — AI EDUCATION
+      // ---------------------------------------------------------
+      "ai-education-pitchbook":
+        "of-ai-education-pb",
+
+      "ai-education-discovery-guide":
+        "of-ai-education-dg",
+
+      "ai-education-standard-proposal":
+        "of-ai-education-sp",
+
+      "explore-ai-education":
+        "of-ai-education",
+
+      // ---------------------------------------------------------
+      // AI ACCELERATOR — PERSONAL AI
+      // ---------------------------------------------------------
+      "personal-ai-pitchbook":
+        "of-personal-ai-pb",
+
+      "personal-ai-discovery-guide":
+        "of-personal-ai-dg",
+
+      "personal-ai-standard-proposal":
+        "of-personal-ai-sp",
+
+      "explore-personal-ai":
+        "of-personal-ai",
+
+      // ---------------------------------------------------------
+      // AI ACCELERATOR — SOVEREIGN AI
+      // ---------------------------------------------------------
+      "sovereign-ai-pitchbook":
+        "of-sovereign-ai-pb",
+
+      "sovereign-ai-discovery-guide":
+        "of-sovereign-ai-dg",
+
+      "sovereign-ai-standard-proposal":
+        "of-sovereign-ai-sp",
+
+      "explore-sovereign-ai":
+        "of-sovereign-ai",
+
+      // ---------------------------------------------------------
+      // QUOTE / DELIVERY LANES
+      // ---------------------------------------------------------
+      "quote-supply-deliver":
+        "of-quote-supply-deliver",
+
+      "quote-staff-aug":
+        "of-quote-staff-aug"
+    });
+
+  const OFFERINGS_CONFIG =
+    Object.freeze({
+      namespace: "offerings",
+      pageLabel: "Offerings",
+      actionAttribute:
+        "data-offerings-action",
+      links: OFFERINGS_LINKS
+    });
+
+  function initialize(pageRoot) {
+    if (
+      !pageRoot ||
+      !window.NexusManagedLinks
+    ) {
+      return;
+    }
+
+    window.NexusManagedLinks
+      .initialize(
+        pageRoot,
+        OFFERINGS_CONFIG
+      );
+  }
+
+  function refresh(pageRoot) {
+    if (
+      !pageRoot ||
+      !window.NexusManagedLinks
+    ) {
+      return;
+    }
+
+    window.NexusManagedLinks
+      .refresh(pageRoot);
+  }
+
+  function getConfiguredLinkKeys() {
+    return Object.keys(
+      OFFERINGS_LINKS
+    ).map(function (action) {
+      return OFFERINGS_LINKS[action];
+    });
+  }
+
+  window.NexusOfferingsLinks =
+    Object.freeze({
+      initialize: initialize,
+      refresh: refresh,
+      getConfiguredLinkKeys:
+        getConfiguredLinkKeys
+    });
+}());
+</script>

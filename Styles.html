@@ -18845,4 +18845,109 @@
       }
     }
 
+
+    /* =========================================================
+       HELP & SUPPORT — MANAGED LINK STATES
+       Applied only after 06_Assets resolves and a configured
+       Support key has no usable URL.
+       ========================================================= */
+
+    .support-page
+      [data-managed-link-missing="true"] {
+      --support-managed-missing-bg:
+        #F2F5F8;
+      --support-managed-missing-border:
+        #D7DEE7;
+      --support-managed-missing-text:
+        #6E7C8D;
+      --support-managed-missing-icon:
+        #8190A2;
+
+      cursor: pointer !important;
+      filter: saturate(.22);
+      opacity: .78;
+      border-color:
+        var(
+          --support-managed-missing-border
+        ) !important;
+      box-shadow:
+        none !important;
+
+      transition:
+        opacity 160ms ease,
+        transform 160ms ease,
+        background-color 160ms ease,
+        border-color 160ms ease;
+    }
+
+    .support-page
+      [data-managed-link-missing="true"]:hover {
+      opacity: .94;
+      transform:
+        translateY(-1px);
+      border-color:
+        #C7D0DA !important;
+    }
+
+    /*
+      Only actual managed resource controls are muted. Section copy,
+      headers, FAQ/Quick Links containers and internal navigation remain
+      fully readable.
+    */
+    .support-page
+      .support-option-card[data-managed-link-missing="true"],
+    .support-page
+      .support-faq-item[data-managed-link-missing="true"],
+    .support-page
+      .support-link-card[data-managed-link-missing="true"],
+    .support-page
+      .support-bottom-button[data-managed-link-missing="true"] {
+      color:
+        var(
+          --support-managed-missing-text
+        ) !important;
+
+      background:
+        var(
+          --support-managed-missing-bg
+        ) !important;
+    }
+
+    .support-page
+      [data-managed-link-missing="true"]
+      svg,
+    .support-page
+      [data-managed-link-missing="true"]
+      [class*="-icon"],
+    .support-page
+      [data-managed-link-missing="true"]
+      [class*="-arrow"] {
+      color:
+        var(
+          --support-managed-missing-icon
+        ) !important;
+
+      stroke:
+        var(
+          --support-managed-missing-icon
+        ) !important;
+    }
+
+    /*
+      These remain internal and are intentionally excluded from the
+      managed-link registry:
+      - ask-nosca
+      - guides-resources
+      - view-all-faqs
+      - view-all-resources
+    */
+
+    @media (prefers-reduced-motion: reduce) {
+      .support-page
+        [data-managed-link-missing="true"] {
+        transition:
+          none !important;
+      }
+    }
+
 </style>

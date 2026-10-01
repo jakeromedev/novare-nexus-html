@@ -1,0 +1,125 @@
+<script>
+(function () {
+  "use strict";
+
+  /*
+   * ONESCA — Help & Support managed-link configuration
+   *
+   * The page already exposes readable data-support-action values.
+   * External/resource actions are mapped to stable sp-* keys in the
+   * existing 06_Assets registry.
+   *
+   * Internal UI / same-page actions are intentionally excluded:
+   * - ask-nosca
+   * - guides-resources
+   * - view-all-faqs
+   * - view-all-resources
+   */
+
+  const SUPPORT_LINKS =
+    Object.freeze({
+      // ---------------------------------------------------------
+      // PRIMARY SUPPORT OPTIONS
+      // ---------------------------------------------------------
+      "contact-support":
+        "sp-contact-support",
+
+      "service-status":
+        "sp-service-status",
+
+      // ---------------------------------------------------------
+      // FREQUENTLY ASKED QUESTIONS
+      // ---------------------------------------------------------
+      "faq-system-access":
+        "sp-faq-system-access",
+
+      "faq-latest-templates":
+        "sp-faq-latest-templates",
+
+      "faq-operating-guidelines":
+        "sp-faq-operating-guidelines",
+
+      "faq-solutioning-toolkit":
+        "sp-faq-solutioning-toolkit",
+
+      // ---------------------------------------------------------
+      // QUICK LINKS / SUPPORT RESOURCES
+      // ---------------------------------------------------------
+      "user-guides":
+        "sp-user-guides",
+
+      "video-tutorials":
+        "sp-video-tutorials",
+
+      "release-notes":
+        "sp-release-notes",
+
+      "tools-templates":
+        "sp-tools-templates",
+
+      "policies-guidelines":
+        "sp-policies-guidelines",
+
+      "process-howtos":
+        "sp-process-howtos",
+
+      // ---------------------------------------------------------
+      // SUPPORT REQUEST
+      // ---------------------------------------------------------
+      "submit-support-request":
+        "sp-submit-support-request"
+    });
+
+  const SUPPORT_CONFIG =
+    Object.freeze({
+      namespace: "support",
+      pageLabel: "Help & Support",
+      actionAttribute:
+        "data-support-action",
+      links: SUPPORT_LINKS
+    });
+
+  function initialize(pageRoot) {
+    if (
+      !pageRoot ||
+      !window.NexusManagedLinks
+    ) {
+      return;
+    }
+
+    window.NexusManagedLinks
+      .initialize(
+        pageRoot,
+        SUPPORT_CONFIG
+      );
+  }
+
+  function refresh(pageRoot) {
+    if (
+      !pageRoot ||
+      !window.NexusManagedLinks
+    ) {
+      return;
+    }
+
+    window.NexusManagedLinks
+      .refresh(pageRoot);
+  }
+
+  function getConfiguredLinkKeys() {
+    return Object.keys(
+      SUPPORT_LINKS
+    ).map(function (action) {
+      return SUPPORT_LINKS[action];
+    });
+  }
+
+  window.NexusSupportLinks =
+    Object.freeze({
+      initialize: initialize,
+      refresh: refresh,
+      getConfiguredLinkKeys:
+        getConfiguredLinkKeys
+    });
+}());
+</script>

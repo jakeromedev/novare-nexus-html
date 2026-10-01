@@ -2751,14 +2751,39 @@
     if (!pageRoot) return;
 
     if (pageRoot.dataset.pageInitialized !== "true") {
-      renderSupportContent(pageRoot, getStaticSupportContent());
-      initializeSupportActions(pageRoot);
-      pageRoot.dataset.pageInitialized = "true";
-      refreshSupportFromServer(pageRoot);
+      renderSupportContent(
+        pageRoot,
+        getStaticSupportContent()
+      );
+
+      /*
+       * Managed Help & Support resources initialize before the existing
+       * page action handler. The shared runtime listens in capture phase,
+       * so resolved Sheet links take precedence while Ask NOSCA and the
+       * same-page resource/FAQ navigation controls remain internal.
+       */
+      if (window.NexusSupportLinks) {
+        window.NexusSupportLinks
+          .initialize(pageRoot);
+      }
+
+      initializeSupportActions(
+        pageRoot
+      );
+
+      pageRoot.dataset.pageInitialized =
+        "true";
+
+      refreshSupportFromServer(
+        pageRoot
+      );
+
       return;
     }
 
-    retryFailedSupportAssets(pageRoot);
+    retryFailedSupportAssets(
+      pageRoot
+    );
   }
 
   function bindToolsAsset(image, fallback, width) {

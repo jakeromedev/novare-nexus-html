@@ -130,6 +130,18 @@
     }
   };
 
+
+  // GLOBAL SEARCH — approved visual redesign hero asset.
+  // Keep the Drive /view URL as metadata only; the image loader resolves
+  // browser-safe image candidates from the file ID.
+  const searchAssetRegistry = {
+    "search-hero": {
+      fileId: "1pNdhrlO0_CN1zx2t0bMusTngik1c3vZ-",
+      viewerUrl: "https://drive.google.com/file/d/1pNdhrlO0_CN1zx2t0bMusTngik1c3vZ-/view?usp=drive_link",
+      phase: 2
+    }
+  };
+
   // HELP & SUPPORT — Phase 2 centralized content model.
   const supportPageData = {
     options: [
@@ -2577,6 +2589,59 @@
     });
   }
 
+
+  function bindSearchAsset(image, fallback, width) {
+    if (!image) return;
+
+    const asset =
+      searchAssetRegistry[
+        image.dataset.imageKey
+      ] || {
+        fileId:
+          image.dataset.driveFileId || ""
+      };
+
+    bindImageCandidates(
+      image,
+      fallback,
+      getDriveImageCandidates(
+        asset,
+        width
+      )
+    );
+  }
+
+  function initializeSearchVisualPage(pageRoot) {
+    if (!pageRoot) return;
+
+    bindSearchAsset(
+      pageRoot.querySelector(
+        "#search-hero-image"
+      ),
+      pageRoot.querySelector(
+        "#search-hero-fallback"
+      ),
+      2400
+    );
+  }
+
+  function retryFailedSearchAssets(pageRoot) {
+    if (!pageRoot) return;
+
+    pageRoot
+      .querySelectorAll(
+        'img[data-asset-state="error"]'
+      )
+      .forEach(function (image) {
+        if (
+          typeof image._nexusRetryAsset ===
+          "function"
+        ) {
+          image._nexusRetryAsset();
+        }
+      });
+  }
+
   function showSupportStatus(pageRoot, message) {
     if (!pageRoot) return;
     const status = pageRoot.querySelector("#support-status");
@@ -4338,6 +4403,7 @@
       typeof window.NexusSearch.initialize === "function"
     ) {
       window.NexusSearch.initialize(wrapper);
+      initializeSearchVisualPage(wrapper);
     }
     return wrapper;
   }
@@ -4358,6 +4424,7 @@
     if (route === "governance" && activePage) retryFailedGovernanceAssets(activePage);
     if (route === "tools" && activePage) retryFailedToolsAssets(activePage);
     if (route === "support" && activePage) retryFailedSupportAssets(activePage);
+    if (route === "search" && activePage) retryFailedSearchAssets(activePage);
     if (
       route === "search" &&
       activePage &&

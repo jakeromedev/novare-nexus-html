@@ -23,9 +23,21 @@
 
   const MAX_SITE_RESULTS = 18;
   const MAX_TOP_MATCHES = 6;
-  const MAX_GROUP_RESULTS = 24;
+  const MAX_GROUP_RESULTS = 40;
+  const RESULT_PAGE_SIZE = 5;
 
   let requestSequence = 0;
+
+  const paginationState = {
+    site: {
+      items: [],
+      page: 1
+    },
+    drive: {
+      items: [],
+      page: 1
+    }
+  };
 
   function normalizeFilter(value) {
     const normalized = String(value || "").trim().toLowerCase();
@@ -158,9 +170,33 @@
       list:
         pageRoot.querySelector("#search-results-list"),
       srStatus:
-        pageRoot.querySelector("#search-results-sr-status")
+        pageRoot.querySelector("#search-results-sr-status"),
+
+      topSection:
+        pageRoot.querySelector("#search-top-matches-section"),
+      topContainer:
+        pageRoot.querySelector("#search-top-matches"),
+      topCount:
+        pageRoot.querySelector("#search-top-matches-count"),
+      topCopy:
+        pageRoot.querySelector("#search-top-matches-copy"),
+
+      siteSection:
+        pageRoot.querySelector("#search-site-section"),
+      siteContainer:
+        pageRoot.querySelector("#search-site-results"),
+      siteCount:
+        pageRoot.querySelector("#search-site-count"),
+
+      driveSection:
+        pageRoot.querySelector("#search-drive-section"),
+      driveContainer:
+        pageRoot.querySelector("#search-drive-results"),
+      driveCount:
+        pageRoot.querySelector("#search-drive-count")
     };
   }
+
 
   function setFilterButtons(buttons, activeFilter) {
     (buttons || []).forEach(function (button) {
@@ -419,21 +455,44 @@
 
     hideEmptyAndError(dom);
 
-    renderGroupedResults(
-      dom.list,
-      [
-        {
-          title: "ONESCA",
-          count: count,
-          results: siteResults.slice(
-            0,
-            MAX_GROUP_RESULTS
-          ),
-          kind: "site"
-        }
-      ]
+    const topMatches =
+      siteResults.slice(
+        0,
+        MAX_TOP_MATCHES
+      );
+
+    const topKeys = {};
+    topMatches.forEach(function (result) {
+      topKeys[
+        getResultUniqueKey(result)
+      ] = true;
+    });
+
+    const remainingSite =
+      siteResults
+        .filter(function (result) {
+          return !topKeys[
+            getResultUniqueKey(result)
+          ];
+        })
+        .slice(
+          0,
+          MAX_GROUP_RESULTS
+        );
+
+    renderSearchPresentation(
+      dom,
+      {
+        query: routeState.query,
+        topMatches: topMatches,
+        siteResults: remainingSite,
+        driveResults: [],
+        siteCount: count,
+        driveCount: 0
+      }
     );
   }
+
 
   function handleDriveSearchSuccess(
     dom,
@@ -497,22 +556,44 @@
 
     hideEmptyAndError(dom);
 
-    renderGroupedResults(
-      dom.list,
-      [
-        {
-          title: "DRIVE",
-          count: count,
-          results:
-            driveResults.slice(
-              0,
-              MAX_GROUP_RESULTS
-            ),
-          kind: "drive"
-        }
-      ]
+    const topMatches =
+      driveResults.slice(
+        0,
+        MAX_TOP_MATCHES
+      );
+
+    const topKeys = {};
+    topMatches.forEach(function (result) {
+      topKeys[
+        getResultUniqueKey(result)
+      ] = true;
+    });
+
+    const remainingDrive =
+      driveResults
+        .filter(function (result) {
+          return !topKeys[
+            getResultUniqueKey(result)
+          ];
+        })
+        .slice(
+          0,
+          MAX_GROUP_RESULTS
+        );
+
+    renderSearchPresentation(
+      dom,
+      {
+        query: routeState.query,
+        topMatches: topMatches,
+        siteResults: [],
+        driveResults: remainingDrive,
+        siteCount: 0,
+        driveCount: count
+      }
     );
   }
+
 
   function renderAllResults(
     dom,
@@ -564,7 +645,9 @@
 
     const topKeys = {};
     topMatches.forEach(function (result) {
-      topKeys[getResultUniqueKey(result)] = true;
+      topKeys[
+        getResultUniqueKey(result)
+      ] = true;
     });
 
     const remainingSite =
@@ -574,7 +657,10 @@
             getResultUniqueKey(result)
           ];
         })
-        .slice(0, MAX_GROUP_RESULTS);
+        .slice(
+          0,
+          MAX_GROUP_RESULTS
+        );
 
     const remainingDrive =
       driveResults
@@ -583,42 +669,24 @@
             getResultUniqueKey(result)
           ];
         })
-        .slice(0, MAX_GROUP_RESULTS);
+        .slice(
+          0,
+          MAX_GROUP_RESULTS
+        );
 
-    const groups = [];
-
-    if (topMatches.length) {
-      groups.push({
-        title: "TOP MATCHES",
-        count: topMatches.length,
-        results: topMatches,
-        kind: "mixed"
-      });
-    }
-
-    if (remainingSite.length) {
-      groups.push({
-        title: "ONESCA",
-        count: siteResults.length,
-        results: remainingSite,
-        kind: "site"
-      });
-    }
-
-    if (remainingDrive.length) {
-      groups.push({
-        title: "DRIVE",
-        count: driveResults.length,
-        results: remainingDrive,
-        kind: "drive"
-      });
-    }
-
-    renderGroupedResults(
-      dom.list,
-      groups
+    renderSearchPresentation(
+      dom,
+      {
+        query: routeState.query,
+        topMatches: topMatches,
+        siteResults: remainingSite,
+        driveResults: remainingDrive,
+        siteCount: siteResults.length,
+        driveCount: driveResults.length
+      }
     );
   }
+
 
   function buildTopMatches(
     siteResults,
@@ -1140,17 +1208,823 @@
     });
   }
 
+
+  function renderSearchPresentation(
+    dom,
+    presentation
+  ) {
+    resetResultZones(dom);
+
+    const topMatches =
+      Array.isArray(
+        presentation.topMatches
+      )
+        ? presentation.topMatches
+        : [];
+
+    const siteResults =
+      Array.isArray(
+        presentation.siteResults
+      )
+        ? presentation.siteResults
+        : [];
+
+    const driveResults =
+      Array.isArray(
+        presentation.driveResults
+      )
+        ? presentation.driveResults
+        : [];
+
+    paginationState.site.items =
+      siteResults.slice();
+
+    paginationState.site.page = 1;
+
+    paginationState.drive.items =
+      driveResults.slice();
+
+    paginationState.drive.page = 1;
+
+    if (
+      dom.topCopy &&
+      presentation.query
+    ) {
+      dom.topCopy.textContent =
+        'The most relevant results for “' +
+        presentation.query +
+        '”.';
+    }
+
+    if (
+      topMatches.length &&
+      dom.topSection &&
+      dom.topContainer
+    ) {
+      dom.topSection.hidden = false;
+
+      if (dom.topCount) {
+        dom.topCount.textContent =
+          String(topMatches.length);
+      }
+
+      topMatches.forEach(
+        function (result) {
+          dom.topContainer.appendChild(
+            createTopMatchCard(result)
+          );
+        }
+      );
+    }
+
+    if (
+      siteResults.length &&
+      dom.siteSection &&
+      dom.siteContainer
+    ) {
+      dom.siteSection.hidden = false;
+
+      if (dom.siteCount) {
+        dom.siteCount.textContent =
+          String(
+            presentation.siteCount ||
+            siteResults.length
+          );
+      }
+
+      renderPagedResultZone(
+        dom,
+        "site"
+      );
+    }
+
+    if (
+      driveResults.length &&
+      dom.driveSection &&
+      dom.driveContainer
+    ) {
+      dom.driveSection.hidden = false;
+
+      if (dom.driveCount) {
+        dom.driveCount.textContent =
+          String(
+            presentation.driveCount ||
+            driveResults.length
+          );
+      }
+
+      renderPagedResultZone(
+        dom,
+        "drive"
+      );
+    }
+  }
+
+
+  function resetResultZones(dom) {
+    paginationState.site.items = [];
+    paginationState.site.page = 1;
+    paginationState.drive.items = [];
+    paginationState.drive.page = 1;
+
+    if (dom.topContainer) {
+      dom.topContainer.replaceChildren();
+    }
+
+    if (dom.siteContainer) {
+      dom.siteContainer.replaceChildren();
+    }
+
+    if (dom.driveContainer) {
+      dom.driveContainer.replaceChildren();
+    }
+
+    removeSearchPagination_(
+      dom.siteContainer
+    );
+
+    removeSearchPagination_(
+      dom.driveContainer
+    );
+
+    if (dom.topSection) {
+      dom.topSection.hidden = true;
+    }
+
+    if (dom.siteSection) {
+      dom.siteSection.hidden = true;
+    }
+
+    if (dom.driveSection) {
+      dom.driveSection.hidden = true;
+    }
+
+    if (dom.topCount) {
+      dom.topCount.textContent = "0";
+    }
+
+    if (dom.siteCount) {
+      dom.siteCount.textContent = "0";
+    }
+
+    if (dom.driveCount) {
+      dom.driveCount.textContent = "0";
+    }
+  }
+
+
+
+  function renderPagedResultZone(
+    dom,
+    zone
+  ) {
+    const isSite =
+      zone === "site";
+
+    const state =
+      paginationState[zone];
+
+    const container =
+      isSite
+        ? dom.siteContainer
+        : dom.driveContainer;
+
+    const section =
+      isSite
+        ? dom.siteSection
+        : dom.driveSection;
+
+    if (
+      !state ||
+      !container ||
+      !section
+    ) {
+      return;
+    }
+
+    const items =
+      Array.isArray(state.items)
+        ? state.items
+        : [];
+
+    const totalPages =
+      Math.max(
+        1,
+        Math.ceil(
+          items.length /
+          RESULT_PAGE_SIZE
+        )
+      );
+
+    state.page =
+      Math.min(
+        Math.max(
+          Number(state.page || 1),
+          1
+        ),
+        totalPages
+      );
+
+    const start =
+      (state.page - 1) *
+      RESULT_PAGE_SIZE;
+
+    const end =
+      Math.min(
+        start +
+        RESULT_PAGE_SIZE,
+        items.length
+      );
+
+    container.replaceChildren();
+
+    items
+      .slice(
+        start,
+        end
+      )
+      .forEach(
+        function (result) {
+          container.appendChild(
+            isSite
+              ? createSiteResultCard(
+                  result
+                )
+              : createDriveResultCard(
+                  result
+                )
+          );
+        }
+      );
+
+    renderSearchPagination_(
+      section,
+      zone,
+      state.page,
+      totalPages,
+      start,
+      end,
+      items.length,
+      dom
+    );
+  }
+
+  function renderSearchPagination_(
+    section,
+    zone,
+    currentPage,
+    totalPages,
+    start,
+    end,
+    totalItems,
+    dom
+  ) {
+    if (!section) {
+      return;
+    }
+
+    const existing =
+      section.querySelector(
+        '[data-search-pagination="' +
+        zone +
+        '"]'
+      );
+
+    if (existing) {
+      existing.remove();
+    }
+
+    if (
+      totalItems <=
+      RESULT_PAGE_SIZE
+    ) {
+      return;
+    }
+
+    const nav =
+      document.createElement("nav");
+
+    nav.className =
+      "search-pagination";
+
+    nav.dataset.searchPagination =
+      zone;
+
+    nav.setAttribute(
+      "aria-label",
+      (
+        zone === "site"
+          ? "ONESCA Pages and Sections"
+          : "Drive Results"
+      ) +
+      " pagination"
+    );
+
+    const info =
+      document.createElement("span");
+
+    info.className =
+      "search-pagination-info";
+
+    info.textContent =
+      String(start + 1) +
+      "–" +
+      String(end) +
+      " of " +
+      String(totalItems);
+
+    const controls =
+      document.createElement("div");
+
+    controls.className =
+      "search-pagination-controls";
+
+    controls.appendChild(
+      createPaginationButton_(
+        "Previous",
+        currentPage - 1,
+        currentPage <= 1,
+        "prev",
+        zone,
+        dom
+      )
+    );
+
+    for (
+      let page = 1;
+      page <= totalPages;
+      page += 1
+    ) {
+      controls.appendChild(
+        createPaginationButton_(
+          String(page),
+          page,
+          false,
+          "page",
+          zone,
+          dom,
+          page === currentPage
+        )
+      );
+    }
+
+    controls.appendChild(
+      createPaginationButton_(
+        "Next",
+        currentPage + 1,
+        currentPage >= totalPages,
+        "next",
+        zone,
+        dom
+      )
+    );
+
+    nav.appendChild(info);
+    nav.appendChild(controls);
+
+    section.appendChild(nav);
+  }
+
+  function createPaginationButton_(
+    label,
+    targetPage,
+    disabled,
+    kind,
+    zone,
+    dom,
+    isCurrent
+  ) {
+    const button =
+      document.createElement("button");
+
+    button.type = "button";
+
+    button.className =
+      "search-pagination-button " +
+      "search-pagination-button--" +
+      kind;
+
+    button.disabled =
+      Boolean(disabled);
+
+    button.setAttribute(
+      "aria-label",
+      kind === "page"
+        ? "Page " + label
+        : label + " page"
+    );
+
+    if (isCurrent) {
+      button.classList.add(
+        "is-current"
+      );
+
+      button.setAttribute(
+        "aria-current",
+        "page"
+      );
+    }
+
+    if (kind === "prev") {
+      button.innerHTML =
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+        '<path d="m15 18-6-6 6-6"></path>' +
+        '</svg>' +
+        '<span>Prev</span>';
+    } else if (
+      kind === "next"
+    ) {
+      button.innerHTML =
+        '<span>Next</span>' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+        '<path d="m9 18 6-6-6-6"></path>' +
+        '</svg>';
+    } else {
+      button.textContent = label;
+    }
+
+    button.addEventListener(
+      "click",
+      function () {
+        if (
+          button.disabled ||
+          !paginationState[zone]
+        ) {
+          return;
+        }
+
+        paginationState[zone].page =
+          targetPage;
+
+        renderPagedResultZone(
+          dom,
+          zone
+        );
+
+        const section =
+          zone === "site"
+            ? dom.siteSection
+            : dom.driveSection;
+
+        if (section) {
+          section.scrollIntoView({
+            behavior:
+              prefersReducedMotion()
+                ? "auto"
+                : "smooth",
+            block: "start"
+          });
+        }
+      }
+    );
+
+    return button;
+  }
+
+  function removeSearchPagination_(
+    container
+  ) {
+    if (
+      !container ||
+      !container.parentElement
+    ) {
+      return;
+    }
+
+    const pagination =
+      container.parentElement.querySelector(
+        "[data-search-pagination]"
+      );
+
+    if (pagination) {
+      pagination.remove();
+    }
+  }
+
+  function createTopMatchCard(result) {
+    const isSite =
+      String(
+        result.resultKind || ""
+      ) === "site";
+
+    const url =
+      isSite
+        ? ""
+        : getSafeHttpUrl(
+            result.driveUrl
+          );
+
+    const card =
+      isSite
+        ? document.createElement("button")
+        : (
+            url
+              ? document.createElement("a")
+              : document.createElement("article")
+          );
+
+    if (isSite) {
+      card.type = "button";
+
+      card.addEventListener(
+        "click",
+        function () {
+          navigateToSiteResult(
+            result.route,
+            result.anchor
+          );
+        }
+      );
+    } else if (url) {
+      card.href = url;
+      card.target = "_blank";
+      card.rel =
+        "noopener noreferrer";
+    }
+
+    const theme =
+      getResultTheme(result);
+
+    card.className =
+      "search-top-card " +
+      "search-top-card--" +
+      theme;
+
+    card.setAttribute(
+      "aria-label",
+      isSite
+        ? (
+            "Open " +
+            String(
+              result.sectionTitle ||
+              result.pageTitle ||
+              "ONESCA page"
+            )
+          )
+        : (
+            "Open " +
+            String(
+              result.name ||
+              "Drive item"
+            )
+          )
+    );
+
+    const media =
+      document.createElement("span");
+
+    media.className =
+      "search-top-card-media";
+
+    const icon =
+      document.createElement("span");
+
+    icon.className =
+      "search-top-card-icon";
+
+    icon.setAttribute(
+      "aria-hidden",
+      "true"
+    );
+
+    icon.innerHTML =
+      isSite
+        ? getSiteResultIconSvg()
+        : getDriveResultIconSvg(
+            result
+          );
+
+    const glow =
+      document.createElement("span");
+
+    glow.className =
+      "search-top-card-glow";
+
+    glow.setAttribute(
+      "aria-hidden",
+      "true"
+    );
+
+    media.appendChild(glow);
+    media.appendChild(icon);
+
+    const badge =
+      document.createElement("span");
+
+    badge.className =
+      "search-top-card-badge";
+
+    badge.textContent =
+      isSite
+        ? "ONESCA PAGE"
+        : getShortDriveType(result);
+
+    const title =
+      document.createElement("strong");
+
+    title.className =
+      "search-top-card-title";
+
+    title.textContent =
+      isSite
+        ? String(
+            result.sectionTitle ||
+            result.pageTitle ||
+            "ONESCA"
+          )
+        : String(
+            result.name ||
+            "Untitled"
+          );
+
+    const path =
+      document.createElement("span");
+
+    path.className =
+      "search-top-card-path";
+
+    path.textContent =
+      isSite
+        ? String(
+            result.pageTitle ||
+            "ONESCA"
+          )
+        : (
+            getDriveResultContext(
+              result
+            ) ||
+            getDriveResultMeta(
+              result
+            )
+          );
+
+    const description =
+      document.createElement("span");
+
+    description.className =
+      "search-top-card-description";
+
+    description.textContent =
+      isSite
+        ? String(
+            result.description ||
+            "Open this section in ONESCA."
+          )
+        : getTopDriveDescription(
+            result
+          );
+
+    const arrow =
+      document.createElement("span");
+
+    arrow.className =
+      "search-top-card-arrow";
+
+    arrow.setAttribute(
+      "aria-hidden",
+      "true"
+    );
+
+    arrow.innerHTML =
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+      '<path d="M5 12h14M13 6l6 6-6 6"></path>' +
+      '</svg>';
+
+    card.appendChild(media);
+    card.appendChild(badge);
+    card.appendChild(title);
+    card.appendChild(path);
+    card.appendChild(description);
+    card.appendChild(arrow);
+
+    return card;
+  }
+
+  function getResultTheme(result) {
+    if (
+      String(
+        result.resultKind || ""
+      ) === "site"
+    ) {
+      return "page";
+    }
+
+    const itemType =
+      String(
+        result.itemType || ""
+      ).toLowerCase();
+
+    const documentType =
+      String(
+        result.documentType || ""
+      ).toLowerCase();
+
+    const format =
+      String(
+        result.fileFormat || ""
+      ).toLowerCase();
+
+    if (itemType === "folder") {
+      return "folder";
+    }
+
+    if (
+      documentType === "presentation" ||
+      format.indexOf("slides") !== -1 ||
+      format.indexOf("powerpoint") !== -1
+    ) {
+      return "slides";
+    }
+
+    if (
+      documentType === "ee" ||
+      documentType === "spreadsheet" ||
+      format.indexOf("sheet") !== -1 ||
+      format.indexOf("excel") !== -1 ||
+      format.indexOf("csv") !== -1
+    ) {
+      return "sheet";
+    }
+
+    if (
+      documentType === "pdf" ||
+      format === "pdf"
+    ) {
+      return "pdf";
+    }
+
+    return "doc";
+  }
+
+  function getShortDriveType(result) {
+    const theme =
+      getResultTheme(result);
+
+    if (theme === "folder") {
+      return "FOLDER";
+    }
+
+    if (theme === "slides") {
+      return "PRESENTATION";
+    }
+
+    if (theme === "sheet") {
+      return (
+        String(
+          result.documentType ||
+          ""
+        ).toUpperCase() === "EE"
+          ? "EE"
+          : "SPREADSHEET"
+      );
+    }
+
+    if (theme === "pdf") {
+      return "PDF";
+    }
+
+    return String(
+      result.documentType ||
+      "DOCUMENT"
+    ).toUpperCase();
+  }
+
+  function getTopDriveDescription(result) {
+    const documentType =
+      String(
+        result.documentType || ""
+      ).trim();
+
+    const fileFormat =
+      String(
+        result.fileFormat || ""
+      ).trim();
+
+    if (
+      documentType &&
+      fileFormat
+    ) {
+      return (
+        documentType +
+        " · " +
+        fileFormat
+      );
+    }
+
+    return (
+      documentType ||
+      fileFormat ||
+      "Open this item in Drive."
+    );
+  }
+
   function createSiteResultCard(result) {
     const card =
       document.createElement("button");
 
     card.type = "button";
-
     card.className =
-      "global-search-result " +
-      "global-search-result--site";
-
-    card.dataset.resultType = "page";
+      "search-result-row search-result-row--site";
 
     card.setAttribute(
       "aria-label",
@@ -1180,7 +2054,7 @@
       document.createElement("span");
 
     icon.className =
-      "global-search-result-icon";
+      "search-result-row-icon";
 
     icon.setAttribute(
       "aria-hidden",
@@ -1194,21 +2068,21 @@
       document.createElement("span");
 
     body.className =
-      "global-search-result-body";
+      "search-result-row-body";
 
-    const topLine =
+    const titleLine =
       document.createElement("span");
 
-    topLine.className =
-      "global-search-result-topline";
+    titleLine.className =
+      "search-result-row-titleline";
 
-    const name =
+    const title =
       document.createElement("strong");
 
-    name.className =
-      "global-search-result-name";
+    title.className =
+      "search-result-row-title";
 
-    name.textContent =
+    title.textContent =
       String(
         result.sectionTitle ||
         result.pageTitle ||
@@ -1219,7 +2093,7 @@
       document.createElement("span");
 
     badge.className =
-      "global-search-result-badge";
+      "search-result-row-badge";
 
     badge.textContent =
       String(
@@ -1227,55 +2101,47 @@
         "ONESCA"
       );
 
-    topLine.appendChild(name);
-    topLine.appendChild(badge);
+    titleLine.appendChild(title);
+    titleLine.appendChild(badge);
 
-    const context =
+    const description =
       document.createElement("span");
 
-    context.className =
-      "global-search-result-context";
+    description.className =
+      "search-result-row-description";
 
-    context.textContent =
+    description.textContent =
       String(
-        result.description || ""
+        result.description ||
+        "Open this section in ONESCA."
       );
 
-    const meta =
+    body.appendChild(titleLine);
+    body.appendChild(description);
+
+    const arrow =
       document.createElement("span");
 
-    meta.className =
-      "global-search-result-meta";
+    arrow.className =
+      "search-result-row-arrow";
 
-    meta.textContent =
-      "Open section in ONESCA";
-
-    body.appendChild(topLine);
-    body.appendChild(context);
-    body.appendChild(meta);
-
-    const open =
-      document.createElement("span");
-
-    open.className =
-      "global-search-result-open";
-
-    open.setAttribute(
+    arrow.setAttribute(
       "aria-hidden",
       "true"
     );
 
-    open.innerHTML =
-      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
+    arrow.innerHTML =
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
       '<path d="M5 12h14M13 6l6 6-6 6"></path>' +
       '</svg>';
 
     card.appendChild(icon);
     card.appendChild(body);
-    card.appendChild(open);
+    card.appendChild(arrow);
 
     return card;
   }
+
 
   function createDriveResultCard(result) {
     const url =
@@ -1288,11 +2154,14 @@
       : document.createElement("article");
 
     card.className =
-      "global-search-result";
+      "search-result-row " +
+      "search-result-row--drive";
 
     card.dataset.resultType =
       String(
-        result.itemType || "File"
+        result.itemType ||
+        result.documentType ||
+        "file"
       ).toLowerCase();
 
     if (url) {
@@ -1319,7 +2188,7 @@
       document.createElement("span");
 
     icon.className =
-      "global-search-result-icon";
+      "search-result-row-icon";
 
     icon.setAttribute(
       "aria-hidden",
@@ -1333,84 +2202,74 @@
       document.createElement("span");
 
     body.className =
-      "global-search-result-body";
+      "search-result-row-body";
 
-    const topLine =
+    const titleLine =
       document.createElement("span");
 
-    topLine.className =
-      "global-search-result-topline";
+    titleLine.className =
+      "search-result-row-titleline";
 
-    const name =
+    const title =
       document.createElement("strong");
 
-    name.className =
-      "global-search-result-name";
+    title.className =
+      "search-result-row-title";
 
-    name.textContent =
+    title.textContent =
       String(
-        result.name || "Untitled"
+        result.name ||
+        "Untitled"
       );
 
     const badge =
       document.createElement("span");
 
     badge.className =
-      "global-search-result-badge";
+      "search-result-row-badge";
 
     badge.textContent =
       getDriveResultBadge(result);
 
-    topLine.appendChild(name);
-    topLine.appendChild(badge);
+    titleLine.appendChild(title);
+    titleLine.appendChild(badge);
 
-    const context =
+    const description =
       document.createElement("span");
 
-    context.className =
-      "global-search-result-context";
+    description.className =
+      "search-result-row-description";
 
-    context.textContent =
-      getDriveResultContext(result);
-
-    const meta =
-      document.createElement("span");
-
-    meta.className =
-      "global-search-result-meta";
-
-    meta.textContent =
+    description.textContent =
+      getDriveResultContext(result) ||
       getDriveResultMeta(result);
 
-    body.appendChild(topLine);
-    body.appendChild(context);
-    body.appendChild(meta);
+    body.appendChild(titleLine);
+    body.appendChild(description);
+
+    const arrow =
+      document.createElement("span");
+
+    arrow.className =
+      "search-result-row-arrow";
+
+    arrow.setAttribute(
+      "aria-hidden",
+      "true"
+    );
+
+    arrow.innerHTML =
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+      '<path d="M5 12h14M13 6l6 6-6 6"></path>' +
+      '</svg>';
 
     card.appendChild(icon);
     card.appendChild(body);
-
-    if (url) {
-      const open =
-        document.createElement("span");
-
-      open.className =
-        "global-search-result-open";
-
-      open.setAttribute(
-        "aria-hidden",
-        "true"
-      );
-
-      open.innerHTML =
-        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
-        '<path d="M14 5h5v5M13 11l6-6M19 13v6H5V5h6"></path>' +
-        '</svg>';
-
-      card.appendChild(open);
-    }
+    card.appendChild(arrow);
 
     return card;
   }
+
 
   function getDriveResultBadge(result) {
     const itemType =
@@ -1816,6 +2675,7 @@
     copy
   ) {
     hideLoading(dom);
+    resetResultZones(dom);
 
     if (dom.error) {
       dom.error.hidden = true;
@@ -1834,14 +2694,12 @@
       dom.emptyCopy.textContent =
         copy;
     }
-
-    if (dom.list) {
-      dom.list.replaceChildren();
-    }
   }
+
 
   function showError(dom) {
     hideLoading(dom);
+    resetResultZones(dom);
 
     if (dom.empty) {
       dom.empty.hidden = true;
@@ -1851,25 +2709,21 @@
       dom.error.hidden = false;
     }
 
-    if (dom.list) {
-      dom.list.replaceChildren();
-    }
-
     setSummary(
       dom,
       "Search isn’t available right now."
     );
   }
 
+
   function clearResults(dom) {
-    if (dom.list) {
-      dom.list.replaceChildren();
-    }
+    resetResultZones(dom);
 
     if (dom.error) {
       dom.error.hidden = true;
     }
   }
+
 
   function getEmptyHelpText(filter) {
     if (filter === "folders") {

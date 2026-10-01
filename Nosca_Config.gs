@@ -18,21 +18,30 @@ const NOSCA_CONFIG = Object.freeze({
   }),
 
   indexHeaders: Object.freeze([
-    'File ID',
-    'File Name',
+    'Item ID',
+    'Item Type',
+    'Item Name',
     'Folder Path',
+    'Hierarchy Context',
     'Document Type',
     'File Format',
     'MIME Type',
     'Modified At',
     'Drive URL',
-    'Keywords',
+    'Generated Keywords',
+    'Manual Keywords',
     'Indexed At',
     'Status',
     'Error / Notes'
   ]),
 
+  itemTypes: Object.freeze({
+    file: 'File',
+    folder: 'Folder'
+  }),
+
   documentTypes: Object.freeze({
+    folder: 'Folder',
     ee: 'EE',
     proposal: 'Proposal',
     presentation: 'Presentation',
@@ -44,6 +53,7 @@ const NOSCA_CONFIG = Object.freeze({
   }),
 
   fileFormats: Object.freeze({
+    folder: 'Folder',
     googleDoc: 'Google Doc',
     googleSheet: 'Google Sheet',
     googleSlides: 'Google Slides',
@@ -85,19 +95,34 @@ const NOSCA_CONFIG = Object.freeze({
   drivePageSize: 250,
 
   metadataAliases: Object.freeze([
+    // Client identity. Do NOT automatically add CashHub simply because a
+    // file belongs to PJL/Cebuana; PJL has projects beyond CashHub.
     Object.freeze({
+      canonical: 'pjl',
+      kind: 'client',
       matchAny: Object.freeze([
+        'pjl',
         'pj lhuillier',
         'cebuana lhuillier',
-        'cebuana',
-        'cash hub',
-        'cashhub'
+        'cebuana'
       ]),
       add: Object.freeze([
         'pjl',
         'pj lhuillier',
         'cebuana',
-        'cebuana lhuillier',
+        'cebuana lhuillier'
+      ])
+    }),
+
+    // Project/product identity is intentionally separate from the client.
+    Object.freeze({
+      canonical: 'cashhub',
+      kind: 'project',
+      matchAny: Object.freeze([
+        'cashhub',
+        'cash hub'
+      ]),
+      add: Object.freeze([
         'cashhub',
         'cash hub'
       ])
@@ -159,8 +184,18 @@ const NOSCA_CONFIG = Object.freeze({
     maxCandidateFiles: 5,
 
     // Number of index-only results returned for "find/show/list documents"
-    // requests. These may include Office/PDF files that are metadata-only.
+    // requests. These may include folders and Office/PDF metadata-only files.
     maxDocumentLookupResults: 12,
+
+    // Broad navigation searches must match enough of the actual client /
+    // project context. This prevents a generic word such as "renewal" from
+    // pulling unrelated projects into a PJL/CashHub result set.
+    minLookupCoverage: 0.60,
+    minLookupMatchedTerms: 2,
+
+    // Broad lookups intentionally surface a small number of matching folders
+    // in addition to the strongest EE / Proposal / Presentation files.
+    maxFolderLookupResults: 2,
 
     // Chunking settings after a candidate file has been extracted.
     chunkChars: 2600,

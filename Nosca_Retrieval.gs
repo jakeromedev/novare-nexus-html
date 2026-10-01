@@ -267,8 +267,10 @@ function retrieveNoscaContext_(question) {
 
           return {
             fileId: candidate.fileId,
+            itemType: candidate.itemType,
             fileName: candidate.fileName,
             folderPath: candidate.folderPath,
+            hierarchyContext: candidate.hierarchyContext,
             documentType: candidate.documentType,
             fileFormat: candidate.fileFormat,
             mimeType: candidate.mimeType,
@@ -464,6 +466,9 @@ function findNoscaIndexedDocuments_(question) {
   const requestedTypes = detectNoscaRequestedDocumentTypes_(
     normalizedQuestion.text
   );
+  const requestedItemTypes = detectNoscaRequestedItemTypes_(
+    normalizedQuestion.text
+  );
 
   const records = Object.keys(existing)
     .map(function (fileId) {
@@ -481,26 +486,57 @@ function findNoscaIndexedDocuments_(question) {
         normalizedQuestion
       );
 
+      const coverage = evaluateNoscaLookupCoverage_(
+        record,
+        normalizedQuestion,
+        requestedTypes,
+        requestedItemTypes
+      );
+
       return {
         fileId: record.fileId,
+        itemType:
+          record.itemType || NOSCA_CONFIG.itemTypes.file,
         fileName: record.fileName,
         folderPath: record.folderPath,
+        hierarchyContext: record.hierarchyContext,
         documentType:
           record.documentType || NOSCA_CONFIG.documentTypes.other,
         fileFormat:
           record.fileFormat || NOSCA_CONFIG.fileFormats.other,
         mimeType: record.mimeType,
         driveUrl: record.driveUrl,
+        generatedKeywords: record.generatedKeywords || '',
+        manualKeywords: record.manualKeywords || '',
         keywords: record.keywords,
         indexedAt: record.indexedAt,
         status: record.status,
         notes: record.notes,
         metadataScore: scoreResult.score,
-        matchedTerms: scoreResult.matchedTerms
+        matchedTerms: scoreResult.matchedTerms,
+        lookupCoverage: coverage.ratio,
+        lookupMatchedTerms: coverage.matchedTerms,
+        lookupRequiredAnchors: coverage.requiredAnchors,
+        lookupMissingAnchors: coverage.missingAnchors,
+        lookupPassesContext: coverage.passes
       };
     })
     .filter(function (record) {
-      if (record.metadataScore < NOSCA_CONFIG.retrieval.minMetadataScore) {
+      if (
+        record.metadataScore <
+        NOSCA_CONFIG.retrieval.minMetadataScore
+      ) {
+        return false;
+      }
+
+      if (!record.lookupPassesContext) {
+        return false;
+      }
+
+      if (
+        requestedItemTypes.length &&
+        requestedItemTypes.indexOf(record.itemType) === -1
+      ) {
         return false;
       }
 
@@ -510,14 +546,17 @@ function findNoscaIndexedDocuments_(question) {
 
       return requestedTypes.indexOf(record.documentType) !== -1;
     })
-    .sort(compareNoscaCandidates_);
+    .sort(compareNoscaLookupCandidates_);
 
   const limit = Math.max(
     Number(NOSCA_CONFIG.retrieval.maxDocumentLookupResults || 12),
     1
   );
 
-  const selected = requestedTypes.length
+  const selected = (
+    requestedTypes.length ||
+    requestedItemTypes.length
+  )
     ? records.slice(0, limit)
     : selectNoscaDiversifiedDocumentResults_(records, limit);
 
@@ -530,6 +569,7 @@ function findNoscaIndexedDocuments_(question) {
     question: normalizedQuestion.text,
     queryTerms: normalizedQuestion.terms,
     requestedDocumentTypes: requestedTypes,
+    requestedItemTypes: requestedItemTypes,
     totalMatches: records.length,
     results: selected,
     summary: summarizeNoscaDocumentLookupResults_(selected)
@@ -579,14 +619,266 @@ function detectNoscaRequestedDocumentTypes_(question) {
   return requested;
 }
 
+function detectNoscaRequestedItemTypes_(question) {
+  const value =
+    ' ' + normalizeNoscaSearchText_(question) + ' ';
+  const requested = [];
+
+  if (
+    value.indexOf(' folder ') !== -1 ||
+    value.indexOf(' folders ') !== -1 ||
+    value.indexOf(' directory ') !== -1 ||
+    value.indexOf(' directories ') !== -1 ||
+    value.indexOf(' location ') !== -1
+  ) {
+    requested.push(NOSCA_CONFIG.itemTypes.folder);
+  }
+
+  return requested;
+}
+
+/**
+ * Enforces hierarchy/context coverage for navigation lookups.
+ *
+ * A query such as:
+ *   "PJL 3-year renewal cashhub documents"
+ *
+ * should NOT accept another client's file simply because it contains
+ * "renewal". Known client/project aliases appearing in the query are treated
+ * as required anchors, and the remaining meaningful terms must reach a
+ * minimum coverage ratio.
+ */
+function evaluateNoscaLookupCoverage_(
+  record,
+  query,
+  requestedDocumentTypes,
+  requestedItemTypes
+) {
+  const topicTerms = getNoscaLookupTopicTerms_(
+    query,
+    requestedDocumentTypes,
+    requestedItemTypes
+  );
+
+  const searchable = [
+    record.fileName,
+    record.folderPath,
+    record.hierarchyContext,
+    record.generatedKeywords,
+    record.manualKeywords,
+    record.keywords
+  ]
+    .map(normalizeNoscaSearchText_)
+    .filter(Boolean)
+    .join(' ');
+
+  const matchedTerms = topicTerms.filter(function (term) {
+    return containsNoscaSearchTerm_(searchable, term);
+  });
+
+  const requiredAnchors =
+    getNoscaRequiredAliasAnchors_(query);
+
+  const missingAnchors =
+    requiredAnchors.filter(function (anchor) {
+      return !containsNoscaSearchTerm_(searchable, anchor);
+    });
+
+  const total = topicTerms.length;
+  const matched = matchedTerms.length;
+  const ratio = total
+    ? matched / total
+    : 1;
+
+  const configuredRatio = Math.max(
+    Math.min(
+      Number(NOSCA_CONFIG.retrieval.minLookupCoverage || 0.60),
+      1
+    ),
+    0
+  );
+
+  let minimumMatched = 1;
+
+  if (total === 2) {
+    minimumMatched = 2;
+  } else if (total >= 3) {
+    minimumMatched = Math.max(
+      Number(NOSCA_CONFIG.retrieval.minLookupMatchedTerms || 2),
+      Math.ceil(total * configuredRatio)
+    );
+  }
+
+  if (!total) {
+    minimumMatched = 0;
+  }
+
+  const passes =
+    missingAnchors.length === 0 &&
+    matched >= minimumMatched &&
+    (
+      total < 2 ||
+      ratio >= configuredRatio
+    );
+
+  return {
+    passes: passes,
+    topicTerms: topicTerms,
+    matchedTerms: matchedTerms,
+    matchedCount: matched,
+    totalTerms: total,
+    ratio: Number(ratio.toFixed(3)),
+    requiredAnchors: requiredAnchors,
+    missingAnchors: missingAnchors
+  };
+}
+
+function getNoscaLookupTopicTerms_(
+  query,
+  requestedDocumentTypes,
+  requestedItemTypes
+) {
+  const ignore = {
+    ee: true,
+    effort: true,
+    estimate: true,
+    estimation: true,
+    proposal: true,
+    bid: true,
+    rfp: true,
+    rfi: true,
+    rfq: true,
+    tender: true,
+    presentation: true,
+    presentations: true,
+    deck: true,
+    decks: true,
+    slide: true,
+    slides: true,
+    ppt: true,
+    pptx: true,
+    powerpoint: true,
+    folder: true,
+    folders: true,
+    directory: true,
+    directories: true,
+    location: true
+  };
+
+  return (query.terms || []).filter(function (term) {
+    return !ignore[String(term || '').toLowerCase()];
+  });
+}
+
+/**
+ * When the query contains a configured client/project alias, require the
+ * candidate to carry that canonical identity.
+ *
+ * "PJL" requires the candidate's generated hierarchy metadata to contain
+ * "pjl". "CashHub" independently requires "cashhub".
+ */
+function getNoscaRequiredAliasAnchors_(query) {
+  const aliases = NOSCA_CONFIG.metadataAliases || [];
+  const normalizedQuestion =
+    normalizeNoscaClassificationText_(
+      query && query.text ? query.text : ''
+    );
+
+  const anchors = [];
+
+  aliases.forEach(function (rule) {
+    const canonical =
+      normalizeNoscaSearchText_(
+        rule && rule.canonical
+          ? rule.canonical
+          : ''
+      );
+
+    if (!canonical) return;
+
+    const variants =
+      rule && Array.isArray(rule.matchAny)
+        ? rule.matchAny
+        : [];
+
+    const matched = variants.some(function (variant) {
+      const normalizedVariant =
+        normalizeNoscaClassificationText_(variant);
+
+      return (
+        normalizedVariant &&
+        (
+          normalizedQuestion === normalizedVariant ||
+          normalizedQuestion.indexOf(
+            ' ' + normalizedVariant + ' '
+          ) !== -1 ||
+          normalizedQuestion.indexOf(normalizedVariant) !== -1
+        )
+      );
+    });
+
+    if (matched && anchors.indexOf(canonical) === -1) {
+      anchors.push(canonical);
+    }
+  });
+
+  return anchors;
+}
+
+function compareNoscaLookupCandidates_(a, b) {
+  if (b.lookupCoverage !== a.lookupCoverage) {
+    return b.lookupCoverage - a.lookupCoverage;
+  }
+
+  if (b.metadataScore !== a.metadataScore) {
+    return b.metadataScore - a.metadataScore;
+  }
+
+  const aFolder =
+    a.itemType === NOSCA_CONFIG.itemTypes.folder ? 0 : 1;
+  const bFolder =
+    b.itemType === NOSCA_CONFIG.itemTypes.folder ? 0 : 1;
+
+  if (aFolder !== bFolder) {
+    return aFolder - bFolder;
+  }
+
+  return String(a.fileName || '').localeCompare(
+    String(b.fileName || '')
+  );
+}
+
 /**
  * For broad "PJL documents"-style requests, prevent one file family from
  * monopolizing all results. Take the best EE, Proposal, Presentation, then
  * fill remaining slots by overall metadata score.
  */
+/**
+ * For broad project/client document lookups:
+ * - include the strongest matching folder(s)
+ * - include the strongest EE / Proposal / Presentation
+ * - fill remaining slots by context coverage + metadata score
+ */
 function selectNoscaDiversifiedDocumentResults_(records, limit) {
   const selected = [];
   const seen = {};
+
+  const folderLimit = Math.max(
+    Number(NOSCA_CONFIG.retrieval.maxFolderLookupResults || 2),
+    0
+  );
+
+  records
+    .filter(function (record) {
+      return record.itemType === NOSCA_CONFIG.itemTypes.folder;
+    })
+    .slice(0, folderLimit)
+    .forEach(function (record) {
+      if (selected.length >= limit) return;
+      selected.push(record);
+      seen[record.fileId] = true;
+    });
+
   const preferredTypes = [
     NOSCA_CONFIG.documentTypes.ee,
     NOSCA_CONFIG.documentTypes.proposal,
@@ -595,7 +887,11 @@ function selectNoscaDiversifiedDocumentResults_(records, limit) {
 
   preferredTypes.forEach(function (type) {
     const match = records.find(function (record) {
-      return record.documentType === type && !seen[record.fileId];
+      return (
+        record.itemType !== NOSCA_CONFIG.itemTypes.folder &&
+        record.documentType === type &&
+        !seen[record.fileId]
+      );
     });
 
     if (match && selected.length < limit) {
@@ -618,19 +914,26 @@ function selectNoscaDiversifiedDocumentResults_(records, limit) {
 
 function summarizeNoscaDocumentLookupResults_(records) {
   const byDocumentType = {};
+  const byItemType = {};
 
   (records || []).forEach(function (record) {
     const type = String(
       record.documentType || NOSCA_CONFIG.documentTypes.other
     );
+    const itemType = String(
+      record.itemType || NOSCA_CONFIG.itemTypes.file
+    );
 
     byDocumentType[type] =
       (byDocumentType[type] || 0) + 1;
+    byItemType[itemType] =
+      (byItemType[itemType] || 0) + 1;
   });
 
   return {
     returned: (records || []).length,
-    byDocumentType: byDocumentType
+    byDocumentType: byDocumentType,
+    byItemType: byItemType
   };
 }
 
@@ -644,6 +947,7 @@ function rankNoscaIndexRecords_(existing, query) {
     })
     .filter(function (record) {
       return (
+        record.itemType !== NOSCA_CONFIG.itemTypes.folder &&
         record.status === NOSCA_CONFIG.statuses.active &&
         NOSCA_SUPPORTED_CONTENT_MIME_TYPES.indexOf(record.mimeType) !== -1
       );
@@ -658,12 +962,16 @@ function rankNoscaIndexRecords_(existing, query) {
 
       return {
         fileId: record.fileId,
+        itemType: record.itemType,
         fileName: record.fileName,
         folderPath: record.folderPath,
+        hierarchyContext: record.hierarchyContext,
         documentType: record.documentType,
         fileFormat: record.fileFormat,
         mimeType: record.mimeType,
         driveUrl: record.driveUrl,
+        generatedKeywords: record.generatedKeywords,
+        manualKeywords: record.manualKeywords,
         keywords: record.keywords,
         indexedAt: record.indexedAt,
         status: record.status,
@@ -680,13 +988,24 @@ function rankNoscaIndexRecords_(existing, query) {
  */
 function scoreNoscaMetadataRecord_(record, query) {
   const name = normalizeNoscaSearchText_(record.fileName);
-  const keywords = normalizeNoscaSearchText_(record.keywords);
+  const generatedKeywords = normalizeNoscaSearchText_(
+    record.generatedKeywords || record.keywords
+  );
+  const manualKeywords = normalizeNoscaSearchText_(
+    record.manualKeywords
+  );
   const folder = normalizeNoscaSearchText_(record.folderPath);
+  const hierarchy = normalizeNoscaSearchText_(
+    record.hierarchyContext
+  );
   const documentType = normalizeNoscaSearchText_(
     record.documentType
   );
   const fileFormat = normalizeNoscaSearchText_(
     record.fileFormat
+  );
+  const itemType = normalizeNoscaSearchText_(
+    record.itemType
   );
 
   let score = 0;
@@ -696,17 +1015,29 @@ function scoreNoscaMetadataRecord_(record, query) {
     let matchedTerm = false;
 
     if (containsNoscaSearchTerm_(name, term)) {
-      score += 6;
+      score += 7;
       matchedTerm = true;
     }
 
-    if (containsNoscaSearchTerm_(keywords, term)) {
+    if (containsNoscaSearchTerm_(manualKeywords, term)) {
+      score += 10;
+      matchedTerm = true;
+    }
+
+    if (containsNoscaSearchTerm_(generatedKeywords, term)) {
       score += 5;
       matchedTerm = true;
     }
 
+    // The hierarchy is now first-class retrieval context. It intentionally
+    // carries client -> project -> renewal/year context inherited from Drive.
+    if (containsNoscaSearchTerm_(hierarchy, term)) {
+      score += 8;
+      matchedTerm = true;
+    }
+
     if (containsNoscaSearchTerm_(folder, term)) {
-      score += 2;
+      score += 5;
       matchedTerm = true;
     }
 
@@ -720,6 +1051,11 @@ function scoreNoscaMetadataRecord_(record, query) {
       matchedTerm = true;
     }
 
+    if (containsNoscaSearchTerm_(itemType, term)) {
+      score += 5;
+      matchedTerm = true;
+    }
+
     if (matchedTerm) {
       matched[term] = true;
     }
@@ -729,28 +1065,43 @@ function scoreNoscaMetadataRecord_(record, query) {
     if (!phrase || phrase.length < 4) return;
 
     if (name.indexOf(phrase) !== -1) {
-      score += 10;
+      score += 12;
     }
 
-    if (keywords.indexOf(phrase) !== -1) {
-      score += 8;
+    if (manualKeywords.indexOf(phrase) !== -1) {
+      score += 14;
+    }
+
+    if (generatedKeywords.indexOf(phrase) !== -1) {
+      score += 9;
+    }
+
+    if (hierarchy.indexOf(phrase) !== -1) {
+      score += 14;
     }
 
     if (folder.indexOf(phrase) !== -1) {
-      score += 3;
-    }
-
-    if (documentType.indexOf(phrase) !== -1) {
-      score += 10;
-    }
-
-    if (fileFormat.indexOf(phrase) !== -1) {
-      score += 5;
+      score += 9;
     }
   });
 
   const matchedTerms = Object.keys(matched);
-  score += Math.max(0, matchedTerms.length - 1) * 2;
+  score += Math.max(0, matchedTerms.length - 1) * 4;
+
+  // Archived content can still be found explicitly, but do not let archived
+  // material outrank the active project folder for ordinary requests.
+  const archived =
+    /\barchive\b|\barchived\b/.test(
+      hierarchy + ' ' + folder
+    );
+  const queryWantsArchive =
+    /\barchive\b|\barchived\b/.test(
+      String(query.normalized || '')
+    );
+
+  if (archived && !queryWantsArchive) {
+    score -= 20;
+  }
 
   return {
     score: score,
@@ -937,8 +1288,10 @@ function buildNoscaBoundedContext_(
     selected.push({
       sourceIndex: 0,
       fileId: chunk.fileId,
+      itemType: chunk.itemType,
       fileName: chunk.fileName,
       folderPath: chunk.folderPath,
+      hierarchyContext: chunk.hierarchyContext,
       documentType: chunk.documentType,
       fileFormat: chunk.fileFormat,
       mimeType: chunk.mimeType,
@@ -1214,6 +1567,8 @@ function buildNoscaContextText_(retrievalResult) {
         String(chunk.documentType || 'Other') +
         ' | Format: ' +
         String(chunk.fileFormat || '') +
+        ' | Hierarchy: ' +
+        String(chunk.hierarchyContext || chunk.folderPath || '') +
         ' | Path: ' +
         String(chunk.folderPath || '') +
         ' | Chunk ' +
@@ -1233,6 +1588,7 @@ function summarizeNoscaIndexForDebug_(existing) {
     totalRows: 0,
     byStatus: {},
     byMimeType: {},
+    byItemType: {},
     byDocumentType: {},
     activeSupported: 0,
     activeUnsupportedMime: 0
@@ -1250,6 +1606,11 @@ function summarizeNoscaIndexForDebug_(existing) {
       (summary.byStatus[status] || 0) + 1;
     summary.byMimeType[mime] =
       (summary.byMimeType[mime] || 0) + 1;
+
+    const itemType =
+      String(record.itemType || '(blank)');
+    summary.byItemType[itemType] =
+      (summary.byItemType[itemType] || 0) + 1;
 
     const documentType =
       String(record.documentType || '(blank)');
@@ -1336,8 +1697,10 @@ function getNoscaRetrievedSources_(retrievalResult) {
     sources.push({
       sourceIndex: chunk.sourceIndex,
       fileId: chunk.fileId,
+      itemType: chunk.itemType || NOSCA_CONFIG.itemTypes.file,
       fileName: chunk.fileName,
       folderPath: chunk.folderPath,
+      hierarchyContext: chunk.hierarchyContext,
       documentType: chunk.documentType,
       fileFormat: chunk.fileFormat,
       mimeType: chunk.mimeType,

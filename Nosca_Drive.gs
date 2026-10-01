@@ -204,7 +204,9 @@ function scanNoscaKnowledgeBatch_(state) {
   const settings = getNoscaIndexingSettings_();
   const startedAt = Date.now();
   const deadline = startedAt + settings.batchExecutionBudgetMs;
-  const batchFiles = [];
+  const batchItems = [];
+  let batchFileCount = 0;
+  let batchFolderCount = 0;
   let batchFoldersStarted = 0;
   let lastHeartbeatAt = startedAt;
   let stopReason = 'tree_complete';
@@ -212,8 +214,18 @@ function scanNoscaKnowledgeBatch_(state) {
   state.totals = state.totals || {
     batches: 0,
     foldersScanned: 0,
-    filesDiscovered: 0
+    foldersDiscovered: 0,
+    filesDiscovered: 0,
+    itemsDiscovered: 0
   };
+
+  if (typeof state.totals.foldersDiscovered !== 'number') {
+    state.totals.foldersDiscovered = 0;
+  }
+  if (typeof state.totals.itemsDiscovered !== 'number') {
+    state.totals.itemsDiscovered =
+      Number(state.totals.filesDiscovered || 0);
+  }
 
   console.log(
     '[Ask NOSCA][Index ' +
@@ -222,15 +234,15 @@ function scanNoscaKnowledgeBatch_(state) {
     (Number(state.totals.batches || 0) + 1) +
     ' started | queued=' +
     state.queue.length +
-    ' | totalFolders=' +
+    ' | totalFoldersScanned=' +
     Number(state.totals.foldersScanned || 0) +
-    ' | totalFiles=' +
-    Number(state.totals.filesDiscovered || 0)
+    ' | totalItems=' +
+    Number(state.totals.itemsDiscovered || 0)
   );
 
   while (state.queue.length) {
-    if (batchFiles.length >= settings.batchMaxFiles) {
-      stopReason = 'batch_file_limit';
+    if (batchItems.length >= settings.batchMaxFiles) {
+      stopReason = 'batch_item_limit';
       break;
     }
 
@@ -273,19 +285,35 @@ function scanNoscaKnowledgeBatch_(state) {
       const item = page.items[i];
 
       if (item.mimeType === NOSCA_CONFIG.mimeTypes.folder) {
+        const folderPath =
+          current.path +
+          '/' +
+          sanitizeNoscaPathPart_(item.name || 'Untitled Folder');
+
+        // Folders are now first-class index records. This lets NOSCA return
+        // the actual Drive folder as a navigation result, while every child
+        // file inherits the same parent hierarchy as retrieval context.
+        batchItems.push(
+          normalizeNoscaDriveFolder_(item, folderPath)
+        );
+        batchFolderCount += 1;
+        state.totals.foldersDiscovered += 1;
+        state.totals.itemsDiscovered += 1;
+
         state.queue.push({
           id: item.id,
-          path:
-            current.path +
-            '/' +
-            sanitizeNoscaPathPart_(item.name || 'Untitled Folder'),
+          path: folderPath,
           pageToken: ''
         });
         continue;
       }
 
-      batchFiles.push(normalizeNoscaDriveFile_(item, current.path));
+      batchItems.push(
+        normalizeNoscaDriveFile_(item, current.path)
+      );
+      batchFileCount += 1;
       state.totals.filesDiscovered += 1;
+      state.totals.itemsDiscovered += 1;
     }
 
     if (page.nextPageToken) {
@@ -302,11 +330,15 @@ function scanNoscaKnowledgeBatch_(state) {
       console.log(
         '[Ask NOSCA][Index ' +
         state.scanId +
-        '] Heartbeat | batchFiles=' +
-        batchFiles.length +
-        ' | totalFiles=' +
-        state.totals.filesDiscovered +
-        ' | totalFolders=' +
+        '] Heartbeat | batchItems=' +
+        batchItems.length +
+        ' | batchFiles=' +
+        batchFileCount +
+        ' | batchFolders=' +
+        batchFolderCount +
+        ' | totalItems=' +
+        state.totals.itemsDiscovered +
+        ' | foldersScanned=' +
         state.totals.foldersScanned +
         ' | queued=' +
         state.queue.length +
@@ -329,11 +361,15 @@ function scanNoscaKnowledgeBatch_(state) {
   state.updatedAt = new Date().toISOString();
 
   const result = {
-    files: batchFiles,
+    items: batchItems,
+    // Kept as a compatibility alias for older index orchestration code.
+    files: batchItems,
     complete: complete,
     stopReason: stopReason,
     batchFoldersStarted: batchFoldersStarted,
-    batchFilesDiscovered: batchFiles.length,
+    batchItemsDiscovered: batchItems.length,
+    batchFilesDiscovered: batchFileCount,
+    batchFoldersDiscovered: batchFolderCount,
     queuedFolders: state.queue.length,
     elapsedMs: Date.now() - startedAt,
     state: state
@@ -344,11 +380,15 @@ function scanNoscaKnowledgeBatch_(state) {
     state.scanId +
     '] Batch ' +
     state.totals.batches +
-    ' scan complete | batchFiles=' +
+    ' scan complete | batchItems=' +
+    result.batchItemsDiscovered +
+    ' | files=' +
     result.batchFilesDiscovered +
-    ' | totalFiles=' +
-    state.totals.filesDiscovered +
-    ' | totalFolders=' +
+    ' | folders=' +
+    result.batchFoldersDiscovered +
+    ' | totalItems=' +
+    state.totals.itemsDiscovered +
+    ' | foldersScanned=' +
     state.totals.foldersScanned +
     ' | queued=' +
     result.queuedFolders +
@@ -442,10 +482,16 @@ function normalizeNoscaDriveFile_(item, folderPath) {
   const supported =
     NOSCA_SUPPORTED_CONTENT_MIME_TYPES.indexOf(mimeType) !== -1;
 
+  const normalizedFolderPath =
+    String(folderPath || '/').trim();
+
   return {
     id: String(item.id || '').trim(),
+    itemType: NOSCA_CONFIG.itemTypes.file,
     name: String(item.name || 'Untitled').trim(),
-    folderPath: String(folderPath || '/').trim(),
+    folderPath: normalizedFolderPath,
+    hierarchyContext:
+      buildNoscaHierarchyContext_(normalizedFolderPath),
     mimeType: mimeType,
     modifiedTime: String(item.modifiedTime || '').trim(),
     driveUrl:
@@ -458,6 +504,73 @@ function normalizeNoscaDriveFile_(item, folderPath) {
       ),
     supported: supported
   };
+}
+
+/**
+ * Converts a Drive folder into a searchable navigation record.
+ *
+ * folderPath is the full path including this folder.
+ */
+function normalizeNoscaDriveFolder_(item, folderPath) {
+  const normalizedFolderPath =
+    String(folderPath || '/').trim();
+
+  return {
+    id: String(item.id || '').trim(),
+    itemType: NOSCA_CONFIG.itemTypes.folder,
+    name: String(item.name || 'Untitled Folder').trim(),
+    folderPath: normalizedFolderPath,
+    hierarchyContext:
+      buildNoscaHierarchyContext_(normalizedFolderPath),
+    mimeType: NOSCA_CONFIG.mimeTypes.folder,
+    modifiedTime: String(item.modifiedTime || '').trim(),
+    driveUrl:
+      String(item.webViewLink || '').trim() ||
+      (
+        item.id
+          ? 'https://drive.google.com/drive/folders/' +
+            encodeURIComponent(item.id)
+          : ''
+      ),
+    supported: false
+  };
+}
+
+/**
+ * Turns a Drive path into a semantic breadcrumb.
+ *
+ * Example:
+ * /Drive/03 | OPPORTUNITIES/02 | BANKING & FINANCIAL SERVICES/
+ * PJ LHUILLIER/02 | Cash Hub Renewal/2026 Renewal
+ *
+ * becomes:
+ * OPPORTUNITIES > BANKING & FINANCIAL SERVICES > PJ LHUILLIER >
+ * Cash Hub Renewal > 2026 Renewal
+ */
+function buildNoscaHierarchyContext_(folderPath) {
+  const parts = String(folderPath || '')
+    .split('/')
+    .map(function (part) {
+      return String(part || '').trim();
+    })
+    .filter(Boolean);
+
+  // The first segment is the configured knowledge-root display name. It does
+  // not add useful retrieval context, so leave it out of the semantic trail.
+  if (parts.length > 1) {
+    parts.shift();
+  }
+
+  const cleaned = parts
+    .map(function (part) {
+      return part
+        .replace(/^\s*\d+\s*[|~:]\s*/i, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+    })
+    .filter(Boolean);
+
+  return cleaned.join(' > ');
 }
 
 /**

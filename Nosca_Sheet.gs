@@ -88,6 +88,15 @@ function prepareNoscaIndexDocumentClassificationSchema() {
 }
 
 /**
+ * Preferred name for the current hierarchy-aware schema preparation.
+ * The older classification function name remains for backward compatibility.
+ */
+function prepareNoscaIndexHierarchySchema() {
+  return prepareNoscaIndexDocumentClassificationSchema();
+}
+
+
+/**
  * Opens and validates the NOSCA_Index sheet.
  */
 function getNoscaIndexSheet_() {
@@ -185,19 +194,32 @@ function loadNoscaExistingIndex_() {
       return;
     }
 
+    const generatedKeywords =
+      String(row[10] || '').trim();
+    const manualKeywords =
+      String(row[11] || '').trim();
+
     records[fileId] = {
       fileId: fileId,
-      fileName: String(row[1] || '').trim(),
-      folderPath: String(row[2] || '').trim(),
-      documentType: String(row[3] || '').trim(),
-      fileFormat: String(row[4] || '').trim(),
-      mimeType: String(row[5] || '').trim(),
-      modifiedAt: normalizeNoscaComparableDate_(row[6]),
-      driveUrl: String(row[7] || '').trim(),
-      keywords: String(row[8] || '').trim(),
-      indexedAt: normalizeNoscaDateValue_(row[9]),
-      status: String(row[10] || '').trim(),
-      notes: String(row[11] || '').trim()
+      itemType: String(row[1] || '').trim(),
+      fileName: String(row[2] || '').trim(),
+      folderPath: String(row[3] || '').trim(),
+      hierarchyContext: String(row[4] || '').trim(),
+      documentType: String(row[5] || '').trim(),
+      fileFormat: String(row[6] || '').trim(),
+      mimeType: String(row[7] || '').trim(),
+      modifiedAt: normalizeNoscaComparableDate_(row[8]),
+      driveUrl: String(row[9] || '').trim(),
+      generatedKeywords: generatedKeywords,
+      manualKeywords: manualKeywords,
+      // Compatibility field used by existing ranking/debug helpers.
+      keywords: [
+        generatedKeywords,
+        manualKeywords
+      ].filter(Boolean).join(', '),
+      indexedAt: normalizeNoscaDateValue_(row[12]),
+      status: String(row[13] || '').trim(),
+      notes: String(row[14] || '').trim()
     };
   });
 

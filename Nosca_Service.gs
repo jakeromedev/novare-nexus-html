@@ -88,8 +88,11 @@ function askNosca(request) {
         const lookupSources = lookup.results.map(function (source) {
           return {
             sourceIndex: source.sourceIndex,
+            itemType:
+              source.itemType || NOSCA_CONFIG.itemTypes.file,
             fileName: source.fileName,
             folderPath: source.folderPath,
+            hierarchyContext: source.hierarchyContext || '',
             documentType: source.documentType,
             fileFormat: source.fileFormat,
             mimeType: source.mimeType,
@@ -253,10 +256,9 @@ function askNosca(request) {
         requestId: requestId,
         grounded: false,
         answer:
-          'I could not find enough information in the available approved ' +
-          'NOSCA references to answer that confidently. Try rephrasing the ' +
-          'question or check whether the relevant material has been added to ' +
-          'the NOSCA knowledge source.',
+          'I couldn’t find enough information to answer that confidently. ' +
+          'Try rephrasing your question or using a more specific client, ' +
+          'project, document type, or topic.',
         sources: [],
         conversationContext:
           contextResolution.context,
@@ -316,8 +318,11 @@ function askNosca(request) {
       sources: sources.map(function (source) {
         return {
           sourceIndex: source.sourceIndex,
+          itemType:
+            source.itemType || NOSCA_CONFIG.itemTypes.file,
           fileName: source.fileName,
           folderPath: source.folderPath,
+          hierarchyContext: source.hierarchyContext || '',
           documentType: source.documentType,
           fileFormat: source.fileFormat,
           mimeType: source.mimeType,
@@ -416,10 +421,19 @@ function buildNoscaDocumentLookupAnswer_(
   const summary =
     lookup && lookup.summary
       ? lookup.summary
-      : { returned: 0, byDocumentType: {} };
+      : {
+        returned: 0,
+        byDocumentType: {},
+        byItemType: {}
+      };
 
   const byType = summary.byDocumentType || {};
+  const byItemType = summary.byItemType || {};
   const returned = Number(summary.returned || 0);
+  const folderCount = Number(
+    byItemType[NOSCA_CONFIG.itemTypes.folder] || 0
+  );
+  const fileCount = Math.max(returned - folderCount, 0);
 
   const context =
     contextResolution &&
@@ -433,6 +447,11 @@ function buildNoscaDocumentLookupAnswer_(
   const requestedTypes =
     lookup && Array.isArray(lookup.requestedDocumentTypes)
       ? lookup.requestedDocumentTypes
+      : [];
+
+  const requestedItemTypes =
+    lookup && Array.isArray(lookup.requestedItemTypes)
+      ? lookup.requestedItemTypes
       : [];
 
   const counts = [];
@@ -463,25 +482,17 @@ function buildNoscaDocumentLookupAnswer_(
     'presentations'
   );
 
-  const knownCount =
-    Number(byType[NOSCA_CONFIG.documentTypes.ee] || 0) +
-    Number(byType[NOSCA_CONFIG.documentTypes.proposal] || 0) +
-    Number(byType[NOSCA_CONFIG.documentTypes.presentation] || 0);
-
-  const otherCount =
-    Math.max(returned - knownCount, 0);
-
-  if (otherCount > 0) {
-    counts.push(
-      otherCount +
-      ' other ' +
-      (otherCount === 1 ? 'document' : 'documents')
-    );
-  }
-
   let opening = '';
 
-  if (requestedTypes.length === 1) {
+  if (
+    requestedItemTypes.length === 1 &&
+    requestedItemTypes[0] === NOSCA_CONFIG.itemTypes.folder
+  ) {
+    opening =
+      'I found ' +
+      folderCount +
+      (folderCount === 1 ? ' matching folder' : ' matching folders');
+  } else if (requestedTypes.length === 1) {
     const requested = requestedTypes[0];
     let friendlyType = requested;
 
@@ -499,38 +510,53 @@ function buildNoscaDocumentLookupAnswer_(
 
     opening =
       'I found ' +
-      returned +
+      fileCount +
       ' ' +
       friendlyType +
-      (returned === 1 ? ' file' : ' files');
-
-    if (topicLabel) {
-      opening += ' for ' + topicLabel;
-    }
-
-    opening += '.';
+      (fileCount === 1 ? ' file' : ' files');
   } else {
-    opening =
-      'I found ' +
-      returned +
-      (returned === 1 ? ' matching file' : ' matching files');
-
-    if (topicLabel) {
-      opening += ' for ' + topicLabel;
+    if (folderCount && fileCount) {
+      opening =
+        'I found ' +
+        folderCount +
+        (folderCount === 1 ? ' matching folder' : ' matching folders') +
+        ' and ' +
+        fileCount +
+        (fileCount === 1 ? ' matching file' : ' matching files');
+    } else if (folderCount) {
+      opening =
+        'I found ' +
+        folderCount +
+        (folderCount === 1 ? ' matching folder' : ' matching folders');
+    } else {
+      opening =
+        'I found ' +
+        fileCount +
+        (fileCount === 1 ? ' matching file' : ' matching files');
     }
+  }
 
-    opening += '.';
+  if (topicLabel) {
+    opening += ' for ' + topicLabel;
+  }
 
-    if (counts.length) {
-      opening += ' That includes ' + joinNoscaFriendlyList_(counts) + '.';
-    }
+  opening += '.';
+
+  if (
+    requestedTypes.length === 0 &&
+    counts.length
+  ) {
+    opening += ' The files include ' +
+      joinNoscaFriendlyList_(counts) +
+      '.';
   }
 
   return (
     opening +
     '\n\n' +
-    'I listed the strongest matches below. Open any source card to go ' +
-    'straight to the file in Drive.'
+    'I prioritized results that match the same Drive hierarchy, so client, ' +
+    'project, renewal, and year context are kept together. Open any result ' +
+    'below to go straight to it in Drive.'
   );
 }
 
@@ -578,8 +604,8 @@ function buildNoscaNoDocumentLookupAnswer_(
   }
 
   message +=
-    ' in the current NOSCA index. It may not be indexed yet, or it may ' +
-    'use a different name in Drive.';
+    '. Try using a different project or client name, a broader search term, ' +
+    'or another document type.';
 
   return message;
 }

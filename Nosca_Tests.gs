@@ -324,12 +324,17 @@ function inspectNoscaIndexForFile_(fileId) {
     indexed: true,
     record: {
       fileId: record.fileId || '',
+      itemType: record.itemType || '',
       fileName: record.fileName || '',
       folderPath: record.folderPath || '',
+      hierarchyContext: record.hierarchyContext || '',
+      documentType: record.documentType || '',
+      fileFormat: record.fileFormat || '',
       mimeType: record.mimeType || '',
       modifiedAt: record.modifiedAt || '',
       driveUrl: record.driveUrl || '',
-      keywords: record.keywords || '',
+      generatedKeywords: record.generatedKeywords || '',
+      manualKeywords: record.manualKeywords || '',
       indexedAt: record.indexedAt || '',
       status: record.status || '',
       notes: record.notes || ''
@@ -386,8 +391,10 @@ function testNoscaExercise02ClassifyKnownPjlEe() {
     generateNoscaMetadataKeywords_(
       file.name || '',
       pathResult.path || '',
+      buildNoscaHierarchyContext_(pathResult.path || ''),
       documentType,
-      fileFormat
+      fileFormat,
+      NOSCA_CONFIG.itemTypes.file
     );
 
   const hasPjlAlias =
@@ -442,6 +449,204 @@ function testNoscaExercise02ClassifyKnownPjlEe() {
       '" / "' +
       fileFormat +
       '".'
+    );
+  }
+
+  return result;
+}
+
+
+/**
+ * EXERCISE 03
+ *
+ * Validates hierarchy-aware indexing against the known PJL Cash Hub Renewal
+ * folder supplied during development:
+ *
+ * https://drive.google.com/drive/folders/
+ * 1wEglxSf8g12ozpVeXwMr7efltl6Am4O4
+ *
+ * It proves that:
+ * - the folder itself can be indexed
+ * - the full ancestor breadcrumb becomes Hierarchy Context
+ * - child files inherit PJL / CashHub / Renewal context
+ * - the query "PJL 3-year renewal cashhub documents" filters by contextual
+ *   coverage instead of accepting unrelated "renewal" files
+ *
+ * Read-only. Does not change NOSCA_Index and does not call Gemini.
+ */
+function testNoscaExercise03PjlCashHubHierarchy() {
+  const folderId =
+    '1wEglxSf8g12ozpVeXwMr7efltl6Am4O4';
+
+  const question =
+    'give me PJL 3-year renewal cashhub documents';
+
+  console.log(
+    '[Ask NOSCA][Exercise 03] Started | folderId=' +
+    folderId
+  );
+
+  assertNoscaAdvancedDriveService_();
+
+  const folder = getNoscaDriveItem_(folderId);
+
+  if (
+    !folder ||
+    folder.mimeType !== NOSCA_CONFIG.mimeTypes.folder
+  ) {
+    throw new Error(
+      'Exercise 03 target is not an accessible Drive folder.'
+    );
+  }
+
+  const pathResult =
+    resolveNoscaDrivePathToKnowledgeRoot_(folder);
+
+  const folderRecord =
+    normalizeNoscaDriveFolder_(
+      folder,
+      pathResult.path
+    );
+
+  const page =
+    listNoscaFolderChildren_(folderId, 100);
+
+  const candidateItems = [folderRecord];
+
+  page.items.forEach(function (item) {
+    if (
+      item.mimeType === NOSCA_CONFIG.mimeTypes.folder
+    ) {
+      candidateItems.push(
+        normalizeNoscaDriveFolder_(
+          item,
+          pathResult.path +
+          '/' +
+          sanitizeNoscaPathPart_(
+            item.name || 'Untitled Folder'
+          )
+        )
+      );
+      return;
+    }
+
+    candidateItems.push(
+      normalizeNoscaDriveFile_(
+        item,
+        pathResult.path
+      )
+    );
+  });
+
+  const query = normalizeNoscaQuery_(question);
+
+  const scored = candidateItems
+    .map(function (item) {
+      const record =
+        buildNoscaIndexRecord_(
+          item,
+          null,
+          new Date()
+        );
+
+      const score =
+        scoreNoscaMetadataRecord_(
+          record,
+          query
+        );
+
+      const coverage =
+        evaluateNoscaLookupCoverage_(
+          record,
+          query,
+          [],
+          []
+        );
+
+      return {
+        itemType: record.itemType,
+        itemName: record.fileName,
+        folderPath: record.folderPath,
+        hierarchyContext:
+          record.hierarchyContext,
+        documentType: record.documentType,
+        fileFormat: record.fileFormat,
+        metadataScore: score.score,
+        coverage: coverage.ratio,
+        matchedTerms: coverage.matchedTerms,
+        requiredAnchors:
+          coverage.requiredAnchors,
+        missingAnchors:
+          coverage.missingAnchors,
+        passesContext:
+          coverage.passes
+      };
+    })
+    .sort(function (a, b) {
+      if (b.coverage !== a.coverage) {
+        return b.coverage - a.coverage;
+      }
+
+      return b.metadataScore - a.metadataScore;
+    });
+
+  const passing =
+    scored.filter(function (item) {
+      return item.passesContext;
+    });
+
+  const folderPasses =
+    passing.some(function (item) {
+      return (
+        item.itemType === NOSCA_CONFIG.itemTypes.folder &&
+        item.itemName === folder.name
+      );
+    });
+
+  const result = {
+    ok:
+      pathResult.underKnowledgeRoot === true &&
+      folderPasses &&
+      passing.length > 0,
+    exercise: '03',
+    question: question,
+    folder: {
+      id: folder.id,
+      name: folder.name || '',
+      path: pathResult.path,
+      hierarchyContext:
+        buildNoscaHierarchyContext_(
+          pathResult.path
+        )
+    },
+    childCountSampled: page.items.length,
+    passingResults: passing.slice(0, 20),
+    rejectedResults: scored
+      .filter(function (item) {
+        return !item.passesContext;
+      })
+      .slice(0, 10)
+  };
+
+  console.log(
+    '[Ask NOSCA][Exercise 03] Hierarchy | path=' +
+    result.folder.path +
+    ' | context=' +
+    result.folder.hierarchyContext +
+    ' | passing=' +
+    result.passingResults.length +
+    ' | passed=' +
+    result.ok
+  );
+
+  console.log(
+    '[Ask NOSCA][Exercise 03] Result JSON: ' +
+    JSON.stringify(result, null, 2)
+  );
+
+  if (!result.ok) {
+    throw new Error(
+      'Exercise 03 hierarchy-aware retrieval test failed.'
     );
   }
 

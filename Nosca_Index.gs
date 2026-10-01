@@ -14,7 +14,7 @@
  */
 
 const NOSCA_INDEX_STATE_PREFIX = 'NOSCA_INDEX_SCAN_STATE_';
-const NOSCA_INDEX_STATE_VERSION = 3;
+const NOSCA_INDEX_STATE_VERSION = 4;
 
 /**
  * Public diagnostic that validates both required connections.
@@ -122,7 +122,7 @@ function refreshNoscaIndex() {
 
     const batch = scanNoscaKnowledgeBatch_(state);
     const batchWrite = applyNoscaIndexBatch_(
-      batch.files,
+      batch.items || batch.files,
       state.scanStartedAt
     );
 
@@ -137,9 +137,13 @@ function refreshNoscaIndex() {
       console.log(
         '[Ask NOSCA][Index ' +
         state.scanId +
-        '] FULL REFRESH COMPLETE | files=' +
-        state.totals.filesDiscovered +
-        ' | folders=' +
+        '] FULL REFRESH COMPLETE | items=' +
+        Number(state.totals.itemsDiscovered || 0) +
+        ' | files=' +
+        Number(state.totals.filesDiscovered || 0) +
+        ' | indexedFolders=' +
+        Number(state.totals.foldersDiscovered || 0) +
+        ' | foldersScanned=' +
         state.totals.foldersScanned +
         ' | batches=' +
         state.totals.batches +
@@ -154,8 +158,8 @@ function refreshNoscaIndex() {
         state.scanId +
         '] Checkpoint saved | run refreshNoscaIndex() again | queued=' +
         state.queue.length +
-        ' | totalFiles=' +
-        state.totals.filesDiscovered
+        ' | totalItems=' +
+        Number(state.totals.itemsDiscovered || 0)
       );
     }
 
@@ -225,7 +229,9 @@ function getNoscaIndexRefreshStatus() {
     updatedAt: state.updatedAt || '',
     batchesCompleted: Number(state.totals.batches || 0),
     foldersScanned: Number(state.totals.foldersScanned || 0),
+    foldersDiscovered: Number(state.totals.foldersDiscovered || 0),
     filesDiscovered: Number(state.totals.filesDiscovered || 0),
+    itemsDiscovered: Number(state.totals.itemsDiscovered || 0),
     queuedFolders: state.queue.length,
     cumulative: state.summary || {}
   };
@@ -245,17 +251,28 @@ function getNoscaIndexStatus() {
     Other: 0
   };
 
+  const itemTypeCounts = {};
+  const documentTypeCounts = {};
   let latestIndexedAt = null;
 
   Object.keys(existing).forEach(function (fileId) {
     const record = existing[fileId];
     const status = record.status;
+    const itemType =
+      String(record.itemType || '(blank)');
+    const documentType =
+      String(record.documentType || '(blank)');
 
     if (Object.prototype.hasOwnProperty.call(statusCounts, status)) {
       statusCounts[status] += 1;
     } else {
       statusCounts.Other += 1;
     }
+
+    itemTypeCounts[itemType] =
+      (itemTypeCounts[itemType] || 0) + 1;
+    documentTypeCounts[documentType] =
+      (documentTypeCounts[documentType] || 0) + 1;
 
     if (
       record.indexedAt instanceof Date &&
@@ -273,6 +290,8 @@ function getNoscaIndexStatus() {
     ok: true,
     rowCount: Object.keys(existing).length,
     statusCounts: statusCounts,
+    itemTypeCounts: itemTypeCounts,
+    documentTypeCounts: documentTypeCounts,
     latestIndexedAt:
       latestIndexedAt ? latestIndexedAt.toISOString() : '',
     refresh: getNoscaIndexRefreshStatus()
@@ -321,18 +340,22 @@ function createNoscaIndexScanState_() {
     totals: {
       batches: 0,
       foldersScanned: 0,
-      filesDiscovered: 0
+      foldersDiscovered: 0,
+      filesDiscovered: 0,
+      itemsDiscovered: 0
     },
     summary: {
       newFiles: 0,
       updatedFiles: 0,
       unchangedFiles: 0,
-      unsupportedFiles: 0
+      unsupportedFiles: 0,
+      folderItems: 0,
+      fileItems: 0
     }
   };
 }
 
-function applyNoscaIndexBatch_(files, scanStartedAt) {
+function applyNoscaIndexBatch_(items, scanStartedAt) {
   const existing = loadNoscaExistingIndex_();
   const indexedAt = new Date(scanStartedAt);
 
@@ -342,18 +365,21 @@ function applyNoscaIndexBatch_(files, scanStartedAt) {
 
   const summary = {
     processedFiles: 0,
+    processedItems: 0,
     newFiles: 0,
     updatedFiles: 0,
     unchangedFiles: 0,
     unsupportedFiles: 0,
+    folderItems: 0,
+    fileItems: 0,
     writtenRows: 0
   };
 
-  (files || []).forEach(function (file) {
-    if (!file || !file.id) return;
+  (items || []).forEach(function (item) {
+    if (!item || !item.id) return;
 
-    const previous = existing[file.id] || null;
-    const next = buildNoscaIndexRecord_(file, previous, indexedAt);
+    const previous = existing[item.id] || null;
+    const next = buildNoscaIndexRecord_(item, previous, indexedAt);
     const changed =
       !previous ||
       hasNoscaIndexMetadataChanged_(previous, next);
@@ -370,20 +396,24 @@ function applyNoscaIndexBatch_(files, scanStartedAt) {
       summary.unsupportedFiles += 1;
     }
 
-    // During a resumable full scan, Indexed At doubles as the durable
-    // "seen in this scan" marker. Every visited file receives the same
-    // scan-start timestamp. Missing-file detection happens only at the end.
+    if (next.itemType === NOSCA_CONFIG.itemTypes.folder) {
+      summary.folderItems += 1;
+    } else {
+      summary.fileItems += 1;
+      summary.processedFiles += 1;
+    }
+
     next.indexedAt = indexedAt;
 
-    existing[file.id] = next;
-    summary.processedFiles += 1;
+    existing[item.id] = next;
+    summary.processedItems += 1;
   });
 
-  const records = Object.keys(existing).map(function (fileId) {
-    return existing[fileId];
-  });
-
-  records.sort(compareNoscaIndexRecords_);
+  const records = Object.keys(existing)
+    .map(function (fileId) {
+      return existing[fileId];
+    })
+    .sort(compareNoscaIndexRecords_);
 
   const rows = records.map(noscaIndexRecordToRow_);
   writeNoscaIndexRows_(rows);
@@ -440,9 +470,13 @@ function buildNoscaIndexRefreshResult_(
     needsAnotherRun: !batch.complete,
     stopReason: batch.stopReason,
     batchNumber: Number(state.totals.batches || 0),
-    batchFilesDiscovered: batch.batchFilesDiscovered,
+    batchItemsDiscovered: Number(batch.batchItemsDiscovered || 0),
+    batchFilesDiscovered: Number(batch.batchFilesDiscovered || 0),
+    batchFoldersDiscovered: Number(batch.batchFoldersDiscovered || 0),
     batchFoldersStarted: batch.batchFoldersStarted,
+    totalItemsDiscovered: Number(state.totals.itemsDiscovered || 0),
     totalFilesDiscovered: Number(state.totals.filesDiscovered || 0),
+    totalFoldersDiscovered: Number(state.totals.foldersDiscovered || 0),
     totalFoldersScanned: Number(state.totals.foldersScanned || 0),
     queuedFolders: state.queue.length,
     batchWrite: batchWrite,
@@ -473,6 +507,12 @@ function accumulateNoscaIndexSummary_(state, batchWrite) {
   state.summary.updatedFiles += Number(batchWrite.updatedFiles || 0);
   state.summary.unchangedFiles += Number(batchWrite.unchangedFiles || 0);
   state.summary.unsupportedFiles += Number(batchWrite.unsupportedFiles || 0);
+  state.summary.folderItems =
+    Number(state.summary.folderItems || 0) +
+    Number(batchWrite.folderItems || 0);
+  state.summary.fileItems =
+    Number(state.summary.fileItems || 0) +
+    Number(batchWrite.fileItems || 0);
 }
 
 function saveNoscaIndexScanState_(state) {
@@ -611,18 +651,70 @@ function clearNoscaIndexScanState_() {
   });
 }
 
-function buildNoscaIndexRecord_(file, previous, indexedAt) {
-  const supported = file.supported === true;
-  const status = supported
-    ? NOSCA_CONFIG.statuses.active
-    : NOSCA_CONFIG.statuses.unsupported;
+function buildNoscaIndexRecord_(item, previous, indexedAt) {
+  const itemType =
+    String(item.itemType || '') ||
+    (
+      item.mimeType === NOSCA_CONFIG.mimeTypes.folder
+        ? NOSCA_CONFIG.itemTypes.folder
+        : NOSCA_CONFIG.itemTypes.file
+    );
 
-  const documentType = classifyNoscaDocumentType_(file);
-  const fileFormat = getNoscaFileFormat_(file);
+  const isFolder =
+    itemType === NOSCA_CONFIG.itemTypes.folder;
+
+  const supported = item.supported === true;
+
+  // Folders are active metadata/navigation records even though there is no
+  // document body to extract.
+  const status = isFolder
+    ? NOSCA_CONFIG.statuses.active
+    : (
+      supported
+        ? NOSCA_CONFIG.statuses.active
+        : NOSCA_CONFIG.statuses.unsupported
+    );
+
+  const documentType = isFolder
+    ? NOSCA_CONFIG.documentTypes.folder
+    : classifyNoscaDocumentType_(item);
+
+  const fileFormat = isFolder
+    ? NOSCA_CONFIG.fileFormats.folder
+    : getNoscaFileFormat_(item);
+
+  const hierarchyContext =
+    String(
+      item.hierarchyContext ||
+      buildNoscaHierarchyContext_(item.folderPath || '')
+    ).trim();
+
+  const generatedKeywords =
+    generateNoscaMetadataKeywords_(
+      item.name,
+      item.folderPath,
+      hierarchyContext,
+      documentType,
+      fileFormat,
+      itemType
+    );
+
+  // Manual Keywords are the only editable keyword field preserved across a
+  // full refresh. Generated Keywords always follow the live Drive hierarchy.
+  const manualKeywords =
+    previous && previous.manualKeywords
+      ? previous.manualKeywords
+      : '';
 
   let notes = previous ? previous.notes : '';
 
-  if (!supported) {
+  if (isFolder) {
+    if (!previous || previous.status !== NOSCA_CONFIG.statuses.active) {
+      notes =
+        'Drive folder indexed as a navigation result. Child files inherit ' +
+        'this directory hierarchy as retrieval context.';
+    }
+  } else if (!supported) {
     if (
       !previous ||
       previous.status === NOSCA_CONFIG.statuses.skipped ||
@@ -644,23 +736,22 @@ function buildNoscaIndexRecord_(file, previous, indexedAt) {
   }
 
   return {
-    fileId: file.id,
-    fileName: file.name,
-    folderPath: file.folderPath,
+    fileId: item.id,
+    itemType: itemType,
+    fileName: item.name,
+    folderPath: item.folderPath,
+    hierarchyContext: hierarchyContext,
     documentType: documentType,
     fileFormat: fileFormat,
-    mimeType: file.mimeType,
-    modifiedAt: normalizeNoscaComparableDate_(file.modifiedTime),
-    driveUrl: file.driveUrl,
-    keywords:
-      previous && previous.keywords
-        ? previous.keywords
-        : generateNoscaMetadataKeywords_(
-            file.name,
-            file.folderPath,
-            documentType,
-            fileFormat
-          ),
+    mimeType: item.mimeType,
+    modifiedAt: normalizeNoscaComparableDate_(item.modifiedTime),
+    driveUrl: item.driveUrl,
+    generatedKeywords: generatedKeywords,
+    manualKeywords: manualKeywords,
+    keywords: [
+      generatedKeywords,
+      manualKeywords
+    ].filter(Boolean).join(', '),
     indexedAt: indexedAt,
     status: status,
     notes: notes
@@ -669,13 +760,16 @@ function buildNoscaIndexRecord_(file, previous, indexedAt) {
 
 function hasNoscaIndexMetadataChanged_(previous, next) {
   return (
+    previous.itemType !== next.itemType ||
     previous.fileName !== next.fileName ||
     previous.folderPath !== next.folderPath ||
+    previous.hierarchyContext !== next.hierarchyContext ||
     previous.documentType !== next.documentType ||
     previous.fileFormat !== next.fileFormat ||
     previous.mimeType !== next.mimeType ||
     previous.modifiedAt !== next.modifiedAt ||
     previous.driveUrl !== next.driveUrl ||
+    previous.generatedKeywords !== next.generatedKeywords ||
     previous.status !== next.status
   );
 }
@@ -683,14 +777,17 @@ function hasNoscaIndexMetadataChanged_(previous, next) {
 function noscaIndexRecordToRow_(record) {
   return [
     record.fileId,
+    record.itemType,
     record.fileName,
     record.folderPath,
+    record.hierarchyContext,
     record.documentType,
     record.fileFormat,
     record.mimeType,
     toNoscaSheetDate_(record.modifiedAt),
     record.driveUrl,
-    record.keywords,
+    record.generatedKeywords,
+    record.manualKeywords,
     record.indexedAt || '',
     record.status,
     record.notes
@@ -741,6 +838,14 @@ function compareNoscaIndexRecords_(a, b) {
  */
 function classifyNoscaDocumentType_(file) {
   const type = NOSCA_CONFIG.documentTypes;
+
+  if (
+    String(file && file.itemType || '') === NOSCA_CONFIG.itemTypes.folder ||
+    String(file && file.mimeType || '') === NOSCA_CONFIG.mimeTypes.folder
+  ) {
+    return type.folder;
+  }
+
   const format = getNoscaFileFormat_(file);
   const searchable = normalizeNoscaClassificationText_(
     String(file && file.name || '') +
@@ -800,6 +905,7 @@ function getNoscaFileFormat_(file) {
   const m = NOSCA_CONFIG.mimeTypes;
   const f = NOSCA_CONFIG.fileFormats;
 
+  if (mime === m.folder) return f.folder;
   if (mime === m.document) return f.googleDoc;
   if (mime === m.spreadsheet) return f.googleSheet;
   if (mime === m.presentation) return f.googleSlides;
@@ -881,10 +987,12 @@ function isNoscaProposalCapableFormat_(format) {
  * Manually edited Keywords values are preserved on later refreshes.
  */
 function generateNoscaMetadataKeywords_(
-  fileName,
+  itemName,
   folderPath,
+  hierarchyContext,
   documentType,
-  fileFormat
+  fileFormat,
+  itemType
 ) {
   const stopWords = {
     a: true,
@@ -906,18 +1014,30 @@ function generateNoscaMetadataKeywords_(
   };
 
   const raw =
-    String(fileName || '')
+    String(itemName || '')
       .replace(/\.[a-z0-9]{1,8}$/i, ' ') +
     ' ' +
     String(folderPath || '') +
+    ' ' +
+    String(hierarchyContext || '') +
     ' ' +
     String(documentType || '') +
     ' ' +
     String(fileFormat || '') +
     ' ' +
-    getNoscaDocumentTypeKeywordAliases_(documentType, fileFormat) +
+    String(itemType || '') +
     ' ' +
-    getNoscaMetadataAliasKeywords_(fileName, folderPath);
+    getNoscaDocumentTypeKeywordAliases_(
+      documentType,
+      fileFormat,
+      itemType
+    ) +
+    ' ' +
+    getNoscaMetadataAliasKeywords_(
+      itemName,
+      folderPath,
+      hierarchyContext
+    );
 
   const parts = raw
     .toLowerCase()
@@ -943,17 +1063,27 @@ function generateNoscaMetadataKeywords_(
     keywords.push(value);
   });
 
-  return keywords.slice(0, 35).join(', ');
+  return keywords.slice(0, 60).join(', ');
 }
 
-function getNoscaDocumentTypeKeywordAliases_(documentType, fileFormat) {
+function getNoscaDocumentTypeKeywordAliases_(
+  documentType,
+  fileFormat,
+  itemType
+) {
   const type = String(documentType || '');
   const format = String(fileFormat || '');
+  const kind = String(itemType || '');
   const d = NOSCA_CONFIG.documentTypes;
   const f = NOSCA_CONFIG.fileFormats;
   const aliases = [];
 
-  if (type === d.ee) {
+  if (
+    kind === NOSCA_CONFIG.itemTypes.folder ||
+    type === d.folder
+  ) {
+    aliases.push('folder directory location path');
+  } else if (type === d.ee) {
     aliases.push('ee effort estimate estimation');
   } else if (type === d.proposal) {
     aliases.push('proposal bid rfp rfi rfq tender response');
@@ -977,10 +1107,18 @@ function getNoscaDocumentTypeKeywordAliases_(documentType, fileFormat) {
   return aliases.join(' ');
 }
 
-function getNoscaMetadataAliasKeywords_(fileName, folderPath) {
+function getNoscaMetadataAliasKeywords_(
+  itemName,
+  folderPath,
+  hierarchyContext
+) {
   const aliases = NOSCA_CONFIG.metadataAliases || [];
   const searchable = normalizeNoscaClassificationText_(
-    String(fileName || '') + ' ' + String(folderPath || '')
+    String(itemName || '') +
+    ' ' +
+    String(folderPath || '') +
+    ' ' +
+    String(hierarchyContext || '')
   );
   const additions = [];
 

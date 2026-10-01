@@ -338,6 +338,7 @@
       sources: Array.isArray(response.sources)
         ? response.sources
         : [],
+      responseMode: String(response.responseMode || ""),
       elapsedMs: Number(response.elapsedMs || 0)
     });
 
@@ -431,7 +432,8 @@
     }
 
     const sourceBlock = createSourceBlock(
-      Array.isArray(data.sources) ? data.sources : []
+      Array.isArray(data.sources) ? data.sources : [],
+      String(data.responseMode || "")
     );
 
     if (sourceBlock) {
@@ -468,7 +470,7 @@
     line.className = "nosca-loading-line";
 
     const copy = document.createElement("span");
-    copy.textContent = "Searching approved Novare knowledge";
+    copy.textContent = "Finding the most relevant information";
 
     const dots = document.createElement("span");
     dots.className = "nosca-thinking-dots";
@@ -553,7 +555,7 @@
     return avatar;
   }
 
-  function createSourceBlock(sources) {
+  function createSourceBlock(sources, responseMode) {
     const validSources = sources.filter(function (source) {
       return (
         source &&
@@ -566,16 +568,24 @@
       return null;
     }
 
+    const isLookup = responseMode === "document_lookup";
+
     const block = document.createElement("section");
     block.className = "nosca-sources";
-    block.setAttribute("aria-label", "Sources used for this answer");
+    block.setAttribute(
+      "aria-label",
+      isLookup
+        ? "Drive results"
+        : "Sources used for this answer"
+    );
 
     const heading = document.createElement("div");
     heading.className = "nosca-sources-heading";
 
     const title = document.createElement("span");
     title.textContent =
-      "Sources · " + validSources.length;
+      (isLookup ? "Drive results · " : "Sources · ") +
+      validSources.length;
 
     heading.appendChild(title);
     block.appendChild(heading);
@@ -591,46 +601,71 @@
 
       item.className = "nosca-source-card";
 
+      const itemType =
+        String(source.itemType || "File").trim();
+
+      item.dataset.itemType =
+        itemType.toLowerCase();
+
       if (url) {
         item.href = url;
         item.target = "_blank";
         item.rel = "noopener noreferrer";
         item.setAttribute(
           "aria-label",
-          "Open source " + String(source.fileName || "")
+          "Open " +
+          itemType.toLowerCase() +
+          " " +
+          String(source.fileName || "")
         );
       }
 
       const icon = document.createElement("span");
       icon.className = "nosca-source-icon";
       icon.setAttribute("aria-hidden", "true");
-      icon.innerHTML =
-        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">' +
-        '<path d="M6 3h9l4 4v14H6z"></path>' +
-        '<path d="M14 3v5h5M9 13h6M9 17h6"></path>' +
-        '</svg>';
+      icon.innerHTML = getNoscaResultIconSvg(source);
 
       const copy = document.createElement("span");
       copy.className = "nosca-source-copy";
 
       const name = document.createElement("strong");
-      name.textContent =
-        (source.sourceIndex
-          ? "Source " + source.sourceIndex + " · "
-          : "") +
-        String(source.fileName || "Novare source");
+
+      if (isLookup) {
+        name.textContent =
+          String(source.fileName || "Drive result");
+      } else {
+        name.textContent =
+          (source.sourceIndex
+            ? "Source " + source.sourceIndex + " · "
+            : "") +
+          String(source.fileName || "Novare source");
+      }
 
       const path = document.createElement("span");
-      const sourceMeta = [
-        String(source.documentType || "").trim(),
-        String(source.fileFormat || "").trim(),
+
+      const sourceMeta = [];
+
+      if (itemType === "Folder") {
+        sourceMeta.push("Folder");
+      } else {
+        sourceMeta.push(
+          String(source.documentType || "").trim()
+        );
+        sourceMeta.push(
+          String(source.fileFormat || "").trim()
+        );
+      }
+
+      sourceMeta.push(
         String(source.folderPath || "").trim() ||
           getReadableMimeType(source.mimeType)
-      ].filter(function (value, index, array) {
-        return value && array.indexOf(value) === index;
-      });
+      );
 
-      path.textContent = sourceMeta.join(" · ");
+      path.textContent = sourceMeta
+        .filter(function (value, index, array) {
+          return value && array.indexOf(value) === index;
+        })
+        .join(" · ");
 
       copy.appendChild(name);
       copy.appendChild(path);
@@ -654,6 +689,88 @@
 
     block.appendChild(list);
     return block;
+  }
+
+  function getNoscaResultIconSvg(source) {
+    const itemType =
+      String(source.itemType || "").toLowerCase();
+    const documentType =
+      String(source.documentType || "").toLowerCase();
+    const format =
+      String(source.fileFormat || "").toLowerCase();
+
+    // Folder
+    if (itemType === "folder") {
+      return (
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
+        '<path d="M3 6.5h6l2 2h10v9.5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"></path>' +
+        '<path d="M3 9h18"></path>' +
+        '</svg>'
+      );
+    }
+
+    // EE / spreadsheets
+    if (
+      documentType === "ee" ||
+      documentType === "spreadsheet" ||
+      format.indexOf("sheet") !== -1 ||
+      format.indexOf("excel") !== -1
+    ) {
+      return (
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
+        '<rect x="4" y="3" width="16" height="18" rx="2"></rect>' +
+        '<path d="M4 9h16M9 9v12M14.5 9v12M4 15h16"></path>' +
+        '</svg>'
+      );
+    }
+
+    // Presentation / deck
+    if (
+      documentType === "presentation" ||
+      format.indexOf("slides") !== -1 ||
+      format.indexOf("powerpoint") !== -1
+    ) {
+      return (
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
+        '<rect x="3" y="4" width="18" height="13" rx="2"></rect>' +
+        '<path d="M8 21l4-4 4 4M8 9h8M8 13h5"></path>' +
+        '</svg>'
+      );
+    }
+
+    // Proposal / document
+    if (
+      documentType === "proposal" ||
+      documentType === "document" ||
+      format.indexOf("doc") !== -1 ||
+      format.indexOf("word") !== -1
+    ) {
+      return (
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
+        '<path d="M6 3h9l4 4v14H6z"></path>' +
+        '<path d="M14 3v5h5M9 12h6M9 16h6"></path>' +
+        '</svg>'
+      );
+    }
+
+    // PDF
+    if (documentType === "pdf" || format === "pdf") {
+      return (
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
+        '<path d="M6 3h9l4 4v14H6z"></path>' +
+        '<path d="M14 3v5h5"></path>' +
+        '<path d="M8 16h2.2a2 2 0 0 0 0-4H8v5M13 17v-5h1.5a2.5 2.5 0 0 1 0 5H13ZM18 17v-5h3"></path>' +
+        '</svg>'
+      );
+    }
+
+    // Generic file
+    return (
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">' +
+      '<path d="M6 3h9l4 4v14H6z"></path>' +
+      '<path d="M14 3v5h5M9 13h6M9 17h6"></path>' +
+      '</svg>'
+    );
   }
 
   function createFeedbackBlock(requestId) {

@@ -17110,4 +17110,73 @@
       }
     }
 
+
+    /* =========================================================
+       GLOBAL SEARCH — PROGRAMMATIC TITLE FOCUS
+       Preserve SPA focus management without drawing a box around the H1.
+       ========================================================= */
+
+    .search-page--visual-redesign
+      .search-hero-title:focus,
+    .search-page--visual-redesign
+      .search-hero-title:focus-visible {
+      outline: none;
+      box-shadow: none;
+    }
+
+
+    /* =========================================================
+       GLOBAL HERO — SOFT BOTTOM FADE
+       Blends hero artwork into the page body while keeping hero
+       text, filters, and other foreground content fully readable.
+       ========================================================= */
+
+    .home-hero::before,
+    .page-hero[data-page-hero]::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 1;
+      height: clamp(82px, 30%, 132px);
+      pointer-events: none;
+      background:
+        linear-gradient(
+          to bottom,
+          rgb(248 252 255 / 0%) 0%,
+          rgb(248 252 255 / 10%) 22%,
+          rgb(248 252 255 / 42%) 55%,
+          rgb(248 252 255 / 82%) 80%,
+          #F8FCFF 100%
+        );
+    }
+
+    /*
+      Hero foreground content sits above the fade.
+      These selectors cover the current ONESCA hero compositions.
+    */
+    .home-hero-copy,
+    .home-hero-message,
+    .overview-hero-copy,
+    .overview-hero-message,
+    .offerings-hero-content,
+    .opportunities-hero-content,
+    .programs-hero-content,
+    .delivery-hero-content,
+    .governance-hero-content,
+    .tools-hero-content,
+    .support-hero-content,
+    .search-hero-content {
+      position: relative;
+      z-index: 2;
+    }
+
+    @media (max-width: 767px) {
+      .home-hero::before,
+      .page-hero[data-page-hero]::before {
+        height: clamp(62px, 24%, 96px);
+      }
+    }
+
 </style>

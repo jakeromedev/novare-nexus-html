@@ -15,28 +15,71 @@
  * @param {string} question
  * @return {Object}
  */
-function askNosca(question) {
+function askNosca(request) {
   const startedAt = Date.now();
   const requestId = createNoscaRequestId_();
+
+  const normalizedRequest =
+    normalizeNoscaRequest_(request);
+
+  const rawQuestion =
+    String(normalizedRequest.question || '');
 
   noscaDebugLog_(
     'askNosca request started',
     {
       requestId: requestId,
-      rawQuestionLength:
-        String(question || '').length
+      rawQuestionLength: rawQuestion.length,
+      hasConversationContext:
+        Boolean(
+          normalizedRequest.context &&
+          normalizedRequest.context.topicTerms &&
+          normalizedRequest.context.topicTerms.length
+        )
     }
   );
 
   let validatedQuestion = '';
+  let resolvedQuestion = '';
+  let contextResolution = null;
 
   try {
     validatedQuestion =
-      validateNoscaPublicQuestion_(question);
+      validateNoscaPublicQuestion_(rawQuestion);
 
-    if (isNoscaDocumentLookupQuestion_(validatedQuestion)) {
+    contextResolution =
+      resolveNoscaConversationContext_(
+        validatedQuestion,
+        normalizedRequest.context
+      );
+
+    resolvedQuestion =
+      contextResolution.resolvedQuestion ||
+      validatedQuestion;
+
+    noscaDebugLog_(
+      'Conversation context resolved',
+      {
+        requestId: requestId,
+        contextApplied:
+          contextResolution.contextApplied,
+        intent:
+          contextResolution.intent,
+        topicTerms:
+          contextResolution.context.topicTerms,
+        documentTypes:
+          contextResolution.context.documentTypes,
+        resolvedQuestionLength:
+          resolvedQuestion.length
+      }
+    );
+
+    if (
+      contextResolution.intent === 'document_lookup' ||
+      isNoscaDocumentLookupQuestion_(resolvedQuestion)
+    ) {
       const lookup = findNoscaIndexedDocuments_(
-        validatedQuestion
+        resolvedQuestion
       );
 
       const lookupElapsedMs = Date.now() - startedAt;
@@ -64,6 +107,8 @@ function askNosca(question) {
           responseMode: 'document_lookup',
           answer: lookupAnswer,
           sources: lookupSources,
+          conversationContext:
+            contextResolution.context,
           model: '',
           usage: {
             promptTokenCount: 0,
@@ -71,6 +116,9 @@ function askNosca(question) {
             totalTokenCount: 0
           },
           diagnostics: {
+            contextApplied:
+              contextResolution.contextApplied,
+            resolvedQuestion: resolvedQuestion,
             retrievalCandidateCount: lookup.totalMatches,
             contextChunkCount: 0,
             contextChars: 0,
@@ -97,7 +145,9 @@ function askNosca(question) {
             requestId: requestId,
             totalMatches: lookup.totalMatches,
             returned: lookupSources.length,
-            summary: lookup.summary
+            summary: lookup.summary,
+            contextApplied:
+              contextResolution.contextApplied
           }
         );
 
@@ -114,6 +164,8 @@ function askNosca(question) {
           'The file may not have been indexed yet, or the search terms may ' +
           'not match its indexed metadata.',
         sources: [],
+        conversationContext:
+          contextResolution.context,
         model: '',
         usage: {
           promptTokenCount: 0,
@@ -121,6 +173,9 @@ function askNosca(question) {
           totalTokenCount: 0
         },
         diagnostics: {
+          contextApplied:
+            contextResolution.contextApplied,
+          resolvedQuestion: resolvedQuestion,
           retrievalCandidateCount: 0,
           contextChunkCount: 0,
           contextChars: 0,
@@ -147,7 +202,7 @@ function askNosca(question) {
     }
 
     const retrieval = retrieveNoscaContext_(
-      validatedQuestion
+      resolvedQuestion
     );
 
     const sources = getNoscaRetrievedSources_(
@@ -166,6 +221,8 @@ function askNosca(question) {
           retrieval.totalContextChars,
         sourceCount:
           sources.length,
+        contextApplied:
+          contextResolution.contextApplied,
         warnings:
           retrieval.warnings || []
       }
@@ -200,6 +257,8 @@ function askNosca(question) {
           'question or check whether the relevant material has been added to ' +
           'the NOSCA knowledge source.',
         sources: [],
+        conversationContext:
+          contextResolution.context,
         model: '',
         usage: {
           promptTokenCount: 0,
@@ -207,6 +266,9 @@ function askNosca(question) {
           totalTokenCount: 0
         },
         diagnostics: {
+          contextApplied:
+            contextResolution.contextApplied,
+          resolvedQuestion: resolvedQuestion,
           retrievalCandidateCount:
             retrieval.candidates.length,
           contextChunkCount: 0,
@@ -231,6 +293,8 @@ function askNosca(question) {
         {
           requestId: requestId,
           questionLength: validatedQuestion.length,
+          contextApplied:
+            contextResolution.contextApplied,
           elapsedMs: noResult.elapsedMs
         }
       );
@@ -239,7 +303,7 @@ function askNosca(question) {
     }
 
     const generated = generateNoscaGroundedAnswer_(
-      validatedQuestion,
+      resolvedQuestion,
       retrieval
     );
 
@@ -259,9 +323,14 @@ function askNosca(question) {
           driveUrl: source.driveUrl
         };
       }),
+      conversationContext:
+        contextResolution.context,
       model: generated.model,
       usage: generated.usage,
       diagnostics: {
+        contextApplied:
+          contextResolution.contextApplied,
+        resolvedQuestion: resolvedQuestion,
         retrievalCandidateCount:
           retrieval.candidates.length,
         contextChunkCount:
@@ -290,6 +359,8 @@ function askNosca(question) {
       {
         requestId: requestId,
         questionLength: validatedQuestion.length,
+        contextApplied:
+          contextResolution.contextApplied,
         sourceCount: result.sources.length,
         model: result.model,
         tokenCount: result.usage.totalTokenCount,
@@ -306,7 +377,7 @@ function askNosca(question) {
       requestId: requestId,
       question:
         validatedQuestion ||
-        String(question || '').trim(),
+        rawQuestion.trim(),
       status: 'Failed',
       sources: [],
       responseTimeMs: elapsedMs,

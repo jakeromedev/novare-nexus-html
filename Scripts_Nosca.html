@@ -2,11 +2,15 @@
 (function () {
   "use strict";
 
+  const NOSCA_CONTEXT_STORAGE_KEY =
+    "onesca.nosca.conversationContext.v1";
+
   const state = {
     initialized: false,
     pending: false,
     previousFocus: null,
-    messages: []
+    messages: [],
+    conversationContext: null
   };
 
   const dom = {};
@@ -107,6 +111,9 @@
       setBusy(false);
       restoreFocus();
     });
+
+    state.conversationContext =
+      loadConversationContext();
 
     updateComposerState();
     autoSizeComposer();
@@ -223,7 +230,18 @@
     console.log(
       "[Ask NOSCA DEBUG] Sending question to Apps Script",
       {
-        questionLength: normalized.length
+        questionLength: normalized.length,
+        hasConversationContext:
+          Boolean(
+            state.conversationContext &&
+            Array.isArray(state.conversationContext.topicTerms) &&
+            state.conversationContext.topicTerms.length
+          ),
+        topic:
+          state.conversationContext &&
+          state.conversationContext.topicLabel
+            ? state.conversationContext.topicLabel
+            : ""
       }
     );
 
@@ -248,7 +266,10 @@
         setBusy(false);
         handleNoscaFailure(normalized, error);
       })
-      .askNosca(normalized);
+      .askNosca({
+        question: normalized,
+        context: state.conversationContext
+      });
   }
 
   function handleNoscaSuccess(question, result) {
@@ -256,6 +277,20 @@
       result && typeof result === "object"
         ? result
         : {};
+
+    if (
+      response.conversationContext &&
+      typeof response.conversationContext === "object"
+    ) {
+      state.conversationContext =
+        sanitizeClientConversationContext(
+          response.conversationContext
+        );
+
+      saveConversationContext(
+        state.conversationContext
+      );
+    }
 
     console.log(
       "[Ask NOSCA DEBUG] Backend response received",
@@ -267,6 +302,8 @@
           ? response.sources.length
           : 0,
         diagnostics: response.diagnostics || null,
+        conversationContext:
+          response.conversationContext || null,
         model: response.model || "",
         elapsedMs: Number(response.elapsedMs || 0)
       }
@@ -894,10 +931,121 @@
     });
   }
 
+  function sanitizeClientConversationContext(value) {
+    const source =
+      value && typeof value === "object"
+        ? value
+        : {};
+
+    const topicTerms =
+      Array.isArray(source.topicTerms)
+        ? source.topicTerms
+            .map(function (term) {
+              return String(term || "")
+                .toLowerCase()
+                .replace(/[^a-z0-9+#&.\-]/g, "")
+                .trim();
+            })
+            .filter(Boolean)
+            .slice(0, 12)
+        : [];
+
+    const documentTypes =
+      Array.isArray(source.documentTypes)
+        ? source.documentTypes
+            .map(function (type) {
+              return String(type || "").trim();
+            })
+            .filter(Boolean)
+            .slice(0, 4)
+        : [];
+
+    return {
+      version: 1,
+      topicTerms: topicTerms,
+      topicLabel:
+        String(source.topicLabel || "").slice(0, 160),
+      lastIntent:
+        source.lastIntent === "document_lookup"
+          ? "document_lookup"
+          : "knowledge",
+      documentTypes: documentTypes,
+      previousQuestion:
+        String(source.previousQuestion || "").slice(0, 500),
+      previousResolvedQuestion:
+        String(
+          source.previousResolvedQuestion || ""
+        ).slice(0, 1000),
+      updatedAt:
+        String(source.updatedAt || "").slice(0, 60)
+    };
+  }
+
+  function loadConversationContext() {
+    try {
+      const raw =
+        window.sessionStorage.getItem(
+          NOSCA_CONTEXT_STORAGE_KEY
+        );
+
+      if (!raw) return null;
+
+      return sanitizeClientConversationContext(
+        JSON.parse(raw)
+      );
+    } catch (error) {
+      console.warn(
+        "[Ask NOSCA] Conversation context could not be restored.",
+        error
+      );
+
+      clearStoredConversationContext();
+      return null;
+    }
+  }
+
+  function saveConversationContext(context) {
+    try {
+      if (
+        !context ||
+        !Array.isArray(context.topicTerms) ||
+        !context.topicTerms.length
+      ) {
+        clearStoredConversationContext();
+        return;
+      }
+
+      window.sessionStorage.setItem(
+        NOSCA_CONTEXT_STORAGE_KEY,
+        JSON.stringify(context)
+      );
+    } catch (error) {
+      console.warn(
+        "[Ask NOSCA] Conversation context could not be saved.",
+        error
+      );
+    }
+  }
+
+  function clearStoredConversationContext() {
+    try {
+      window.sessionStorage.removeItem(
+        NOSCA_CONTEXT_STORAGE_KEY
+      );
+    } catch (error) {
+      console.warn(
+        "[Ask NOSCA] Conversation context could not be cleared.",
+        error
+      );
+    }
+  }
+
   function clearConversation() {
     if (!initialize() || state.pending) return;
 
     state.messages = [];
+    state.conversationContext = null;
+    clearStoredConversationContext();
 
     dom.messages
       .querySelectorAll(".nosca-message")

@@ -1,0 +1,1936 @@
+<script>
+(function () {
+  "use strict";
+
+  const VALID_FILTERS = Object.freeze([
+    "all",
+    "pages",
+    "drive",
+    "folders",
+    "docs",
+    "sheets",
+    "slides",
+    "pdf"
+  ]);
+
+  const HEADER_FILTERS = Object.freeze([
+    "all",
+    "drive",
+    "docs",
+    "sheets",
+    "slides"
+  ]);
+
+  const MAX_SITE_RESULTS = 18;
+  const MAX_TOP_MATCHES = 6;
+  const MAX_GROUP_RESULTS = 24;
+
+  let requestSequence = 0;
+
+  function normalizeFilter(value) {
+    const normalized = String(value || "").trim().toLowerCase();
+    return VALID_FILTERS.indexOf(normalized) !== -1
+      ? normalized
+      : "all";
+  }
+
+  function normalizeQuery(value) {
+    return String(value || "")
+      .replace(/\s+/g, " ")
+      .trim()
+      .slice(0, 300);
+  }
+
+  function normalizeSearchText(value) {
+    return String(value || "")
+      .toLowerCase()
+      .replace(/[_/\\|()[\]{}:,;!?\"'`~*=<>]/g, " ")
+      .replace(/[^a-z0-9+#&.\-\s]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  function getRouteState() {
+    const raw = String(window.location.hash || "").replace(/^#/, "");
+    const questionIndex = raw.indexOf("?");
+    const route =
+      questionIndex === -1
+        ? raw
+        : raw.slice(0, questionIndex);
+
+    const params = new URLSearchParams(
+      questionIndex === -1
+        ? ""
+        : raw.slice(questionIndex + 1)
+    );
+
+    return {
+      route: route || "",
+      query: normalizeQuery(params.get("q") || ""),
+      filter: normalizeFilter(params.get("type") || "all"),
+      section: String(params.get("section") || "").trim()
+    };
+  }
+
+  function buildSearchHash(query, filter) {
+    const normalizedQuery = normalizeQuery(query);
+    const normalizedFilter = normalizeFilter(filter);
+    const params = new URLSearchParams();
+
+    if (normalizedQuery) {
+      params.set("q", normalizedQuery);
+    }
+
+    if (normalizedFilter !== "all") {
+      params.set("type", normalizedFilter);
+    }
+
+    const queryString = params.toString();
+
+    return "#search" + (queryString ? "?" + queryString : "");
+  }
+
+  function buildSiteTargetHash(route, anchor) {
+    const safeRoute =
+      String(route || "home").trim() || "home";
+
+    const safeAnchor =
+      String(anchor || "").trim();
+
+    const params = new URLSearchParams();
+
+    if (safeAnchor) {
+      params.set("section", safeAnchor);
+    }
+
+    const queryString = params.toString();
+
+    return (
+      "#" +
+      safeRoute +
+      (queryString ? "?" + queryString : "")
+    );
+  }
+
+  function navigate(query, filter) {
+    const nextHash =
+      buildSearchHash(query, filter);
+
+    if (window.location.hash === nextHash) {
+      window.dispatchEvent(
+        new Event("nexus-search-route-refresh")
+      );
+      return;
+    }
+
+    window.location.hash = nextHash;
+  }
+
+  function navigateToSiteResult(route, anchor) {
+    window.location.hash =
+      buildSiteTargetHash(route, anchor);
+  }
+
+  function getPageDom(pageRoot) {
+    return {
+      form:
+        pageRoot.querySelector("#search-page-form"),
+      input:
+        pageRoot.querySelector("#search-page-input"),
+      filters:
+        Array.from(
+          pageRoot.querySelectorAll(
+            "[data-search-page-filter]"
+          )
+        ),
+      summary:
+        pageRoot.querySelector("#search-results-summary"),
+      loading:
+        pageRoot.querySelector("#search-results-loading"),
+      empty:
+        pageRoot.querySelector("#search-results-empty"),
+      emptyTitle:
+        pageRoot.querySelector("#search-empty-title"),
+      emptyCopy:
+        pageRoot.querySelector("#search-empty-copy"),
+      error:
+        pageRoot.querySelector("#search-results-error"),
+      list:
+        pageRoot.querySelector("#search-results-list"),
+      srStatus:
+        pageRoot.querySelector("#search-results-sr-status")
+    };
+  }
+
+  function setFilterButtons(buttons, activeFilter) {
+    (buttons || []).forEach(function (button) {
+      const isActive =
+        button.dataset.searchPageFilter === activeFilter;
+
+      button.setAttribute(
+        "aria-pressed",
+        String(isActive)
+      );
+
+      if (isActive) {
+        button.setAttribute("aria-current", "true");
+      } else {
+        button.removeAttribute("aria-current");
+      }
+    });
+  }
+
+  function initialize(pageRoot) {
+    if (
+      !pageRoot ||
+      pageRoot.dataset.searchPageInitialized === "true"
+    ) {
+      syncFromLocation(pageRoot);
+      return;
+    }
+
+    const dom = getPageDom(pageRoot);
+
+    if (dom.form) {
+      dom.form.addEventListener(
+        "submit",
+        function (event) {
+          event.preventDefault();
+
+          const current = getRouteState();
+
+          navigate(
+            dom.input
+              ? dom.input.value
+              : current.query,
+            current.filter
+          );
+        }
+      );
+    }
+
+    dom.filters.forEach(function (button) {
+      button.addEventListener(
+        "click",
+        function () {
+          const current = getRouteState();
+
+          navigate(
+            dom.input
+              ? dom.input.value
+              : current.query,
+            button.dataset.searchPageFilter
+          );
+        }
+      );
+    });
+
+    window.addEventListener(
+      "nexus-search-route-refresh",
+      function () {
+        syncFromLocation(pageRoot);
+      }
+    );
+
+    pageRoot.dataset.searchPageInitialized = "true";
+    syncFromLocation(pageRoot);
+  }
+
+  function syncFromLocation(pageRoot) {
+    if (!pageRoot) return;
+
+    const routeState = getRouteState();
+    const dom = getPageDom(pageRoot);
+
+    if (
+      dom.input &&
+      dom.input.value !== routeState.query
+    ) {
+      dom.input.value = routeState.query;
+    }
+
+    setFilterButtons(
+      dom.filters,
+      routeState.filter
+    );
+
+    syncHeaderFromRoute(routeState);
+
+    if (!routeState.query) {
+      requestSequence += 1;
+      showInitialState(dom);
+      return;
+    }
+
+    runSearch(
+      pageRoot,
+      routeState
+    );
+  }
+
+  function syncHeaderFromRoute(routeState) {
+    const headerInput =
+      document.getElementById("global-search");
+
+    if (
+      headerInput &&
+      headerInput.value !== routeState.query
+    ) {
+      headerInput.value = routeState.query;
+    }
+
+    const headerFilter =
+      getHeaderFilterForRoute(routeState.filter);
+
+    const filterItems =
+      Array.from(
+        document.querySelectorAll("[data-filter]")
+      );
+
+    filterItems.forEach(function (item) {
+      item.setAttribute(
+        "aria-pressed",
+        String(item.dataset.filter === headerFilter)
+      );
+    });
+  }
+
+  function runSearch(pageRoot, routeState) {
+    const dom = getPageDom(pageRoot);
+    const requestId = ++requestSequence;
+    const siteResults =
+      searchSiteIndex(routeState.query);
+
+    clearResults(dom);
+    showLoading(dom, routeState);
+
+    if (routeState.filter === "pages") {
+      window.setTimeout(function () {
+        if (requestId !== requestSequence) return;
+
+        handlePagesOnlySuccess(
+          dom,
+          routeState,
+          siteResults
+        );
+      }, 0);
+
+      return;
+    }
+
+    if (
+      !window.google ||
+      !google.script ||
+      !google.script.run
+    ) {
+      if (
+        routeState.filter === "all" &&
+        siteResults.length
+      ) {
+        renderAllResults(
+          dom,
+          routeState,
+          siteResults,
+          [],
+          true
+        );
+        return;
+      }
+
+      showError(dom);
+      return;
+    }
+
+    google.script.run
+      .withSuccessHandler(function (response) {
+        if (requestId !== requestSequence) {
+          return;
+        }
+
+        handleDriveSearchSuccess(
+          dom,
+          routeState,
+          siteResults,
+          response
+        );
+      })
+      .withFailureHandler(function (error) {
+        if (requestId !== requestSequence) {
+          return;
+        }
+
+        console.error(
+          "[ONESCA Search] Search request failed",
+          error
+        );
+
+        if (
+          routeState.filter === "all" &&
+          siteResults.length
+        ) {
+          renderAllResults(
+            dom,
+            routeState,
+            siteResults,
+            [],
+            true
+          );
+          return;
+        }
+
+        showError(dom);
+      })
+      .searchNexus({
+        query: routeState.query,
+        filter: routeState.filter
+      });
+  }
+
+  function handlePagesOnlySuccess(
+    dom,
+    routeState,
+    siteResults
+  ) {
+    hideLoading(dom);
+
+    const count = siteResults.length;
+
+    setSummary(
+      dom,
+      count +
+        (count === 1
+          ? " page result"
+          : " page results") +
+        ' for “' +
+        routeState.query +
+        '”'
+    );
+
+    if (!count) {
+      showEmpty(
+        dom,
+        'No page results found for “' +
+          routeState.query +
+          '”',
+        "Try a page name, section name, offering, process, tool, or governance topic."
+      );
+      return;
+    }
+
+    hideEmptyAndError(dom);
+
+    renderGroupedResults(
+      dom.list,
+      [
+        {
+          title: "ONESCA",
+          count: count,
+          results: siteResults.slice(
+            0,
+            MAX_GROUP_RESULTS
+          ),
+          kind: "site"
+        }
+      ]
+    );
+  }
+
+  function handleDriveSearchSuccess(
+    dom,
+    routeState,
+    siteResults,
+    response
+  ) {
+    const data =
+      response && typeof response === "object"
+        ? response
+        : {};
+
+    const driveResults =
+      Array.isArray(data.results)
+        ? data.results
+        : [];
+
+    hideLoading(dom);
+
+    if (routeState.filter === "all") {
+      renderAllResults(
+        dom,
+        routeState,
+        siteResults,
+        driveResults,
+        false
+      );
+      return;
+    }
+
+    const count =
+      Number(
+        data.totalMatches ||
+        driveResults.length ||
+        0
+      );
+
+    setSummary(
+      dom,
+      count +
+        (count === 1
+          ? " result"
+          : " results") +
+        ' for “' +
+        routeState.query +
+        '”'
+    );
+
+    if (!driveResults.length) {
+      showEmpty(
+        dom,
+        'No results found for “' +
+          routeState.query +
+          '”',
+        getEmptyHelpText(
+          routeState.filter
+        )
+      );
+      return;
+    }
+
+    hideEmptyAndError(dom);
+
+    renderGroupedResults(
+      dom.list,
+      [
+        {
+          title: "DRIVE",
+          count: count,
+          results:
+            driveResults.slice(
+              0,
+              MAX_GROUP_RESULTS
+            ),
+          kind: "drive"
+        }
+      ]
+    );
+  }
+
+  function renderAllResults(
+    dom,
+    routeState,
+    siteResults,
+    driveResults,
+    driveUnavailable
+  ) {
+    hideLoading(dom);
+
+    const total =
+      siteResults.length +
+      driveResults.length;
+
+    let summary =
+      total +
+      (total === 1
+        ? " result"
+        : " results") +
+      ' for “' +
+      routeState.query +
+      '”';
+
+    if (driveUnavailable) {
+      summary +=
+        " · Some results may be unavailable";
+    }
+
+    setSummary(dom, summary);
+
+    if (!total) {
+      showEmpty(
+        dom,
+        'No results found for “' +
+          routeState.query +
+          '”',
+        "Try checking the spelling, using fewer words, or searching by a page, client, project, or resource name."
+      );
+      return;
+    }
+
+    hideEmptyAndError(dom);
+
+    const topMatches =
+      buildTopMatches(
+        siteResults,
+        driveResults
+      );
+
+    const topKeys = {};
+    topMatches.forEach(function (result) {
+      topKeys[getResultUniqueKey(result)] = true;
+    });
+
+    const remainingSite =
+      siteResults
+        .filter(function (result) {
+          return !topKeys[
+            getResultUniqueKey(result)
+          ];
+        })
+        .slice(0, MAX_GROUP_RESULTS);
+
+    const remainingDrive =
+      driveResults
+        .filter(function (result) {
+          return !topKeys[
+            getResultUniqueKey(result)
+          ];
+        })
+        .slice(0, MAX_GROUP_RESULTS);
+
+    const groups = [];
+
+    if (topMatches.length) {
+      groups.push({
+        title: "TOP MATCHES",
+        count: topMatches.length,
+        results: topMatches,
+        kind: "mixed"
+      });
+    }
+
+    if (remainingSite.length) {
+      groups.push({
+        title: "ONESCA",
+        count: siteResults.length,
+        results: remainingSite,
+        kind: "site"
+      });
+    }
+
+    if (remainingDrive.length) {
+      groups.push({
+        title: "DRIVE",
+        count: driveResults.length,
+        results: remainingDrive,
+        kind: "drive"
+      });
+    }
+
+    renderGroupedResults(
+      dom.list,
+      groups
+    );
+  }
+
+  function buildTopMatches(
+    siteResults,
+    driveResults
+  ) {
+    const combined = [];
+
+    (siteResults || []).forEach(function (result) {
+      combined.push({
+        source: "site",
+        result: result,
+        relevance:
+          Number(result.relevanceScore || 0)
+      });
+    });
+
+    (driveResults || []).forEach(function (result) {
+      combined.push({
+        source: "drive",
+        result: result,
+        relevance:
+          Number(result.relevanceScore || 0)
+      });
+    });
+
+    combined.sort(function (a, b) {
+      if (b.relevance !== a.relevance) {
+        return b.relevance - a.relevance;
+      }
+
+      // When scores tie, show an ONESCA navigation result before a Drive
+      // result so users can discover relevant workspace sections easily.
+      if (a.source !== b.source) {
+        return a.source === "site" ? -1 : 1;
+      }
+
+      return 0;
+    });
+
+    const selected = [];
+    let siteCount = 0;
+    let driveCount = 0;
+
+    combined.forEach(function (entry) {
+      if (selected.length >= MAX_TOP_MATCHES) {
+        return;
+      }
+
+      // Keep top matches useful across both sources where both exist.
+      if (
+        entry.source === "site" &&
+        siteCount >= 3 &&
+        driveResults.length
+      ) {
+        return;
+      }
+
+      if (
+        entry.source === "drive" &&
+        driveCount >= 4 &&
+        siteResults.length
+      ) {
+        return;
+      }
+
+      const result =
+        Object.assign(
+          {},
+          entry.result,
+          {
+            resultKind:
+              entry.source === "site"
+                ? "site"
+                : "drive"
+          }
+        );
+
+      selected.push(result);
+
+      if (entry.source === "site") {
+        siteCount += 1;
+      } else {
+        driveCount += 1;
+      }
+    });
+
+    return selected;
+  }
+
+  function getResultUniqueKey(result) {
+    if (
+      String(result.resultKind || "") === "site"
+    ) {
+      return (
+        "site:" +
+        String(result.route || "") +
+        ":" +
+        String(result.anchor || "")
+      );
+    }
+
+    return (
+      "drive:" +
+      String(result.id || result.driveUrl || result.name || "")
+    );
+  }
+
+  function searchSiteIndex(queryValue) {
+    const registry =
+      Array.isArray(window.NexusSiteSearchIndex)
+        ? window.NexusSiteSearchIndex
+        : [];
+
+    const query =
+      buildSiteSearchQuery(queryValue);
+
+    if (!query.terms.length) {
+      return [];
+    }
+
+    const candidates =
+      registry
+        .map(function (record, index) {
+          return scoreSiteRecord(
+            record,
+            query,
+            index
+          );
+        })
+        .filter(function (candidate) {
+          return (
+            candidate.score > 0 &&
+            candidate.coveragePass
+          );
+        })
+        .sort(function (a, b) {
+          if (b.score !== a.score) {
+            return b.score - a.score;
+          }
+
+          if (b.coverage !== a.coverage) {
+            return b.coverage - a.coverage;
+          }
+
+          return a.index - b.index;
+        });
+
+    const maxScore =
+      candidates.length
+        ? Math.max(
+            Number(candidates[0].score || 0),
+            1
+          )
+        : 1;
+
+    return candidates
+      .slice(0, MAX_SITE_RESULTS)
+      .map(function (candidate) {
+        const normalizedScore =
+          Math.max(
+            Math.min(
+              Number(candidate.score || 0) /
+                maxScore,
+              1
+            ),
+            0
+          );
+
+        const coverage =
+          Math.max(
+            Math.min(
+              Number(candidate.coverage || 0),
+              1
+            ),
+            0
+          );
+
+        const relevanceScore =
+          Math.round(
+            (
+              normalizedScore * 0.72 +
+              coverage * 0.28
+            ) * 100
+          );
+
+        return {
+          resultKind: "site",
+          route:
+            candidate.record.route,
+          pageTitle:
+            candidate.record.pageTitle,
+          sectionTitle:
+            candidate.record.sectionTitle,
+          anchor:
+            candidate.record.anchor,
+          description:
+            candidate.record.description,
+          relevanceScore:
+            relevanceScore,
+          score:
+            candidate.score,
+          coverage:
+            candidate.coverage,
+          matchedTerms:
+            candidate.matchedTerms
+        };
+      });
+  }
+
+  function buildSiteSearchQuery(value) {
+    const normalized =
+      normalizeSearchText(value);
+
+    const stopWords = {
+      a: true,
+      an: true,
+      and: true,
+      are: true,
+      for: true,
+      from: true,
+      give: true,
+      i: true,
+      in: true,
+      is: true,
+      me: true,
+      of: true,
+      on: true,
+      or: true,
+      show: true,
+      the: true,
+      to: true,
+      want: true,
+      where: true,
+      with: true
+    };
+
+    const terms =
+      normalized
+        .split(" ")
+        .filter(function (term) {
+          return (
+            term &&
+            !stopWords[term] &&
+            term.length >= 2
+          );
+        });
+
+    return {
+      normalized: normalized,
+      terms:
+        terms.filter(
+          function (
+            term,
+            index,
+            array
+          ) {
+            return array.indexOf(term) === index;
+          }
+        )
+    };
+  }
+
+  function scoreSiteRecord(
+    record,
+    query,
+    index
+  ) {
+    const page =
+      normalizeSearchText(
+        record.pageTitle
+      );
+
+    const section =
+      normalizeSearchText(
+        record.sectionTitle
+      );
+
+    const description =
+      normalizeSearchText(
+        record.description
+      );
+
+    const keywords =
+      normalizeSearchText(
+        Array.isArray(record.keywords)
+          ? record.keywords.join(" ")
+          : record.keywords
+      );
+
+    let score = 0;
+    const matchedTerms = [];
+
+    if (section === query.normalized) {
+      score += 80;
+    } else if (
+      query.normalized &&
+      section.indexOf(
+        query.normalized
+      ) !== -1
+    ) {
+      score += 42;
+    }
+
+    if (page === query.normalized) {
+      score += 64;
+    } else if (
+      query.normalized &&
+      page.indexOf(
+        query.normalized
+      ) !== -1
+    ) {
+      score += 30;
+    }
+
+    query.terms.forEach(function (term) {
+      let matched = false;
+
+      if (
+        containsSearchTerm(
+          section,
+          term
+        )
+      ) {
+        score += 20;
+        matched = true;
+      }
+
+      if (
+        containsSearchTerm(
+          page,
+          term
+        )
+      ) {
+        score += 16;
+        matched = true;
+      }
+
+      if (
+        containsSearchTerm(
+          keywords,
+          term
+        )
+      ) {
+        score += 11;
+        matched = true;
+      }
+
+      if (
+        containsSearchTerm(
+          description,
+          term
+        )
+      ) {
+        score += 6;
+        matched = true;
+      }
+
+      if (matched) {
+        matchedTerms.push(term);
+      }
+    });
+
+    const uniqueMatched =
+      matchedTerms.filter(
+        function (
+          term,
+          termIndex,
+          array
+        ) {
+          return (
+            array.indexOf(term) ===
+            termIndex
+          );
+        }
+      );
+
+    const coverage =
+      query.terms.length
+        ? uniqueMatched.length /
+          query.terms.length
+        : 0;
+
+    score +=
+      Math.max(
+        0,
+        uniqueMatched.length - 1
+      ) * 5;
+
+    const minimumMatched =
+      query.terms.length <= 1
+        ? 1
+        : Math.max(
+            1,
+            Math.ceil(
+              query.terms.length * 0.5
+            )
+          );
+
+    return {
+      record: record,
+      index: index,
+      score: score,
+      coverage:
+        Number(
+          coverage.toFixed(3)
+        ),
+      coveragePass:
+        uniqueMatched.length >=
+        minimumMatched,
+      matchedTerms:
+        uniqueMatched
+    };
+  }
+
+  function containsSearchTerm(
+    text,
+    term
+  ) {
+    const value =
+      String(text || "").trim();
+
+    const needle =
+      String(term || "").trim();
+
+    if (!value || !needle) {
+      return false;
+    }
+
+    return (
+      (
+        " " +
+        value +
+        " "
+      ).indexOf(
+        " " +
+        needle +
+        " "
+      ) !== -1 ||
+      value.indexOf(needle) !== -1
+    );
+  }
+
+  function renderGroupedResults(
+    container,
+    groups
+  ) {
+    if (!container) return;
+
+    container.replaceChildren();
+
+    groups.forEach(function (group) {
+      if (
+        !group.results ||
+        !group.results.length
+      ) {
+        return;
+      }
+
+      const section =
+        document.createElement("section");
+
+      section.className =
+        "global-search-result-group " +
+        "global-search-result-group--" +
+        String(
+          group.kind || "results"
+        );
+
+      const heading =
+        document.createElement("div");
+
+      heading.className =
+        "global-search-result-group-heading";
+
+      const title =
+        document.createElement("h3");
+
+      title.textContent =
+        group.title;
+
+      const count =
+        document.createElement("span");
+
+      count.textContent =
+        String(
+          group.count ||
+          group.results.length
+        );
+
+      heading.appendChild(title);
+      heading.appendChild(count);
+      section.appendChild(heading);
+
+      const items =
+        document.createElement("div");
+
+      items.className =
+        "global-search-result-group-items";
+
+      group.results.forEach(
+        function (result) {
+          const kind =
+            String(
+              result.resultKind ||
+              group.kind ||
+              ""
+            );
+
+          items.appendChild(
+            kind === "site"
+              ? createSiteResultCard(result)
+              : createDriveResultCard(result)
+          );
+        }
+      );
+
+      section.appendChild(items);
+      container.appendChild(section);
+    });
+  }
+
+  function createSiteResultCard(result) {
+    const card =
+      document.createElement("button");
+
+    card.type = "button";
+
+    card.className =
+      "global-search-result " +
+      "global-search-result--site";
+
+    card.dataset.resultType = "page";
+
+    card.setAttribute(
+      "aria-label",
+      "Open " +
+        String(
+          result.pageTitle ||
+          "ONESCA page"
+        ) +
+        ", " +
+        String(
+          result.sectionTitle ||
+          "section"
+        )
+    );
+
+    card.addEventListener(
+      "click",
+      function () {
+        navigateToSiteResult(
+          result.route,
+          result.anchor
+        );
+      }
+    );
+
+    const icon =
+      document.createElement("span");
+
+    icon.className =
+      "global-search-result-icon";
+
+    icon.setAttribute(
+      "aria-hidden",
+      "true"
+    );
+
+    icon.innerHTML =
+      getSiteResultIconSvg();
+
+    const body =
+      document.createElement("span");
+
+    body.className =
+      "global-search-result-body";
+
+    const topLine =
+      document.createElement("span");
+
+    topLine.className =
+      "global-search-result-topline";
+
+    const name =
+      document.createElement("strong");
+
+    name.className =
+      "global-search-result-name";
+
+    name.textContent =
+      String(
+        result.sectionTitle ||
+        result.pageTitle ||
+        "ONESCA"
+      );
+
+    const badge =
+      document.createElement("span");
+
+    badge.className =
+      "global-search-result-badge";
+
+    badge.textContent =
+      String(
+        result.pageTitle ||
+        "ONESCA"
+      );
+
+    topLine.appendChild(name);
+    topLine.appendChild(badge);
+
+    const context =
+      document.createElement("span");
+
+    context.className =
+      "global-search-result-context";
+
+    context.textContent =
+      String(
+        result.description || ""
+      );
+
+    const meta =
+      document.createElement("span");
+
+    meta.className =
+      "global-search-result-meta";
+
+    meta.textContent =
+      "Open section in ONESCA";
+
+    body.appendChild(topLine);
+    body.appendChild(context);
+    body.appendChild(meta);
+
+    const open =
+      document.createElement("span");
+
+    open.className =
+      "global-search-result-open";
+
+    open.setAttribute(
+      "aria-hidden",
+      "true"
+    );
+
+    open.innerHTML =
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
+      '<path d="M5 12h14M13 6l6 6-6 6"></path>' +
+      '</svg>';
+
+    card.appendChild(icon);
+    card.appendChild(body);
+    card.appendChild(open);
+
+    return card;
+  }
+
+  function createDriveResultCard(result) {
+    const url =
+      getSafeHttpUrl(
+        result.driveUrl
+      );
+
+    const card = url
+      ? document.createElement("a")
+      : document.createElement("article");
+
+    card.className =
+      "global-search-result";
+
+    card.dataset.resultType =
+      String(
+        result.itemType || "File"
+      ).toLowerCase();
+
+    if (url) {
+      card.href = url;
+      card.target = "_blank";
+      card.rel =
+        "noopener noreferrer";
+
+      card.setAttribute(
+        "aria-label",
+        "Open " +
+          String(
+            result.itemType ||
+            "file"
+          ).toLowerCase() +
+          " " +
+          String(
+            result.name || ""
+          )
+      );
+    }
+
+    const icon =
+      document.createElement("span");
+
+    icon.className =
+      "global-search-result-icon";
+
+    icon.setAttribute(
+      "aria-hidden",
+      "true"
+    );
+
+    icon.innerHTML =
+      getDriveResultIconSvg(result);
+
+    const body =
+      document.createElement("span");
+
+    body.className =
+      "global-search-result-body";
+
+    const topLine =
+      document.createElement("span");
+
+    topLine.className =
+      "global-search-result-topline";
+
+    const name =
+      document.createElement("strong");
+
+    name.className =
+      "global-search-result-name";
+
+    name.textContent =
+      String(
+        result.name || "Untitled"
+      );
+
+    const badge =
+      document.createElement("span");
+
+    badge.className =
+      "global-search-result-badge";
+
+    badge.textContent =
+      getDriveResultBadge(result);
+
+    topLine.appendChild(name);
+    topLine.appendChild(badge);
+
+    const context =
+      document.createElement("span");
+
+    context.className =
+      "global-search-result-context";
+
+    context.textContent =
+      getDriveResultContext(result);
+
+    const meta =
+      document.createElement("span");
+
+    meta.className =
+      "global-search-result-meta";
+
+    meta.textContent =
+      getDriveResultMeta(result);
+
+    body.appendChild(topLine);
+    body.appendChild(context);
+    body.appendChild(meta);
+
+    card.appendChild(icon);
+    card.appendChild(body);
+
+    if (url) {
+      const open =
+        document.createElement("span");
+
+      open.className =
+        "global-search-result-open";
+
+      open.setAttribute(
+        "aria-hidden",
+        "true"
+      );
+
+      open.innerHTML =
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
+        '<path d="M14 5h5v5M13 11l6-6M19 13v6H5V5h6"></path>' +
+        '</svg>';
+
+      card.appendChild(open);
+    }
+
+    return card;
+  }
+
+  function getDriveResultBadge(result) {
+    const itemType =
+      String(
+        result.itemType || ""
+      ).trim();
+
+    if (itemType === "Folder") {
+      return "Folder";
+    }
+
+    const documentType =
+      String(
+        result.documentType || ""
+      ).trim();
+
+    const format =
+      String(
+        result.fileFormat || ""
+      ).trim();
+
+    if (
+      documentType &&
+      format &&
+      documentType !== format
+    ) {
+      return (
+        documentType +
+        " · " +
+        format
+      );
+    }
+
+    return (
+      documentType ||
+      format ||
+      "File"
+    );
+  }
+
+  function getDriveResultContext(result) {
+    const hierarchy =
+      String(
+        result.hierarchyContext || ""
+      ).trim();
+
+    return (
+      hierarchy ||
+      String(
+        result.folderPath || ""
+      ).trim()
+    );
+  }
+
+  function getDriveResultMeta(result) {
+    const itemType =
+      String(
+        result.itemType || ""
+      ).trim();
+
+    if (itemType === "Folder") {
+      return "Open folder in Drive";
+    }
+
+    return (
+      String(
+        result.folderPath || ""
+      ).trim() ||
+      "Open file in Drive"
+    );
+  }
+
+  function getSiteResultIconSvg() {
+    return (
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
+      '<rect x="3" y="4" width="18" height="16" rx="2"></rect>' +
+      '<path d="M3 9h18M8 4v5"></path>' +
+      '<path d="M8 14h8M8 17h5"></path>' +
+      '</svg>'
+    );
+  }
+
+  function getDriveResultIconSvg(result) {
+    const itemType =
+      String(
+        result.itemType || ""
+      ).toLowerCase();
+
+    const documentType =
+      String(
+        result.documentType || ""
+      ).toLowerCase();
+
+    const format =
+      String(
+        result.fileFormat || ""
+      ).toLowerCase();
+
+    if (itemType === "folder") {
+      return (
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
+        '<path d="M3 6.5h6l2 2h10v9.5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"></path>' +
+        '<path d="M3 9h18"></path>' +
+        '</svg>'
+      );
+    }
+
+    if (
+      documentType === "ee" ||
+      documentType === "spreadsheet" ||
+      format.indexOf("sheet") !== -1 ||
+      format.indexOf("excel") !== -1 ||
+      format.indexOf("csv") !== -1
+    ) {
+      return (
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
+        '<rect x="4" y="3" width="16" height="18" rx="2"></rect>' +
+        '<path d="M4 9h16M9 9v12M14.5 9v12M4 15h16"></path>' +
+        '</svg>'
+      );
+    }
+
+    if (
+      documentType === "presentation" ||
+      format.indexOf("slides") !== -1 ||
+      format.indexOf("powerpoint") !== -1
+    ) {
+      return (
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
+        '<rect x="3" y="4" width="18" height="13" rx="2"></rect>' +
+        '<path d="M8 21l4-4 4 4M8 9h8M8 13h5"></path>' +
+        '</svg>'
+      );
+    }
+
+    if (
+      documentType === "proposal" ||
+      documentType === "document" ||
+      format.indexOf("doc") !== -1 ||
+      format.indexOf("word") !== -1
+    ) {
+      return (
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
+        '<path d="M6 3h9l4 4v14H6z"></path>' +
+        '<path d="M14 3v5h5M9 12h6M9 16h6"></path>' +
+        '</svg>'
+      );
+    }
+
+    if (
+      documentType === "pdf" ||
+      format === "pdf"
+    ) {
+      return (
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
+        '<path d="M6 3h9l4 4v14H6z"></path>' +
+        '<path d="M14 3v5h5"></path>' +
+        '<path d="M8 15h8"></path>' +
+        '</svg>'
+      );
+    }
+
+    return (
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
+      '<path d="M6 3h9l4 4v14H6z"></path>' +
+      '<path d="M14 3v5h5M9 13h6M9 17h6"></path>' +
+      '</svg>'
+    );
+  }
+
+  function getSafeHttpUrl(value) {
+    const raw =
+      String(value || "").trim();
+
+    if (!/^https?:\/\//i.test(raw)) {
+      return "";
+    }
+
+    try {
+      const parsed = new URL(raw);
+
+      if (
+        parsed.protocol !== "https:" &&
+        parsed.protocol !== "http:"
+      ) {
+        return "";
+      }
+
+      return parsed.href;
+    } catch (error) {
+      return "";
+    }
+  }
+
+  function applyPendingSectionTarget(
+    pageRoot,
+    route
+  ) {
+    const routeState =
+      getRouteState();
+
+    if (
+      !pageRoot ||
+      routeState.route !== route ||
+      !routeState.section
+    ) {
+      return;
+    }
+
+    const target =
+      pageRoot.querySelector(
+        "#" +
+        cssEscape(
+          routeState.section
+        )
+      );
+
+    if (!target) {
+      console.warn(
+        "[ONESCA Search] Section target not found:",
+        routeState.section
+      );
+      return;
+    }
+
+    window.setTimeout(
+      function () {
+        target.scrollIntoView({
+          behavior:
+            prefersReducedMotion()
+              ? "auto"
+              : "smooth",
+          block: "start"
+        });
+
+        target.classList.remove(
+          "search-target-highlight"
+        );
+
+        void target.offsetWidth;
+
+        target.classList.add(
+          "search-target-highlight"
+        );
+
+        const hadTabIndex =
+          target.hasAttribute(
+            "tabindex"
+          );
+
+        const previousTabIndex =
+          target.getAttribute(
+            "tabindex"
+          );
+
+        if (!hadTabIndex) {
+          target.setAttribute(
+            "tabindex",
+            "-1"
+          );
+        }
+
+        try {
+          target.focus({
+            preventScroll: true
+          });
+        } catch (error) {
+          target.focus();
+        }
+
+        window.setTimeout(
+          function () {
+            target.classList.remove(
+              "search-target-highlight"
+            );
+
+            if (!hadTabIndex) {
+              target.removeAttribute(
+                "tabindex"
+              );
+            } else if (
+              previousTabIndex !== null
+            ) {
+              target.setAttribute(
+                "tabindex",
+                previousTabIndex
+              );
+            }
+          },
+          1800
+        );
+      },
+      80
+    );
+  }
+
+  function cssEscape(value) {
+    if (
+      window.CSS &&
+      typeof window.CSS.escape ===
+        "function"
+    ) {
+      return window.CSS.escape(
+        String(value || "")
+      );
+    }
+
+    return String(value || "")
+      .replace(
+        /[^a-zA-Z0-9_-]/g,
+        function (character) {
+          return (
+            "\\" +
+            character
+          );
+        }
+      );
+  }
+
+  function prefersReducedMotion() {
+    return Boolean(
+      window.matchMedia &&
+      window.matchMedia(
+        "(prefers-reduced-motion: reduce)"
+      ).matches
+    );
+  }
+
+  function setSummary(
+    dom,
+    message
+  ) {
+    if (dom.summary) {
+      dom.summary.textContent =
+        message;
+    }
+
+    if (dom.srStatus) {
+      dom.srStatus.textContent =
+        message;
+    }
+  }
+
+  function showInitialState(dom) {
+    clearResults(dom);
+    hideLoading(dom);
+
+    setSummary(
+      dom,
+      "Enter a search to get started."
+    );
+
+    showEmpty(
+      dom,
+      "Search across ONESCA",
+      "Find ONESCA pages and sections alongside Drive folders and files."
+    );
+  }
+
+  function showLoading(
+    dom,
+    routeState
+  ) {
+    if (dom.error) {
+      dom.error.hidden = true;
+    }
+
+    if (dom.empty) {
+      dom.empty.hidden = true;
+    }
+
+    if (dom.loading) {
+      dom.loading.hidden = false;
+    }
+
+    setSummary(
+      dom,
+      'Finding matches for “' +
+        routeState.query +
+        '”…'
+    );
+  }
+
+  function hideLoading(dom) {
+    if (dom.loading) {
+      dom.loading.hidden = true;
+    }
+  }
+
+  function hideEmptyAndError(dom) {
+    if (dom.empty) {
+      dom.empty.hidden = true;
+    }
+
+    if (dom.error) {
+      dom.error.hidden = true;
+    }
+  }
+
+  function showEmpty(
+    dom,
+    title,
+    copy
+  ) {
+    hideLoading(dom);
+
+    if (dom.error) {
+      dom.error.hidden = true;
+    }
+
+    if (dom.empty) {
+      dom.empty.hidden = false;
+    }
+
+    if (dom.emptyTitle) {
+      dom.emptyTitle.textContent =
+        title;
+    }
+
+    if (dom.emptyCopy) {
+      dom.emptyCopy.textContent =
+        copy;
+    }
+
+    if (dom.list) {
+      dom.list.replaceChildren();
+    }
+  }
+
+  function showError(dom) {
+    hideLoading(dom);
+
+    if (dom.empty) {
+      dom.empty.hidden = true;
+    }
+
+    if (dom.error) {
+      dom.error.hidden = false;
+    }
+
+    if (dom.list) {
+      dom.list.replaceChildren();
+    }
+
+    setSummary(
+      dom,
+      "Search isn’t available right now."
+    );
+  }
+
+  function clearResults(dom) {
+    if (dom.list) {
+      dom.list.replaceChildren();
+    }
+
+    if (dom.error) {
+      dom.error.hidden = true;
+    }
+  }
+
+  function getEmptyHelpText(filter) {
+    if (filter === "folders") {
+      return "Try a client, project, opportunity, or folder name.";
+    }
+
+    if (filter === "docs") {
+      return "Try a broader client or project name, or switch to All.";
+    }
+
+    if (filter === "sheets") {
+      return "Try a client or project name, or search for EE, estimate, or workbook terms.";
+    }
+
+    if (filter === "slides") {
+      return "Try a client, project, deck, presentation, or roadmap term.";
+    }
+
+    if (filter === "pdf") {
+      return "Try a broader client, project, or document name.";
+    }
+
+    return "Try checking the spelling, using fewer words, or searching by client or project name.";
+  }
+
+  function getHeaderFilterForRoute(filter) {
+    const normalized =
+      normalizeFilter(filter);
+
+    return (
+      HEADER_FILTERS.indexOf(
+        normalized
+      ) !== -1
+        ? normalized
+        : "all"
+    );
+  }
+
+  window.NexusSearch =
+    Object.freeze({
+      navigate: navigate,
+      navigateToSiteResult:
+        navigateToSiteResult,
+      getRouteState:
+        getRouteState,
+      buildSearchHash:
+        buildSearchHash,
+      initialize:
+        initialize,
+      syncFromLocation:
+        syncFromLocation,
+      applyPendingSectionTarget:
+        applyPendingSectionTarget,
+      getHeaderFilterForRoute:
+        getHeaderFilterForRoute,
+      normalizeFilter:
+        normalizeFilter,
+      normalizeQuery:
+        normalizeQuery,
+      searchSiteIndex:
+        searchSiteIndex
+    });
+}());
+</script>

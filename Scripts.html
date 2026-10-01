@@ -22,7 +22,8 @@
     delivery:      { title: "Delivery",             templateId: "page-delivery-template",      showSearchFilters: true },
     governance:    { title: "Governance",           templateId: "page-governance-template",    showSearchFilters: true },
     tools:         { title: "Tools & Templates",    templateId: "page-tools-template",         showSearchFilters: true },
-    support:       { title: "Help & Support",       templateId: "page-support-template",       showSearchFilters: true }
+    support:       { title: "Help & Support",       templateId: "page-support-template",       showSearchFilters: true },
+    search:        { title: "Search",               templateId: "page-search-template",        showSearchFilters: true }
   };
 
   // 3. CURRENT USER FALLBACK
@@ -40,6 +41,7 @@
     sidebarClose: document.getElementById("sidebar-close"),
     content: document.getElementById("nexus-content"),
     pageMount: document.getElementById("page-mount"),
+    searchForm: document.getElementById("global-search-form"),
     search: document.getElementById("global-search"),
     filters: document.getElementById("search-filters"),
     navItems: Array.from(document.querySelectorAll("[data-route]")),
@@ -4330,6 +4332,13 @@
     if (route === "governance") initializeGovernancePage(wrapper);
     if (route === "tools") initializeToolsPage(wrapper);
     if (route === "support") initializeSupportPage(wrapper);
+    if (
+      route === "search" &&
+      window.NexusSearch &&
+      typeof window.NexusSearch.initialize === "function"
+    ) {
+      window.NexusSearch.initialize(wrapper);
+    }
     return wrapper;
   }
 
@@ -4349,6 +4358,28 @@
     if (route === "governance" && activePage) retryFailedGovernanceAssets(activePage);
     if (route === "tools" && activePage) retryFailedToolsAssets(activePage);
     if (route === "support" && activePage) retryFailedSupportAssets(activePage);
+    if (
+      route === "search" &&
+      activePage &&
+      window.NexusSearch &&
+      typeof window.NexusSearch.syncFromLocation === "function"
+    ) {
+      window.NexusSearch.syncFromLocation(activePage);
+
+      const searchRouteState = window.NexusSearch.getRouteState();
+      if (dom.search) dom.search.value = searchRouteState.query || "";
+      setSearchFilter(
+        window.NexusSearch.getHeaderFilterForRoute(searchRouteState.filter)
+      );
+    }
+
+    if (
+      activePage &&
+      window.NexusSearch &&
+      typeof window.NexusSearch.applyPendingSectionTarget === "function"
+    ) {
+      window.NexusSearch.applyPendingSectionTarget(activePage, route);
+    }
 
     const hasPageHero = Boolean(activePage && activePage.querySelector("[data-page-hero]"));
     dom.app.classList.toggle("hero-route", hasPageHero);
@@ -4372,7 +4403,8 @@
   }
 
   function handleRouteChange(focusContent) {
-    const requested = window.location.hash.slice(1);
+    const rawHash = window.location.hash.slice(1);
+    const requested = rawHash.split("?")[0];
     const route = Object.prototype.hasOwnProperty.call(routes, requested)
       ? requested
       : config.defaultRoute;
@@ -5288,6 +5320,26 @@
         setSearchFilter(item.dataset.filter);
       });
     });
+
+    if (dom.searchForm) {
+      dom.searchForm.addEventListener("submit", function (event) {
+        event.preventDefault();
+
+        const query = dom.search ? dom.search.value.trim() : "";
+
+        if (!query) {
+          focusGlobalSearch();
+          return;
+        }
+
+        if (
+          window.NexusSearch &&
+          typeof window.NexusSearch.navigate === "function"
+        ) {
+          window.NexusSearch.navigate(query, state.filter);
+        }
+      });
+    }
 
     if (dom.toggle) dom.toggle.addEventListener("click", toggleSidebar);
     if (dom.sidebarClose) dom.sidebarClose.addEventListener("click", function () { setMobileSidebar(false, true); });

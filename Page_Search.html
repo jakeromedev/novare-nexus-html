@@ -1,0 +1,90 @@
+<section class="search-page" aria-labelledby="search-page-title">
+  <div class="search-page-shell">
+    <header class="search-page-header">
+      <div class="search-page-heading">
+        <span class="section-label">GLOBAL SEARCH</span>
+        <h1 id="search-page-title" data-page-title tabindex="-1">Search ONESCA</h1>
+        <p>Find the right ONESCA page, section, folder, document, template, or presentation from one place.</p>
+      </div>
+
+      <form id="search-page-form" class="search-page-form" role="search" novalidate>
+        <span class="search-page-field">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="10.5" cy="10.5" r="6.5"></circle>
+            <path d="m16 16 5 5"></path>
+          </svg>
+          <input
+            id="search-page-input"
+            type="search"
+            aria-label="Search ONESCA"
+            placeholder="Search knowledge, templates, playbooks, tools..."
+            autocomplete="off"
+          >
+          <button class="search-page-submit" type="submit" aria-label="Search">
+            <span>Search</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M5 12h14M13 6l6 6-6 6"></path>
+            </svg>
+          </button>
+        </span>
+      </form>
+
+      <div id="search-page-filters" class="search-page-filters" role="group" aria-label="Search result filters">
+        <button type="button" class="search-page-filter" data-search-page-filter="all" aria-pressed="true">All</button>
+        <button type="button" class="search-page-filter" data-search-page-filter="pages" aria-pressed="false">Pages</button>
+        <button type="button" class="search-page-filter" data-search-page-filter="drive" aria-pressed="false">Drive</button>
+        <button type="button" class="search-page-filter" data-search-page-filter="folders" aria-pressed="false">Folders</button>
+        <button type="button" class="search-page-filter" data-search-page-filter="docs" aria-pressed="false">Docs</button>
+        <button type="button" class="search-page-filter" data-search-page-filter="sheets" aria-pressed="false">Sheets</button>
+        <button type="button" class="search-page-filter" data-search-page-filter="slides" aria-pressed="false">Slides</button>
+        <button type="button" class="search-page-filter" data-search-page-filter="pdf" aria-pressed="false">PDF</button>
+      </div>
+    </header>
+
+    <section class="search-results-panel" aria-labelledby="search-results-title">
+      <div class="search-results-toolbar">
+        <div>
+          <h2 id="search-results-title">Results</h2>
+          <p id="search-results-summary">Enter a search to get started.</p>
+          <span id="search-results-sr-status" class="sr-only" role="status" aria-live="polite" aria-atomic="true">Enter a search to get started.</span>
+        </div>
+      </div>
+
+      <div id="search-results-loading" class="search-results-state" hidden>
+        <span class="search-results-spinner" aria-hidden="true"></span>
+        <div>
+          <strong>Finding matches…</strong>
+          <span>Looking for the most relevant results.</span>
+        </div>
+      </div>
+
+      <div id="search-results-empty" class="search-results-state search-results-empty">
+        <span class="search-results-state-icon" aria-hidden="true">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="10.5" cy="10.5" r="6.5"></circle>
+            <path d="m16 16 5 5"></path>
+          </svg>
+        </span>
+        <div>
+          <strong id="search-empty-title">Search across ONESCA</strong>
+          <span id="search-empty-copy">Search across ONESCA pages and sections, plus Drive folders and files.</span>
+        </div>
+      </div>
+
+      <div id="search-results-error" class="search-results-state search-results-error" hidden role="alert">
+        <span class="search-results-state-icon" aria-hidden="true">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="9"></circle>
+            <path d="M12 7v6M12 17h.01"></path>
+          </svg>
+        </span>
+        <div>
+          <strong>Search isn’t available right now.</strong>
+          <span>Please try again.</span>
+        </div>
+      </div>
+
+      <div id="search-results-list" class="search-results-list" aria-live="polite"></div>
+    </section>
+  </div>
+</section>

@@ -1,8 +1,8 @@
       <header id="nexus-nav-header" class="nexus-nav-header shadow-sm" data-global-nav-header>
         <button id="sidebar-toggle" class="icon-button sidebar-toggle" type="button" aria-label="Open navigation" aria-controls="nexus-sidebar" aria-expanded="false"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
-        <div class="global-search" role="search">
+        <form id="global-search-form" class="global-search" role="search" novalidate>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg>
-          <input id="global-search" type="search" aria-keyshortcuts="Control+k Meta+k" aria-label="Search Nexus" placeholder="Search knowledge, templates, playbooks, tools, and more..." autocomplete="off">
+          <input id="global-search" type="search" aria-keyshortcuts="Control+k Meta+k" aria-label="Search ONESCA" placeholder="Search knowledge, templates, playbooks, tools, and more..." autocomplete="off">
           <kbd class="search-keycap" aria-hidden="true">Ctrl K</kbd>
           <div id="search-filters" class="search-filters" role="group" aria-label="Search filters">
             <button class="pill filter-chip" type="button" data-filter="all" aria-pressed="true"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#0068F5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 9 9-6 9 6-9 6Zm0 5 9 6 9-6"/></svg>All</button>
@@ -11,7 +11,7 @@
             <button class="pill filter-chip" type="button" data-filter="sheets" aria-pressed="false"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#13A765" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3h10l4 4v14H5ZM14 3v5h5M8 11h8v7H8Zm4 0v7M8 14h8"/></svg>Sheets</button>
             <button class="pill filter-chip" type="button" data-filter="slides" aria-pressed="false"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#FF9A14" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3h10l4 4v14H5ZM14 3v5h5M8 11h8v6H8Z"/></svg>Slides</button>
           </div>
-        </div>
+        </form>
         <div class="topbar-controls" role="group" aria-label="User controls">
           <button class="icon-button" type="button" aria-label="Help — coming soon" aria-disabled="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9 9a3 3 0 0 1 6 0c0 2-3 2-3 5m0 3h.01"/></svg></button>
           <button class="icon-button" type="button" aria-label="Notifications — coming soon" aria-disabled="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg><span class="notification-dot" aria-hidden="true"></span></button>

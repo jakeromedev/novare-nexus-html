@@ -23,14 +23,20 @@
         <form id="home-ai-form" class="home-ai-form">
           <div class="home-ai-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5ZM20 2v4m-2-2h4"/></svg></div>
           <div class="home-ai-field">
-            <label id="home-ai-title" class="home-ai-label" for="home-ai-input">Ask Nexus <span class="home-ai-beta">BETA</span></label>
-            <input id="home-ai-input" class="home-ai-input" type="text" placeholder="Find templates, playbooks, insights or ask a question..." autocomplete="off" maxlength="2000" aria-describedby="home-ai-status">
+            <div class="home-ai-heading-row">
+              <label id="home-ai-title" class="home-ai-label" for="home-ai-input">Ask NOSCA <span class="home-ai-beta">BETA</span></label>
+              <span class="home-ai-index-hint">Search the NOSCA index</span>
+            </div>
+            <div class="home-ai-input-shell">
+              <svg class="home-ai-input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+              <input id="home-ai-input" class="home-ai-input" type="text" placeholder="Ask about a client, project, proposal, EE, deck or offering..." autocomplete="off" maxlength="2000" aria-describedby="home-ai-status">
+            </div>
           </div>
-          <button class="icon-button home-ai-send" type="submit" aria-label="Send Ask Nexus prompt"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 3 18 9-18 9 4-9Zm4 9h14"/></svg></button>
+          <button class="icon-button home-ai-send" type="submit" aria-label="Send Ask NOSCA prompt" title="Ask NOSCA"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 3 18 9-18 9 4-9Zm4 9h14"/></svg></button>
         </form>
         <div class="home-ai-actions">
-          <div id="home-ai-track" class="home-ai-track" role="group" aria-label="Suggested Ask Nexus actions"></div>
-          <button id="home-ai-next" class="icon-button home-ai-next" type="button" aria-label="Next suggested action" aria-controls="home-ai-track"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></button>
+          <div id="home-ai-track" class="home-ai-track" role="group" aria-label="Quick Ask NOSCA searches"></div>
+          <button id="home-ai-next" class="icon-button home-ai-next" type="button" aria-label="Next Ask NOSCA shortcut" aria-controls="home-ai-track"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></button>
         </div>
         <p id="home-ai-status" class="home-ai-status" role="status" aria-live="polite"></p>
       </section>

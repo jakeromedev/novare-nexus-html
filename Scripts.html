@@ -3962,20 +3962,36 @@
   }
 
   const aiActionIcons = [
-    '<path d="M5 3h10l4 4v14H5ZM14 3v5h5M8 12h2v6H8Zm5-2h2v8h-2Z"/>',
-    '<path d="M4 5h7v6H4Zm9 0h7v6h-7ZM4 13h7v6H4Zm9 0h7v6h-7Z"/>',
-    '<path d="m8 3 4 4-4 4M12 7H3m13 6-4 4 4 4m-4-4h9"/>',
-    '<path d="M9 18h6m-5 3h4M8 14a6 6 0 1 1 8 0l-1 3H9Z"/>'
+    '<path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6M9 13h8M9 17h6"/>',
+    '<rect x="5" y="2" width="14" height="20" rx="2"/><path d="M8 6h8M8 10h2m3 0h2m-7 4h2m3 0h2m-7 4h2m3 0h2"/>',
+    '<rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4M7 8h10M7 11h7"/>',
+    '<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H11v17H6.5A2.5 2.5 0 0 0 4 22z"/><path d="M20 5.5A2.5 2.5 0 0 0 17.5 3H13v17h4.5A2.5 2.5 0 0 1 20 22z"/><circle cx="17" cy="8" r="2.5"/><path d="m19 10 2 2"/>'
   ];
 
   // Phase 4: Home content is centralized so Apps Script / Sheets can replace
   // these arrays later without requiring the HTML structure to be rewritten.
   const homePageData = {
     aiActions: [
-      "Summarize a document",
-      "Find a template",
-      "Compare offerings",
-      "Create a playbook"
+      {
+        id: "proposal",
+        label: "Find a proposal",
+        draft: "Find proposals for "
+      },
+      {
+        id: "ee",
+        label: "Find an EE",
+        draft: "Find EEs for "
+      },
+      {
+        id: "presentation",
+        label: "Find a presentation",
+        draft: "Find presentations for "
+      },
+      {
+        id: "client-project",
+        label: "Search a client / project",
+        draft: "Find files for "
+      }
     ],
     quickAccess: [
       {
@@ -4107,9 +4123,9 @@
     ],
     help: [
       {
-        id: "ask-nexus",
-        title: "Ask Nexus (AI Assistant)",
-        description: "Get quick answers, find resources, and discover content",
+        id: "ask-nosca",
+        title: "Ask NOSCA (AI Assistant)",
+        description: "Search indexed proposals, EEs, presentations, and project resources",
         theme: "blue",
         action: "open-nosca",
         icon: '<path d="m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5ZM20 2v4m-2-2h4"/>'
@@ -4537,6 +4553,134 @@
     list.dataset.rendered = "true";
   }
 
+  function getHomeAiTopicFromDraft(value) {
+    const current = String(value || "").trim();
+    if (!current) return "";
+
+    for (let index = 0; index < homePageData.aiActions.length; index += 1) {
+      const starter = String(homePageData.aiActions[index].draft || "").trim();
+      if (starter && current.toLowerCase().indexOf(starter.toLowerCase()) === 0) {
+        return current.slice(starter.length).trim();
+      }
+    }
+
+    return current;
+  }
+
+  function buildHomeAiActionDraft(action, currentValue) {
+    const starter = String(action && action.draft || "");
+    const topic = getHomeAiTopicFromDraft(currentValue);
+    return topic ? starter + topic : starter;
+  }
+
+  function pulseHomeAiInput(form, inputShell) {
+    if (!form || !inputShell) return;
+
+    form.classList.remove("is-receiving-suggestion");
+    inputShell.classList.remove("is-filled-by-suggestion");
+
+    // Restart the CSS animations even when users choose shortcuts quickly.
+    void inputShell.offsetWidth;
+
+    form.classList.add("is-receiving-suggestion");
+    inputShell.classList.add("is-filled-by-suggestion");
+
+    window.setTimeout(function () {
+      form.classList.remove("is-receiving-suggestion");
+      inputShell.classList.remove("is-filled-by-suggestion");
+    }, 760);
+  }
+
+  function setHomeAiDraft(form, input, inputShell, draft) {
+    input.value = String(draft || "");
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    pulseHomeAiInput(form, inputShell);
+    input.focus();
+
+    if (typeof input.setSelectionRange === "function") {
+      input.setSelectionRange(input.value.length, input.value.length);
+    }
+  }
+
+  function animateHomeAiSuggestion(button, form, input, inputShell, draft) {
+    if (!input) return;
+
+    if (!button || !inputShell) {
+      setHomeAiDraft(form, input, inputShell, draft);
+      return;
+    }
+
+    const reducedMotion = Boolean(
+      window.matchMedia &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    );
+
+    button.classList.remove("is-activating");
+    void button.offsetWidth;
+    button.classList.add("is-activating");
+
+    window.setTimeout(function () {
+      button.classList.remove("is-activating");
+    }, 520);
+
+    if (
+      reducedMotion ||
+      typeof button.animate !== "function" ||
+      !document.body
+    ) {
+      setHomeAiDraft(form, input, inputShell, draft);
+      return;
+    }
+
+    const startRect = button.getBoundingClientRect();
+    const endRect = inputShell.getBoundingClientRect();
+    const label = button.querySelector("span");
+    const flyer = document.createElement("span");
+
+    flyer.className = "home-ai-suggestion-flyer";
+    flyer.textContent = label ? label.textContent : "Ask NOSCA";
+    flyer.style.left = startRect.left + "px";
+    flyer.style.top = startRect.top + "px";
+    flyer.style.width = startRect.width + "px";
+    document.body.appendChild(flyer);
+
+    const deltaX =
+      endRect.left + Math.min(endRect.width * 0.45, 180) -
+      (startRect.left + startRect.width / 2);
+    const deltaY =
+      endRect.top + endRect.height / 2 -
+      (startRect.top + startRect.height / 2);
+
+    const animation = flyer.animate(
+      [
+        {
+          transform: "translate3d(0, 0, 0) scale(1)",
+          opacity: 1
+        },
+        {
+          transform:
+            "translate3d(" + deltaX + "px, " + deltaY + "px, 0) scale(.72)",
+          opacity: 0.08
+        }
+      ],
+      {
+        duration: 420,
+        easing: "cubic-bezier(.22,.8,.26,1)",
+        fill: "forwards"
+      }
+    );
+
+    window.setTimeout(function () {
+      setHomeAiDraft(form, input, inputShell, draft);
+    }, 245);
+
+    Promise.resolve(animation.finished)
+      .catch(function () {})
+      .then(function () {
+        if (flyer.parentNode) flyer.parentNode.removeChild(flyer);
+      });
+  }
+
   function initializeHomePage(pageRoot) {
     if (!pageRoot || pageRoot.dataset.pageInitialized === "true") return;
 
@@ -4560,24 +4704,45 @@
     const status = pageRoot.querySelector("#home-ai-status");
     const track = pageRoot.querySelector("#home-ai-track");
     const form = pageRoot.querySelector("#home-ai-form");
+    const inputShell = pageRoot.querySelector(".home-ai-input-shell");
     const next = pageRoot.querySelector("#home-ai-next");
 
-    if (!input || !status || !track || !form || !next) return;
+    if (!input || !status || !track || !form || !inputShell || !next) return;
 
-    homePageData.aiActions.forEach(function (label, index) {
+    function updateHomeAiComposerState() {
+      form.classList.toggle("has-query", Boolean(input.value.trim()));
+    }
+
+    input.addEventListener("input", function () {
+      status.textContent = "";
+      updateHomeAiComposerState();
+    });
+
+    homePageData.aiActions.forEach(function (action, index) {
       const button = document.createElement("button");
       button.type = "button";
       button.className = "button home-ai-action";
+      button.dataset.homeAiAction = action.id;
+      button.setAttribute(
+        "aria-label",
+        action.label + ". Add this search starter to Ask NOSCA."
+      );
       button.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + aiActionIcons[index] + '</svg>';
 
       const labelNode = document.createElement("span");
-      labelNode.textContent = label;
+      labelNode.textContent = action.label;
       button.appendChild(labelNode);
 
       button.addEventListener("click", function () {
-        input.value = label;
+        const draft = buildHomeAiActionDraft(action, input.value);
         status.textContent = "";
-        input.focus();
+        animateHomeAiSuggestion(
+          button,
+          form,
+          input,
+          inputShell,
+          draft
+        );
       });
 
       track.appendChild(button);
@@ -4588,18 +4753,20 @@
 
       const question = input.value.trim();
 
+      status.textContent = "";
+
       if (!question) {
-        status.textContent = "Enter a question or choose a suggested action to get started.";
-        input.focus();
+        openNoscaChat({ focus: true });
         return;
       }
 
-      status.textContent = "";
       openNoscaChat({
         draft: question,
         submit: true
       });
     });
+
+    updateHomeAiComposerState();
 
     next.addEventListener("click", function () {
       const buttons = Array.from(track.querySelectorAll("button"));

@@ -18950,4 +18950,1113 @@
       }
     }
 
+
+    /* =========================================================
+       ONESCA — RESPONSIVE MOBILE SHELL + HOME HERO V3
+       Single-row header, static filter dropdown, full-bleed hero.
+       ========================================================= */
+
+    /* Static mobile filter trigger is mobile-only. */
+    .mobile-filter-trigger {
+      display: none;
+    }
+
+    .search-filter-options {
+      display: flex;
+      align-items: center;
+      flex-wrap: nowrap;
+      gap: 3px;
+      min-width: 0;
+    }
+
+    /* Preserve the previous desktop preference: profile before search. */
+    @media (min-width: 768px) {
+      #nexus-nav-header > .sidebar-toggle {
+        order: 0;
+      }
+
+      #nexus-nav-header > .user-profile--header-left {
+        order: 1;
+      }
+
+      #nexus-nav-header > .global-search {
+        order: 2;
+      }
+    }
+
+    @media (max-width: 767px) {
+      :root {
+        --content-padding: 14px;
+      }
+
+      #nexus-app {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      /* ---------- MOBILE DRAWER ---------- */
+      .sidebar-overlay {
+        z-index: 140;
+        background: rgb(5 20 43 / 58%);
+        backdrop-filter: blur(2px);
+        -webkit-backdrop-filter: blur(2px);
+      }
+
+      #nexus-sidebar {
+        position: fixed;
+        inset: 0 auto 0 0;
+        z-index: 150;
+        width: min(320px, calc(100vw - 28px));
+        max-width: calc(100vw - 28px);
+        height: 100vh;
+        height: 100dvh;
+        overflow: hidden;
+        padding:
+          max(8px, env(safe-area-inset-top))
+          14px
+          max(12px, env(safe-area-inset-bottom));
+        gap: 8px;
+        transform: translate3d(-100%, 0, 0);
+        visibility: hidden;
+        box-shadow: 18px 0 42px rgb(0 12 38 / 34%);
+        transition:
+          transform 220ms cubic-bezier(.22, .72, .24, 1),
+          visibility 0s linear 220ms;
+      }
+
+      #nexus-app.mobile-open #nexus-sidebar {
+        visibility: visible;
+        transform: translate3d(0, 0, 0);
+        transition-delay: 0s;
+      }
+
+      #nexus-sidebar .sidebar-scroll {
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow-y: auto;
+        overflow-x: hidden;
+        overscroll-behavior: contain;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      #nexus-sidebar .nosca-launcher {
+        position: relative;
+        right: auto;
+        bottom: auto;
+        flex: 0 0 auto;
+        width: 100%;
+        min-width: 0;
+        margin-top: 4px;
+      }
+
+      /* ---------- HEADER: EXACTLY ONE ROW ---------- */
+      #nexus-nav-header,
+      #nexus-app.hero-route #nexus-nav-header {
+        position: sticky;
+        top: 0;
+        z-index: 40;
+
+        display: flex !important;
+        flex-flow: row nowrap !important;
+        align-items: center !important;
+
+        width: 100%;
+        min-width: 0;
+        min-height: 60px;
+        height: 60px;
+
+        margin: 0 0 -60px !important;
+        padding: 8px 0 !important;
+        gap: 6px !important;
+
+        border: 0 !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+      }
+
+      #nexus-nav-header > .sidebar-toggle {
+        order: 1;
+        display: inline-flex !important;
+        flex: 0 0 44px !important;
+
+        width: 44px !important;
+        min-width: 44px !important;
+        height: 44px !important;
+        min-height: 44px !important;
+
+        margin: 0 !important;
+        padding: 0 !important;
+
+        border-radius: 0 12px 12px 0 !important;
+        border: 1px solid rgb(184 217 244 / 96%) !important;
+        background: rgb(255 255 255 / 95%) !important;
+        box-shadow: 0 5px 14px rgb(5 52 110 / 11%) !important;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+      }
+
+      #nexus-nav-header > .global-search,
+      #nexus-app.hero-route #nexus-nav-header > .global-search {
+        order: 2;
+
+        display: flex !important;
+        flex: 1 1 auto !important;
+        align-items: center !important;
+
+        width: auto !important;
+        min-width: 0 !important;
+        max-width: none !important;
+        height: 42px !important;
+        min-height: 42px !important;
+
+        margin: 0 !important;
+        padding: 0 7px !important;
+        gap: 6px !important;
+
+        overflow: visible !important;
+        flex-wrap: nowrap !important;
+
+        border: 1px solid rgb(184 217 244 / 96%) !important;
+        border-radius: 12px !important;
+        background: rgb(255 255 255 / 95%) !important;
+        box-shadow: 0 5px 14px rgb(5 52 110 / 11%) !important;
+        backdrop-filter: blur(10px) !important;
+        -webkit-backdrop-filter: blur(10px) !important;
+      }
+
+      #nexus-nav-header .global-search-icon {
+        flex: 0 0 17px;
+        width: 17px;
+        height: 17px;
+      }
+
+      #nexus-nav-header > .global-search input {
+        display: block !important;
+        flex: 1 1 0 !important;
+
+        width: 100% !important;
+        min-width: 0 !important;
+        height: 30px !important;
+
+        margin: 0 !important;
+        padding: 0 !important;
+
+        font-size: .69rem !important;
+        line-height: 1.2;
+      }
+
+      #nexus-nav-header .search-keycap {
+        display: none !important;
+      }
+
+      /* ---------- FILTER DROPDOWN INSIDE SEARCH ---------- */
+      #nexus-nav-header .search-filters {
+        position: relative;
+        display: block !important;
+        flex: 0 0 auto !important;
+
+        width: auto !important;
+        min-width: 0 !important;
+        height: 30px;
+
+        margin: 0 !important;
+        padding: 0 !important;
+
+        overflow: visible !important;
+      }
+
+      #nexus-nav-header .mobile-filter-trigger {
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
+
+        min-width: 54px;
+        max-width: 68px;
+        height: 30px;
+
+        margin: 0;
+        padding: 0 6px;
+        gap: 3px;
+
+        border: 1px solid #D4E6F5;
+        border-radius: 9px;
+
+        color: #12498B;
+        background: #F4FAFF;
+
+        font: inherit;
+        font-size: .61rem;
+        font-weight: 650;
+        white-space: nowrap;
+        cursor: pointer;
+      }
+
+      #nexus-nav-header .search-filter-options {
+        position: absolute;
+        top: calc(100% + 7px);
+        right: 0;
+        z-index: 120;
+
+        display: none;
+        min-width: 140px;
+
+        padding: 6px;
+        gap: 3px;
+
+        border: 1px solid #D5E5F3;
+        border-radius: 12px;
+
+        background: rgb(255 255 255 / 99%);
+        box-shadow: 0 14px 34px rgb(6 38 86 / 18%);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+      }
+
+      #nexus-nav-header .search-filter-options.is-open {
+        display: grid;
+      }
+
+      #nexus-nav-header .search-filter-options .filter-chip {
+        display: inline-flex;
+        justify-content: flex-start;
+
+        width: 100%;
+        min-height: 34px;
+
+        padding: 6px 8px;
+        border-radius: 8px;
+
+        font-size: .67rem;
+      }
+
+      /* ---------- USER = RIGHT CONTROL ---------- */
+      #nexus-nav-header > .user-profile--header-left {
+        order: 3;
+
+        display: flex !important;
+        flex: 0 0 40px !important;
+        align-items: center;
+        justify-content: center;
+
+        width: 40px !important;
+        min-width: 40px !important;
+        height: 40px !important;
+        min-height: 40px !important;
+
+        margin: 0 !important;
+        padding: 0 !important;
+        gap: 0 !important;
+
+        border: 0 !important;
+      }
+
+      #nexus-nav-header > .user-profile--header-left .user-details {
+        display: none !important;
+      }
+
+      #nexus-nav-header #user-avatar {
+        width: 38px !important;
+        min-width: 38px !important;
+        height: 38px !important;
+        min-height: 38px !important;
+
+        margin: 0 !important;
+        padding: 0 !important;
+
+        border-radius: 999px !important;
+        background: rgb(255 255 255 / 95%) !important;
+        box-shadow: 0 5px 14px rgb(5 52 110 / 11%) !important;
+      }
+
+      /* ---------- HOME = FULL-BLEED DESKTOP-LIKE HERO ---------- */
+      #nexus-app.home-route .home-page {
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 0 24px !important;
+      }
+
+      #nexus-app.home-route .home-hero,
+      #nexus-app.hero-route .home-hero {
+        position: relative !important;
+        isolation: isolate !important;
+
+        display: flex !important;
+        align-items: flex-start !important;
+
+        width: 100% !important;
+        min-height: 320px !important;
+
+        margin: 0 !important;
+        padding: 78px 20px 28px !important;
+
+        border: 0 !important;
+        border-radius: 0 !important;
+
+        overflow: hidden !important;
+        background: #DFF1FC !important;
+      }
+
+      #nexus-app.home-route .home-hero::before {
+        content: none !important;
+        display: none !important;
+      }
+
+      /*
+       * The banner artwork supplied for Home is compositionally weighted
+       * to the right. Make the image layer wider and shift it left so the
+       * visual becomes one continuous background instead of a right-hand
+       * rectangle.
+       */
+      #nexus-app.home-route .home-hero-media {
+        position: absolute !important;
+
+        top: 0 !important;
+        right: auto !important;
+        bottom: 0 !important;
+        left: -65% !important;
+
+        z-index: 0 !important;
+
+        width: 165% !important;
+        max-width: none !important;
+        height: 100% !important;
+        min-height: 100% !important;
+
+        margin: 0 !important;
+        padding: 0 !important;
+
+        aspect-ratio: auto !important;
+        overflow: hidden !important;
+
+        transform: none !important;
+      }
+
+      #nexus-app.home-route .home-hero-image {
+        position: absolute !important;
+        inset: 0 !important;
+
+        display: block !important;
+
+        width: 100% !important;
+        max-width: none !important;
+        height: 100% !important;
+        min-height: 100% !important;
+
+        margin: 0 !important;
+        padding: 0 !important;
+
+        object-fit: cover !important;
+        object-position: right 42% !important;
+
+        transform: none !important;
+      }
+
+      #nexus-app.home-route .home-hero-media::after {
+        content: "" !important;
+        position: absolute !important;
+        inset: 0 !important;
+        z-index: 1 !important;
+
+        display: block !important;
+        pointer-events: none !important;
+
+        background:
+          linear-gradient(
+            90deg,
+            rgb(244 250 254 / 78%) 0%,
+            rgb(242 250 255 / 67%) 18%,
+            rgb(239 249 255 / 46%) 34%,
+            rgb(239 249 255 / 18%) 50%,
+            transparent 70%
+          ) !important;
+      }
+
+      #nexus-app.home-route .home-hero-copy {
+        position: relative !important;
+        z-index: 3 !important;
+
+        width: min(62%, 315px) !important;
+        max-width: 315px !important;
+
+        margin: 0 !important;
+        padding: 0 !important;
+
+        transform: none !important;
+      }
+
+      #nexus-app.home-route .home-welcome {
+        margin: 0 !important;
+        font-size: clamp(1.12rem, 4.4vw, 1.4rem) !important;
+      }
+
+      #nexus-app.home-route .home-hero h1 {
+        margin: 2px 0 10px !important;
+        font-size: clamp(2.15rem, 8vw, 2.85rem) !important;
+        line-height: 1 !important;
+        white-space: nowrap !important;
+      }
+
+      #nexus-app.home-route .home-description {
+        max-width: 285px !important;
+        margin: 0 !important;
+        font-size: .76rem !important;
+        line-height: 1.34 !important;
+      }
+
+      #nexus-app.home-route .home-description br {
+        display: none !important;
+      }
+
+      #nexus-app.home-route .home-tagline {
+        max-width: 260px !important;
+        margin-top: 14px !important;
+        font-size: .66rem !important;
+        line-height: 1.25 !important;
+      }
+
+      #nexus-app.home-route .home-tagline::before {
+        width: 34px !important;
+      }
+
+      #nexus-app.home-route .home-hero-message,
+      #nexus-app.home-route .home-handwriting-frame {
+        display: none !important;
+      }
+
+      #nexus-app.home-route .home-ai-command {
+        margin: 0 !important;
+        border-radius: 0 0 14px 14px !important;
+      }
+    }
+
+    @media (max-width: 420px) {
+      #nexus-nav-header,
+      #nexus-app.hero-route #nexus-nav-header {
+        min-height: 56px;
+        height: 56px;
+        margin-bottom: -56px !important;
+        padding: 7px 0 !important;
+        gap: 5px !important;
+      }
+
+      #nexus-nav-header > .sidebar-toggle {
+        flex-basis: 42px !important;
+        width: 42px !important;
+        min-width: 42px !important;
+        height: 42px !important;
+        min-height: 42px !important;
+      }
+
+      #nexus-nav-header > .global-search,
+      #nexus-app.hero-route #nexus-nav-header > .global-search {
+        height: 40px !important;
+        min-height: 40px !important;
+        padding-inline: 6px !important;
+        gap: 5px !important;
+      }
+
+      #nexus-nav-header > .global-search input {
+        font-size: .64rem !important;
+      }
+
+      #nexus-nav-header .mobile-filter-trigger {
+        min-width: 48px;
+        max-width: 56px;
+        height: 28px;
+        padding-inline: 5px;
+        font-size: .57rem;
+      }
+
+      #nexus-nav-header > .user-profile--header-left {
+        flex-basis: 36px !important;
+        width: 36px !important;
+        min-width: 36px !important;
+        height: 36px !important;
+        min-height: 36px !important;
+      }
+
+      #nexus-nav-header #user-avatar {
+        width: 35px !important;
+        min-width: 35px !important;
+        height: 35px !important;
+        min-height: 35px !important;
+      }
+
+      #nexus-app.home-route .home-hero {
+        min-height: 305px !important;
+        padding: 72px 17px 24px !important;
+      }
+
+      #nexus-app.home-route .home-hero-media {
+        left: -78% !important;
+        width: 178% !important;
+      }
+
+      #nexus-app.home-route .home-hero-copy {
+        width: 64% !important;
+      }
+
+      #nexus-app.home-route .home-hero h1 {
+        font-size: clamp(2rem, 8vw, 2.55rem) !important;
+      }
+    }
+
+    @media (max-width: 350px) {
+      #nexus-nav-header > .global-search input {
+        font-size: .61rem !important;
+      }
+
+      #nexus-nav-header .mobile-filter-label {
+        max-width: 27px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      #nexus-app.home-route .home-hero h1 {
+        font-size: 1.95rem !important;
+      }
+    }
+
+
+    /* =========================================================
+       ONESCA — HOME MOBILE HERO BANNER FIX V4
+       The loaded Home artwork becomes the hero's actual background.
+       This removes the hard-edged right-side photo rectangle.
+       ========================================================= */
+
+    @media (max-width: 767px) {
+      #nexus-app.home-route
+        .home-hero.has-mobile-hero-background,
+      #nexus-app.hero-route
+        .home-hero.has-mobile-hero-background {
+        /*
+         * Layer 1 = readability wash for the HTML copy.
+         * Layer 2 = the same real Home hero asset used on desktop.
+         */
+        background-image:
+          linear-gradient(
+            90deg,
+            rgb(239 248 255 / 88%) 0%,
+            rgb(239 248 255 / 78%) 24%,
+            rgb(239 248 255 / 54%) 42%,
+            rgb(239 248 255 / 20%) 59%,
+            rgb(239 248 255 / 3%) 73%,
+            transparent 84%
+          ),
+          var(--home-hero-mobile-image) !important;
+
+        background-size:
+          100% 100%,
+          cover !important;
+
+        background-position:
+          center,
+          58% 42% !important;
+
+        background-repeat:
+          no-repeat,
+          no-repeat !important;
+
+        background-color:
+          #DFF1FC !important;
+      }
+
+      /*
+       * Keep the original <img> in the DOM for loading/retry logic,
+       * but make it visually transparent after the hero has adopted
+       * the same URL as its background.
+       */
+      #nexus-app.home-route
+        .home-hero.has-mobile-hero-background
+        .home-hero-media {
+        opacity:
+          0 !important;
+
+        visibility:
+          hidden !important;
+
+        pointer-events:
+          none !important;
+      }
+
+      /*
+       * The hero no longer needs extra width/left shifting once the
+       * artwork is painted directly on the hero background.
+       */
+      #nexus-app.home-route
+        .home-hero.has-mobile-hero-background
+        .home-hero-media,
+      #nexus-app.home-route
+        .home-hero.has-mobile-hero-background
+        .home-hero-image {
+        inset:
+          0 !important;
+
+        left:
+          0 !important;
+
+        right:
+          0 !important;
+
+        width:
+          100% !important;
+
+        height:
+          100% !important;
+
+        transform:
+          none !important;
+      }
+
+      /*
+       * Keep the text region compact so more of the subjects remain
+       * visible on the right without creating a split-column look.
+       */
+      #nexus-app.home-route
+        .home-hero-copy {
+        width:
+          min(60%, 300px) !important;
+
+        max-width:
+          300px !important;
+      }
+
+      #nexus-app.home-route
+        .home-description {
+        max-width:
+          275px !important;
+      }
+
+      #nexus-app.home-route
+        .home-tagline {
+        max-width:
+          245px !important;
+      }
+    }
+
+    @media (max-width: 420px) {
+      #nexus-app.home-route
+        .home-hero.has-mobile-hero-background {
+        background-position:
+          center,
+          61% 42% !important;
+      }
+
+      #nexus-app.home-route
+        .home-hero-copy {
+        width:
+          62% !important;
+      }
+    }
+
+    @media (max-width: 360px) {
+      #nexus-app.home-route
+        .home-hero.has-mobile-hero-background {
+        background-position:
+          center,
+          63% 42% !important;
+      }
+    }
+
+
+    /* =========================================================
+       ONESCA — HOME MOBILE HERO DUPLICATE REMOVAL V7
+       Keep the correct v4 full-width CSS background.
+       Remove ONLY the original <img> media copy after the
+       background has been successfully activated.
+       ========================================================= */
+
+    @media (max-width: 767px) {
+      /*
+       * Important:
+       * The app currently uses hero-route for this screen. The earlier
+       * duplicate-removal rule only targeted home-route, so it never
+       * matched the live Home hero. Target both route states explicitly.
+       */
+      #nexus-app.home-route
+        .home-hero.has-mobile-hero-background
+        > .home-hero-media,
+      #nexus-app.hero-route
+        .home-hero.has-mobile-hero-background
+        > .home-hero-media {
+        display:
+          none !important;
+
+        visibility:
+          hidden !important;
+
+        opacity:
+          0 !important;
+
+        pointer-events:
+          none !important;
+      }
+
+      #nexus-app.home-route
+        .home-hero.has-mobile-hero-background
+        > .home-hero-media
+        > .home-hero-image,
+      #nexus-app.hero-route
+        .home-hero.has-mobile-hero-background
+        > .home-hero-media
+        > .home-hero-image,
+      #nexus-app.home-route
+        .home-hero.has-mobile-hero-background
+        > .home-hero-media
+        > .home-hero-fallback,
+      #nexus-app.hero-route
+        .home-hero.has-mobile-hero-background
+        > .home-hero-media
+        > .home-hero-fallback {
+        display:
+          none !important;
+
+        visibility:
+          hidden !important;
+
+        opacity:
+          0 !important;
+      }
+
+      /*
+       * The hero background from v4 remains the single visible artwork:
+       * gradient + var(--home-hero-mobile-image).
+       */
+      #nexus-app.home-route
+        .home-hero.has-mobile-hero-background,
+      #nexus-app.hero-route
+        .home-hero.has-mobile-hero-background {
+        overflow:
+          hidden !important;
+      }
+    }
+
+
+    /* =========================================================
+       ONESCA — HOME MOBILE HERO EDGE-TO-EDGE FIX V8
+       Removes the remaining mobile Home page gutters and lets the
+       hero artwork span the complete viewport width.
+       ========================================================= */
+
+    @media (max-width: 767px) {
+      /*
+       * Earlier Home responsive rules add 10px side padding.
+       * Remove those gutters on the Home page itself.
+       */
+      .home-page,
+      #nexus-app.home-route .home-page,
+      #nexus-app.hero-route .home-page {
+        width:
+          100% !important;
+
+        max-width:
+          none !important;
+
+        margin-inline:
+          0 !important;
+
+        padding-left:
+          0 !important;
+
+        padding-right:
+          0 !important;
+      }
+
+      /*
+       * Break the hero out to the mobile viewport so an ancestor
+       * container can never leave a white strip on either side.
+       */
+      .home-page
+        > .home-hero,
+      #nexus-app.home-route
+        .home-hero,
+      #nexus-app.hero-route
+        .home-hero {
+        width:
+          100vw !important;
+
+        max-width:
+          none !important;
+
+        margin-left:
+          calc(
+            50% -
+            50vw
+          ) !important;
+
+        margin-right:
+          calc(
+            50% -
+            50vw
+          ) !important;
+
+        border-left:
+          0 !important;
+
+        border-right:
+          0 !important;
+
+        border-radius:
+          0 !important;
+      }
+
+      /*
+       * The v4/v7 hero background stays unchanged; this simply gives
+       * that background the full viewport canvas.
+       */
+      #nexus-app.home-route
+        .home-hero.has-mobile-hero-background,
+      #nexus-app.hero-route
+        .home-hero.has-mobile-hero-background {
+        background-size:
+          100% 100%,
+          cover !important;
+
+        background-repeat:
+          no-repeat,
+          no-repeat !important;
+      }
+
+      #nexus-content,
+      #page-mount {
+        overflow-x:
+          clip;
+      }
+    }
+
+
+    /* =========================================================
+       ONESCA — MOBILE CONTENT PADDING + FLOATING NOSCA FIX V9
+       Only the Home hero stays full-bleed. Content below it regains
+       mobile gutters. Ask NOSCA returns as a floating mobile control.
+       ========================================================= */
+
+    @media (max-width: 767px) {
+      /*
+       * Restore the normal mobile content gutter.
+       * The hero keeps its existing 100vw breakout from v8, so only
+       * the banner reaches the physical viewport edges.
+       */
+      .home-page,
+      #nexus-app.home-route .home-page,
+      #nexus-app.hero-route .home-page {
+        box-sizing:
+          border-box !important;
+
+        width:
+          100% !important;
+
+        max-width:
+          none !important;
+
+        margin-inline:
+          0 !important;
+
+        padding:
+          0 14px 24px !important;
+      }
+
+      /*
+       * Keep the banner full-bleed despite the restored page padding.
+       */
+      .home-page
+        > .home-hero,
+      #nexus-app.home-route
+        .home-hero,
+      #nexus-app.hero-route
+        .home-hero {
+        width:
+          100vw !important;
+
+        max-width:
+          none !important;
+
+        margin-left:
+          calc(
+            50% -
+            50vw
+          ) !important;
+
+        margin-right:
+          calc(
+            50% -
+            50vw
+          ) !important;
+      }
+
+      /*
+       * Ask Nexus and every section after the hero now inherit the
+       * restored 14px page gutter instead of touching the viewport edge.
+       */
+      #nexus-app.home-route
+        .home-ai-command,
+      #nexus-app.hero-route
+        .home-ai-command {
+        width:
+          auto !important;
+
+        margin-left:
+          0 !important;
+
+        margin-right:
+          0 !important;
+
+        border-radius:
+          14px !important;
+      }
+
+      /*
+       * The launcher is moved out of the hidden mobile sidebar by
+       * Scripts.html and becomes a true floating mobile control.
+       */
+      .nosca-launcher.is-mobile-floating {
+        position:
+          fixed !important;
+
+        right:
+          14px !important;
+
+        bottom:
+          max(
+            16px,
+            env(safe-area-inset-bottom)
+          ) !important;
+
+        left:
+          auto !important;
+
+        z-index:
+          135 !important;
+
+        display:
+          inline-flex !important;
+
+        align-items:
+          center !important;
+
+        justify-content:
+          center !important;
+
+        width:
+          auto !important;
+
+        min-width:
+          132px !important;
+
+        max-width:
+          calc(
+            100vw -
+            28px
+          ) !important;
+
+        min-height:
+          48px !important;
+
+        margin:
+          0 !important;
+
+        padding:
+          10px
+          15px !important;
+
+        gap:
+          8px !important;
+
+        border-radius:
+          999px !important;
+
+        box-shadow:
+          0
+          12px
+          28px
+          rgb(0 62 158 / 28%) !important;
+
+        transform:
+          translate3d(
+            0,
+            0,
+            0
+          );
+
+        visibility:
+          visible !important;
+      }
+
+      .nosca-launcher.is-mobile-floating
+        span {
+        display:
+          inline !important;
+
+        font-size:
+          .78rem !important;
+
+        font-weight:
+          700 !important;
+      }
+
+      .nosca-launcher.is-mobile-floating
+        svg {
+        width:
+          18px !important;
+
+        height:
+          18px !important;
+      }
+
+      /*
+       * Do not leave the launcher floating over the open navigation
+       * drawer. It returns automatically as soon as the drawer closes.
+       */
+      body.sidebar-open
+        .nosca-launcher.is-mobile-floating {
+        opacity:
+          0 !important;
+
+        visibility:
+          hidden !important;
+
+        pointer-events:
+          none !important;
+
+        transform:
+          translate3d(
+            0,
+            10px,
+            0
+          ) !important;
+      }
+
+      .nosca-launcher.is-mobile-floating.is-chat-open {
+        pointer-events:
+          none !important;
+      }
+    }
+
+    @media (max-width: 420px) {
+      .home-page,
+      #nexus-app.home-route .home-page,
+      #nexus-app.hero-route .home-page {
+        padding-left:
+          10px !important;
+
+        padding-right:
+          10px !important;
+      }
+
+      .nosca-launcher.is-mobile-floating {
+        right:
+          10px !important;
+
+        min-width:
+          118px !important;
+
+        min-height:
+          46px !important;
+
+        padding-inline:
+          13px !important;
+      }
+    }
+
 </style>

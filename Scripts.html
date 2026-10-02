@@ -44,6 +44,9 @@
     searchForm: document.getElementById("global-search-form"),
     search: document.getElementById("global-search"),
     filters: document.getElementById("search-filters"),
+    mobileFilterTrigger: document.getElementById("mobile-filter-trigger"),
+    mobileFilterLabel: document.getElementById("mobile-filter-label"),
+    mobileFilterOptions: document.getElementById("search-filter-options"),
     navItems: Array.from(document.querySelectorAll("[data-route]")),
     filterItems: Array.from(document.querySelectorAll("[data-filter]")),
     launcher: document.getElementById("nosca-launcher"),
@@ -51,6 +54,55 @@
     dialogClose: document.getElementById("nosca-close"),
     skipLink: document.querySelector(".skip-link")
   };
+
+  const noscaLauncherHome = dom.launcher
+    ? {
+        parent: dom.launcher.parentNode,
+        nextSibling: dom.launcher.nextSibling
+      }
+    : null;
+
+  function placeNoscaLauncherForViewport() {
+    if (!dom.launcher || !noscaLauncherHome) return;
+
+    if (mobileQuery.matches) {
+      if (dom.launcher.parentNode !== document.body) {
+        document.body.appendChild(dom.launcher);
+      }
+
+      dom.launcher.classList.add(
+        "is-mobile-floating"
+      );
+
+      return;
+    }
+
+    dom.launcher.classList.remove(
+      "is-mobile-floating"
+    );
+
+    const parent =
+      noscaLauncherHome.parent;
+
+    if (!parent) return;
+
+    const sibling =
+      noscaLauncherHome.nextSibling;
+
+    if (
+      sibling &&
+      sibling.parentNode === parent
+    ) {
+      parent.insertBefore(
+        dom.launcher,
+        sibling
+      );
+    } else {
+      parent.appendChild(
+        dom.launcher
+      );
+    }
+  }
 
   // 5. HOME / SHELL ASSETS + INTERACTIONS
   // Drive /view links are kept as the source-of-truth references.
@@ -3867,6 +3919,36 @@
     const root = pageRoot || document;
     const image = root.querySelector("#" + imageId);
     const fallback = root.querySelector("#" + fallbackId);
+
+    /*
+     * On mobile, the Home hero artwork is rendered as a CSS background
+     * on the hero itself rather than as a visible rectangular <img>
+     * layer. We still use the normal image loader first so the URL has
+     * already been proven to load successfully.
+     */
+    if (image && imageId === "home-hero-image") {
+      image.addEventListener("load", function () {
+        const hero = root.querySelector(".home-hero");
+        const source = image.currentSrc || image.src || "";
+
+        if (!hero || !source) return;
+
+        const safeSource =
+          source
+            .replace(/\\/g, "\\\\")
+            .replace(/"/g, '\\"');
+
+        hero.style.setProperty(
+          "--home-hero-mobile-image",
+          'url("' + safeSource + '")'
+        );
+
+        hero.classList.add(
+          "has-mobile-hero-background"
+        );
+      });
+    }
+
     bindHomeAsset(image, fallback, width);
   }
 
@@ -5176,16 +5258,58 @@
     dom.search.focus();
   }
 
+  function getSearchFilterLabel(filter) {
+    const labels = {
+      all: "All",
+      drive: "Drive",
+      docs: "Docs",
+      sheets: "Sheets",
+      slides: "Slides"
+    };
+
+    return labels[String(filter || "").trim()] || "All";
+  }
+
+  function closeMobileFilterMenu() {
+    if (!dom.mobileFilterTrigger || !dom.mobileFilterOptions) return;
+
+    dom.mobileFilterOptions.classList.remove("is-open");
+    dom.mobileFilterTrigger.setAttribute("aria-expanded", "false");
+  }
+
+  function toggleMobileFilterMenu() {
+    if (!dom.mobileFilterTrigger || !dom.mobileFilterOptions) return;
+
+    const open = !dom.mobileFilterOptions.classList.contains("is-open");
+    dom.mobileFilterOptions.classList.toggle("is-open", open);
+    dom.mobileFilterTrigger.setAttribute("aria-expanded", String(open));
+  }
+
   function setSearchFilter(filter) {
     state.filter = filter;
+
     dom.filterItems.forEach(function (item) {
-      item.setAttribute("aria-pressed", String(item.dataset.filter === filter));
+      const active = item.dataset.filter === filter;
+      item.setAttribute("aria-pressed", String(active));
+      item.setAttribute("aria-checked", String(active));
     });
-    if (dom.search) dom.search.dataset.filter = filter;
+
+    if (dom.search) {
+      dom.search.dataset.filter = filter;
+    }
+
+    if (dom.mobileFilterLabel) {
+      dom.mobileFilterLabel.textContent = getSearchFilterLabel(filter);
+    }
+
+    closeMobileFilterMenu();
   }
 
   // 9. RESPONSIVE NAVIGATION
   function handleViewportChange() {
+    closeMobileFilterMenu();
+    placeNoscaLauncherForViewport();
+
     const active = document.activeElement;
     const focusWasInSidebar = dom.sidebar && dom.sidebar.contains(active);
 
@@ -5208,6 +5332,21 @@
     if ((event.ctrlKey || event.metaKey) && !event.altKey && !event.shiftKey && event.key.toLowerCase() === "k") {
       event.preventDefault();
       focusGlobalSearch();
+      return;
+    }
+
+    if (
+      event.key === "Escape" &&
+      dom.mobileFilterOptions &&
+      dom.mobileFilterOptions.classList.contains("is-open")
+    ) {
+      event.preventDefault();
+      closeMobileFilterMenu();
+
+      if (dom.mobileFilterTrigger) {
+        dom.mobileFilterTrigger.focus();
+      }
+
       return;
     }
 
@@ -6017,6 +6156,25 @@
       });
     });
 
+    if (dom.mobileFilterTrigger) {
+      dom.mobileFilterTrigger.addEventListener("click", function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        toggleMobileFilterMenu();
+      });
+    }
+
+    document.addEventListener("click", function (event) {
+      if (
+        dom.filters &&
+        dom.filters.contains(event.target)
+      ) {
+        return;
+      }
+
+      closeMobileFilterMenu();
+    });
+
     if (dom.searchForm) {
       dom.searchForm.addEventListener("submit", function (event) {
         event.preventDefault();
@@ -6061,10 +6219,11 @@
     mobileQuery.addEventListener("change", handleViewportChange);
     tabletQuery.addEventListener("change", handleViewportChange);
 
+    placeNoscaLauncherForViewport();
     updateSidebar();
     setSearchFilter(state.filter);
     initializeShellAssets();
-  handleRouteChange(false);
+    handleRouteChange(false);
     dom.app.dataset.initialized = "true";
   }
 

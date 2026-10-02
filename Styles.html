@@ -20059,4 +20059,258 @@
       }
     }
 
+
+
+    /* =========================================================
+       ONESCA — SHARED CONTENT PAGE MOBILE HERO PARITY V10
+       Extends the proven Home mobile shell treatment to the
+       primary content pages without changing their page-specific
+       artwork composition or the spacing of sections below.
+       ========================================================= */
+
+    @media (max-width: 767px) {
+      /*
+       * The navbar is a shared shell component, so the Home mobile
+       * single-row treatment above already applies to every route.
+       * Give each content hero the same protected header zone so
+       * its title never sits underneath the transparent navbar.
+       */
+      .overview-hero.page-hero[data-page-hero],
+      .offerings-hero.page-hero[data-page-hero],
+      .opportunities-hero.page-hero[data-page-hero],
+      .programs-hero.page-hero[data-page-hero],
+      .delivery-hero.page-hero[data-page-hero],
+      .governance-hero.page-hero[data-page-hero],
+      .tools-hero.page-hero[data-page-hero],
+      .support-hero.page-hero[data-page-hero] {
+        width: 100vw !important;
+        max-width: none !important;
+
+        margin-left: calc(50% - 50vw) !important;
+        margin-right: calc(50% - 50vw) !important;
+
+        padding-top: 78px !important;
+
+        border-left: 0 !important;
+        border-right: 0 !important;
+        border-radius: 0 !important;
+
+        overflow: hidden !important;
+      }
+
+      /*
+       * Keep every page artwork behaving like a true banner: the
+       * media canvas fills the hero and the image always covers it.
+       * Existing page-specific object-position rules remain in force.
+       */
+      .overview-hero.page-hero[data-page-hero] > .overview-hero-media,
+      .offerings-hero.page-hero[data-page-hero] > .offerings-hero-media,
+      .opportunities-hero.page-hero[data-page-hero] > .opportunities-hero-media,
+      .programs-hero.page-hero[data-page-hero] > .programs-hero-media,
+      .delivery-hero.page-hero[data-page-hero] > .delivery-hero-media,
+      .governance-hero.page-hero[data-page-hero] > .governance-hero-media,
+      .tools-hero.page-hero[data-page-hero] > .tools-hero-media,
+      .support-hero.page-hero[data-page-hero] > .support-hero-media {
+        position: absolute !important;
+        inset: 0 !important;
+
+        width: 100% !important;
+        max-width: none !important;
+        height: 100% !important;
+        min-height: 100% !important;
+
+        margin: 0 !important;
+        padding: 0 !important;
+
+        overflow: hidden !important;
+        transform: none !important;
+      }
+
+      .overview-hero.page-hero[data-page-hero] .overview-hero-image,
+      .offerings-hero.page-hero[data-page-hero] .offerings-hero-image,
+      .opportunities-hero.page-hero[data-page-hero] .opportunities-hero-image,
+      .programs-hero.page-hero[data-page-hero] .programs-hero-image,
+      .delivery-hero.page-hero[data-page-hero] .delivery-hero-image,
+      .governance-hero.page-hero[data-page-hero] .governance-hero-image,
+      .tools-hero.page-hero[data-page-hero] .tools-hero-image,
+      .support-hero.page-hero[data-page-hero] .support-hero-image {
+        display: block !important;
+
+        width: 100% !important;
+        max-width: none !important;
+        height: 100% !important;
+        min-height: 100% !important;
+
+        object-fit: cover !important;
+        border-radius: 0 !important;
+      }
+
+      /*
+       * Earlier page-specific mobile rules sized these content regions
+       * assuming a 26px hero top inset. Reduce only their internal
+       * minimum height to make room for the shared 78px navbar-safe
+       * inset while preserving each hero's overall mobile height.
+       */
+      .offerings-hero-content {
+        min-height: 378px !important;
+      }
+
+      .opportunities-hero-content {
+        min-height: 400px !important;
+      }
+
+      .programs-hero-content {
+        min-height: 414px !important;
+      }
+
+      .delivery-hero-content {
+        min-height: 418px !important;
+      }
+
+      .governance-hero-content {
+        min-height: 398px !important;
+      }
+
+      .tools-hero-content {
+        min-height: 363px !important;
+      }
+
+      .support-hero-content {
+        min-height: 398px !important;
+      }
+
+      /*
+       * Keep the shell itself clipped horizontally so the 100vw hero
+       * breakout never creates a sideways scroll bar in Google Sites.
+       */
+      #nexus-content,
+      #page-mount {
+        overflow-x: clip;
+      }
+    }
+
+    @media (max-width: 420px) {
+      /* The compact navbar is 56px tall at this breakpoint. */
+      .overview-hero.page-hero[data-page-hero],
+      .offerings-hero.page-hero[data-page-hero],
+      .opportunities-hero.page-hero[data-page-hero],
+      .programs-hero.page-hero[data-page-hero],
+      .delivery-hero.page-hero[data-page-hero],
+      .governance-hero.page-hero[data-page-hero],
+      .tools-hero.page-hero[data-page-hero],
+      .support-hero.page-hero[data-page-hero] {
+        padding-top: 70px !important;
+      }
+    }
+
+
+    /* =========================================================
+       ONESCA — SHARED HERO HEIGHT PARITY V11
+       Locks every primary content-page hero to the exact Home
+       hero height at the same responsive breakpoints.
+       ========================================================= */
+
+    /* Home desktop reference: 468px. */
+    .home-hero[data-page-hero],
+    .overview-hero.page-hero[data-page-hero],
+    .offerings-hero.page-hero[data-page-hero],
+    .opportunities-hero.page-hero[data-page-hero],
+    .programs-hero.page-hero[data-page-hero],
+    .delivery-hero.page-hero[data-page-hero],
+    .governance-hero.page-hero[data-page-hero],
+    .tools-hero.page-hero[data-page-hero],
+    .support-hero.page-hero[data-page-hero] {
+      box-sizing: border-box !important;
+      height: 468px !important;
+      min-height: 468px !important;
+      max-height: 468px !important;
+      overflow: hidden !important;
+    }
+
+    /* Remove page-specific internal minimums that can force a hero taller. */
+    .offerings-hero-content,
+    .opportunities-hero-content,
+    .programs-hero-content,
+    .delivery-hero-content,
+    .governance-hero-content,
+    .tools-hero-content,
+    .support-hero-content {
+      min-height: 0 !important;
+    }
+
+    /* Home reference between 1200px and 1350px: 440px. */
+    @media (min-width: 1200px) and (max-width: 1350px) {
+      .home-hero[data-page-hero],
+      .overview-hero.page-hero[data-page-hero],
+      .offerings-hero.page-hero[data-page-hero],
+      .opportunities-hero.page-hero[data-page-hero],
+      .programs-hero.page-hero[data-page-hero],
+      .delivery-hero.page-hero[data-page-hero],
+      .governance-hero.page-hero[data-page-hero],
+      .tools-hero.page-hero[data-page-hero],
+      .support-hero.page-hero[data-page-hero] {
+        height: 440px !important;
+        min-height: 440px !important;
+        max-height: 440px !important;
+      }
+    }
+
+    /* Home reference below 1200px: 320px. */
+    @media (max-width: 1199px) {
+      .home-hero[data-page-hero],
+      .overview-hero.page-hero[data-page-hero],
+      .offerings-hero.page-hero[data-page-hero],
+      .opportunities-hero.page-hero[data-page-hero],
+      .programs-hero.page-hero[data-page-hero],
+      .delivery-hero.page-hero[data-page-hero],
+      .governance-hero.page-hero[data-page-hero],
+      .tools-hero.page-hero[data-page-hero],
+      .support-hero.page-hero[data-page-hero] {
+        height: 320px !important;
+        min-height: 320px !important;
+        max-height: 320px !important;
+      }
+    }
+
+    @media (max-width: 767px) {
+      /*
+       * Home uses a compact text-first mobile hero. Hide only the
+       * additional page-specific hero callouts that would compete for
+       * vertical space once every banner is locked to Home's height.
+       */
+      .offerings-impact-panel,
+      .opportunities-growth-steps,
+      .programs-execution-stages {
+        display: none !important;
+      }
+
+      .offerings-hero-content,
+      .opportunities-hero-content,
+      .programs-hero-content,
+      .delivery-hero-content,
+      .governance-hero-content,
+      .tools-hero-content,
+      .support-hero-content {
+        min-height: 0 !important;
+        height: auto !important;
+      }
+    }
+
+    /* Home reference on compact phones: 305px. */
+    @media (max-width: 420px) {
+      .home-hero[data-page-hero],
+      .overview-hero.page-hero[data-page-hero],
+      .offerings-hero.page-hero[data-page-hero],
+      .opportunities-hero.page-hero[data-page-hero],
+      .programs-hero.page-hero[data-page-hero],
+      .delivery-hero.page-hero[data-page-hero],
+      .governance-hero.page-hero[data-page-hero],
+      .tools-hero.page-hero[data-page-hero],
+      .support-hero.page-hero[data-page-hero] {
+        height: 305px !important;
+        min-height: 305px !important;
+        max-height: 305px !important;
+      }
+    }
+
 </style>

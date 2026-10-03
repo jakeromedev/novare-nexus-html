@@ -1386,6 +1386,16 @@
       fileId: "1BC101irslEn78ntf6Z6z2j7DUInrgdKj",
       viewerUrl: "https://drive.google.com/file/d/1BC101irslEn78ntf6Z6z2j7DUInrgdKj/view?usp=drive_link",
       phase: 3
+    },
+    "win-repository": {
+      fileId: "1uj0Y3KDmQbTe7fK-oJwEwBznLGF11VCb",
+      viewerUrl: "https://drive.google.com/file/d/1uj0Y3KDmQbTe7fK-oJwEwBznLGF11VCb/view?usp=drive_link",
+      phase: 3
+    },
+    "loss-repository": {
+      fileId: "1oJ1Nu_9ZmGjSMx1-hfn8yaweC7nREshK",
+      viewerUrl: "https://drive.google.com/file/d/1oJ1Nu_9ZmGjSMx1-hfn8yaweC7nREshK/view?usp=drive_link",
+      phase: 3
     }
   };
 
@@ -1444,19 +1454,21 @@
 
     repositories: [
       {
-        id: "win",
+        id: "win-repository",
         title: "Win Repository",
         description: "Insights, success factors,\nand best practices.",
         themeClass: "is-win",
         icon: "trophy",
+        imageKey: "win-repository",
         action: "win-repository"
       },
       {
-        id: "loss",
+        id: "loss-repository",
         title: "Loss Repository",
         description: "Challenges, lessons learned,\nand improvement opportunities.",
         themeClass: "is-loss",
         icon: "target",
+        imageKey: "loss-repository",
         action: "loss-repository"
       }
     ],
@@ -1611,13 +1623,23 @@
     if (!grid || !Array.isArray(items)) return;
 
     grid.innerHTML = items.map(function (item) {
+      const id = escapeOpportunitiesHtml(item.id || item.action || item.title || "repository");
+      const title = escapeOpportunitiesHtml(item.title);
+      const imageKey = escapeOpportunitiesHtml(item.imageKey || item.action || id);
       return '<button class="deal-retrospective-card ' + escapeOpportunitiesHtml(item.themeClass || "") + '" type="button" data-opportunities-action="' + escapeOpportunitiesHtml(item.action) + '">' +
-        '<span class="deal-retrospective-icon" aria-hidden="true">' + opportunitiesIconSvg(item.icon, 35) + '</span>' +
-        '<span class="deal-retrospective-copy">' +
-          '<strong>' + escapeOpportunitiesHtml(item.title) + '</strong>' +
-          '<span>' + formatOpportunitiesLines(item.description) + '</span>' +
+        '<span class="deal-retrospective-media">' +
+          '<img id="' + id + '-image" class="deal-retrospective-image" data-image-key="' + imageKey + '" alt="" width="800" height="360" loading="lazy" decoding="async" fetchpriority="low">' +
+          '<span id="' + id + '-fallback" class="image-placeholder deal-retrospective-fallback" data-image-fallback="' + imageKey + '" role="img" aria-label="' + title + ' visual unavailable" hidden>' + title + '</span>' +
+          '<span class="deal-retrospective-media-wash" aria-hidden="true"></span>' +
         '</span>' +
-        '<span class="deal-retrospective-arrow" aria-hidden="true">›</span>' +
+        '<span class="deal-retrospective-content">' +
+          '<span class="deal-retrospective-icon" aria-hidden="true">' + opportunitiesIconSvg(item.icon, 35) + '</span>' +
+          '<span class="deal-retrospective-copy">' +
+            '<strong>' + title + '</strong>' +
+            '<span>' + formatOpportunitiesLines(item.description) + '</span>' +
+          '</span>' +
+          '<span class="deal-retrospective-arrow" aria-hidden="true">›</span>' +
+        '</span>' +
       '</button>';
     }).join("");
   }
@@ -1658,6 +1680,15 @@
         pageRoot.querySelector("#sales-pillar-" + item.id + "-image"),
         pageRoot.querySelector("#sales-pillar-" + item.id + "-fallback"),
         900
+      );
+    });
+
+    opportunitiesPageData.repositories.forEach(function (item) {
+      if (!item || !item.id) return;
+      bindOpportunitiesAsset(
+        pageRoot.querySelector("#" + item.id + "-image"),
+        pageRoot.querySelector("#" + item.id + "-fallback"),
+        1200
       );
     });
   }
@@ -2542,6 +2573,11 @@
     let index = 0;
     let currentUrl = "";
     let loadTimer = null;
+    let visibilityObserver = null;
+    let hasStarted = false;
+
+    const shouldDefer =
+      (image.getAttribute("loading") || "").toLowerCase() === "lazy";
 
     function clearLoadTimer() {
       if (loadTimer) {
@@ -2550,18 +2586,53 @@
       }
     }
 
+    function disconnectObserver() {
+      if (visibilityObserver) {
+        visibilityObserver.disconnect();
+        visibilityObserver = null;
+      }
+    }
+
+    function rememberFallbackAccessibility() {
+      if (!fallback || fallback.dataset.nexusLoaderPrepared === "true") return;
+      fallback.dataset.nexusLoaderPrepared = "true";
+      fallback.dataset.nexusOriginalAriaLabel = fallback.getAttribute("aria-label") || "";
+    }
+
+    function setFallbackLoading(isLoading) {
+      if (!fallback) return;
+      rememberFallbackAccessibility();
+
+      fallback.classList.toggle("nexus-image-loader", isLoading);
+      fallback.setAttribute("aria-busy", isLoading ? "true" : "false");
+
+      if (isLoading) {
+        fallback.hidden = false;
+        fallback.setAttribute("aria-label", "Loading image");
+      } else {
+        fallback.removeAttribute("aria-busy");
+        const originalAriaLabel = fallback.dataset.nexusOriginalAriaLabel || "";
+        if (originalAriaLabel) fallback.setAttribute("aria-label", originalAriaLabel);
+        else fallback.removeAttribute("aria-label");
+      }
+    }
+
     function showFallback() {
       clearLoadTimer();
+      disconnectObserver();
       image.dataset.assetState = "error";
+      image.classList.remove("nexus-image-loading", "nexus-image-loaded");
       image.hidden = true;
       image.style.visibility = "";
       image.removeAttribute("src");
+      setFallbackLoading(false);
       if (fallback) fallback.hidden = false;
       console.warn("Nexus asset could not be loaded:", key, urls);
     }
 
     function tryNext() {
       clearLoadTimer();
+
       if (index >= urls.length) {
         showFallback();
         return;
@@ -2569,26 +2640,81 @@
 
       currentUrl = urls[index++];
       image.dataset.assetState = "loading";
+      image.classList.add("nexus-image-loading");
+      image.classList.remove("nexus-image-loaded");
+      setFallbackLoading(true);
 
-      // Do not keep a lazy-loaded image display:none/hidden while assigning src.
-      // Browsers may otherwise defer it indefinitely and never fire load/error.
+      // Once our observer has intentionally activated a lazy image, make the
+      // browser fetch it immediately. Native loading=lazy plus a manual timeout
+      // can otherwise leave an off-screen request deferred long enough for the
+      // timeout to incorrectly mark every Drive URL as failed.
+      image.loading = "eager";
       image.hidden = false;
       image.style.visibility = "hidden";
-      if (fallback) fallback.hidden = false;
 
       image.removeAttribute("src");
       image.src = currentUrl;
 
-      // Prevent a stalled third-party image request from leaving an empty card forever.
+      // This timer now runs only after the image is close enough to the viewport
+      // (or is explicitly eager), so it represents a genuinely stalled request.
       loadTimer = window.setTimeout(function () {
         if (image.dataset.assetState === "loading") tryNext();
-      }, 10000);
+      }, 15000);
+    }
+
+    function startLoading() {
+      if (hasStarted) return;
+      hasStarted = true;
+      disconnectObserver();
+      tryNext();
+    }
+
+    function waitUntilNearViewport() {
+      image.dataset.assetState = "waiting";
+      image.classList.add("nexus-image-loading");
+      image.classList.remove("nexus-image-loaded");
+      setFallbackLoading(true);
+
+      // Keep the element measurable so IntersectionObserver can detect it,
+      // while the animated placeholder remains visible until loading begins.
+      image.hidden = false;
+      image.style.visibility = "hidden";
+
+      if (!("IntersectionObserver" in window)) {
+        startLoading();
+        return;
+      }
+
+      visibilityObserver = new IntersectionObserver(
+        function (entries) {
+          const shouldStart = entries.some(function (entry) {
+            return entry.isIntersecting;
+          });
+
+          if (shouldStart) startLoading();
+        },
+        {
+          root: null,
+          // Begin fetching before the user reaches the asset so cards normally
+          // appear populated by the time they scroll into view.
+          rootMargin: "900px",
+          threshold: 0.01
+        }
+      );
+
+      visibilityObserver.observe(image);
     }
 
     function retryAll() {
+      clearLoadTimer();
+      disconnectObserver();
       index = 0;
       currentUrl = "";
-      tryNext();
+      hasStarted = false;
+      image.classList.remove("nexus-image-loaded");
+
+      if (shouldDefer) waitUntilNearViewport();
+      else startLoading();
     }
 
     image._nexusRetryAsset = retryAll;
@@ -2603,6 +2729,9 @@
       image.dataset.assetState = "loaded";
       image.hidden = false;
       image.style.visibility = "visible";
+      image.classList.remove("nexus-image-loading");
+      image.classList.add("nexus-image-loaded");
+      setFallbackLoading(false);
       if (fallback) fallback.hidden = true;
 
       try {
@@ -2617,7 +2746,8 @@
       tryNext();
     };
 
-    tryNext();
+    if (shouldDefer) waitUntilNearViewport();
+    else startLoading();
   }
 
   function retryFailedHomeAssets(pageRoot) {
@@ -5266,12 +5396,13 @@
         activePage.dataset.defaultPageLoaderShown !==
         "true"
       ) {
+        /*
+         * Route content is already available synchronously from the page
+         * template. Do not cover the whole page with a loader. Any async
+         * resource-link work now exposes loading only on the affected controls.
+         */
         activePage.dataset.defaultPageLoaderShown =
           "true";
-
-        showDefaultPageLoader(
-          activePage
-        );
       }
     }
 

@@ -633,19 +633,46 @@
           type="button"
           data-opportunities-action="win-repository"
         >
-          <span class="deal-retrospective-icon" aria-hidden="true">
-            <svg width="35" height="35" viewBox="0 0 24 24" fill="none"
-                 stroke="currentColor" stroke-width="1.8"
-                 stroke-linecap="round" stroke-linejoin="round">
-              <path d="M8 4h8v4c0 4-2 6-4 7-2-1-4-3-4-7z"/>
-              <path d="M8 6H4c0 3 1 5 4 5M16 6h4c0 3-1 5-4 5M12 15v4M9 21h6"/>
-            </svg>
+          <span class="deal-retrospective-media">
+            <img
+              id="win-repository-image"
+              class="deal-retrospective-image"
+              data-image-key="win-repository"
+              alt=""
+              width="800"
+              height="360"
+              loading="lazy"
+              decoding="async"
+              fetchpriority="low"
+              hidden
+            >
+            <span
+              id="win-repository-fallback"
+              class="image-placeholder deal-retrospective-fallback"
+              data-image-fallback="win-repository"
+              role="img"
+              aria-label="Win Repository visual unavailable"
+              hidden
+            >
+              Win Repository
+            </span>
+            <span class="deal-retrospective-media-wash" aria-hidden="true"></span>
           </span>
-          <span class="deal-retrospective-copy">
-            <strong>Win Repository</strong>
-            <span>Insights, success factors,<br>and best practices.</span>
+          <span class="deal-retrospective-content">
+            <span class="deal-retrospective-icon" aria-hidden="true">
+              <svg width="35" height="35" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="1.8"
+                   stroke-linecap="round" stroke-linejoin="round">
+                <path d="M8 4h8v4c0 4-2 6-4 7-2-1-4-3-4-7z"/>
+                <path d="M8 6H4c0 3 1 5 4 5M16 6h4c0 3-1 5-4 5M12 15v4M9 21h6"/>
+              </svg>
+            </span>
+            <span class="deal-retrospective-copy">
+              <strong>Win Repository</strong>
+              <span>Insights, success factors,<br>and best practices.</span>
+            </span>
+            <span class="deal-retrospective-arrow" aria-hidden="true">›</span>
           </span>
-          <span class="deal-retrospective-arrow" aria-hidden="true">›</span>
         </button>
 
         <button
@@ -653,20 +680,47 @@
           type="button"
           data-opportunities-action="loss-repository"
         >
-          <span class="deal-retrospective-icon" aria-hidden="true">
-            <svg width="35" height="35" viewBox="0 0 24 24" fill="none"
-                 stroke="currentColor" stroke-width="1.9"
-                 stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="7"/>
-              <circle cx="12" cy="12" r="3"/>
-              <path d="m17 7 4-4M17 3h4v4"/>
-            </svg>
+          <span class="deal-retrospective-media">
+            <img
+              id="loss-repository-image"
+              class="deal-retrospective-image"
+              data-image-key="loss-repository"
+              alt=""
+              width="800"
+              height="360"
+              loading="lazy"
+              decoding="async"
+              fetchpriority="low"
+              hidden
+            >
+            <span
+              id="loss-repository-fallback"
+              class="image-placeholder deal-retrospective-fallback"
+              data-image-fallback="loss-repository"
+              role="img"
+              aria-label="Loss Repository visual unavailable"
+              hidden
+            >
+              Loss Repository
+            </span>
+            <span class="deal-retrospective-media-wash" aria-hidden="true"></span>
           </span>
-          <span class="deal-retrospective-copy">
-            <strong>Loss Repository</strong>
-            <span>Challenges, lessons learned,<br>and improvement opportunities.</span>
+          <span class="deal-retrospective-content">
+            <span class="deal-retrospective-icon" aria-hidden="true">
+              <svg width="35" height="35" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="1.9"
+                   stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="7"/>
+                <circle cx="12" cy="12" r="3"/>
+                <path d="m17 7 4-4M17 3h4v4"/>
+              </svg>
+            </span>
+            <span class="deal-retrospective-copy">
+              <strong>Loss Repository</strong>
+              <span>Challenges, lessons learned,<br>and improvement opportunities.</span>
+            </span>
+            <span class="deal-retrospective-arrow" aria-hidden="true">›</span>
           </span>
-          <span class="deal-retrospective-arrow" aria-hidden="true">›</span>
         </button>
       </div>
     </article>

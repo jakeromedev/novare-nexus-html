@@ -20724,4 +20724,1239 @@
       }
     }
 
+
+    /* ================================================================
+       SHARED IMAGE LOADING FEEDBACK
+       Applied by bindImageCandidates() to every Drive-backed image.
+       The existing fallback remains the layout anchor while loading;
+       once the image succeeds it fades in, and on a real failure the
+       normal fallback content is restored.
+       ================================================================ */
+    @keyframes nexus-image-loader-shimmer {
+      0% { transform: translateX(-120%); }
+      100% { transform: translateX(120%); }
+    }
+
+    @keyframes nexus-image-loader-spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes nexus-image-reveal {
+      0% { opacity: 0; filter: saturate(.92); }
+      100% { opacity: 1; filter: saturate(1); }
+    }
+
+    .nexus-image-loader {
+      position: relative !important;
+      isolation: isolate;
+      overflow: hidden !important;
+      color: transparent !important;
+      border-color: rgb(157 190 219 / 48%) !important;
+      background-color: #EAF4FB !important;
+      background-image: linear-gradient(110deg, #E8F2FA 18%, #F7FBFE 38%, #E8F2FA 58%) !important;
+      background-size: 220% 100% !important;
+      cursor: progress;
+      user-select: none;
+    }
+
+    .nexus-image-loader > * {
+      opacity: 0 !important;
+    }
+
+    .nexus-image-loader::before {
+      content: "";
+      position: absolute;
+      z-index: 1;
+      inset: 0;
+      width: 48%;
+      pointer-events: none;
+      background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgb(255 255 255 / 12%) 12%,
+        rgb(255 255 255 / 74%) 50%,
+        rgb(255 255 255 / 12%) 88%,
+        transparent 100%
+      );
+      transform: translateX(-120%);
+      animation: nexus-image-loader-shimmer 1.35s cubic-bezier(.4, 0, .2, 1) infinite;
+    }
+
+    .nexus-image-loader::after {
+      content: "";
+      position: absolute;
+      z-index: 2;
+      top: 50%;
+      left: 50%;
+      width: 24px;
+      height: 24px;
+      margin: -12px 0 0 -12px;
+      box-sizing: border-box;
+      border: 2.5px solid rgb(8 85 220 / 17%);
+      border-top-color: #0755E8;
+      border-right-color: #13BDEB;
+      border-radius: 50%;
+      box-shadow: 0 0 0 5px rgb(255 255 255 / 52%), 0 5px 16px rgb(9 78 170 / 12%);
+      pointer-events: none;
+      animation: nexus-image-loader-spin .76s linear infinite;
+    }
+
+    img.nexus-image-loaded {
+      animation: nexus-image-reveal .34s ease-out both;
+    }
+
+    @media (max-width: 520px) {
+      .nexus-image-loader::after {
+        width: 20px;
+        height: 20px;
+        margin: -10px 0 0 -10px;
+        border-width: 2px;
+        box-shadow: 0 0 0 4px rgb(255 255 255 / 50%), 0 4px 12px rgb(9 78 170 / 10%);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .nexus-image-loader::before,
+      .nexus-image-loader::after,
+      img.nexus-image-loaded {
+        animation: none !important;
+      }
+
+      .nexus-image-loader::before {
+        transform: none;
+        opacity: .35;
+      }
+    }
+
+
+
+    /* ================================================================
+       SHARED IN-PLACE SKELETON WAVE
+       Images and managed resource controls now load in their own footprint.
+       No full-page blocking loader is used for route or link preparation.
+       ================================================================ */
+    @keyframes nexus-skeleton-wave {
+      0% { background-position: 210% 0; }
+      100% { background-position: -210% 0; }
+    }
+
+    .nexus-image-loader {
+      background-color: #DCE7F1 !important;
+      background-image: linear-gradient(
+        100deg,
+        #DCE7F1 18%,
+        #EEF4F9 36%,
+        #F8FBFD 49%,
+        #EEF4F9 62%,
+        #DCE7F1 80%
+      ) !important;
+      background-size: 240% 100% !important;
+      background-repeat: no-repeat !important;
+      animation: nexus-skeleton-wave 1.45s ease-in-out infinite !important;
+      cursor: progress;
+    }
+
+    /* The wave itself is the loader; remove the old centered spinner. */
+    .nexus-image-loader::before,
+    .nexus-image-loader::after {
+      content: none !important;
+      display: none !important;
+      animation: none !important;
+    }
+
+    /*
+      Managed links resolve from the Sheet asynchronously. Keep each actionable
+      control at its final width/height and shimmer only that control while the
+      URL registry is loading.
+    */
+    .nexus-control-loading {
+      position: relative !important;
+      isolation: isolate;
+      overflow: hidden !important;
+      color: transparent !important;
+      text-shadow: none !important;
+      border-color: rgb(164 185 205 / 48%) !important;
+      background-color: #DCE7F1 !important;
+      background-image: linear-gradient(
+        100deg,
+        #DCE7F1 18%,
+        #EAF1F7 36%,
+        #F7FAFC 49%,
+        #EAF1F7 62%,
+        #DCE7F1 80%
+      ) !important;
+      background-size: 240% 100% !important;
+      background-repeat: no-repeat !important;
+      background-position: 210% 0;
+      box-shadow: none !important;
+      transform: none !important;
+      pointer-events: none !important;
+      user-select: none !important;
+      cursor: progress !important;
+      animation: nexus-skeleton-wave 1.45s ease-in-out infinite !important;
+    }
+
+    .nexus-control-loading > * {
+      opacity: 0 !important;
+      visibility: hidden !important;
+    }
+
+    .nexus-control-loading::before,
+    .nexus-control-loading::after {
+      opacity: 0 !important;
+      visibility: hidden !important;
+      animation: none !important;
+    }
+
+    @keyframes nexus-control-ready {
+      0% { opacity: .58; }
+      100% { opacity: 1; }
+    }
+
+    .nexus-control-ready {
+      animation: nexus-control-ready .24s ease-out both;
+    }
+
+    /* Safety: legacy route/link overlay nodes may still exist in cached markup. */
+    .route-page .overview-link-loader,
+    .route-page .managed-link-loader {
+      display: none !important;
+    }
+
+    .route-page.is-default-page-loading,
+    .route-page.is-managed-links-loading {
+      min-height: 0 !important;
+    }
+
+    .route-page.is-default-page-loading > :not(.overview-link-loader):not(.managed-link-loader),
+    .route-page.is-managed-links-loading > :not(.overview-link-loader):not(.managed-link-loader) {
+      pointer-events: auto !important;
+      user-select: auto !important;
+      filter: none !important;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .nexus-image-loader,
+      .nexus-control-loading,
+      .nexus-control-ready {
+        animation: none !important;
+        background-position: 50% 0 !important;
+      }
+    }
+
+
+    /* ================================================================
+       OVERVIEW VISUAL REFRESH — IMAGE-LED REFERENCE CARDS
+       Makes the About / Directories artwork the focal point while keeping
+       all existing managed-link actions and page content intact.
+       ================================================================ */
+    .overview-reference-grid {
+      gap: 16px;
+      margin: -24px 20px 0;
+    }
+
+    .overview-reference-card {
+      min-height: 390px;
+      padding: 0;
+      border: 1px solid #CFE3F3;
+      border-radius: 18px;
+      background: linear-gradient(180deg, #FFFFFF 0%, #FBFDFF 100%);
+      box-shadow:
+        0 14px 34px rgb(7 49 115 / 8%),
+        0 2px 7px rgb(7 49 115 / 4%);
+      transition:
+        transform .22s ease,
+        box-shadow .22s ease,
+        border-color .22s ease;
+    }
+
+    .overview-reference-card:hover {
+      transform: translateY(-3px);
+      border-color: #AFD4F1;
+      box-shadow:
+        0 18px 42px rgb(7 49 115 / 12%),
+        0 3px 9px rgb(7 49 115 / 5%);
+    }
+
+    .overview-reference-card-header {
+      position: relative;
+      display: block;
+      min-height: 178px;
+      margin: 0;
+      overflow: hidden;
+      border-radius: 17px 17px 0 0;
+      isolation: isolate;
+      background: #EAF5FD;
+    }
+
+    .overview-reference-card-header::before {
+      content: "";
+      position: absolute;
+      z-index: 2;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(
+          90deg,
+          rgb(248 252 255 / 98%) 0%,
+          rgb(248 252 255 / 92%) 24%,
+          rgb(248 252 255 / 70%) 42%,
+          rgb(248 252 255 / 18%) 70%,
+          transparent 100%
+        ),
+        linear-gradient(
+          0deg,
+          rgb(255 255 255 / 62%) 0%,
+          transparent 43%
+        );
+    }
+
+    .overview-reference-card-header::after {
+      content: "";
+      position: absolute;
+      z-index: 2;
+      right: -8%;
+      bottom: -42%;
+      width: 72%;
+      height: 90%;
+      border-radius: 50%;
+      pointer-events: none;
+      background: radial-gradient(circle, rgb(49 150 255 / 17%) 0%, transparent 68%);
+    }
+
+    .overview-reference-thumbnail {
+      position: absolute;
+      z-index: 0;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      border-radius: 0;
+      background: #EAF5FD;
+    }
+
+    .overview-reference-image,
+    .overview-reference-image-fallback {
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .overview-reference-image {
+      object-fit: cover;
+      object-position: center;
+      transform: scale(1.002);
+      transition: transform .55s cubic-bezier(.2, .7, .2, 1), filter .4s ease;
+    }
+
+    .overview-reference-card:hover .overview-reference-image {
+      transform: scale(1.035);
+      filter: saturate(1.04) contrast(1.02);
+    }
+
+    .overview-reference-image-fallback {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding: 20px;
+      color: #6A82A2;
+      background:
+        linear-gradient(115deg, #EFF8FE 0%, #DCEFFD 48%, #E8F7FC 100%);
+      font-size: .75rem;
+      font-weight: 700;
+    }
+
+    .overview-reference-heading-copy {
+      position: absolute;
+      z-index: 3;
+      left: 22px;
+      bottom: 22px;
+      width: min(64%, 300px);
+      min-width: 0;
+      padding: 0;
+    }
+
+    .overview-reference-heading-copy h2 {
+      margin: 0;
+      color: #071F63;
+      font-size: clamp(1.36rem, 1.65vw, 1.72rem);
+      font-weight: 860;
+      line-height: 1.02;
+      letter-spacing: -.035em;
+      text-shadow: 0 1px 0 rgb(255 255 255 / 75%);
+    }
+
+    .overview-reference-card:not(.overview-directory-card)
+      .overview-reference-heading-copy h2::before,
+    .overview-directory-card .overview-reference-heading-copy h2::before {
+      display: block;
+      margin-bottom: 6px;
+      color: #174D8C;
+      font-size: .60rem;
+      font-weight: 850;
+      line-height: 1;
+      letter-spacing: .105em;
+      text-transform: uppercase;
+    }
+
+    .overview-reference-card:not(.overview-directory-card)
+      .overview-reference-heading-copy h2::before {
+      content: "ABOUT";
+    }
+
+    .overview-directory-card .overview-reference-heading-copy h2::before {
+      content: "DIRECTORIES";
+    }
+
+    .overview-reference-heading-copy p {
+      max-width: 280px;
+      margin: 7px 0 0;
+      color: #315681;
+      font-size: .72rem;
+      font-weight: 540;
+      line-height: 1.34;
+      text-wrap: balance;
+    }
+
+    .overview-card-arrow {
+      position: absolute;
+      z-index: 4;
+      right: 18px;
+      bottom: 19px;
+      width: 44px;
+      height: 44px;
+      margin: 0;
+      border-color: rgb(159 205 242 / 76%);
+      color: #0757EF;
+      background: rgb(255 255 255 / 94%);
+      box-shadow:
+        0 8px 20px rgb(6 76 171 / 15%),
+        inset 0 1px 0 rgb(255 255 255 / 70%);
+      backdrop-filter: blur(7px);
+      -webkit-backdrop-filter: blur(7px);
+    }
+
+    .overview-card-arrow:hover {
+      transform: translateX(3px) scale(1.03);
+      border-color: #7CB9EA;
+      box-shadow: 0 10px 24px rgb(6 76 171 / 20%);
+    }
+
+    .overview-reference-links,
+    .overview-directory-card .overview-reference-links {
+      margin: 12px 14px 14px;
+      overflow: hidden;
+      border: 1px solid #E1EDF6;
+      border-radius: 11px;
+      background: #FFFFFF;
+      box-shadow: 0 2px 8px rgb(9 57 123 / 3%);
+    }
+
+    .overview-reference-row {
+      min-height: 36px;
+      padding: 6px 10px;
+      border-bottom-color: #EBF2F8;
+      font-size: .72rem;
+      transition:
+        color .15s ease,
+        background .15s ease,
+        padding-left .15s ease;
+    }
+
+    .overview-reference-row:hover {
+      padding-left: 12px;
+      color: #0757EF;
+      background: linear-gradient(90deg, #F4FAFF 0%, #FAFDFF 100%);
+    }
+
+    .overview-reference-row.is-highlighted {
+      position: relative;
+      background: linear-gradient(90deg, #EBF5FF 0%, #F8FBFF 100%);
+    }
+
+    .overview-reference-row.is-highlighted::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 3px;
+      background: linear-gradient(180deg, #0959F2, #0CC9DD);
+    }
+
+    .overview-reference-row-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      box-shadow: 0 3px 8px rgb(7 87 239 / 15%);
+    }
+
+    .overview-directory-row {
+      min-height: 46px;
+      font-size: .74rem;
+    }
+
+    /* Stronger visual bridge into the solution-group cards. */
+    .overview-solution-groups {
+      margin-top: 22px;
+    }
+
+    .overview-section-header-enhanced {
+      align-items: flex-start;
+      margin: 0 4px 14px;
+    }
+
+    .overview-section-kicker-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+
+    .overview-section-kicker {
+      color: #31537E;
+      font-size: .62rem;
+      font-weight: 850;
+      line-height: 1;
+      letter-spacing: .15em;
+    }
+
+    .overview-section-header-enhanced .overview-section-accent {
+      width: 42px;
+      height: 4px;
+    }
+
+    .overview-section-header-enhanced #overview-solution-groups-title {
+      margin: 0 0 0 52px;
+      color: #071F63;
+      font-size: clamp(1.42rem, 1.9vw, 1.82rem);
+      font-weight: 880;
+      line-height: 1.04;
+      letter-spacing: -.035em;
+    }
+
+    .overview-section-header-enhanced .overview-section-heading > p {
+      margin: 6px 0 0 52px;
+      color: #536E91;
+      font-size: .76rem;
+    }
+
+    .overview-solution-card {
+      border-radius: 15px;
+      box-shadow: 0 10px 25px rgb(3 49 113 / 7%);
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+
+    .overview-solution-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 34px rgb(3 49 113 / 10%);
+    }
+
+    @media (max-width: 1199px) {
+      .overview-reference-grid {
+        gap: 15px;
+        margin: 18px 18px 0;
+      }
+
+      .overview-reference-card {
+        min-height: 380px;
+      }
+
+      .overview-directory-card .overview-reference-card-header,
+      .overview-reference-card-header {
+        min-height: 175px;
+      }
+
+      .overview-directory-card {
+        grid-column: 1 / -1;
+      }
+
+      .overview-directory-card .overview-reference-heading-copy {
+        width: min(48%, 390px);
+      }
+    }
+
+    @media (max-width: 767px) {
+      .overview-reference-grid {
+        gap: 14px;
+        margin: 14px 0 0;
+      }
+
+      .overview-reference-card {
+        min-height: 0;
+        padding: 0;
+        border-radius: 16px;
+      }
+
+      .overview-reference-card-header,
+      .overview-directory-card .overview-reference-card-header {
+        display: block;
+        min-height: 186px;
+        margin: 0;
+        border-radius: 15px 15px 0 0;
+      }
+
+      .overview-reference-thumbnail {
+        inset: 0;
+        width: 100%;
+        height: 100%;
+      }
+
+      .overview-reference-heading-copy,
+      .overview-directory-card .overview-reference-heading-copy {
+        left: 18px;
+        bottom: 18px;
+        width: min(68%, 320px);
+        padding: 0;
+      }
+
+      .overview-reference-heading-copy h2 {
+        font-size: 1.38rem;
+      }
+
+      .overview-reference-heading-copy p {
+        display: block;
+        margin-top: 6px;
+        font-size: .70rem;
+        -webkit-line-clamp: unset;
+      }
+
+      .overview-card-arrow {
+        right: 16px;
+        bottom: 17px;
+        width: 40px;
+        height: 40px;
+      }
+
+      .overview-reference-links,
+      .overview-directory-card .overview-reference-links {
+        margin: 10px 11px 12px;
+      }
+
+      .overview-reference-row {
+        min-height: 40px;
+        font-size: .73rem;
+      }
+
+      .overview-directory-row {
+        min-height: 44px;
+      }
+
+      .overview-section-header-enhanced {
+        margin: 0 2px 12px;
+      }
+
+      .overview-section-kicker-row {
+        gap: 8px;
+      }
+
+      .overview-section-kicker {
+        font-size: .58rem;
+        letter-spacing: .12em;
+      }
+
+      .overview-section-header-enhanced .overview-section-accent {
+        width: 34px;
+      }
+
+      .overview-section-header-enhanced #overview-solution-groups-title,
+      .overview-section-header-enhanced .overview-section-heading > p {
+        margin-left: 42px;
+      }
+
+      .overview-section-header-enhanced #overview-solution-groups-title {
+        font-size: 1.35rem;
+      }
+
+      .overview-section-header-enhanced .overview-section-heading > p {
+        font-size: .70rem;
+      }
+    }
+
+    @media (max-width: 440px) {
+      .overview-reference-card-header,
+      .overview-directory-card .overview-reference-card-header {
+        min-height: 176px;
+      }
+
+      .overview-reference-card-header::before {
+        background:
+          linear-gradient(
+            90deg,
+            rgb(248 252 255 / 97%) 0%,
+            rgb(248 252 255 / 86%) 36%,
+            rgb(248 252 255 / 30%) 70%,
+            transparent 100%
+          ),
+          linear-gradient(0deg, rgb(255 255 255 / 62%) 0%, transparent 45%);
+      }
+
+      .overview-reference-heading-copy,
+      .overview-directory-card .overview-reference-heading-copy {
+        left: 15px;
+        bottom: 15px;
+        width: 67%;
+      }
+
+      .overview-reference-heading-copy h2 {
+        font-size: 1.24rem;
+      }
+
+      .overview-reference-heading-copy p {
+        font-size: .66rem;
+        line-height: 1.3;
+      }
+
+      .overview-card-arrow {
+        right: 13px;
+        bottom: 14px;
+        width: 38px;
+        height: 38px;
+      }
+
+      .overview-section-header-enhanced #overview-solution-groups-title {
+        font-size: 1.24rem;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .overview-reference-card,
+      .overview-reference-image,
+      .overview-card-arrow,
+      .overview-reference-row,
+      .overview-solution-card {
+        transition: none !important;
+      }
+
+      .overview-reference-card:hover,
+      .overview-reference-card:hover .overview-reference-image,
+      .overview-solution-card:hover {
+        transform: none !important;
+      }
+    }
+
+    
+    /* =========================================================
+      H3 OPPORTUNITIES — 2026 VISUAL REFRESH
+      Beautified layout based on the approved concept.
+    ========================================================== */
+
+    .opportunities-entry-section {
+      padding: 16px 18px 22px;
+      background: transparent;
+    }
+
+    .opportunities-entry-grid {
+      gap: 16px;
+    }
+
+    .opportunity-entry-card {
+      min-height: 178px;
+      border-radius: 22px;
+      border: 1px solid #cfe2f6;
+      background: linear-gradient(180deg, #fdfefe 0%, #f7fbff 100%);
+      box-shadow: 0 10px 26px rgb(15 71 150 / 8%), inset 0 1px 0 rgb(255 255 255 / 80%);
+    }
+
+    .opportunity-entry-gradient {
+      background:
+        linear-gradient(90deg, rgb(255 255 255 / 98%) 0%, rgb(255 255 255 / 96%) 34%, rgb(255 255 255 / 80%) 48%, rgb(255 255 255 / 28%) 68%, transparent 100%),
+        linear-gradient(180deg, rgb(255 255 255 / 12%) 0%, rgb(255 255 255 / 0%) 100%);
+    }
+
+    .opportunity-entry-content {
+      grid-template-columns: 66px minmax(0, 1fr) 52px;
+      grid-template-rows: auto 1fr auto;
+      gap: 8px 14px;
+      min-height: 178px;
+      padding: 18px 18px 16px;
+    }
+
+    .opportunity-entry-icon {
+      width: 54px;
+      height: 54px;
+      border-radius: 16px;
+      box-shadow: inset 0 1px 0 rgb(255 255 255 / 75%), 0 8px 18px rgb(29 101 190 / 10%);
+    }
+
+    .opportunity-entry-copy h2 {
+      color: #0b2f95;
+      font-size: clamp(1.02rem, .95rem + .2vw, 1.18rem);
+      line-height: 1.04;
+    }
+
+    .opportunity-entry-copy p {
+      max-width: 310px;
+      margin-top: 6px;
+      color: #32599e;
+      font-size: .79rem;
+      line-height: 1.3;
+    }
+
+    .opportunity-entry-arrow {
+      width: 46px;
+      height: 46px;
+      margin-top: 2px;
+      border-width: 1px;
+      font-size: 1.72rem;
+    }
+
+    .opportunity-entry-link {
+      min-height: 42px;
+      gap: 10px;
+      padding: 0 18px;
+      border: 1px solid color-mix(in srgb, var(--entry-accent) 24%, #d2e3f4);
+      border-radius: 999px;
+      color: #0c50d4;
+      background: rgb(255 255 255 / 88%);
+      box-shadow: 0 7px 18px rgb(0 58 135 / 8%);
+      font-size: .83rem;
+      font-weight: 850;
+    }
+
+    .opportunity-entry-link:hover {
+      background: #ffffff;
+    }
+
+    .opportunities-panel,
+    .solutioning-toolkit-section,
+    .opportunities-quick-access,
+    .sales-pillars-panel,
+    .deal-retrospective-panel {
+      border-radius: 24px;
+      border-color: #d6e6f5;
+      box-shadow: 0 10px 24px rgb(14 72 148 / 5%), inset 0 1px 0 rgb(255 255 255 / 72%);
+    }
+
+    .opportunities-panel-header {
+      margin-bottom: 14px;
+    }
+
+    .opportunities-panel-title-group {
+      gap: 12px;
+    }
+
+    .opportunities-panel-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      box-shadow: 0 12px 24px rgb(18 90 197 / 16%);
+    }
+
+    .opportunities-panel-title-group h2 {
+      font-size: 1.08rem;
+      letter-spacing: -.02em;
+    }
+
+    .opportunities-panel-title-group p {
+      font-size: .79rem;
+      color: #5a78aa;
+    }
+
+    .opportunities-view-all {
+      min-height: 42px;
+      padding: 0 14px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, #ffffff 0%, #f6faff 100%);
+      box-shadow: 0 6px 14px rgb(20 78 163 / 7%);
+    }
+
+    .solutioning-toolkit-section {
+      margin: 0 18px 14px;
+      padding: 14px 14px 16px;
+    }
+
+    .solutioning-toolkit-grid {
+      gap: 12px;
+    }
+
+    .toolkit-card {
+      position: relative;
+      min-height: 132px;
+      padding: 16px 16px 14px;
+      border-radius: 18px;
+      border: 1px solid #dbe8f5;
+      background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+      box-shadow: 0 6px 16px rgb(18 80 157 / 5%);
+    }
+
+    .toolkit-card::before {
+      content: "";
+      position: absolute;
+      inset: auto -10% -32px 10%;
+      height: 82px;
+      border-radius: 50%;
+      background: radial-gradient(circle at center, color-mix(in srgb, var(--toolkit-accent, #7bbcff) 15%, transparent) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .toolkit-card-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 14px;
+      box-shadow: 0 10px 20px rgb(20 87 170 / 8%);
+    }
+
+    .toolkit-card-label {
+      margin-top: 12px;
+      color: #193b8d;
+      font-size: .88rem;
+      line-height: 1.15;
+    }
+
+    .toolkit-card-arrow {
+      right: 14px;
+      bottom: 14px;
+      width: 34px;
+      height: 34px;
+      border: 1px solid #d9e6f5;
+      border-radius: 50%;
+      background: rgb(255 255 255 / 90%);
+      box-shadow: 0 4px 12px rgb(18 79 154 / 8%);
+    }
+
+    .toolkit-card.is-blue { --toolkit-accent: #5d96ff; }
+    .toolkit-card.is-teal { --toolkit-accent: #59d7d4; }
+    .toolkit-card.is-purple { --toolkit-accent: #c5abff; }
+    .toolkit-card.is-orange { --toolkit-accent: #ffbf83; }
+
+    .opportunities-repository-grid {
+      gap: 14px;
+      margin: 0 18px 14px;
+    }
+
+    .sales-pillars-panel,
+    .deal-retrospective-panel {
+      padding: 14px;
+    }
+
+    .sales-pillars-grid {
+      gap: 14px;
+    }
+
+    .sales-pillar-card {
+      display: block;
+      min-height: 176px;
+      padding: 0;
+      border-radius: 18px;
+      overflow: hidden;
+      border: 1px solid #d8e6f3;
+      background: #0e1f48;
+      box-shadow: 0 8px 20px rgb(15 61 128 / 8%);
+    }
+
+    .sales-pillar-card:hover {
+      transform: translateY(-3px);
+    }
+
+    .sales-pillar-card::after {
+      content: "";
+      position: absolute;
+      inset: auto 0 0;
+      height: 68px;
+      background: linear-gradient(180deg, rgb(10 31 74 / 8%) 0%, rgb(10 31 74 / 82%) 55%, rgb(10 31 74 / 96%) 100%);
+      pointer-events: none;
+    }
+
+    .sales-pillar-media {
+      width: 100%;
+      height: 176px;
+      border-radius: 0;
+    }
+
+    .sales-pillar-card strong,
+    .sales-pillar-arrow {
+      position: absolute;
+      z-index: 2;
+    }
+
+    .sales-pillar-card strong {
+      left: 18px;
+      right: 56px;
+      bottom: 18px;
+      padding-left: 0;
+      color: #ffffff;
+      font-size: 1.02rem;
+      line-height: 1;
+    }
+
+    .sales-pillar-arrow {
+      right: 14px;
+      bottom: 14px;
+      width: 38px;
+      height: 38px;
+      border-color: rgb(255 255 255 / 30%);
+      color: #163da4;
+      background: rgb(255 255 255 / 92%);
+    }
+
+    .deal-retrospective-grid {
+      gap: 14px;
+    }
+
+    .deal-retrospective-card {
+      --retro-accent: #25a962;
+      --retro-deep: #117746;
+      --retro-tint: #ecfbf1;
+      position: relative;
+      display: block;
+      min-height: 176px;
+      padding: 0;
+      overflow: hidden;
+      border-width: 1px;
+      border-radius: 18px;
+      background: linear-gradient(180deg, #fff 0%, #f9fcff 100%);
+      box-shadow: 0 8px 20px rgb(15 61 128 / 7%);
+    }
+
+    .deal-retrospective-card.is-loss {
+      --retro-accent: #e54a4a;
+      --retro-deep: #b43535;
+      --retro-tint: #fff0f0;
+    }
+
+    .deal-retrospective-media,
+    .deal-retrospective-image,
+    .deal-retrospective-fallback,
+    .deal-retrospective-media-wash {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .deal-retrospective-media {
+      display: block;
+      overflow: hidden;
+    }
+
+    .deal-retrospective-image {
+      display: block;
+      object-fit: cover;
+      object-position: center;
+    }
+
+    .deal-retrospective-fallback {
+      border: 0;
+      border-radius: 0;
+      color: var(--retro-deep);
+      background: var(--retro-tint);
+      font-size: .85rem;
+      font-weight: 850;
+    }
+
+    .deal-retrospective-media-wash {
+      background:
+        linear-gradient(90deg, color-mix(in srgb, var(--retro-tint) 90%, white) 0%, color-mix(in srgb, var(--retro-tint) 84%, white) 36%, rgb(255 255 255 / 38%) 70%, transparent 100%),
+        linear-gradient(180deg, transparent 0%, rgb(255 255 255 / 8%) 100%);
+    }
+
+    .deal-retrospective-content {
+      position: absolute;
+      inset: auto 16px 16px 16px;
+      z-index: 2;
+      display: grid;
+      grid-template-columns: 58px minmax(0, 1fr) 40px;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .deal-retrospective-icon {
+      width: 54px;
+      height: 54px;
+      border-radius: 16px;
+      box-shadow: 0 10px 18px rgb(14 63 131 / 12%);
+    }
+
+    .deal-retrospective-copy strong {
+      font-size: 1rem;
+    }
+
+    .deal-retrospective-copy > span {
+      margin-top: 4px;
+      font-size: .77rem;
+      line-height: 1.22;
+    }
+
+    .deal-retrospective-arrow {
+      width: 38px;
+      height: 38px;
+      font-size: 1.35rem;
+    }
+
+    .opportunities-quick-access {
+      margin: 0 18px 18px;
+      padding: 14px;
+    }
+
+    .opportunities-quick-access-header {
+      margin-bottom: 12px;
+    }
+
+    .opportunities-quick-access-title-group {
+      gap: 10px;
+    }
+
+    .quick-access-bolt {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      color: #ffffff;
+      background: linear-gradient(135deg, #205bf3, #4f8cff);
+      box-shadow: 0 10px 20px rgb(24 89 198 / 20%);
+      font-size: 1rem;
+      transform: none;
+    }
+
+    .opportunities-quick-access-title-group h2 {
+      font-size: 1.04rem;
+    }
+
+    .opportunities-quick-access-title-group p {
+      margin-left: 0;
+      font-size: .78rem;
+    }
+
+    .opportunities-quick-access-grid {
+      gap: 12px;
+    }
+
+    .opportunities-quick-card {
+      grid-template-columns: 44px minmax(0, 1fr) 22px;
+      min-height: 64px;
+      padding: 10px 12px;
+      border-radius: 18px;
+      font-size: .84rem;
+      font-weight: 820;
+    }
+
+    .opportunities-quick-card.is-blue:nth-child(1) { --quick-accent: #2869ff; --quick-deep: #1d4dd1; --quick-tint: #eaf1ff; }
+    .opportunities-quick-card.is-blue:nth-child(2) { --quick-accent: #8a4dff; --quick-deep: #6e31d8; --quick-tint: #f1ebff; }
+    .opportunities-quick-card.is-blue:nth-child(3) { --quick-accent: #31c6c8; --quick-deep: #1599a1; --quick-tint: #e8fbfb; }
+    .opportunities-quick-card.is-blue:nth-child(4) { --quick-accent: #ff9437; --quick-deep: #d66d13; --quick-tint: #fff1e4; }
+    .opportunities-quick-card.is-blue:nth-child(5) { --quick-accent: #3477ff; --quick-deep: #1c55d1; --quick-tint: #ecf2ff; }
+    .opportunities-quick-card.is-purple { --quick-accent: #7c3ef1; --quick-deep: #6328cc; --quick-tint: #f3edff; }
+
+    @media (max-width: 1320px) {
+      .sales-pillars-grid,
+      .deal-retrospective-grid,
+      .opportunities-quick-access-grid {
+        gap: 12px;
+      }
+    }
+
+    @media (max-width: 1080px) {
+      .toolkit-card {
+        min-height: 124px;
+      }
+
+      .sales-pillar-card,
+      .sales-pillar-media,
+      .deal-retrospective-card {
+        min-height: 164px;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .opportunity-entry-card,
+      .opportunity-entry-content {
+        min-height: 168px;
+      }
+
+      .deal-retrospective-content {
+        inset-inline: 14px;
+      }
+    }
+
+    @media (max-width: 767px) {
+      .opportunities-entry-section,
+      .solutioning-toolkit-section,
+      .opportunities-repository-grid,
+      .opportunities-quick-access {
+        margin-inline: 14px;
+        padding-inline: 14px;
+      }
+
+      .opportunities-entry-section {
+        padding: 14px 14px 18px;
+        margin-inline: 0;
+      }
+
+      .opportunity-entry-card,
+      .opportunity-entry-content {
+        min-height: 170px;
+      }
+
+      .opportunity-entry-content {
+        grid-template-columns: 58px minmax(0, 1fr) 48px;
+        padding: 16px;
+      }
+
+      .opportunity-entry-copy p {
+        max-width: 92%;
+        font-size: .76rem;
+      }
+
+      .solutioning-toolkit-section,
+      .sales-pillars-panel,
+      .deal-retrospective-panel,
+      .opportunities-quick-access {
+        padding: 14px;
+      }
+
+      .toolkit-card {
+        min-height: 118px;
+        padding: 14px;
+      }
+
+      .sales-pillar-card,
+      .sales-pillar-media,
+      .deal-retrospective-card {
+        min-height: 158px;
+      }
+
+      .opportunities-quick-access-title-group p {
+        width: 100%;
+        margin-left: 42px;
+      }
+
+      .opportunities-quick-card {
+        min-height: 60px;
+        font-size: .8rem;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .toolkit-card {
+        min-height: 112px;
+      }
+
+      .sales-pillar-card,
+      .sales-pillar-media,
+      .deal-retrospective-card {
+        min-height: 150px;
+      }
+
+      .deal-retrospective-content {
+        grid-template-columns: 50px minmax(0, 1fr) 36px;
+        gap: 8px;
+      }
+
+      .deal-retrospective-icon {
+        width: 46px;
+        height: 46px;
+        border-radius: 14px;
+      }
+
+      .deal-retrospective-copy strong {
+        font-size: .92rem;
+      }
+
+      .deal-retrospective-copy > span {
+        font-size: .72rem;
+      }
+    }
+
+
 </style>

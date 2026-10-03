@@ -1,0 +1,877 @@
+<style>
+/* Styles Overview Refinements — modularized from the former monolithic Styles.html. */
+    /* =========================================================
+       H1 OVERVIEW — GROUPED HIGHLIGHTED REFERENCE ITEMS
+       Keep important resources inside their natural list group.
+    ========================================================== */
+
+    /* With featured resources now kept inside the list, cards no longer
+       need a detached bottom action treatment. */
+    .overview-reference-links {
+      margin-bottom: 0;
+    }
+
+    .overview-reference-row.is-highlighted {
+      position: relative;
+      color: #083DBA;
+      background:
+        linear-gradient(90deg, #E9F4FF 0%, #F4F9FF 58%, #FFFFFF 100%);
+      font-weight: 760;
+      box-shadow: inset 3px 0 0 #1765F4;
+    }
+
+    .overview-reference-row.is-highlighted:hover {
+      color: #0649D8;
+      background:
+        linear-gradient(90deg, #DDEFFF 0%, #EDF7FF 60%, #FFFFFF 100%);
+    }
+
+    .overview-reference-row.is-highlighted .overview-reference-row-icon {
+      color: #FFFFFF;
+      background: linear-gradient(145deg, #2A79FF 0%, #1646D5 100%);
+      box-shadow:
+        0 3px 8px rgb(17 75 211 / 22%),
+        inset 0 1px 0 rgb(255 255 255 / 20%);
+    }
+
+    .overview-reference-row.is-highlighted .overview-reference-chevron {
+      color: #0757EF;
+      font-weight: 800;
+    }
+
+    .overview-reference-row.is-highlighted strong {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .overview-reference-row.is-highlighted strong::after {
+      content: "KEY";
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 15px;
+      padding: 1px 5px;
+      border: 1px solid #B9D8FF;
+      border-radius: 999px;
+      color: #0B55D7;
+      background: #FFFFFF;
+      font-size: .40rem;
+      font-weight: 850;
+      line-height: 1;
+      letter-spacing: .055em;
+    }
+
+    /* Legacy detached featured-link markup is intentionally hidden if an
+       older cached page template appears before the Phase 4 renderer runs. */
+    .overview-reference-featured-link {
+      display: none !important;
+    }
+
+    @media (max-width: 767px) {
+      .overview-reference-row.is-highlighted strong::after {
+        font-size: .38rem;
+      }
+    }
+
+
+    /* =========================================================
+       H1 OVERVIEW — MANAGED LINK / COMING SOON STATES
+       Gray treatment is applied only after the link registry has
+       resolved and no usable URL exists for a configured key.
+    ========================================================== */
+
+    .overview-page [data-managed-link-missing="true"] {
+      --overview-missing-bg: #F2F5F8;
+      --overview-missing-border: #D7DEE7;
+      --overview-missing-text: #6E7C8D;
+      --overview-missing-icon: #8190A2;
+
+      cursor: pointer !important;
+      filter: saturate(.22);
+      opacity: .78;
+      border-color: var(--overview-missing-border) !important;
+      box-shadow: none !important;
+      transition:
+        opacity 160ms ease,
+        transform 160ms ease,
+        background-color 160ms ease,
+        border-color 160ms ease;
+    }
+
+    .overview-page [data-managed-link-missing="true"]:hover {
+      opacity: .94;
+      transform: translateY(-1px);
+      border-color: #C7D0DA !important;
+    }
+
+    .overview-page .overview-reference-row[data-managed-link-missing="true"],
+    .overview-page .overview-capability-card[data-managed-link-missing="true"],
+    .overview-page .overview-card-arrow[data-managed-link-missing="true"],
+    .overview-page .overview-solution-arrow[data-managed-link-missing="true"],
+    .overview-page .overview-video-button[data-managed-link-missing="true"] {
+      color: var(--overview-missing-text) !important;
+    }
+
+    .overview-page .overview-reference-row[data-managed-link-missing="true"] {
+      background: var(--overview-missing-bg) !important;
+    }
+
+    .overview-page .overview-reference-row[data-managed-link-missing="true"] strong,
+    .overview-page .overview-reference-row[data-managed-link-missing="true"] span,
+    .overview-page .overview-reference-row[data-managed-link-missing="true"] svg {
+      color: var(--overview-missing-text) !important;
+      stroke: var(--overview-missing-icon) !important;
+    }
+
+    .overview-page .overview-reference-row.is-highlighted[data-managed-link-missing="true"] {
+      background:
+        linear-gradient(135deg, #F2F5F8 0%, #E9EEF3 100%) !important;
+      border-color: #D5DDE6 !important;
+    }
+
+    .overview-page .overview-reference-row.is-highlighted[data-managed-link-missing="true"] strong::after {
+      content: "SOON";
+      color: #69798A;
+      background: #E2E7EC;
+      border-color: #CCD5DE;
+    }
+
+    .overview-page .overview-capability-card[data-managed-link-missing="true"] {
+      background: #F3F6F8 !important;
+    }
+
+    .overview-page .overview-video-button[data-managed-link-missing="true"],
+    .overview-page .overview-card-arrow[data-managed-link-missing="true"],
+    .overview-page .overview-solution-arrow[data-managed-link-missing="true"] {
+      background: #EEF2F5 !important;
+    }
+
+    /* Coming-soon dialog */
+    .overview-coming-soon-dialog {
+      width: min(92vw, 470px);
+      max-width: 470px;
+      margin: auto;
+      padding: 0;
+      border: 0;
+      border-radius: 22px;
+      overflow: visible;
+      color: #0A2757;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .overview-coming-soon-dialog::backdrop {
+      background: rgb(4 20 43 / 55%);
+      backdrop-filter: blur(7px);
+      -webkit-backdrop-filter: blur(7px);
+    }
+
+    .overview-coming-soon-card {
+      position: relative;
+      overflow: hidden;
+      padding: 36px 34px 30px;
+      border: 1px solid rgb(199 222 241 / 82%);
+      border-radius: 22px;
+      text-align: center;
+      background:
+        radial-gradient(circle at 85% 4%, rgb(0 183 255 / 15%), transparent 32%),
+        radial-gradient(circle at 12% 88%, rgb(86 69 255 / 9%), transparent 34%),
+        linear-gradient(145deg, #FFFFFF 0%, #F6FBFF 100%);
+      box-shadow:
+        0 28px 80px rgb(0 28 70 / 24%),
+        inset 0 1px 0 rgb(255 255 255 / 90%);
+    }
+
+    .overview-coming-soon-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 12%;
+      right: 12%;
+      height: 3px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #156BFF, #00C9E8, #8B61FF);
+    }
+
+    .overview-coming-soon-close {
+      position: absolute;
+      z-index: 2;
+      top: 15px;
+      right: 15px;
+      display: grid;
+      width: 34px;
+      height: 34px;
+      place-items: center;
+      padding: 0;
+      border: 1px solid #DFE9F2;
+      border-radius: 50%;
+      color: #69809A;
+      background: rgb(255 255 255 / 76%);
+      cursor: pointer;
+      transition:
+        color 150ms ease,
+        background-color 150ms ease,
+        transform 150ms ease;
+    }
+
+    .overview-coming-soon-close:hover {
+      color: #174CA0;
+      background: #FFFFFF;
+      transform: rotate(4deg);
+    }
+
+    .overview-coming-soon-close svg {
+      width: 16px;
+      height: 16px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+    }
+
+    .overview-coming-soon-icon {
+      display: grid;
+      width: 66px;
+      height: 66px;
+      margin: 0 auto 17px;
+      place-items: center;
+      border-radius: 20px;
+      color: #096AF2;
+      background:
+        linear-gradient(145deg, #EAF5FF 0%, #E8F9FB 100%);
+      box-shadow:
+        inset 0 0 0 1px rgb(150 204 245 / 38%),
+        0 9px 24px rgb(0 91 194 / 10%);
+    }
+
+    .overview-coming-soon-icon svg {
+      width: 37px;
+      height: 37px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.55;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .overview-coming-soon-eyebrow {
+      margin: 0 0 8px;
+      color: #0877E8;
+      font-size: .68rem;
+      font-weight: 850;
+      letter-spacing: .14em;
+    }
+
+    .overview-coming-soon-dialog h2 {
+      margin: 0;
+      color: #0A2C62;
+      font-size: clamp(1.25rem, 3vw, 1.55rem);
+      line-height: 1.12;
+      font-weight: 850;
+      letter-spacing: -.025em;
+    }
+
+    .overview-coming-soon-resource {
+      margin: 13px 0 5px;
+      color: #135FC0;
+      font-size: .86rem;
+      font-weight: 760;
+      line-height: 1.35;
+    }
+
+    .overview-coming-soon-message {
+      max-width: 370px;
+      margin: 0 auto;
+      color: #61758C;
+      font-size: .79rem;
+      line-height: 1.55;
+    }
+
+    .overview-coming-soon-action {
+      min-height: 40px;
+      margin-top: 22px;
+      padding: 9px 18px;
+      border: 0;
+      border-radius: 999px;
+      color: #FFFFFF;
+      font-size: .76rem;
+      font-weight: 780;
+      background:
+        linear-gradient(90deg, #0C67E8 0%, #058EDB 100%);
+      box-shadow: 0 9px 20px rgb(7 104 217 / 19%);
+      cursor: pointer;
+      transition:
+        transform 150ms ease,
+        box-shadow 150ms ease;
+    }
+
+    .overview-coming-soon-action:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 24px rgb(7 104 217 / 24%);
+    }
+
+    @media (max-width: 560px) {
+      .overview-coming-soon-card {
+        padding: 32px 22px 24px;
+        border-radius: 18px;
+      }
+
+      .overview-coming-soon-dialog {
+        width: min(94vw, 470px);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .overview-page [data-managed-link-missing="true"],
+      .overview-coming-soon-close,
+      .overview-coming-soon-action {
+        transition: none;
+      }
+    }
+
+
+    /* =========================================================
+       H1 OVERVIEW — SOLUTION CAPABILITY READABILITY FIX
+       Prevents EDGE / INFRA / NETSEC labels and descriptions from
+       breaking character-by-character inside compact capability cards.
+    ========================================================== */
+
+    .overview-page .overview-capability-copy {
+      min-width: 0;
+      overflow-wrap: normal !important;
+      word-break: normal !important;
+      hyphens: none;
+    }
+
+    .overview-page .overview-capability-copy strong {
+      display: block;
+      width: 100%;
+      white-space: nowrap;
+      overflow-wrap: normal !important;
+      word-break: keep-all !important;
+      line-height: 1.12;
+    }
+
+    .overview-page .overview-capability-copy > span {
+      display: block;
+      width: 100%;
+      overflow-wrap: normal !important;
+      word-break: normal !important;
+      hyphens: none;
+      line-height: 1.32;
+    }
+
+    /* Give the copy more room in 3-item capability rows. */
+    .overview-page .overview-capability-grid-3 .overview-capability-card {
+      grid-template-columns: 30px minmax(0, 1fr) 10px;
+      gap: 7px;
+      padding: 10px 8px;
+    }
+
+    .overview-page .overview-capability-grid-3 .overview-capability-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+    }
+
+    .overview-page .overview-capability-grid-3 .overview-capability-copy strong {
+      font-size: .70rem;
+    }
+
+    .overview-page .overview-capability-grid-3 .overview-capability-copy > span {
+      font-size: .57rem;
+    }
+
+    .overview-page .overview-capability-grid-3 .overview-capability-chevron {
+      font-size: 1.18rem;
+    }
+
+    /* At narrower widths, two columns are more readable than squeezing
+       three capability cards into a narrow row. */
+    @media (max-width: 900px) and (min-width: 541px) {
+      .overview-page .overview-capability-grid-3,
+      .overview-page .overview-solution-card.is-modernization .overview-capability-grid-3 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .overview-page .overview-capability-grid-3 .overview-capability-card {
+        grid-template-columns: 38px minmax(0, 1fr) 14px;
+        min-height: 82px;
+        padding: 10px 11px;
+      }
+
+      .overview-page .overview-capability-grid-3 .overview-capability-icon {
+        width: 38px;
+        height: 38px;
+      }
+
+      .overview-page .overview-capability-grid-3 .overview-capability-copy strong {
+        font-size: .76rem;
+      }
+
+      .overview-page .overview-capability-grid-3 .overview-capability-copy > span {
+        font-size: .64rem;
+      }
+    }
+
+    /* On phone widths, keep the existing single-column behavior but
+       explicitly preserve normal word wrapping. */
+    @media (max-width: 540px) {
+      .overview-page .overview-capability-copy strong {
+        white-space: normal;
+      }
+
+      .overview-page .overview-capability-copy,
+      .overview-page .overview-capability-copy > span,
+      .overview-page .overview-capability-copy strong {
+        overflow-wrap: normal !important;
+        word-break: normal !important;
+      }
+    }
+
+
+    /* =========================================================
+       H1 OVERVIEW — MANAGED LINK PAGE LOADER
+       Covers the Overview content while Google Sheet link states
+       are being resolved, preventing active-to-gray visual flicker.
+    ========================================================== */
+
+    .overview-page {
+      position: relative;
+    }
+
+    .overview-page.is-managed-links-loading {
+      min-height: 68vh;
+    }
+
+    .overview-link-loader[hidden] {
+      display: none !important;
+    }
+
+    .overview-link-loader {
+      position: absolute;
+      z-index: 90;
+      inset: 0;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      min-height: 68vh;
+      padding:
+        clamp(115px, 18vh, 190px)
+        clamp(18px, 4vw, 46px)
+        60px;
+      opacity: 0;
+
+      /* Keep the page visible while softening it enough that the
+         loader remains the clear focal point. */
+      background:
+        radial-gradient(
+          circle at 72% 12%,
+          rgb(60 161 255 / 8%),
+          transparent 35%
+        ),
+        linear-gradient(
+          180deg,
+          rgb(245 250 254 / 34%) 0%,
+          rgb(245 250 254 / 26%) 48%,
+          rgb(245 250 254 / 32%) 100%
+        );
+
+      backdrop-filter:
+        blur(9px)
+        saturate(.78);
+      -webkit-backdrop-filter:
+        blur(9px)
+        saturate(.78);
+
+      transition: opacity 180ms ease;
+
+      /* Allow mouse-wheel / trackpad scrolling through the overlay. */
+      pointer-events: none;
+    }
+
+    .overview-link-loader.is-visible {
+      opacity: 1;
+    }
+
+
+    /* While links are unresolved, prevent managed buttons from being
+       activated underneath the translucent loader. Scrolling is unaffected. */
+    .overview-page.is-managed-links-loading [data-link-key] {
+      pointer-events: none !important;
+      user-select: none;
+    }
+
+    /* Make the underlying page subtly recede without hiding it. */
+    .overview-page.is-managed-links-loading > :not(.overview-link-loader) {
+      filter: saturate(.82) contrast(.96);
+      transition: filter 180ms ease;
+    }
+
+    .overview-link-loader-card {
+      position: sticky;
+      top: 120px;
+      width: min(92vw, 410px);
+      padding: 30px 32px 27px;
+      border: 1px solid rgb(190 219 240 / 78%);
+      border-radius: 22px;
+      text-align: center;
+      background:
+        radial-gradient(
+          circle at 88% 4%,
+          rgb(0 190 232 / 11%),
+          transparent 34%
+        ),
+        linear-gradient(145deg, #FFFFFF 0%, #F7FBFF 100%);
+      box-shadow:
+        0 18px 54px rgb(0 44 95 / 12%),
+        inset 0 1px 0 rgb(255 255 255 / 90%);
+    }
+
+    .overview-link-loader-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 16%;
+      right: 16%;
+      height: 3px;
+      border-radius: 999px;
+      background:
+        linear-gradient(90deg, #1269ED, #00C6E8, #7766FF);
+    }
+
+    .overview-link-loader-mark {
+      position: relative;
+      display: grid;
+      width: 66px;
+      height: 66px;
+      margin: 0 auto 17px;
+      place-items: center;
+    }
+
+    .overview-link-loader-ring {
+      position: absolute;
+      inset: 0;
+      border: 4px solid #E3EFF9;
+      border-top-color: #0874EC;
+      border-right-color: #00BAD7;
+      border-radius: 50%;
+      animation: overview-link-loader-spin .82s linear infinite;
+    }
+
+    .overview-link-loader-mark svg {
+      width: 27px;
+      height: 27px;
+      fill: none;
+      stroke: #0B65D8;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .overview-link-loader-eyebrow {
+      margin: 0 0 7px;
+      color: #0874DF;
+      font-size: .65rem;
+      font-weight: 850;
+      letter-spacing: .14em;
+    }
+
+    .overview-link-loader-card h2 {
+      margin: 0;
+      color: #0A2E63;
+      font-size: clamp(1.15rem, 2.5vw, 1.38rem);
+      line-height: 1.16;
+      font-weight: 850;
+      letter-spacing: -.02em;
+    }
+
+    .overview-link-loader-copy {
+      max-width: 315px;
+      margin: 9px auto 0;
+      color: #647991;
+      font-size: .76rem;
+      line-height: 1.5;
+    }
+
+    .overview-link-loader-dots {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 18px;
+    }
+
+    .overview-link-loader-dots span {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #1683EB;
+      animation: overview-link-loader-dot 1.05s ease-in-out infinite;
+    }
+
+    .overview-link-loader-dots span:nth-child(2) {
+      animation-delay: 140ms;
+    }
+
+    .overview-link-loader-dots span:nth-child(3) {
+      animation-delay: 280ms;
+    }
+
+    @keyframes overview-link-loader-spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    @keyframes overview-link-loader-dot {
+      0%,
+      65%,
+      100% {
+        transform: translateY(0);
+        opacity: .36;
+      }
+
+      32% {
+        transform: translateY(-4px);
+        opacity: 1;
+      }
+    }
+
+    @media (max-width: 620px) {
+      .overview-link-loader {
+        padding-top: 96px;
+      }
+
+      .overview-link-loader-card {
+        top: 94px;
+        padding: 27px 22px 24px;
+        border-radius: 18px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .overview-link-loader,
+      .overview-link-loader-ring,
+      .overview-link-loader-dots span {
+        transition: none;
+        animation: none;
+      }
+    }
+
+
+    /* =========================================================
+       H1 OVERVIEW — EMBEDDED GOOGLE DRIVE VIDEO PLAYER
+       Used by ov-eov / ov-iov / ov-mov.
+    ========================================================== */
+
+    .overview-video-dialog {
+      width: min(94vw, 1040px);
+      max-width: 1040px;
+      margin: auto;
+      padding: 0;
+      border: 0;
+      border-radius: 24px;
+      overflow: visible;
+      color: #FFFFFF;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .overview-video-dialog::backdrop {
+      background:
+        radial-gradient(
+          circle at 50% 28%,
+          rgb(10 87 165 / 18%),
+          transparent 36%
+        ),
+        rgb(2 13 29 / 78%);
+      backdrop-filter: blur(9px);
+      -webkit-backdrop-filter: blur(9px);
+    }
+
+    .overview-video-dialog-shell {
+      overflow: hidden;
+      border: 1px solid rgb(105 164 219 / 34%);
+      border-radius: 24px;
+      background:
+        radial-gradient(
+          circle at 90% 0%,
+          rgb(0 173 230 / 17%),
+          transparent 34%
+        ),
+        linear-gradient(
+          145deg,
+          #071C37 0%,
+          #061426 58%,
+          #030B16 100%
+        );
+      box-shadow:
+        0 32px 92px rgb(0 0 0 / 45%),
+        inset 0 1px 0 rgb(255 255 255 / 7%);
+    }
+
+    .overview-video-dialog-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      min-height: 78px;
+      padding: 17px 20px 15px 24px;
+      border-bottom: 1px solid rgb(132 177 216 / 16%);
+    }
+
+    .overview-video-dialog-heading {
+      min-width: 0;
+    }
+
+    .overview-video-dialog-eyebrow {
+      margin: 0 0 4px;
+      color: #61D6F1;
+      font-size: .62rem;
+      font-weight: 850;
+      letter-spacing: .14em;
+    }
+
+    .overview-video-dialog h2 {
+      margin: 0;
+      overflow: hidden;
+      color: #FFFFFF;
+      font-size: clamp(1rem, 2.4vw, 1.28rem);
+      font-weight: 800;
+      line-height: 1.2;
+      letter-spacing: -.015em;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .overview-video-dialog-close {
+      display: grid;
+      width: 40px;
+      height: 40px;
+      flex: 0 0 40px;
+      place-items: center;
+      padding: 0;
+      border: 1px solid rgb(150 193 228 / 23%);
+      border-radius: 50%;
+      color: #DDEEFF;
+      background: rgb(255 255 255 / 7%);
+      cursor: pointer;
+      transition:
+        transform 150ms ease,
+        background-color 150ms ease,
+        border-color 150ms ease;
+    }
+
+    .overview-video-dialog-close:hover {
+      transform: rotate(4deg);
+      border-color: rgb(111 204 238 / 42%);
+      background: rgb(255 255 255 / 13%);
+    }
+
+    .overview-video-dialog-close svg {
+      width: 17px;
+      height: 17px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+    }
+
+    .overview-video-frame-wrap {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      overflow: hidden;
+      background:
+        radial-gradient(
+          circle at center,
+          #102C4A 0%,
+          #061321 54%,
+          #020711 100%
+        );
+    }
+
+    .overview-video-frame-wrap::before {
+      content: "Loading video…";
+      position: absolute;
+      z-index: 0;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      color: rgb(210 230 247 / 65%);
+      font-size: .78rem;
+      font-weight: 650;
+      letter-spacing: .03em;
+    }
+
+    .overview-video-frame {
+      position: relative;
+      z-index: 1;
+      display: block;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      background: #030911;
+    }
+
+    .overview-video-dialog-footer {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      min-height: 43px;
+      padding: 10px 22px 11px;
+      border-top: 1px solid rgb(132 177 216 / 12%);
+    }
+
+    .overview-video-dialog-note {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      color: #8EA9C2;
+      font-size: .62rem;
+      font-weight: 600;
+    }
+
+    .overview-video-dialog-note::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #42C8E8;
+      box-shadow: 0 0 0 4px rgb(66 200 232 / 10%);
+    }
+
+    @media (max-width: 620px) {
+      .overview-video-dialog {
+        width: min(96vw, 1040px);
+        border-radius: 18px;
+      }
+
+      .overview-video-dialog-shell {
+        border-radius: 18px;
+      }
+
+      .overview-video-dialog-header {
+        min-height: 68px;
+        padding: 13px 14px 12px 17px;
+      }
+
+      .overview-video-dialog-close {
+        width: 36px;
+        height: 36px;
+        flex-basis: 36px;
+      }
+
+      .overview-video-dialog-footer {
+        padding-inline: 16px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .overview-video-dialog-close {
+        transition: none;
+      }
+    }
+</style>

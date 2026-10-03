@@ -1,0 +1,579 @@
+<style>
+/* Styles Opportunities Refinements — modularized from the former monolithic Styles.html. */
+    /* =========================================================
+       H3 OPPORTUNITIES — COMPACT LOWER SECTIONS REFINEMENT
+       Solutioning Toolkit + Repositories + Quick Access
+       Preserves existing content and behavior.
+    ========================================================== */
+
+    /* ---------- Shared lower-section density ---------- */
+
+    .solutioning-toolkit-section,
+    .sales-pillars-panel,
+    .deal-retrospective-panel,
+    .opportunities-quick-access {
+      border-radius: 10px;
+      box-shadow:
+        0 4px 12px rgb(0 48 116 / 4%),
+        inset 0 1px 0 rgb(255 255 255 / 84%);
+    }
+
+    .opportunities-panel-header {
+      min-height: 45px;
+      margin-bottom: 6px;
+      gap: 12px;
+    }
+
+    .opportunities-panel-title-group {
+      gap: 9px;
+    }
+
+    .opportunities-panel-icon {
+      width: 43px;
+      height: 43px;
+      border-radius: 8px;
+    }
+
+    .opportunities-panel-icon.is-repository,
+    .opportunities-panel-icon.is-retrospective {
+      width: 41px;
+      height: 41px;
+    }
+
+    .opportunities-panel-icon svg {
+      width: 25px;
+      height: 25px;
+    }
+
+    .opportunities-panel-title-group h2 {
+      font-size: .91rem;
+      line-height: 1.02;
+    }
+
+    .opportunities-panel-title-group p {
+      margin-top: 2px;
+      font-size: .58rem;
+      line-height: 1.12;
+    }
+
+    .opportunities-view-all {
+      min-height: 30px;
+      gap: 7px;
+      padding: 3px 4px;
+      font-size: .59rem;
+    }
+
+    /* ---------- Solutioning Toolkit ---------- */
+
+    .solutioning-toolkit-section {
+      margin: 0 14px 10px;
+      padding: 7px 9px 9px;
+    }
+
+    /* Keep all 8 toolkit resources visible in one row at
+       normal desktop/laptop widths. */
+    .solutioning-toolkit-grid {
+      grid-template-columns: repeat(8, minmax(0, 1fr));
+      gap: 7px;
+    }
+
+    .toolkit-card {
+      grid-template-rows: 43px minmax(2.55rem, auto);
+      min-height: 104px !important;
+      padding: 7px 6px 6px;
+      border-radius: 8px;
+    }
+
+    .toolkit-card-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 7px;
+    }
+
+    .toolkit-card-icon svg {
+      width: 25px;
+      height: 25px;
+    }
+
+    .toolkit-card-label {
+      align-self: start;
+      padding-top: 4px;
+      font-size: .57rem;
+      font-weight: 830;
+      line-height: 1.03;
+    }
+
+    .toolkit-card-arrow {
+      right: 6px;
+      bottom: 4px;
+      font-size: 1.03rem;
+    }
+
+    /* ---------- Repository row ---------- */
+
+    .opportunities-repository-grid {
+      grid-template-columns: minmax(0, 1.03fr) minmax(0, 1fr);
+      gap: 10px;
+      margin: 0 14px 10px;
+    }
+
+    .sales-pillars-panel,
+    .deal-retrospective-panel {
+      padding: 7px 9px 9px;
+    }
+
+    .sales-pillars-grid {
+      gap: 7px;
+    }
+
+    .sales-pillar-card {
+      grid-template-columns: 74px minmax(0, 1fr) 30px;
+      min-height: 68px !important;
+      height: 68px;
+      padding-right: 6px;
+      border-radius: 8px;
+    }
+
+    .sales-pillar-media {
+      width: 74px;
+      height: 68px;
+      border-radius: 7px 0 0 7px;
+    }
+
+    .sales-pillar-card strong {
+      padding-left: 8px;
+      font-size: .66rem;
+    }
+
+    .sales-pillar-arrow {
+      width: 28px;
+      height: 28px;
+      font-size: 1.05rem;
+    }
+
+    /* Make failed-image fallbacks feel intentional rather than
+       looking like duplicate text blocks. */
+    .sales-pillar-fallback {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6px;
+      color: #1553B7;
+      background:
+        linear-gradient(135deg, #EAF5FF, #DDEEFF);
+      font-size: .58rem;
+      line-height: 1;
+      text-align: center;
+    }
+
+    /* Win/Loss cards */
+    .deal-retrospective-grid {
+      gap: 8px;
+    }
+
+    .deal-retrospective-card {
+      grid-template-columns: 46px minmax(0, 1fr) 31px;
+      gap: 8px;
+      min-height: 68px !important;
+      height: 68px;
+      padding: 7px 8px;
+      border-radius: 8px;
+    }
+
+    .deal-retrospective-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 7px;
+    }
+
+    .deal-retrospective-icon svg {
+      width: 25px;
+      height: 25px;
+    }
+
+    .deal-retrospective-copy {
+      gap: 2px;
+    }
+
+    .deal-retrospective-copy strong {
+      font-size: .66rem;
+    }
+
+    .deal-retrospective-copy > span {
+      font-size: .50rem;
+      line-height: 1.12;
+    }
+
+    .deal-retrospective-arrow {
+      width: 28px;
+      height: 28px;
+      font-size: 1.02rem;
+    }
+
+    /* ---------- Quick Access ---------- */
+
+    .opportunities-quick-access {
+      margin: 0 14px 13px;
+      padding: 7px 9px 9px;
+    }
+
+    .opportunities-quick-access-header {
+      margin-bottom: 6px;
+    }
+
+    .opportunities-quick-access-title-group {
+      gap: 7px;
+    }
+
+    .quick-access-bolt {
+      font-size: 1.20rem;
+    }
+
+    .opportunities-quick-access-title-group h2 {
+      font-size: .84rem;
+    }
+
+    .opportunities-quick-access-title-group p {
+      margin-left: 2px;
+      font-size: .55rem;
+    }
+
+    .opportunities-quick-access-grid {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 7px;
+    }
+
+    .opportunities-quick-card {
+      grid-template-columns: 35px minmax(0, 1fr) 17px;
+      gap: 6px;
+      min-height: 45px !important;
+      padding: 4px 7px;
+      border-radius: 10px;
+      font-size: .54rem;
+      line-height: 1.04;
+    }
+
+    .opportunities-quick-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 7px;
+    }
+
+    .opportunities-quick-icon svg {
+      width: 21px;
+      height: 21px;
+    }
+
+    .opportunities-quick-arrow {
+      font-size: 1.03rem;
+    }
+
+    /* ---------- Responsive ---------- */
+
+    /* Existing CSS collapses toolkit at 1450px. Override it so
+       ordinary desktop/laptop layouts remain compact and single-row. */
+    @media (min-width: 1181px) {
+      .solutioning-toolkit-grid {
+        grid-template-columns: repeat(8, minmax(0, 1fr));
+      }
+
+      .opportunities-repository-grid {
+        grid-template-columns: minmax(0, 1.03fr) minmax(0, 1fr);
+      }
+
+      .sales-pillars-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .deal-retrospective-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .opportunities-quick-access-grid {
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+      }
+    }
+
+    @media (min-width: 901px) and (max-width: 1180px) {
+      .solutioning-toolkit-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+
+      .toolkit-card {
+        min-height: 96px !important;
+      }
+
+      .opportunities-repository-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .sales-pillars-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .deal-retrospective-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .opportunities-quick-access-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    @media (min-width: 621px) and (max-width: 900px) {
+      .solutioning-toolkit-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+
+      .opportunities-repository-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .sales-pillars-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .deal-retrospective-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .opportunities-quick-access-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 620px) {
+      .solutioning-toolkit-section,
+      .opportunities-repository-grid,
+      .opportunities-quick-access {
+        margin-inline: 12px;
+      }
+
+      .solutioning-toolkit-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .toolkit-card {
+        min-height: 98px !important;
+      }
+
+      .sales-pillars-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .sales-pillar-card {
+        min-height: 72px !important;
+        height: 72px;
+      }
+
+      .sales-pillar-media {
+        height: 72px;
+      }
+
+      .deal-retrospective-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .deal-retrospective-card {
+        min-height: 72px !important;
+        height: auto;
+      }
+
+      .opportunities-quick-access-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .opportunities-quick-card {
+        min-height: 48px !important;
+      }
+    }
+
+    @media (max-width: 430px) {
+      .solutioning-toolkit-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .toolkit-card {
+        grid-template-columns: 44px minmax(0, 1fr) 18px;
+        grid-template-rows: 1fr;
+        min-height: 58px !important;
+        gap: 8px;
+        text-align: left;
+      }
+
+      .toolkit-card-icon {
+        width: 38px;
+        height: 38px;
+      }
+
+      .toolkit-card-label {
+        align-self: center;
+        padding-top: 0;
+        font-size: .62rem;
+      }
+
+      .toolkit-card-arrow {
+        position: static;
+        justify-self: end;
+        align-self: center;
+      }
+
+      .opportunities-quick-access-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+
+    /* =========================================================
+       H3 OPPORTUNITIES — ENTRY CARD READABILITY REFINEMENT
+       Keeps imagery visible while protecting all text labels.
+    ========================================================== */
+
+    /* Stronger left-to-right veil:
+       copy area stays clean; artwork remains vivid on the right. */
+    .opportunity-entry-gradient {
+      background:
+        linear-gradient(
+          90deg,
+          rgb(255 255 255 / 100%) 0%,
+          rgb(255 255 255 / 100%) 33%,
+          rgb(255 255 255 / 98%) 46%,
+          rgb(255 255 255 / 92%) 57%,
+          rgb(255 255 255 / 66%) 68%,
+          rgb(255 255 255 / 22%) 80%,
+          rgb(255 255 255 / 0%) 100%
+        );
+    }
+
+    /* Give the icon + copy their own subtle readable surface.
+       This avoids text competing with bright dashboard imagery. */
+    .opportunity-entry-content::before {
+      content: "";
+      position: absolute;
+      z-index: -1;
+      top: 8px;
+      left: 8px;
+      bottom: 8px;
+      width: min(64%, 375px);
+      border-radius: 9px;
+      pointer-events: none;
+      background:
+        linear-gradient(
+          90deg,
+          rgb(255 255 255 / 96%) 0%,
+          rgb(255 255 255 / 92%) 76%,
+          rgb(255 255 255 / 0%) 100%
+        );
+      backdrop-filter: blur(2px);
+      -webkit-backdrop-filter: blur(2px);
+    }
+
+    /* Stronger typography contrast */
+    .opportunity-entry-copy h2 {
+      color: #082F9F;
+      font-size: .98rem;
+      font-weight: 920;
+      text-shadow: 0 1px 0 rgb(255 255 255 / 90%);
+    }
+
+    .opportunity-entry-copy p {
+      max-width: 315px;
+      color: #284F96;
+      font-size: .69rem;
+      font-weight: 640;
+      line-height: 1.24;
+      text-shadow: 0 1px 0 rgb(255 255 255 / 82%);
+    }
+
+    /* CTA also gets a protected white pill so the label remains
+       readable regardless of the artwork underneath. */
+    .opportunity-entry-link {
+      min-height: 31px;
+      padding: 4px 10px;
+      border: 1px solid rgb(184 211 239 / 70%);
+      border-radius: 999px;
+      color: #084DCC;
+      background: rgb(255 255 255 / 91%);
+      box-shadow:
+        0 2px 7px rgb(0 47 115 / 6%),
+        inset 0 1px 0 rgb(255 255 255 / 88%);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+    }
+
+    .opportunity-entry-link:hover {
+      color: var(--entry-deep);
+      background: #FFFFFF;
+      border-color: color-mix(in srgb, var(--entry-accent) 30%, #C9DDF0);
+    }
+
+    /* Make the icon tile more opaque so the icon is never lost
+       against bright portions of the image. */
+    .opportunity-entry-icon {
+      background:
+        color-mix(in srgb, var(--entry-accent) 12%, #FFFFFF);
+      box-shadow:
+        inset 0 0 0 1px rgb(255 255 255 / 92%),
+        0 3px 9px rgb(0 47 115 / 6%);
+    }
+
+    /* Keep image detail on the far-right side */
+    .opportunity-entry-card.is-dashboard .opportunity-entry-image {
+      object-position: 72% center;
+    }
+
+    .opportunity-entry-card.is-process .opportunity-entry-image {
+      object-position: 73% center;
+    }
+
+    .opportunity-entry-card.is-engagement .opportunity-entry-image {
+      object-position: 72% center;
+    }
+
+    /* On narrower layouts, reserve a little more white space
+       because the image and text naturally overlap sooner. */
+    @media (max-width: 1180px) {
+      .opportunity-entry-gradient {
+        background:
+          linear-gradient(
+            90deg,
+            rgb(255 255 255 / 100%) 0%,
+            rgb(255 255 255 / 100%) 39%,
+            rgb(255 255 255 / 96%) 55%,
+            rgb(255 255 255 / 72%) 68%,
+            rgb(255 255 255 / 20%) 84%,
+            transparent 100%
+          );
+      }
+
+      .opportunity-entry-content::before {
+        width: min(70%, 405px);
+      }
+    }
+
+    @media (max-width: 767px) {
+      .opportunity-entry-content::before {
+        top: 7px;
+        left: 7px;
+        right: 7px;
+        bottom: 7px;
+        width: auto;
+        background: rgb(255 255 255 / 88%);
+        border: 1px solid rgb(214 231 245 / 72%);
+      }
+
+      .opportunity-entry-gradient {
+        background:
+          linear-gradient(
+            180deg,
+            rgb(255 255 255 / 96%) 0%,
+            rgb(255 255 255 / 90%) 60%,
+            rgb(255 255 255 / 55%) 100%
+          );
+      }
+
+      .opportunity-entry-copy p {
+        max-width: none;
+      }
+    }
+</style>

@@ -1,0 +1,273 @@
+<style>
+/* Styles Offerings Refinements — modularized from the former monolithic Styles.html. */
+    /* =========================================================
+       H2 OFFERINGS — COMPACT CORE OFFERINGS REFINEMENT
+       Keeps all 5 cards in one desktop row and reduces card height.
+    ========================================================== */
+
+    /* Compact section framing */
+    .offerings-core-section {
+      padding: 9px 14px 15px;
+    }
+
+    .offerings-section-header {
+      gap: 12px;
+    }
+
+    .offerings-section-title-row {
+      gap: 9px;
+    }
+
+    .offerings-section-title-row h2 {
+      font-size: .96rem;
+    }
+
+    .offerings-section-rule {
+      width: 48px;
+      height: 4px;
+    }
+
+    .offerings-section-title-row p {
+      font-size: .63rem;
+    }
+
+    .offerings-coe-filter {
+      gap: 5px;
+    }
+
+    .offerings-coe-filter-label {
+      font-size: .54rem;
+    }
+
+    .offerings-coe-chip {
+      min-height: 25px;
+      padding: 4px 9px;
+      border-radius: 6px;
+      font-size: .52rem;
+    }
+
+    /* Five compact offering cards on normal desktop widths */
+    .core-offerings-grid {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      align-items: stretch;
+      gap: 9px;
+      margin-top: 7px;
+    }
+
+    .core-offering-card {
+      min-height: 0 !important;
+      height: auto;
+      padding: 6px 6px 6px;
+      border-radius: 10px;
+    }
+
+    .core-offering-card::before {
+      height: 34%;
+    }
+
+    .core-offering-card-topline {
+      min-height: 23px;
+      padding: 0 2px;
+    }
+
+    .core-offering-number {
+      font-size: .95rem;
+    }
+
+    .core-offering-coe-chip {
+      min-height: 21px;
+      padding: 3px 7px;
+      border-radius: 5px;
+      font-size: .46rem;
+    }
+
+    /* Main height reduction: artwork no longer dominates card */
+    .core-offering-visual {
+      height: 92px;
+      margin: 0 -1px 4px;
+      border-radius: 7px;
+    }
+
+    .core-offering-image {
+      padding: 0;
+    }
+
+    .core-offering-content {
+      padding: 0 3px;
+    }
+
+    .core-offering-content h3 {
+      font-size: .90rem;
+      line-height: 1;
+    }
+
+    .core-offering-coe {
+      min-height: 19px;
+      margin: 2px 0 3px;
+      font-size: .52rem;
+      line-height: 1.1;
+    }
+
+    /* Keep descriptions aligned but much shorter */
+    .core-offering-description {
+      min-height: 44px;
+      margin: 0 0 4px;
+      font-size: .53rem;
+      line-height: 1.18;
+    }
+
+    .offering-artifacts {
+      gap: 0;
+      margin-top: 0;
+      padding-top: 4px;
+    }
+
+    .offering-artifacts-title {
+      margin-bottom: 2px;
+      font-size: .48rem;
+    }
+
+    .offering-artifacts button {
+      min-height: 17px;
+      gap: 5px;
+      padding: 0;
+      font-size: .51rem;
+      line-height: 1.05;
+    }
+
+    .artifact-icon {
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+      font-size: .42rem;
+    }
+
+    .offering-explore-button {
+      min-height: 31px;
+      margin-top: 5px;
+      padding: 5px 7px;
+      border-radius: 7px;
+      font-size: .58rem;
+      gap: 8px;
+    }
+
+    .offering-explore-button > span:last-child {
+      font-size: .88rem;
+    }
+
+    /* Desktop/laptop:
+       retain 5 columns instead of prematurely switching to 3 + 2. */
+    @media (min-width: 1120px) {
+      .core-offerings-grid {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 9px;
+      }
+
+      .core-offering-card {
+        min-height: 0 !important;
+      }
+
+      .core-offering-visual {
+        height: 92px;
+      }
+
+      .core-offering-description {
+        min-height: 44px;
+      }
+    }
+
+    /* Smaller laptop/tablet: 3 columns, but still compact. */
+    @media (min-width: 820px) and (max-width: 1119px) {
+      .core-offerings-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .core-offering-card {
+        min-height: 0 !important;
+      }
+
+      .core-offering-visual {
+        height: 105px;
+      }
+
+      .core-offering-description {
+        min-height: 38px;
+      }
+    }
+
+    /* Tablet */
+    @media (min-width: 621px) and (max-width: 819px) {
+      .core-offerings-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .core-offering-card {
+        min-height: 0 !important;
+      }
+
+      .core-offering-visual {
+        height: 118px;
+      }
+
+      .core-offering-description {
+        min-height: 0;
+      }
+    }
+
+    /* Mobile keeps the existing readable one-column behavior,
+       but removes the oversized 190px artwork. */
+    @media (max-width: 620px) {
+      .offerings-core-section {
+        padding: 12px 12px 16px;
+      }
+
+      .core-offerings-grid {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 9px;
+      }
+
+      .core-offering-card {
+        min-height: 0 !important;
+        padding: 8px;
+      }
+
+      .core-offering-visual {
+        height: 145px;
+        margin-bottom: 5px;
+      }
+
+      .core-offering-content h3 {
+        font-size: 1.02rem;
+      }
+
+      .core-offering-coe {
+        font-size: .62rem;
+      }
+
+      .core-offering-description {
+        min-height: 0;
+        margin-bottom: 6px;
+        font-size: .64rem;
+      }
+
+      .offering-artifacts-title {
+        font-size: .57rem;
+      }
+
+      .offering-artifacts button {
+        min-height: 27px;
+        font-size: .62rem;
+      }
+
+      .artifact-icon {
+        width: 18px;
+        height: 18px;
+      }
+
+      .offering-explore-button {
+        min-height: 40px;
+        font-size: .69rem;
+      }
+    }
+</style>

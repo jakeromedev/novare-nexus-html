@@ -1,0 +1,330 @@
+<style>
+/* Styles Core — modularized from the former monolithic Styles.html. */
+    /* 1. DESIGN TOKENS */
+    :root {
+      color-scheme: light;
+      --navy-950: #001126;
+      --navy-900: #01172F;
+      --navy-850: #031B3D;
+      --blue-700: #004ECF;
+      --blue-600: #0068F5;
+      --blue-500: #0785FF;
+      --cyan-500: #00CFE8;
+      --cyan-400: #13E1E1;
+      --cyan-300: #55E8F2;
+      --page-bg: #F5FAFE;
+      --surface: #FFFFFF;
+      --surface-soft: #F3F8FC;
+      --surface-blue: #EAF6FD;
+      --border-light: #D8E9F5;
+      --border-blue: #BFDDF4;
+      --text-primary: #071B4B;
+      --text-secondary: #526987;
+      --text-muted: #7185A0;
+      --accent-purple: #742CE8;
+      --accent-orange: #FF861F;
+      --accent-green: #13BF85;
+      --accent-red: #F04B4B;
+      --sidebar-width: 235px;
+      --topbar-height: 72px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-card: 14px;
+      --radius-pill: 999px;
+      --shadow-sm: 0 2px 8px rgb(7 27 75 / 5%);
+      --shadow-md: 0 8px 24px rgb(7 27 75 / 8%);
+      --content-padding: clamp(20px, 3vw, 48px);
+    }
+
+    /* 2. RESET / BASE */
+    [hidden] { display: none !important; }
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Inter", "Arial", sans-serif;
+      font-size: 1rem;
+      line-height: 1.5;
+      color: var(--text-primary);
+      background: var(--page-bg);
+    }
+    button, input, select, textarea { font: inherit; }
+    button, a { -webkit-tap-highlight-color: transparent; }
+    a { color: var(--blue-700); }
+    h1, h2, p { margin: 0; }
+    svg { display: block; flex-shrink: 0; }
+    :focus-visible {
+      outline: 3px solid var(--blue-600);
+      outline-offset: 4px;
+    }
+    .skip-link {
+      position: absolute;
+      z-index: 10;
+      top: 12px;
+      left: 12px;
+      padding: 10px 16px;
+      border-radius: var(--radius-sm);
+      background: var(--surface);
+      transform: translateY(-180%);
+    }
+    .skip-link:focus { transform: translateY(0); }
+
+    .button, .icon-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 44px;
+      border: 1px solid var(--border-blue);
+      border-radius: var(--radius-sm);
+      padding: 10px 16px;
+      color: var(--text-primary);
+      background: var(--surface);
+      font-size: .875rem;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .button:hover, .icon-button:hover { background: var(--surface-blue); }
+    .button--primary { color: var(--surface); background: var(--blue-700); border-color: var(--blue-700); }
+    .button--primary:hover { background: var(--blue-600); }
+    .icon-button { width: 44px; padding: 10px; flex-shrink: 0; }
+    .button:disabled, .icon-button:disabled { opacity: .5; cursor: not-allowed; }
+    .card { padding: 24px; border: 1px solid var(--border-light); border-radius: var(--radius-card); background: var(--surface); }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border: 1px solid var(--border-blue);
+      border-radius: var(--radius-pill);
+      color: var(--blue-700);
+      background: var(--surface-blue);
+      font-size: .75rem;
+      font-weight: 600;
+    }
+    .divider { width: 100%; height: 1px; margin: 16px 0; border: 0; background: var(--border-light); }
+    .shadow-sm { box-shadow: var(--shadow-sm); }
+    .shadow-md { box-shadow: var(--shadow-md); }
+    .section-label { font-size: .6875rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; }
+
+    /* Reserved controls have no backend behavior yet. */
+    [aria-disabled="true"] { cursor: default; }
+
+    /* 3. APP LAYOUT */
+    #nexus-app {
+      display: grid;
+      grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+      min-height: 100vh;
+    }
+    #nexus-workspace { position: relative; display: flex; flex-direction: column; min-width: 0; }
+    #nexus-content { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+
+    /* 4. SIDEBAR */
+    #nexus-sidebar {
+      position: sticky;
+      top: 0;
+      align-self: start;
+      height: 100vh;
+      height: 100dvh;
+      overflow: visible;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-width: 0;
+      padding: 8px 16px 14px;
+      color: var(--surface);
+      background:
+        radial-gradient(circle at 50% 0%, rgb(0 199 255 / 12%), transparent 28%),
+        linear-gradient(180deg, #02112C 0%, #041B43 38%, #031538 100%);
+      border-right: 1px solid rgb(121 183 255 / 12%);
+      box-shadow: inset -1px 0 0 rgb(255 255 255 / 3%), 10px 0 24px rgb(1 11 32 / 26%);
+      z-index: 5;
+    }
+    .sidebar-scroll { flex: 1; min-height: 0; overflow-y: auto; overflow-x: visible; padding: 0 6px 64px; margin: 0 -6px; display: flex; flex-direction: column; gap: 8px; scrollbar-width: thin; }
+    .sidebar-scroll::-webkit-scrollbar { width: 6px; }
+    .sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
+    .sidebar-scroll::-webkit-scrollbar-thumb { background: rgb(203 224 244 / 34%); border-radius: 999px; }
+    .sidebar-label { color: rgb(255 255 255 / 78%); font-size: .75rem; text-transform: uppercase; letter-spacing: .18em; font-weight: 700; }
+    #nexus-sidebar :focus-visible { outline-color: var(--cyan-300); }
+
+    /* 5. NAVIGATION */
+    .nav-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-height: 42px;
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid transparent;
+      border-radius: 14px;
+      color: var(--border-light);
+      background: transparent;
+      text-align: left;
+      text-decoration: none;
+      font-size: .86rem;
+      font-weight: 500;
+      transition: background .18s ease, border-color .18s ease, box-shadow .18s ease, color .18s ease;
+    }
+    a.nav-row:hover, button.nav-row:hover { background: rgb(7 133 255 / 12%); color: var(--surface); }
+    .nav-row.is-active, .nav-row[aria-current="page"] {
+      color: var(--surface);
+      background: linear-gradient(90deg, rgb(9 82 226 / 94%), rgb(12 113 255 / 84%) 52%, rgb(8 96 255 / 72%) 100%);
+      border-color: rgb(58 224 255 / 80%);
+      box-shadow: 0 0 0 1px rgb(49 221 255 / 36%) inset, 0 0 18px rgb(0 194 255 / 45%), inset 0 0 18px rgb(181 241 255 / 14%);
+    }
+    .sidebar-nav { display: grid; gap: 1px; }
+    .sidebar-nav .sidebar-label { padding: 10px 8px 4px; }
+    .sidebar-nav .divider { margin: 6px 8px 8px; background: rgb(191 221 244 / 22%); }
+    .sidebar-nav .nav-row svg { width: 18px; height: 18px; }
+
+    /* 6. TOPBAR */
+    #nexus-nav-header {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      min-height: var(--topbar-height);
+      padding: 14px 24px;
+      border-bottom: 1px solid var(--border-light);
+      background: rgb(255 255 255 / 92%);
+      box-shadow: 0 8px 22px rgb(7 27 75 / 5%);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+
+    /* 7. SEARCH */
+    .global-search {
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1 1 360px;
+      max-width: 680px;
+      min-width: 0;
+      height: 44px;
+      padding: 0 12px;
+      border: 1px solid var(--border-blue);
+      border-radius: var(--radius-md);
+      color: var(--text-secondary);
+      background: var(--surface);
+    }
+    .global-search:focus-within { border-color: var(--blue-600); box-shadow: 0 0 0 3px rgb(0 207 232 / 16%); }
+    .global-search input { width: 100%; min-width: 0; border: 0; padding: 0; color: var(--text-primary); background: transparent; font-size: .8125rem; }
+    .global-search input:focus { outline: none; }
+    .global-search input::placeholder { color: var(--text-secondary); opacity: 1; }
+    .search-keycap { flex-shrink: 0; padding: 2px 5px; border: 1px solid var(--border-light); border-radius: 4px; font: .75rem "Inter", "Arial", sans-serif; white-space: nowrap; }
+    .search-filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+    .filter-chip { min-height: 32px; padding: 5px 12px; color: var(--text-secondary); background: var(--surface); }
+    .filter-chip[aria-pressed="true"] { color: var(--blue-700); border-color: var(--blue-500); background: var(--surface-blue); }
+
+    /* 8. USER CONTROLS */
+    .topbar-controls { display: flex; align-items: center; gap: 4px; }
+    .topbar-controls > .icon-button { position: relative; border-color: transparent; background: transparent; color: var(--text-secondary); }
+    .topbar-controls > .icon-button:hover { background: var(--surface-blue); }
+    .notification-dot { position: absolute; top: 9px; right: 10px; width: 7px; height: 7px; border: 1px solid var(--surface); border-radius: 50%; background: var(--accent-red); }
+    .user-profile { display: flex; align-items: center; gap: 10px; margin-left: 8px; padding-left: 16px; border-left: 1px solid var(--border-light); }
+    .user-details { display: grid; }
+    .user-name { font-size: .875rem; font-weight: 600; white-space: nowrap; }
+    .user-department { font-size: .75rem; color: var(--text-secondary); }
+
+    /* 9. PAGE CONTAINER */
+    .page-container { padding: var(--content-padding); }
+    .page-development-placeholder { padding-block: 12px 40px; }
+    .page-development-placeholder .section-label { color: var(--blue-700); }
+    .page-development-placeholder h1 {
+      margin-top: 10px;
+      font-size: clamp(1.75rem, 3vw, 2.5rem);
+      font-weight: 600;
+      letter-spacing: -.035em;
+      line-height: 1.2;
+    }
+    .page-development-placeholder p { margin-top: 16px; color: var(--text-secondary); }
+
+    /* 10. ASK NOSCA */
+    .nosca-launcher {
+      position: absolute;
+      right: -34px;
+      bottom: 16px;
+      z-index: 6;
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 11px 16px;
+      min-width: 162px;
+      min-height: 50px;
+      border: 1px solid rgb(96 238 255 / 55%);
+      border-radius: var(--radius-pill);
+      color: var(--surface);
+      background: linear-gradient(90deg, #18D1F0 0%, #168CFF 46%, #2553EC 100%);
+      box-shadow: 0 12px 28px rgb(0 72 173 / 42%), 0 0 0 1px rgb(255 255 255 / 8%) inset;
+    }
+    .nosca-launcher svg { flex-shrink: 0; }
+    .nosca-launcher span { font-size: .95rem; font-weight: 700; white-space: nowrap; }
+    .nosca-launcher:hover { background: linear-gradient(90deg, #23D7F2 0%, #2496FF 46%, #2E5AF0 100%); }
+    /* The full Ask NOSCA chat surface is defined near the end of this file. */
+
+    /* 11. PLACEHOLDERS */
+    .image-placeholder {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 0;
+      overflow: hidden;
+      padding: 12px;
+      border: 1px dashed var(--border-blue);
+      border-radius: var(--radius-md);
+      color: var(--text-secondary);
+      background: linear-gradient(135deg, var(--surface-blue), var(--surface-soft));
+      text-align: center;
+      font-size: .75rem;
+      overflow-wrap: anywhere;
+    }
+    .sidebar-brand {
+      position: sticky;
+      top: 0;
+      z-index: 8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      min-height: 72px;
+      flex-shrink: 0;
+      overflow: hidden;
+      padding: 0;
+      margin: 0;
+      background: transparent;
+    }
+    .sidebar-brand::before,
+    .sidebar-brand::after { content: none; }
+    .sidebar-logo {
+      display: block;
+      width: 100%;
+      height: auto;
+      max-width: none;
+      max-height: none;
+      object-fit: contain;
+      object-position: center;
+      filter: none;
+    }
+
+    .sidebar-logo-fallback {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      color: #FFFFFF;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    .sidebar-logo-fallback-brand { font-size: .72rem; font-weight: 800; letter-spacing: .12em; }
+    .sidebar-logo-fallback-divider { color: var(--cyan-300); opacity: .85; }
+    .sidebar-logo-fallback-name { font-size: 1.05rem; font-weight: 750; letter-spacing: .08em; }
+
+    .avatar-placeholder { width: 38px; height: 38px; padding: 0; flex-shrink: 0; border-radius: var(--radius-pill); color: var(--blue-700); font-weight: 600; }
+</style>

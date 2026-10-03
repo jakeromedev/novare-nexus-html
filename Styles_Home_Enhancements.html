@@ -1,0 +1,411 @@
+<style>
+/* Styles Home Enhancements — modularized from the former monolithic Styles.html. */
+    /* =========================================================
+       HOME — ASK NOSCA INDEX SHORTCUTS + COMPOSER REFRESH
+       Makes the home composer unmistakably editable and gives
+       index-aligned shortcuts a visual transfer into the textbox.
+       ========================================================= */
+
+    .home-ai-form {
+      min-height: 70px;
+      padding: 7px 9px;
+      gap: 11px;
+      border-color: #D5E8FB;
+      background: rgb(255 255 255 / 92%);
+      box-shadow:
+        0 3px 10px rgb(7 85 232 / 8%),
+        inset 0 0 0 1px rgb(255 255 255 / 80%);
+    }
+
+    .home-ai-field {
+      display: grid;
+      gap: 5px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .home-ai-heading-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .home-ai-label {
+      flex-shrink: 0;
+      color: #062C94;
+      letter-spacing: -.01em;
+    }
+
+    .home-ai-index-hint {
+      min-width: 0;
+      overflow: hidden;
+      color: #7186A3;
+      font-size: .625rem;
+      font-weight: 650;
+      line-height: 1.2;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .home-ai-input-shell {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      min-width: 0;
+      min-height: 34px;
+      padding: 0 9px;
+      overflow: hidden;
+      border: 1px solid #BFD8F2;
+      border-radius: 10px;
+      background: #FFFFFF;
+      box-shadow:
+        inset 0 1px 2px rgb(7 45 112 / 4%),
+        0 1px 4px rgb(7 85 232 / 5%);
+      transition:
+        border-color .18s ease,
+        box-shadow .18s ease,
+        transform .18s ease,
+        background-color .18s ease;
+    }
+
+    .home-ai-input-shell::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      border-radius: inherit;
+      background:
+        linear-gradient(
+          100deg,
+          transparent 5%,
+          rgb(35 135 255 / 0%) 36%,
+          rgb(35 135 255 / 12%) 50%,
+          rgb(0 218 234 / 10%) 58%,
+          transparent 86%
+        );
+      opacity: 0;
+      transform: translateX(-45%);
+    }
+
+    .home-ai-input-shell:focus-within {
+      border-color: #5B9BFF;
+      background: #FFFFFF;
+      box-shadow:
+        0 0 0 3px rgb(41 126 255 / 12%),
+        0 4px 12px rgb(0 77 207 / 8%);
+      transform: translateY(-1px);
+    }
+
+    .home-ai-input-icon {
+      width: 15px;
+      height: 15px;
+      flex: 0 0 auto;
+      color: #2878E6;
+      opacity: .9;
+    }
+
+    .home-ai-input {
+      width: 100%;
+      min-height: 30px;
+      padding: 5px 0;
+      border: 0;
+      outline: 0;
+      color: #092B65;
+      background: transparent;
+      font-size: .78rem;
+      font-weight: 520;
+      line-height: 1.35;
+      text-overflow: ellipsis;
+    }
+
+    .home-ai-input::placeholder {
+      color: #71839D;
+      opacity: 1;
+    }
+
+    .home-ai-send {
+      flex: 0 0 auto;
+      transition:
+        transform .18s ease,
+        box-shadow .18s ease,
+        filter .18s ease;
+    }
+
+    .home-ai-send:hover {
+      transform: translateY(-1px) scale(1.035);
+      box-shadow: 0 6px 15px rgb(0 87 220 / 23%);
+    }
+
+    .home-ai-form.has-query .home-ai-send {
+      box-shadow:
+        0 0 0 3px rgb(0 140 255 / 9%),
+        0 5px 13px rgb(0 87 220 / 22%);
+    }
+
+    .home-ai-actions {
+      position: relative;
+    }
+
+    .home-ai-action {
+      position: relative;
+      isolation: isolate;
+      overflow: hidden;
+      cursor: pointer;
+      border-color: #C8DFF8;
+      background: rgb(255 255 255 / 82%);
+      box-shadow: 0 2px 6px rgb(7 85 232 / 6%);
+      transition:
+        transform .16s ease,
+        border-color .16s ease,
+        background-color .16s ease,
+        box-shadow .16s ease,
+        color .16s ease;
+    }
+
+    .home-ai-action::before {
+      content: "";
+      position: absolute;
+      z-index: -1;
+      top: -35%;
+      bottom: -35%;
+      left: -45%;
+      width: 34%;
+      pointer-events: none;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgb(255 255 255 / 75%),
+        transparent
+      );
+      opacity: 0;
+      transform: skewX(-18deg);
+    }
+
+    .home-ai-action:hover,
+    .home-ai-action:focus-visible {
+      color: #003AAE;
+      border-color: #8FC2FA;
+      background: #FFFFFF;
+      box-shadow: 0 7px 16px rgb(7 85 232 / 11%);
+      transform: translateY(-2px);
+    }
+
+    .home-ai-action:hover::before,
+    .home-ai-action:focus-visible::before {
+      opacity: 1;
+      animation: homeAiShortcutShine .72s ease-out 1;
+    }
+
+    .home-ai-action:active {
+      transform: translateY(0) scale(.98);
+    }
+
+    .home-ai-action.is-activating {
+      animation: homeAiShortcutSelect .5s cubic-bezier(.2,.8,.2,1) both;
+    }
+
+    .home-ai-action svg {
+      transition: transform .18s ease;
+    }
+
+    .home-ai-action.is-activating svg {
+      transform: scale(1.16) rotate(-4deg);
+    }
+
+    .home-ai-suggestion-flyer {
+      position: fixed;
+      z-index: 240;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 34px;
+      padding: 6px 10px;
+      pointer-events: none;
+      overflow: hidden;
+      border: 1px solid #8FC2FA;
+      border-radius: 999px;
+      color: #0641BE;
+      background: rgb(255 255 255 / 97%);
+      box-shadow:
+        0 10px 26px rgb(7 85 232 / 20%),
+        0 0 0 3px rgb(80 161 255 / 9%);
+      font-size: .75rem;
+      font-weight: 700;
+      line-height: 1.1;
+      white-space: nowrap;
+      will-change: transform, opacity;
+    }
+
+    .home-ai-input-shell.is-filled-by-suggestion {
+      animation: homeAiInputReceive .72s cubic-bezier(.18,.84,.24,1) both;
+    }
+
+    .home-ai-input-shell.is-filled-by-suggestion::after {
+      animation: homeAiInputSweep .72s ease-out both;
+    }
+
+    .home-ai-form.is-receiving-suggestion .home-ai-icon {
+      animation: homeAiIconPulse .64s cubic-bezier(.2,.8,.2,1) both;
+    }
+
+    .home-ai-form.is-receiving-suggestion .home-ai-icon svg {
+      animation: homeAiIconSpark .64s cubic-bezier(.2,.8,.2,1) both;
+    }
+
+    @keyframes homeAiShortcutShine {
+      from { transform: translateX(0) skewX(-18deg); }
+      to { transform: translateX(430%) skewX(-18deg); }
+    }
+
+    @keyframes homeAiShortcutSelect {
+      0% { transform: translateY(0) scale(1); }
+      35% { transform: translateY(-3px) scale(1.035); }
+      100% { transform: translateY(0) scale(1); }
+    }
+
+    @keyframes homeAiInputReceive {
+      0% {
+        border-color: #8FC2FA;
+        box-shadow: 0 0 0 0 rgb(20 127 255 / 0%);
+        transform: scale(1);
+      }
+      38% {
+        border-color: #1A86FF;
+        box-shadow:
+          0 0 0 4px rgb(20 127 255 / 13%),
+          0 6px 18px rgb(0 89 215 / 11%);
+        transform: scale(1.012);
+      }
+      100% {
+        border-color: #5B9BFF;
+        box-shadow: 0 0 0 3px rgb(41 126 255 / 12%);
+        transform: translateY(-1px) scale(1);
+      }
+    }
+
+    @keyframes homeAiInputSweep {
+      0% { opacity: 0; transform: translateX(-45%); }
+      30% { opacity: 1; }
+      100% { opacity: 0; transform: translateX(52%); }
+    }
+
+    @keyframes homeAiIconPulse {
+      0%, 100% { transform: scale(1); }
+      45% { transform: scale(1.08); box-shadow: 0 8px 18px rgb(0 104 245 / 22%); }
+    }
+
+    @keyframes homeAiIconSpark {
+      0%, 100% { transform: rotate(0deg) scale(1); }
+      45% { transform: rotate(10deg) scale(1.12); }
+    }
+
+    @media (max-width: 1199px) {
+      .home-ai-form {
+        min-height: 72px;
+      }
+
+      .home-ai-actions {
+        padding-inline: 0;
+      }
+
+      .home-ai-track {
+        padding-block: 6px;
+      }
+    }
+
+    @media (max-width: 767px) {
+      .home-ai-command {
+        gap: 7px;
+      }
+
+      .home-ai-form {
+        min-height: 70px;
+        padding: 6px;
+      }
+
+      .home-ai-icon {
+        width: 42px;
+        height: 46px;
+      }
+
+      .home-ai-heading-row {
+        gap: 6px;
+      }
+
+      .home-ai-index-hint {
+        display: none;
+      }
+
+      .home-ai-input-shell {
+        min-height: 38px;
+        border-radius: 9px;
+      }
+
+      .home-ai-input {
+        min-height: 34px;
+        font-size: .88rem;
+      }
+
+      .home-ai-action {
+        min-height: 36px;
+        padding-inline: 10px;
+      }
+    }
+
+    @media (max-width: 420px) {
+      .home-ai-form {
+        gap: 7px;
+      }
+
+      .home-ai-label {
+        font-size: .9rem;
+      }
+
+      .home-ai-beta {
+        font-size: .56rem;
+      }
+
+      .home-ai-input-shell {
+        padding-inline: 8px;
+      }
+
+      .home-ai-input {
+        font-size: .82rem;
+      }
+
+      .home-ai-action {
+        min-height: 34px;
+        padding: 5px 9px;
+        font-size: .7rem;
+      }
+
+      .home-ai-suggestion-flyer {
+        max-width: calc(100vw - 28px);
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .home-ai-action,
+      .home-ai-action::before,
+      .home-ai-action svg,
+      .home-ai-input-shell,
+      .home-ai-input-shell::after,
+      .home-ai-icon,
+      .home-ai-icon svg,
+      .home-ai-send {
+        animation: none !important;
+        transition: none !important;
+      }
+
+      .home-ai-action:hover,
+      .home-ai-action:focus-visible,
+      .home-ai-input-shell:focus-within {
+        transform: none !important;
+      }
+    }
+</style>

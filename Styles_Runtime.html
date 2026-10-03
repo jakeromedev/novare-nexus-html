@@ -1,0 +1,1423 @@
+<style>
+/* Styles Runtime — modularized from the former monolithic Styles.html. */
+    /* =========================================================
+       NAVBAR — USER PROFILE ON THE LEFT
+       Removes the unused Help / Notification / App Grid region.
+       The global search markup and controls are unchanged.
+       ========================================================= */
+
+    #nexus-nav-header {
+      justify-content: flex-start;
+    }
+
+    #nexus-nav-header > .sidebar-toggle {
+      flex: 0 0 auto;
+      order: 1;
+    }
+
+    #nexus-nav-header > .user-profile--header-left {
+      order: 2;
+      flex: 0 0 auto;
+      min-width: 0;
+      margin: 0;
+      padding:
+        0
+        18px
+        0
+        0;
+      border-left: 0;
+      border-right:
+        1px solid
+        var(--border-light);
+    }
+
+    #nexus-nav-header > .global-search {
+      order: 3;
+    }
+
+    #nexus-nav-header
+      > .user-profile--header-left
+      .user-details {
+      min-width: 0;
+    }
+
+    #nexus-nav-header
+      > .user-profile--header-left
+      .user-name,
+    #nexus-nav-header
+      > .user-profile--header-left
+      .user-department {
+      max-width: 210px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* Keep the profile readable while the navbar is transparent over a hero. */
+    #nexus-app.hero-route
+      #nexus-nav-header
+      > .user-profile--header-left {
+      gap: 8px;
+      margin: 0;
+      padding:
+        0
+        14px
+        0
+        0;
+      border-left: 0;
+      border-right:
+        1px solid
+        rgb(7 56 142 / 18%);
+    }
+
+    #nexus-app.hero-route
+      #nexus-nav-header
+      > .user-profile--header-left
+      .user-name {
+      color: #062E74;
+    }
+
+    #nexus-app.hero-route
+      #nexus-nav-header
+      > .user-profile--header-left
+      .user-department {
+      color: #486A94;
+    }
+
+    /* Tablet: keep the avatar on the left and give the search the remaining room. */
+    @media (min-width: 768px) and (max-width: 1199px) {
+      #nexus-nav-header
+        > .user-profile--header-left {
+        padding-right: 10px;
+      }
+
+      #nexus-nav-header
+        > .user-profile--header-left
+        .user-details {
+        display: none;
+      }
+    }
+
+    /* Mobile: profile remains at the left of the header as a compact avatar. */
+    @media (max-width: 767px) {
+      #nexus-nav-header
+        > .user-profile--header-left {
+        flex: 0 0 auto;
+        gap: 0;
+        margin: 0;
+        padding:
+          0
+          8px
+          0
+          0;
+      }
+
+      #nexus-nav-header
+        > .user-profile--header-left
+        .user-details {
+        display: none;
+      }
+
+      #nexus-nav-header
+        > .global-search {
+        flex: 1 1 220px;
+        min-width: 0;
+      }
+    }
+
+
+    /* =========================================================
+       NAVBAR USER PROFILE — LOADING SKELETON
+       Shown only while Session.getActiveUser() is resolving.
+       ========================================================= */
+
+    #nexus-nav-header
+      > .user-profile--header-left.is-loading {
+      pointer-events: none;
+    }
+
+    #nexus-nav-header
+      > .user-profile--header-left.is-loading
+      #user-avatar {
+      position: relative;
+      overflow: hidden;
+      color: transparent !important;
+      border-color:
+        rgb(126 168 218 / 28%);
+      background:
+        linear-gradient(
+          100deg,
+          rgb(218 232 246 / 82%) 18%,
+          rgb(244 249 253 / 96%) 38%,
+          rgb(218 232 246 / 82%) 58%
+        );
+      background-size: 220% 100%;
+      box-shadow: none;
+      animation:
+        nexus-user-skeleton-shimmer
+        1.25s
+        ease-in-out
+        infinite;
+    }
+
+    #nexus-nav-header
+      > .user-profile--header-left.is-loading
+      .user-name,
+    #nexus-nav-header
+      > .user-profile--header-left.is-loading
+      .user-department {
+      position: relative;
+      display: block;
+      overflow: hidden;
+      color: transparent !important;
+      text-shadow: none !important;
+      border-radius: 999px;
+      background:
+        linear-gradient(
+          100deg,
+          rgb(206 222 239 / 76%) 18%,
+          rgb(246 250 253 / 96%) 38%,
+          rgb(206 222 239 / 76%) 58%
+        );
+      background-size: 220% 100%;
+      user-select: none;
+      animation:
+        nexus-user-skeleton-shimmer
+        1.25s
+        ease-in-out
+        infinite;
+    }
+
+    #nexus-nav-header
+      > .user-profile--header-left.is-loading
+      .user-name {
+      width: 142px;
+      max-width: 142px;
+      height: 13px;
+      margin-bottom: 6px;
+    }
+
+    #nexus-nav-header
+      > .user-profile--header-left.is-loading
+      .user-department {
+      width: 188px;
+      max-width: 188px;
+      height: 10px;
+    }
+
+    /* Add a subtle stagger so the three skeleton pieces feel fluid. */
+    #nexus-nav-header
+      > .user-profile--header-left.is-loading
+      .user-name {
+      animation-delay: -120ms;
+    }
+
+    #nexus-nav-header
+      > .user-profile--header-left.is-loading
+      .user-department {
+      animation-delay: -240ms;
+    }
+
+    @keyframes nexus-user-skeleton-shimmer {
+      0% {
+        background-position: 120% 0;
+      }
+
+      100% {
+        background-position: -120% 0;
+      }
+    }
+
+    /* Fade the real values in once Apps Script resolves the user. */
+    #nexus-nav-header
+      > .user-profile--header-left:not(.is-loading)
+      #user-avatar,
+    #nexus-nav-header
+      > .user-profile--header-left:not(.is-loading)
+      .user-name,
+    #nexus-nav-header
+      > .user-profile--header-left:not(.is-loading)
+      .user-department {
+      animation:
+        nexus-user-profile-loaded
+        220ms
+        ease-out
+        both;
+    }
+
+    @keyframes nexus-user-profile-loaded {
+      from {
+        opacity: 0;
+        transform: translateY(2px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      #nexus-nav-header
+        > .user-profile--header-left.is-loading
+        #user-avatar,
+      #nexus-nav-header
+        > .user-profile--header-left.is-loading
+        .user-name,
+      #nexus-nav-header
+        > .user-profile--header-left.is-loading
+        .user-department,
+      #nexus-nav-header
+        > .user-profile--header-left:not(.is-loading)
+        #user-avatar,
+      #nexus-nav-header
+        > .user-profile--header-left:not(.is-loading)
+        .user-name,
+      #nexus-nav-header
+        > .user-profile--header-left:not(.is-loading)
+        .user-department {
+        animation: none !important;
+      }
+    }
+
+
+    /* =========================================================
+       GLOBAL SEARCH — PROGRAMMATIC TITLE FOCUS
+       Preserve SPA focus management without drawing a box around the H1.
+       ========================================================= */
+
+    .search-page--visual-redesign
+      .search-hero-title:focus,
+    .search-page--visual-redesign
+      .search-hero-title:focus-visible {
+      outline: none;
+      box-shadow: none;
+    }
+
+
+    /* =========================================================
+       GLOBAL HERO — SOFT BOTTOM FADE
+       Blends hero artwork into the page body while keeping hero
+       text, filters, and other foreground content fully readable.
+       ========================================================= */
+
+    .home-hero::before,
+    .page-hero[data-page-hero]::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 1;
+      height: clamp(82px, 30%, 132px);
+      pointer-events: none;
+      background:
+        linear-gradient(
+          to bottom,
+          rgb(248 252 255 / 0%) 0%,
+          rgb(248 252 255 / 10%) 22%,
+          rgb(248 252 255 / 42%) 55%,
+          rgb(248 252 255 / 82%) 80%,
+          #F8FCFF 100%
+        );
+    }
+
+    /*
+      Hero foreground content sits above the fade.
+      These selectors cover the current ONESCA hero compositions.
+    */
+    .home-hero-copy,
+    .home-hero-message,
+    .overview-hero-copy,
+    .overview-hero-message,
+    .offerings-hero-content,
+    .opportunities-hero-content,
+    .programs-hero-content,
+    .delivery-hero-content,
+    .governance-hero-content,
+    .tools-hero-content,
+    .support-hero-content,
+    .search-hero-content {
+      position: relative;
+      z-index: 2;
+    }
+
+    @media (max-width: 767px) {
+      .home-hero::before,
+      .page-hero[data-page-hero]::before {
+        height: clamp(62px, 24%, 96px);
+      }
+    }
+
+
+    /* =========================================================
+       ONESCA MANAGED LINKS — SHARED RUNTIME
+       Home is the first page using the shared implementation.
+       ========================================================= */
+
+    .home-page {
+      position: relative;
+    }
+
+    .managed-link-loader[hidden] {
+      display: none !important;
+    }
+
+    .managed-link-loader {
+      position: absolute;
+      z-index: 92;
+      inset: 0;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      min-height: 68vh;
+      padding:
+        clamp(118px, 18vh, 190px)
+        clamp(18px, 4vw, 46px)
+        60px;
+      opacity: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(
+          circle at 74% 10%,
+          rgb(59 160 255 / 8%),
+          transparent 34%
+        ),
+        linear-gradient(
+          180deg,
+          rgb(247 251 255 / 34%) 0%,
+          rgb(247 251 255 / 25%) 46%,
+          rgb(247 251 255 / 34%) 100%
+        );
+      backdrop-filter:
+        blur(8px)
+        saturate(.82);
+      -webkit-backdrop-filter:
+        blur(8px)
+        saturate(.82);
+      transition:
+        opacity 180ms ease;
+    }
+
+    .managed-link-loader.is-visible {
+      opacity: 1;
+    }
+
+    .managed-link-loader-card {
+      width:
+        min(
+          92vw,
+          350px
+        );
+      padding:
+        25px
+        28px
+        24px;
+      border:
+        1px solid
+        rgb(188 216 239 / 78%);
+      border-radius: 20px;
+      text-align: center;
+      color: #0A2D61;
+      background:
+        radial-gradient(
+          circle at 86% 0%,
+          rgb(25 176 255 / 11%),
+          transparent 32%
+        ),
+        linear-gradient(
+          145deg,
+          rgb(255 255 255 / 96%),
+          rgb(246 251 255 / 96%)
+        );
+      box-shadow:
+        0 24px 60px
+        rgb(7 49 101 / 15%);
+    }
+
+    .managed-link-loader-mark {
+      position: relative;
+      display: grid;
+      width: 54px;
+      height: 54px;
+      margin:
+        0
+        auto
+        14px;
+      place-items: center;
+      border-radius: 17px;
+      color: #0B66E7;
+      background:
+        linear-gradient(
+          145deg,
+          #E9F5FF,
+          #EDF9FF
+        );
+    }
+
+    .managed-link-loader-mark svg {
+      position: relative;
+      z-index: 2;
+      width: 25px;
+      height: 25px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.9;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .managed-link-loader-ring {
+      position: absolute;
+      inset: -5px;
+      border:
+        2px solid
+        rgb(25 113 235 / 13%);
+      border-top-color:
+        #1674EC;
+      border-radius: 20px;
+      animation:
+        managed-link-spin
+        .85s
+        linear
+        infinite;
+    }
+
+    .managed-link-loader-eyebrow {
+      margin: 0 0 6px;
+      color: #0871E8;
+      font-size: .6rem;
+      font-weight: 850;
+      letter-spacing: .14em;
+    }
+
+    .managed-link-loader-card h2 {
+      margin: 0;
+      color: #092B61;
+      font-size: 1.02rem;
+      font-weight: 850;
+      letter-spacing: -.02em;
+    }
+
+    .managed-link-loader-copy {
+      max-width: 280px;
+      margin: 7px auto 0;
+      color: #61758D;
+      font-size: .7rem;
+      line-height: 1.45;
+    }
+
+    .managed-link-loader-dots {
+      display: flex;
+      justify-content: center;
+      gap: 5px;
+      margin-top: 14px;
+    }
+
+    .managed-link-loader-dots span {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #1B70E5;
+      animation:
+        managed-link-dot
+        1s
+        ease-in-out
+        infinite;
+    }
+
+    .managed-link-loader-dots span:nth-child(2) {
+      animation-delay: 120ms;
+    }
+
+    .managed-link-loader-dots span:nth-child(3) {
+      animation-delay: 240ms;
+    }
+
+    .home-page.is-managed-links-loading
+      [data-link-key] {
+      pointer-events: none !important;
+      user-select: none;
+    }
+
+    .home-page.is-managed-links-loading
+      > :not(.managed-link-loader) {
+      filter:
+        saturate(.86)
+        contrast(.97);
+      transition:
+        filter 180ms ease;
+    }
+
+    /*
+      The gray state is only applied once the registry has resolved and
+      no usable URL exists for the configured Home key.
+    */
+    .home-page
+      [data-managed-link-missing="true"] {
+      --home-managed-missing-bg:
+        #F1F4F7;
+      --home-managed-missing-border:
+        #D6DEE7;
+      --home-managed-missing-text:
+        #718091;
+      --home-managed-missing-icon:
+        #8493A4;
+
+      cursor: pointer !important;
+      filter: saturate(.24);
+      opacity: .76;
+      border-color:
+        var(
+          --home-managed-missing-border
+        ) !important;
+      box-shadow:
+        none !important;
+      transition:
+        opacity 160ms ease,
+        transform 160ms ease,
+        border-color 160ms ease,
+        background-color 160ms ease;
+    }
+
+    .home-page
+      [data-managed-link-missing="true"]:hover {
+      opacity: .94;
+      transform:
+        translateY(-1px);
+      border-color:
+        #C5CFDA !important;
+    }
+
+    .home-page
+      .quick-access-card[data-managed-link-missing="true"],
+    .home-page
+      .role-card[data-managed-link-missing="true"],
+    .home-page
+      .featured-cta[data-managed-link-missing="true"],
+    .home-page
+      .whats-new-item[data-managed-link-missing="true"],
+    .home-page
+      .home-help-item[data-managed-link-missing="true"] {
+      color:
+        var(
+          --home-managed-missing-text
+        ) !important;
+      background:
+        var(
+          --home-managed-missing-bg
+        ) !important;
+    }
+
+    .home-page
+      [data-managed-link-missing="true"]
+      svg {
+      color:
+        var(
+          --home-managed-missing-icon
+        ) !important;
+      stroke:
+        var(
+          --home-managed-missing-icon
+        ) !important;
+    }
+
+    /* ---------- Shared Coming Soon dialog ---------- */
+
+    .managed-coming-soon-dialog {
+      width:
+        min(
+          92vw,
+          470px
+        );
+      max-width: 470px;
+      margin: auto;
+      padding: 0;
+      overflow: visible;
+      border: 0;
+      border-radius: 22px;
+      color: #0A2757;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .managed-coming-soon-dialog::backdrop {
+      background:
+        rgb(4 20 43 / 55%);
+      backdrop-filter:
+        blur(7px);
+      -webkit-backdrop-filter:
+        blur(7px);
+    }
+
+    .managed-coming-soon-card {
+      position: relative;
+      overflow: hidden;
+      padding:
+        36px
+        34px
+        30px;
+      border:
+        1px solid
+        rgb(199 222 241 / 82%);
+      border-radius: 22px;
+      text-align: center;
+      background:
+        radial-gradient(
+          circle at 85% 4%,
+          rgb(0 183 255 / 15%),
+          transparent 32%
+        ),
+        radial-gradient(
+          circle at 12% 88%,
+          rgb(86 69 255 / 9%),
+          transparent 34%
+        ),
+        linear-gradient(
+          145deg,
+          #FFFFFF 0%,
+          #F6FBFF 100%
+        );
+      box-shadow:
+        0 28px 80px
+        rgb(0 28 70 / 24%),
+        inset 0 1px 0
+        rgb(255 255 255 / 90%);
+    }
+
+    .managed-coming-soon-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 12%;
+      right: 12%;
+      height: 3px;
+      border-radius: 999px;
+      background:
+        linear-gradient(
+          90deg,
+          #156BFF,
+          #00C9E8,
+          #8B61FF
+        );
+    }
+
+    .managed-coming-soon-close {
+      position: absolute;
+      z-index: 2;
+      top: 15px;
+      right: 15px;
+      display: grid;
+      width: 34px;
+      height: 34px;
+      place-items: center;
+      padding: 0;
+      border:
+        1px solid
+        #DFE9F2;
+      border-radius: 50%;
+      color: #69809A;
+      background:
+        rgb(255 255 255 / 76%);
+      cursor: pointer;
+      transition:
+        color 150ms ease,
+        background-color 150ms ease,
+        transform 150ms ease;
+    }
+
+    .managed-coming-soon-close:hover {
+      color: #174CA0;
+      background: #FFFFFF;
+      transform: rotate(4deg);
+    }
+
+    .managed-coming-soon-close svg {
+      width: 16px;
+      height: 16px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+    }
+
+    .managed-coming-soon-icon {
+      display: grid;
+      width: 66px;
+      height: 66px;
+      margin:
+        0
+        auto
+        17px;
+      place-items: center;
+      border-radius: 20px;
+      color: #096AF2;
+      background:
+        linear-gradient(
+          145deg,
+          #EAF5FF,
+          #E8F9FB
+        );
+      box-shadow:
+        inset 0 0 0 1px
+        rgb(150 204 245 / 38%),
+        0 9px 24px
+        rgb(0 91 194 / 10%);
+    }
+
+    .managed-coming-soon-icon svg {
+      width: 37px;
+      height: 37px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.55;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .managed-coming-soon-eyebrow {
+      margin: 0 0 8px;
+      color: #0877E8;
+      font-size: .68rem;
+      font-weight: 850;
+      letter-spacing: .14em;
+    }
+
+    .managed-coming-soon-dialog h2 {
+      margin: 0;
+      color: #0A2C62;
+      font-size:
+        clamp(
+          1.25rem,
+          3vw,
+          1.55rem
+        );
+      line-height: 1.12;
+      font-weight: 850;
+      letter-spacing: -.025em;
+    }
+
+    .managed-coming-soon-resource {
+      margin: 13px 0 5px;
+      color: #135FC0;
+      font-size: .86rem;
+      font-weight: 760;
+      line-height: 1.35;
+    }
+
+    .managed-coming-soon-message {
+      max-width: 370px;
+      margin: 0 auto;
+      color: #61758C;
+      font-size: .79rem;
+      line-height: 1.55;
+    }
+
+    .managed-coming-soon-action {
+      min-height: 40px;
+      margin-top: 22px;
+      padding: 9px 18px;
+      border: 0;
+      border-radius: 999px;
+      color: #FFFFFF;
+      font-size: .76rem;
+      font-weight: 780;
+      background:
+        linear-gradient(
+          90deg,
+          #0C67E8,
+          #058EDB
+        );
+      box-shadow:
+        0 9px 20px
+        rgb(7 104 217 / 19%);
+      cursor: pointer;
+      transition:
+        transform 150ms ease,
+        box-shadow 150ms ease;
+    }
+
+    .managed-coming-soon-action:hover {
+      transform:
+        translateY(-1px);
+      box-shadow:
+        0 12px 24px
+        rgb(7 104 217 / 24%);
+    }
+
+    @keyframes managed-link-spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    @keyframes managed-link-dot {
+      0%,
+      100% {
+        opacity: .34;
+        transform: translateY(0);
+      }
+
+      50% {
+        opacity: 1;
+        transform: translateY(-3px);
+      }
+    }
+
+    @media (max-width: 560px) {
+      .managed-coming-soon-card {
+        padding:
+          32px
+          22px
+          24px;
+        border-radius: 18px;
+      }
+
+      .managed-coming-soon-dialog {
+        width:
+          min(
+            94vw,
+            470px
+          );
+      }
+
+      .managed-link-loader {
+        padding-top:
+          clamp(
+            96px,
+            16vh,
+            150px
+          );
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .managed-link-loader-ring,
+      .managed-link-loader-dots span {
+        animation:
+          none !important;
+      }
+
+      .home-page
+        [data-managed-link-missing="true"],
+      .managed-coming-soon-close,
+      .managed-coming-soon-action {
+        transition:
+          none !important;
+      }
+    }
+
+
+    /* =========================================================
+       GLOBAL HERO — STICKY SCROLL DISSOLVE
+       The hero stays pinned briefly while scrolling, then fades
+       and softly zooms away as the frosted navbar takes over.
+       ========================================================= */
+
+    [data-page-hero] {
+      --hero-scroll-opacity: 1;
+      --hero-copy-opacity: 1;
+      --hero-media-scale: 1;
+      --hero-copy-offset: 0px;
+
+      position: sticky !important;
+      top: 0;
+      z-index: 0;
+
+      opacity:
+        var(--hero-scroll-opacity);
+
+      transform:
+        translateZ(0);
+
+      will-change:
+        opacity;
+
+      transition:
+        opacity 28ms linear;
+    }
+
+    /*
+      Hero artwork scales independently from the hero container so
+      sticky positioning remains stable.
+    */
+    [data-page-hero]
+      > [class*="-hero-media"],
+    .home-hero[data-page-hero]
+      .home-hero-media {
+      transform:
+        scale(
+          var(--hero-media-scale)
+        );
+
+      transform-origin:
+        center center;
+
+      will-change:
+        transform;
+
+      transition:
+        transform 28ms linear;
+    }
+
+    /*
+      Foreground copy fades slightly faster than the artwork and moves
+      upward just a few pixels for a polished dissolve.
+    */
+    .home-hero[data-page-hero]
+      .home-hero-copy,
+    .home-hero[data-page-hero]
+      .home-hero-message,
+    .home-hero[data-page-hero]
+      .home-handwriting-frame,
+    .overview-hero[data-page-hero]
+      .overview-hero-copy,
+    .offerings-hero[data-page-hero]
+      .offerings-hero-content,
+    .opportunities-hero[data-page-hero]
+      .opportunities-hero-content,
+    .programs-hero[data-page-hero]
+      .programs-hero-content,
+    .delivery-hero[data-page-hero]
+      .delivery-hero-content,
+    .governance-hero[data-page-hero]
+      .governance-hero-content,
+    .tools-hero[data-page-hero]
+      .tools-hero-content,
+    .support-hero[data-page-hero]
+      .support-hero-content,
+    .search-hero[data-page-hero]
+      .search-hero-content {
+      opacity:
+        var(--hero-copy-opacity);
+
+      transform:
+        translateY(
+          var(--hero-copy-offset)
+        );
+
+      will-change:
+        opacity,
+        transform;
+
+      transition:
+        opacity 28ms linear,
+        transform 28ms linear;
+    }
+
+    /*
+      Once fully faded, the invisible sticky hero must not intercept
+      clicks intended for content scrolling underneath it.
+    */
+    [data-page-hero].is-scroll-faded {
+      pointer-events: none;
+    }
+
+    /*
+      Give following page content its own paint layer so it can visually
+      take over from the fading sticky hero instead of appearing trapped
+      behind it.
+    */
+    [data-page-hero] + * {
+      position: relative;
+      z-index: 1;
+    }
+
+    /*
+      Home's Ask NOSCA command already intentionally overlaps the hero;
+      keep its existing stronger stacking level.
+    */
+    .home-hero[data-page-hero]
+      + .home-ai-command {
+      z-index: 5;
+    }
+
+    /*
+      Reduced motion keeps the hero layout stable and disables the
+      scale/offset animation while preserving a simple opacity fade.
+    */
+    @media (prefers-reduced-motion: reduce) {
+      [data-page-hero] {
+        position: relative !important;
+        top: auto;
+        transform: none !important;
+        transition: none !important;
+      }
+
+      [data-page-hero]
+        > [class*="-hero-media"],
+      .home-hero[data-page-hero]
+        .home-hero-media,
+      .home-hero[data-page-hero]
+        .home-hero-copy,
+      .home-hero[data-page-hero]
+        .home-hero-message,
+      .home-hero[data-page-hero]
+        .home-handwriting-frame,
+      .overview-hero[data-page-hero]
+        .overview-hero-copy,
+      .offerings-hero[data-page-hero]
+        .offerings-hero-content,
+      .opportunities-hero[data-page-hero]
+        .opportunities-hero-content,
+      .programs-hero[data-page-hero]
+        .programs-hero-content,
+      .delivery-hero[data-page-hero]
+        .delivery-hero-content,
+      .governance-hero[data-page-hero]
+        .governance-hero-content,
+      .tools-hero[data-page-hero]
+        .tools-hero-content,
+      .support-hero[data-page-hero]
+        .support-hero-content,
+      .search-hero[data-page-hero]
+        .search-hero-content {
+        transform: none !important;
+        transition: none !important;
+      }
+    }
+
+
+    /* =========================================================
+       ONESCA — DEFAULT PAGE LOADER
+       The H1 Overview resource loader is now the default loader
+       treatment for every SPA page.
+       ========================================================= */
+
+    .route-page {
+      position: relative;
+    }
+
+    .route-page.is-default-page-loading,
+    .route-page.is-managed-links-loading {
+      min-height: 68vh;
+    }
+
+    /*
+      Every route-level loader uses the Overview visual baseline.
+      The shared managed-link loader is aliased here so Home and
+      future managed-link pages look identical to Overview.
+    */
+    .route-page
+      .overview-link-loader[hidden],
+    .route-page
+      .managed-link-loader[hidden] {
+      display: none !important;
+    }
+
+    .route-page
+      .overview-link-loader,
+    .route-page
+      .managed-link-loader {
+      position: absolute;
+      z-index: 90;
+      inset: 0;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      min-height: 68vh;
+      padding:
+        clamp(115px, 18vh, 190px)
+        clamp(18px, 4vw, 46px)
+        60px;
+      opacity: 0;
+
+      background:
+        radial-gradient(
+          circle at 72% 12%,
+          rgb(60 161 255 / 8%),
+          transparent 35%
+        ),
+        linear-gradient(
+          180deg,
+          rgb(245 250 254 / 34%) 0%,
+          rgb(245 250 254 / 26%) 48%,
+          rgb(245 250 254 / 32%) 100%
+        );
+
+      backdrop-filter:
+        blur(9px)
+        saturate(.78);
+
+      -webkit-backdrop-filter:
+        blur(9px)
+        saturate(.78);
+
+      transition:
+        opacity 180ms ease;
+
+      pointer-events: none;
+    }
+
+    .route-page
+      .overview-link-loader.is-visible,
+    .route-page
+      .managed-link-loader.is-visible {
+      opacity: 1;
+    }
+
+    /*
+      Prevent interactions under the transition overlay.
+      Scrolling remains available because the overlay itself has
+      pointer-events disabled.
+    */
+    .route-page.is-default-page-loading
+      > :not(.overview-link-loader):not(.managed-link-loader),
+    .route-page.is-managed-links-loading
+      > :not(.overview-link-loader):not(.managed-link-loader) {
+      pointer-events: none;
+      user-select: none;
+      filter:
+        saturate(.82)
+        contrast(.96);
+      transition:
+        filter 180ms ease;
+    }
+
+    /* ---------- Exact Overview loader card ---------- */
+
+    .route-page
+      .overview-link-loader-card,
+    .route-page
+      .managed-link-loader-card {
+      position: sticky;
+      top: 120px;
+      width:
+        min(
+          92vw,
+          410px
+        );
+      padding:
+        30px
+        32px
+        27px;
+      border:
+        1px solid
+        rgb(190 219 240 / 78%);
+      border-radius: 22px;
+      text-align: center;
+      color: #0A2E63;
+
+      background:
+        radial-gradient(
+          circle at 88% 4%,
+          rgb(0 190 232 / 11%),
+          transparent 34%
+        ),
+        linear-gradient(
+          145deg,
+          #FFFFFF 0%,
+          #F7FBFF 100%
+        );
+
+      box-shadow:
+        0 18px 54px
+        rgb(0 44 95 / 12%),
+        inset 0 1px 0
+        rgb(255 255 255 / 90%);
+    }
+
+    .route-page
+      .overview-link-loader-card::before,
+    .route-page
+      .managed-link-loader-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 16%;
+      right: 16%;
+      height: 3px;
+      border-radius: 999px;
+
+      background:
+        linear-gradient(
+          90deg,
+          #1269ED,
+          #00C6E8,
+          #7766FF
+        );
+    }
+
+    .route-page
+      .overview-link-loader-mark,
+    .route-page
+      .managed-link-loader-mark {
+      position: relative;
+      display: grid;
+      width: 66px;
+      height: 66px;
+      margin:
+        0
+        auto
+        17px;
+      place-items: center;
+      border-radius: 0;
+      color: #0B65D8;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .route-page
+      .overview-link-loader-ring,
+    .route-page
+      .managed-link-loader-ring {
+      position: absolute;
+      inset: 0;
+      border:
+        4px solid
+        #E3EFF9;
+      border-top-color:
+        #0874EC;
+      border-right-color:
+        #00BAD7;
+      border-radius: 50%;
+
+      animation:
+        overview-link-loader-spin
+        .82s
+        linear
+        infinite;
+    }
+
+    .route-page
+      .overview-link-loader-mark svg,
+    .route-page
+      .managed-link-loader-mark svg {
+      position: relative;
+      z-index: 2;
+      width: 27px;
+      height: 27px;
+      fill: none;
+      stroke: #0B65D8;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .route-page
+      .overview-link-loader-eyebrow,
+    .route-page
+      .managed-link-loader-eyebrow {
+      margin: 0 0 7px;
+      color: #0874DF;
+      font-size: .65rem;
+      font-weight: 850;
+      letter-spacing: .14em;
+    }
+
+    .route-page
+      .overview-link-loader-card h2,
+    .route-page
+      .managed-link-loader-card h2 {
+      margin: 0;
+      color: #0A2E63;
+
+      font-size:
+        clamp(
+          1.15rem,
+          2.5vw,
+          1.38rem
+        );
+
+      line-height: 1.16;
+      font-weight: 850;
+      letter-spacing: -.02em;
+    }
+
+    .route-page
+      .overview-link-loader-copy,
+    .route-page
+      .managed-link-loader-copy {
+      max-width: 315px;
+      margin:
+        9px
+        auto
+        0;
+      color: #647991;
+      font-size: .76rem;
+      line-height: 1.5;
+    }
+
+    .route-page
+      .overview-link-loader-dots,
+    .route-page
+      .managed-link-loader-dots {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 18px;
+    }
+
+    .route-page
+      .overview-link-loader-dots span,
+    .route-page
+      .managed-link-loader-dots span {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #1683EB;
+
+      animation:
+        overview-link-loader-dot
+        1.05s
+        ease-in-out
+        infinite;
+    }
+
+    .route-page
+      .overview-link-loader-dots
+      span:nth-child(2),
+    .route-page
+      .managed-link-loader-dots
+      span:nth-child(2) {
+      animation-delay: 140ms;
+    }
+
+    .route-page
+      .overview-link-loader-dots
+      span:nth-child(3),
+    .route-page
+      .managed-link-loader-dots
+      span:nth-child(3) {
+      animation-delay: 280ms;
+    }
+
+    @media (max-width: 620px) {
+      .route-page
+        .overview-link-loader,
+      .route-page
+        .managed-link-loader {
+        padding-top: 96px;
+      }
+
+      .route-page
+        .overview-link-loader-card,
+      .route-page
+        .managed-link-loader-card {
+        top: 94px;
+        padding:
+          27px
+          22px
+          24px;
+        border-radius: 18px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .route-page
+        .overview-link-loader,
+      .route-page
+        .managed-link-loader,
+      .route-page
+        .overview-link-loader-ring,
+      .route-page
+        .managed-link-loader-ring,
+      .route-page
+        .overview-link-loader-dots span,
+      .route-page
+        .managed-link-loader-dots span {
+        transition: none !important;
+        animation: none !important;
+      }
+    }
+</style>

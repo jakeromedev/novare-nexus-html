@@ -1,0 +1,221 @@
+<style>
+/* Styles Loading — modularized from the former monolithic Styles.html. */
+    /* ================================================================
+       SHARED IMAGE LOADING FEEDBACK
+       Applied by bindImageCandidates() to every Drive-backed image.
+       The existing fallback remains the layout anchor while loading;
+       once the image succeeds it fades in, and on a real failure the
+       normal fallback content is restored.
+       ================================================================ */
+    @keyframes nexus-image-loader-shimmer {
+      0% { transform: translateX(-120%); }
+      100% { transform: translateX(120%); }
+    }
+
+    @keyframes nexus-image-loader-spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes nexus-image-reveal {
+      0% { opacity: 0; filter: saturate(.92); }
+      100% { opacity: 1; filter: saturate(1); }
+    }
+
+    .nexus-image-loader {
+      position: relative !important;
+      isolation: isolate;
+      overflow: hidden !important;
+      color: transparent !important;
+      border-color: rgb(157 190 219 / 48%) !important;
+      background-color: #EAF4FB !important;
+      background-image: linear-gradient(110deg, #E8F2FA 18%, #F7FBFE 38%, #E8F2FA 58%) !important;
+      background-size: 220% 100% !important;
+      cursor: progress;
+      user-select: none;
+    }
+
+    .nexus-image-loader > * {
+      opacity: 0 !important;
+    }
+
+    .nexus-image-loader::before {
+      content: "";
+      position: absolute;
+      z-index: 1;
+      inset: 0;
+      width: 48%;
+      pointer-events: none;
+      background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgb(255 255 255 / 12%) 12%,
+        rgb(255 255 255 / 74%) 50%,
+        rgb(255 255 255 / 12%) 88%,
+        transparent 100%
+      );
+      transform: translateX(-120%);
+      animation: nexus-image-loader-shimmer 1.35s cubic-bezier(.4, 0, .2, 1) infinite;
+    }
+
+    .nexus-image-loader::after {
+      content: "";
+      position: absolute;
+      z-index: 2;
+      top: 50%;
+      left: 50%;
+      width: 24px;
+      height: 24px;
+      margin: -12px 0 0 -12px;
+      box-sizing: border-box;
+      border: 2.5px solid rgb(8 85 220 / 17%);
+      border-top-color: #0755E8;
+      border-right-color: #13BDEB;
+      border-radius: 50%;
+      box-shadow: 0 0 0 5px rgb(255 255 255 / 52%), 0 5px 16px rgb(9 78 170 / 12%);
+      pointer-events: none;
+      animation: nexus-image-loader-spin .76s linear infinite;
+    }
+
+    img.nexus-image-loaded {
+      animation: nexus-image-reveal .34s ease-out both;
+    }
+
+    @media (max-width: 520px) {
+      .nexus-image-loader::after {
+        width: 20px;
+        height: 20px;
+        margin: -10px 0 0 -10px;
+        border-width: 2px;
+        box-shadow: 0 0 0 4px rgb(255 255 255 / 50%), 0 4px 12px rgb(9 78 170 / 10%);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .nexus-image-loader::before,
+      .nexus-image-loader::after,
+      img.nexus-image-loaded {
+        animation: none !important;
+      }
+
+      .nexus-image-loader::before {
+        transform: none;
+        opacity: .35;
+      }
+    }
+
+
+
+    /* ================================================================
+       SHARED IN-PLACE SKELETON WAVE
+       Images and managed resource controls now load in their own footprint.
+       No full-page blocking loader is used for route or link preparation.
+       ================================================================ */
+    @keyframes nexus-skeleton-wave {
+      0% { background-position: 210% 0; }
+      100% { background-position: -210% 0; }
+    }
+
+    .nexus-image-loader {
+      background-color: #DCE7F1 !important;
+      background-image: linear-gradient(
+        100deg,
+        #DCE7F1 18%,
+        #EEF4F9 36%,
+        #F8FBFD 49%,
+        #EEF4F9 62%,
+        #DCE7F1 80%
+      ) !important;
+      background-size: 240% 100% !important;
+      background-repeat: no-repeat !important;
+      animation: nexus-skeleton-wave 1.45s ease-in-out infinite !important;
+      cursor: progress;
+    }
+
+    /* The wave itself is the loader; remove the old centered spinner. */
+    .nexus-image-loader::before,
+    .nexus-image-loader::after {
+      content: none !important;
+      display: none !important;
+      animation: none !important;
+    }
+
+    /*
+      Managed links resolve from the Sheet asynchronously. Keep each actionable
+      control at its final width/height and shimmer only that control while the
+      URL registry is loading.
+    */
+    .nexus-control-loading {
+      position: relative !important;
+      isolation: isolate;
+      overflow: hidden !important;
+      color: transparent !important;
+      text-shadow: none !important;
+      border-color: rgb(164 185 205 / 48%) !important;
+      background-color: #DCE7F1 !important;
+      background-image: linear-gradient(
+        100deg,
+        #DCE7F1 18%,
+        #EAF1F7 36%,
+        #F7FAFC 49%,
+        #EAF1F7 62%,
+        #DCE7F1 80%
+      ) !important;
+      background-size: 240% 100% !important;
+      background-repeat: no-repeat !important;
+      background-position: 210% 0;
+      box-shadow: none !important;
+      transform: none !important;
+      pointer-events: none !important;
+      user-select: none !important;
+      cursor: progress !important;
+      animation: nexus-skeleton-wave 1.45s ease-in-out infinite !important;
+    }
+
+    .nexus-control-loading > * {
+      opacity: 0 !important;
+      visibility: hidden !important;
+    }
+
+    .nexus-control-loading::before,
+    .nexus-control-loading::after {
+      opacity: 0 !important;
+      visibility: hidden !important;
+      animation: none !important;
+    }
+
+    @keyframes nexus-control-ready {
+      0% { opacity: .58; }
+      100% { opacity: 1; }
+    }
+
+    .nexus-control-ready {
+      animation: nexus-control-ready .24s ease-out both;
+    }
+
+    /* Safety: legacy route/link overlay nodes may still exist in cached markup. */
+    .route-page .overview-link-loader,
+    .route-page .managed-link-loader {
+      display: none !important;
+    }
+
+    .route-page.is-default-page-loading,
+    .route-page.is-managed-links-loading {
+      min-height: 0 !important;
+    }
+
+    .route-page.is-default-page-loading > :not(.overview-link-loader):not(.managed-link-loader),
+    .route-page.is-managed-links-loading > :not(.overview-link-loader):not(.managed-link-loader) {
+      pointer-events: auto !important;
+      user-select: auto !important;
+      filter: none !important;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .nexus-image-loader,
+      .nexus-control-loading,
+      .nexus-control-ready {
+        animation: none !important;
+        background-position: 50% 0 !important;
+      }
+    }
+</style>

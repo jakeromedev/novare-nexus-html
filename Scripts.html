@@ -1372,6 +1372,16 @@
       viewerUrl: "https://drive.google.com/file/d/1kkQcGtw5vjlwLWK8TN7hctKVIOEgXpRO/view?usp=drive_link",
       phase: 1
     },
+    "solutioning-toolkit-header-bg": {
+      fileId: "1OLXWyIvqAYRnrly3t-m0hR2C7U7zokgQ",
+      viewerUrl: "https://drive.google.com/file/d/1OLXWyIvqAYRnrly3t-m0hR2C7U7zokgQ/view?usp=drive_link",
+      phase: 2
+    },
+    "opportunities-solutioning-toolkit-header-icon": {
+      fileId: "1UQN0O2quzN_Mfs9BH4H_qv3CI2bBn8tV",
+      viewerUrl: "https://drive.google.com/file/d/1UQN0O2quzN_Mfs9BH4H_qv3CI2bBn8tV/view?usp=drive_link",
+      phase: 2
+    },
     "sales-pillar-tudi": {
       fileId: "125DgraKmZoV3xEJrEcJ16QNgRpuIBSo2",
       viewerUrl: "https://drive.google.com/file/d/125DgraKmZoV3xEJrEcJ16QNgRpuIBSo2/view?usp=drive_link",
@@ -1665,6 +1675,19 @@
       pageRoot.querySelector("#opportunities-hero-image"),
       pageRoot.querySelector("#opportunities-hero-fallback"),
       2400
+    );
+
+
+    bindOpportunitiesAsset(
+      pageRoot.querySelector("#solutioning-toolkit-header-bg-image"),
+      pageRoot.querySelector("#solutioning-toolkit-header-bg-fallback"),
+      2200
+    );
+
+    bindOpportunitiesAsset(
+      pageRoot.querySelector("#solutioning-toolkit-header-icon-image"),
+      pageRoot.querySelector("#solutioning-toolkit-header-icon-fallback"),
+      900
     );
 
     opportunitiesPageData.entryPoints.forEach(function (item) {

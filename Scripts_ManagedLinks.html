@@ -396,6 +396,9 @@
           element.removeAttribute(
             "data-managed-link-missing"
           );
+          element.removeAttribute(
+            "data-managed-tooltip"
+          );
         } else {
           delete element.dataset
             .managedLinkReady;
@@ -403,6 +406,8 @@
           element.dataset
             .managedLinkMissing =
               "true";
+          element.dataset.managedTooltip =
+            "Coming soon";
         }
       });
   }
@@ -488,15 +493,14 @@
         '</div>' +
 
         '<p class="managed-coming-soon-eyebrow">COMING SOON</p>' +
-        '<h2 id="managed-coming-soon-title">Something great is on the way.</h2>' +
-        '<p id="managed-coming-soon-resource" class="managed-coming-soon-resource"></p>' +
+        '<h2 id="managed-coming-soon-title">Something exciting is on the way ✨</h2>' +
         '<p id="managed-coming-soon-message" class="managed-coming-soon-message">' +
-          'We’re preparing the latest approved resource for ONESCA so you get the best, most up-to-date material. Check back soon!' +
+          'We’re putting the finishing touches on this experience so it’s ready to shine. Check back soon — there’s more good stuff coming!' +
         '</p>' +
 
         '<button class="managed-coming-soon-action" type="button" ' +
           'data-managed-coming-soon-close>' +
-          'Got it — I’ll check back' +
+          'Got it — can’t wait!' +
         '</button>' +
       '</div>';
 
@@ -531,29 +535,9 @@
     return dialog;
   }
 
-  function showComingSoon(
-    trigger
-  ) {
+  function showComingSoon() {
     const dialog =
       ensureComingSoonDialog();
-
-    const resource =
-      dialog.querySelector(
-        "#managed-coming-soon-resource"
-      );
-
-    const label =
-      getTriggerLabel(trigger);
-
-    if (resource) {
-      resource.textContent =
-        label === "This resource"
-          ? "This resource is getting ready for launch."
-          : (
-              label +
-              " is getting ready for launch."
-            );
-    }
 
     if (
       typeof dialog.showModal ===
@@ -581,6 +565,200 @@
       "noopener,noreferrer"
     );
   }
+
+
+
+  let managedTooltip = null;
+  let managedTooltipCard = null;
+  let managedTooltipMessage = null;
+  let managedTooltipActiveTrigger = null;
+  let managedTooltipBound = false;
+
+  function ensureManagedTooltip() {
+    if (managedTooltip) {
+      return managedTooltip;
+    }
+
+    managedTooltip = document.createElement("div");
+    managedTooltip.id = "managed-link-tooltip";
+    managedTooltip.className = "managed-link-tooltip";
+    managedTooltip.setAttribute("role", "status");
+    managedTooltip.setAttribute("aria-live", "polite");
+    managedTooltip.setAttribute("data-placement", "top");
+    managedTooltip.hidden = true;
+    managedTooltip.innerHTML =
+      '<div class="managed-link-tooltip-card">' +
+        '<p class="managed-link-tooltip-message">✨ Coming soon — something great is near!</p>' +
+        '<div class="managed-link-tooltip-caret" aria-hidden="true"></div>' +
+      '</div>';
+
+    document.body.appendChild(managedTooltip);
+    managedTooltipCard = managedTooltip.querySelector('.managed-link-tooltip-card');
+    managedTooltipMessage = managedTooltip.querySelector('.managed-link-tooltip-message');
+
+    if (!managedTooltipBound) {
+      window.addEventListener('scroll', function () {
+        if (managedTooltipActiveTrigger) {
+          positionManagedTooltip(managedTooltipActiveTrigger);
+        }
+      }, true);
+
+      window.addEventListener('resize', function () {
+        if (managedTooltipActiveTrigger) {
+          positionManagedTooltip(managedTooltipActiveTrigger);
+        }
+      });
+
+      managedTooltipBound = true;
+    }
+
+    return managedTooltip;
+  }
+
+  function getUnavailableTooltip() {
+    return "✨ Coming soon — something great is near!";
+  }
+
+  function positionManagedTooltip(trigger) {
+    if (!trigger) {
+      return;
+    }
+
+    const tooltip = ensureManagedTooltip();
+    tooltip.hidden = false;
+
+    const rect = trigger.getBoundingClientRect();
+    const gap = 8;
+    const viewportWidth = window.innerWidth || document.documentElement.clientWidth;
+    const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+    const cardWidth = managedTooltipCard.offsetWidth || 204;
+    const cardHeight = managedTooltipCard.offsetHeight || 46;
+
+    let left = rect.left + (rect.width / 2) - (cardWidth / 2);
+    const minLeft = 10;
+    const maxLeft = viewportWidth - cardWidth - 10;
+    left = Math.max(minLeft, Math.min(left, maxLeft));
+
+    const showBelow = rect.top < cardHeight + 16;
+    let top = showBelow
+      ? rect.bottom + gap
+      : rect.top - cardHeight - gap;
+
+    top = Math.max(10, Math.min(top, viewportHeight - cardHeight - 10));
+
+    tooltip.style.left = left + 'px';
+    tooltip.style.top = top + 'px';
+    tooltip.setAttribute('data-placement', showBelow ? 'bottom' : 'top');
+
+    const caret = tooltip.querySelector('.managed-link-tooltip-caret');
+    if (caret) {
+      const center = rect.left + (rect.width / 2);
+      const caretLeft = Math.max(22, Math.min(cardWidth - 22, center - left));
+      caret.style.left = caretLeft + 'px';
+    }
+  }
+
+  function showManagedTooltip(trigger) {
+    if (!trigger || trigger.dataset.managedLinkMissing !== 'true') {
+      return;
+    }
+
+    const tooltip = ensureManagedTooltip();
+    const message = getUnavailableTooltip(trigger);
+
+    if (managedTooltipMessage) {
+      managedTooltipMessage.textContent = message;
+    }
+    managedTooltipActiveTrigger = trigger;
+
+    positionManagedTooltip(trigger);
+    requestAnimationFrame(function () {
+      tooltip.classList.add('is-visible');
+    });
+  }
+
+  function hideManagedTooltip(trigger) {
+    if (
+      trigger &&
+      managedTooltipActiveTrigger &&
+      trigger !== managedTooltipActiveTrigger
+    ) {
+      return;
+    }
+
+    if (!managedTooltip) {
+      return;
+    }
+
+    managedTooltip.classList.remove('is-visible');
+    managedTooltipActiveTrigger = null;
+
+    window.setTimeout(function () {
+      if (managedTooltip && !managedTooltip.classList.contains('is-visible')) {
+        managedTooltip.hidden = true;
+      }
+    }, 180);
+  }
+
+  function bindManagedTooltip(pageRoot, state) {
+    if (state.tooltipBound) {
+      return;
+    }
+
+    pageRoot.addEventListener('mouseover', function (event) {
+      const trigger = event.target.closest('[data-managed-link-missing="true"]');
+      if (!trigger || !pageRoot.contains(trigger)) {
+        return;
+      }
+
+      if (managedTooltipActiveTrigger === trigger) {
+        positionManagedTooltip(trigger);
+        return;
+      }
+
+      showManagedTooltip(trigger);
+    }, true);
+
+    pageRoot.addEventListener('mouseout', function (event) {
+      const trigger = event.target.closest('[data-managed-link-missing="true"]');
+      if (!trigger || managedTooltipActiveTrigger !== trigger) {
+        return;
+      }
+
+      const related = event.relatedTarget;
+      if (related && trigger.contains(related)) {
+        return;
+      }
+
+      hideManagedTooltip(trigger);
+    }, true);
+
+    pageRoot.addEventListener('focusin', function (event) {
+      const trigger = event.target.closest('[data-managed-link-missing="true"]');
+      if (!trigger || !pageRoot.contains(trigger)) {
+        return;
+      }
+
+      showManagedTooltip(trigger);
+    });
+
+    pageRoot.addEventListener('focusout', function (event) {
+      const trigger = event.target.closest('[data-managed-link-missing="true"]');
+      if (!trigger || managedTooltipActiveTrigger !== trigger) {
+        return;
+      }
+
+      const related = event.relatedTarget;
+      if (related && trigger.contains(related)) {
+        return;
+      }
+
+      hideManagedTooltip(trigger);
+    });
+
+    state.tooltipBound = true;
+  }
+
 
   function handleManagedClick(
     event,
@@ -857,6 +1035,11 @@
       state
     );
 
+    bindManagedTooltip(
+      pageRoot,
+      state
+    );
+
     fetchLinks(
       pageRoot,
       state
@@ -898,7 +1081,11 @@
       initialize: initialize,
       refresh: refresh,
       showComingSoon:
-        showComingSoon
+        showComingSoon,
+      showUnavailableTooltip:
+        showManagedTooltip,
+      hideUnavailableTooltip:
+        hideManagedTooltip
     });
 }());
 </script>

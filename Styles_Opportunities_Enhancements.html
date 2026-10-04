@@ -523,4 +523,2973 @@
     font-size: .72rem;
   }
 }
+
+
+/* =========================================================
+   H3 OPPORTUNITIES — REPOSITORY SHOWCASE ALIGNMENT PATCH
+   Matches the approved compact visual treatment for the
+   Sales Pillars and Deal Retrospective panels.
+========================================================== */
+
+.sales-pillars-panel,
+.deal-retrospective-panel {
+  padding: 12px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, #fbfdff 0%, #f4f8fc 100%);
+  box-shadow: 0 10px 22px rgb(14 72 148 / 6%), inset 0 1px 0 rgb(255 255 255 / 78%);
+}
+
+.sales-pillars-panel .opportunities-panel-header,
+.deal-retrospective-panel .opportunities-panel-header {
+  min-height: 40px;
+  margin-bottom: 10px;
+}
+
+.sales-pillars-panel .opportunities-panel-title-group,
+.deal-retrospective-panel .opportunities-panel-title-group {
+  gap: 10px;
+}
+
+.sales-pillars-panel .opportunities-panel-icon,
+.deal-retrospective-panel .opportunities-panel-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  box-shadow: 0 8px 16px rgb(18 90 197 / 14%);
+}
+
+.sales-pillars-panel .opportunities-panel-icon svg,
+.deal-retrospective-panel .opportunities-panel-icon svg {
+  width: 23px;
+  height: 23px;
+}
+
+.sales-pillars-panel .opportunities-panel-title-group h2,
+.deal-retrospective-panel .opportunities-panel-title-group h2 {
+  font-size: 1.02rem;
+  line-height: 1.03;
+}
+
+.sales-pillars-panel .opportunities-panel-title-group p,
+.deal-retrospective-panel .opportunities-panel-title-group p {
+  margin-top: 2px;
+  color: #5a78aa;
+  font-size: 0.60rem;
+  line-height: 1.15;
+}
+
+.sales-pillars-grid,
+.deal-retrospective-grid {
+  gap: 10px;
+}
+
+.sales-pillar-card {
+  position: relative;
+  display: block;
+  min-height: 108px !important;
+  height: 108px;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid #d6e6f4;
+  border-radius: 14px;
+  background: #10264f;
+  box-shadow: 0 6px 16px rgb(16 65 133 / 8%);
+}
+
+.sales-pillar-card:hover {
+  transform: translateY(-2px);
+}
+
+.sales-pillar-media {
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+}
+
+.sales-pillar-media img {
+  object-fit: cover;
+  object-position: center;
+}
+
+.sales-pillar-card::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 34px;
+  background: linear-gradient(180deg, rgb(12 30 71 / 22%) 0%, rgb(12 30 71 / 86%) 55%, rgb(9 24 58 / 96%) 100%);
+  pointer-events: none;
+}
+
+.sales-pillar-card::before {
+  content: "";
+  position: absolute;
+  left: 10px;
+  bottom: 8px;
+  z-index: 2;
+  width: 18px;
+  height: 18px;
+  opacity: 0.95;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 21h18'/%3E%3Cpath d='M5 21V8l7-4 7 4v13'/%3E%3Cpath d='M9 21v-6h6v6'/%3E%3Cpath d='M9 10h.01M15 10h.01M9 13h.01M15 13h.01'/%3E%3C/svg%3E");
+  pointer-events: none;
+}
+
+.sales-pillar-card strong {
+  position: absolute;
+  z-index: 2;
+  left: 32px;
+  right: 46px;
+  bottom: 9px;
+  padding-left: 0;
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 880;
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+
+.sales-pillar-arrow {
+  position: absolute;
+  z-index: 2;
+  right: 10px;
+  bottom: 8px;
+  width: 28px;
+  height: 28px;
+  border: 1px solid rgb(255 255 255 / 18%);
+  border-radius: 50%;
+  color: #1f54ca;
+  background: rgb(255 255 255 / 92%);
+  box-shadow: 0 3px 8px rgb(8 40 98 / 18%);
+  font-size: 1.02rem;
+  line-height: 1;
+}
+
+.deal-retrospective-card {
+  position: relative;
+  display: block;
+  min-height: 108px !important;
+  height: 108px;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid #d6e6f4;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #f7fffd 0%, #ffffff 56%);
+  box-shadow: 0 6px 16px rgb(16 65 133 / 7%);
+}
+
+.deal-retrospective-card.is-loss {
+  background: linear-gradient(135deg, #fff6f8 0%, #ffffff 56%);
+}
+
+.deal-retrospective-media {
+  left: 39%;
+}
+
+.deal-retrospective-image {
+  object-fit: cover;
+  object-position: center;
+}
+
+.deal-retrospective-media-wash {
+  background: linear-gradient(90deg, rgb(255 255 255 / 96%) 0%, rgb(255 255 255 / 88%) 12%, rgb(255 255 255 / 45%) 38%, rgb(255 255 255 / 8%) 72%, transparent 100%);
+}
+
+.deal-retrospective-content {
+  position: relative;
+  inset: auto;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) 28px;
+  align-items: center;
+  gap: 8px;
+  width: min(56%, 240px);
+  height: 100%;
+  padding: 12px 12px 12px 14px;
+}
+
+.deal-retrospective-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 72%);
+}
+
+.deal-retrospective-copy {
+  gap: 2px;
+}
+
+.deal-retrospective-copy strong {
+  color: var(--retro-deep);
+  font-size: 0.74rem;
+  font-weight: 900;
+  line-height: 1.05;
+}
+
+.deal-retrospective-copy > span {
+  margin-top: 1px;
+  color: color-mix(in srgb, var(--retro-deep) 82%, #6881ad);
+  font-size: 0.58rem;
+  line-height: 1.18;
+}
+
+.deal-retrospective-arrow {
+  width: 28px;
+  height: 28px;
+  border-color: rgb(255 255 255 / 24%);
+  background: rgb(255 255 255 / 92%);
+  box-shadow: 0 3px 8px rgb(8 40 98 / 14%);
+  font-size: 1.02rem;
+}
+
+@media (max-width: 1180px) {
+  .sales-pillar-card,
+  .deal-retrospective-card {
+    min-height: 98px !important;
+    height: 98px;
+  }
+
+  .deal-retrospective-content {
+    width: min(58%, 235px);
+  }
+}
+
+@media (max-width: 900px) {
+  .opportunities-repository-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .sales-pillars-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .deal-retrospective-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 767px) {
+  .sales-pillars-panel,
+  .deal-retrospective-panel {
+    padding: 12px;
+  }
+
+  .sales-pillar-card {
+    min-height: 94px !important;
+    height: 94px;
+  }
+
+  .deal-retrospective-card {
+    min-height: 94px !important;
+    height: 94px;
+  }
+
+  .deal-retrospective-media {
+    left: 44%;
+  }
+
+  .deal-retrospective-content {
+    width: min(58%, 228px);
+    grid-template-columns: 38px minmax(0, 1fr) 26px;
+    padding-inline: 12px;
+  }
+
+  .deal-retrospective-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+  }
+}
+
+@media (max-width: 620px) {
+  .sales-pillars-grid,
+  .deal-retrospective-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .sales-pillar-card,
+  .deal-retrospective-card {
+    min-height: 96px !important;
+    height: 96px;
+  }
+
+  .deal-retrospective-media {
+    left: 46%;
+  }
+
+  .deal-retrospective-content {
+    width: min(58%, 220px);
+  }
+}
+
+
+
+.deal-retrospective-card.is-loss .deal-retrospective-media {
+  left: 41%;
+}
+
+.deal-retrospective-card.is-loss .deal-retrospective-image {
+  object-position: 82% center;
+}
+
+@media (max-width: 767px) {
+  .deal-retrospective-card.is-loss .deal-retrospective-media {
+    left: 46%;
+  }
+}
+
+@media (max-width: 620px) {
+  .deal-retrospective-card.is-loss .deal-retrospective-media {
+    left: 48%;
+  }
+}
+
+
+
+/* =========================================================
+   LOSS REPOSITORY — FLAG VISIBILITY FIX V2
+   The image region is now sized to the right side of the card
+   instead of shifting a full-width image beyond the card edge.
+========================================================== */
+.deal-retrospective-card.is-loss .deal-retrospective-media {
+  left: auto !important;
+  right: 0 !important;
+  width: 68% !important;
+}
+
+.deal-retrospective-card.is-loss .deal-retrospective-image {
+  object-fit: cover;
+  object-position: center 18% !important;
+}
+
+.deal-retrospective-card.is-loss .deal-retrospective-media-wash {
+  background:
+    linear-gradient(
+      90deg,
+      rgb(255 255 255 / 96%) 0%,
+      rgb(255 255 255 / 82%) 16%,
+      rgb(255 255 255 / 42%) 42%,
+      rgb(255 255 255 / 10%) 68%,
+      transparent 100%
+    );
+}
+
+@media (max-width: 767px) {
+  .deal-retrospective-card.is-loss .deal-retrospective-media {
+    width: 66% !important;
+  }
+
+  .deal-retrospective-card.is-loss .deal-retrospective-image {
+    object-position: center 16% !important;
+  }
+}
+
+@media (max-width: 620px) {
+  .deal-retrospective-card.is-loss .deal-retrospective-media {
+    width: 64% !important;
+  }
+}
+
+
+
+/* =========================================================
+   REPOSITORY SECTION — TALLER IMAGE TREATMENT
+   Increases the visual image height for both Sales Pillars
+   and Deal Retrospective cards while preserving layout.
+========================================================== */
+
+.sales-pillar-card {
+  min-height: 124px !important;
+  height: 124px;
+}
+
+.sales-pillar-media {
+  height: 100%;
+}
+
+.sales-pillar-card::after {
+  height: 38px;
+}
+
+.sales-pillar-card::before {
+  bottom: 10px;
+  width: 18px;
+  height: 18px;
+}
+
+.sales-pillar-card strong {
+  left: 34px;
+  right: 48px;
+  bottom: 10px;
+  font-size: 0.78rem;
+}
+
+.sales-pillar-arrow {
+  right: 10px;
+  bottom: 8px;
+  width: 28px;
+  height: 28px;
+  font-size: 1.02rem;
+}
+
+.deal-retrospective-card {
+  min-height: 124px !important;
+  height: 124px;
+}
+
+.deal-retrospective-media {
+  left: 36%;
+}
+
+.deal-retrospective-image {
+  object-position: center 42%;
+}
+
+.deal-retrospective-content {
+  width: min(50%, 220px);
+  grid-template-columns: 40px minmax(0, 1fr) 28px;
+  padding: 14px 12px 14px 14px;
+}
+
+.deal-retrospective-icon {
+  width: 38px;
+  height: 38px;
+}
+
+.deal-retrospective-copy strong {
+  font-size: 0.74rem;
+}
+
+.deal-retrospective-copy > span {
+  font-size: 0.58rem;
+}
+
+.deal-retrospective-arrow {
+  width: 28px;
+  height: 28px;
+  font-size: 1rem;
+}
+
+.deal-retrospective-card.is-loss .deal-retrospective-media {
+  width: 70% !important;
+}
+
+.deal-retrospective-card.is-loss .deal-retrospective-image {
+  object-position: center 18% !important;
+}
+
+@media (max-width: 1180px) {
+  .sales-pillar-card,
+  .deal-retrospective-card {
+    min-height: 114px !important;
+    height: 114px;
+  }
+
+  .deal-retrospective-content {
+    width: min(52%, 220px);
+  }
+}
+
+@media (max-width: 767px) {
+  .sales-pillar-card,
+  .deal-retrospective-card {
+    min-height: 108px !important;
+    height: 108px;
+  }
+
+  .deal-retrospective-media {
+    left: 40%;
+  }
+
+  .deal-retrospective-content {
+    width: min(54%, 220px);
+    grid-template-columns: 36px minmax(0, 1fr) 26px;
+    padding-inline: 12px;
+  }
+
+  .deal-retrospective-icon {
+    width: 34px;
+    height: 34px;
+  }
+
+  .deal-retrospective-card.is-loss .deal-retrospective-media {
+    width: 68% !important;
+  }
+}
+
+@media (max-width: 620px) {
+  .sales-pillar-card,
+  .deal-retrospective-card {
+    min-height: 104px !important;
+    height: 104px;
+  }
+
+  .deal-retrospective-media {
+    left: 42%;
+  }
+
+  .deal-retrospective-content {
+    width: min(56%, 220px);
+  }
+
+  .deal-retrospective-card.is-loss .deal-retrospective-media {
+    width: 66% !important;
+  }
+}
+
+
+
+/* =========================================================
+   WIN REPOSITORY — FLAG VISIBILITY FIX
+   Give the Win Repository image its own right-side region and
+   crop upward/right so the summit flag remains visible.
+========================================================== */
+.deal-retrospective-card.is-win .deal-retrospective-media {
+  left: auto !important;
+  right: 0 !important;
+  width: 70% !important;
+}
+
+.deal-retrospective-card.is-win .deal-retrospective-image {
+  object-fit: cover;
+  object-position: 84% 16% !important;
+}
+
+.deal-retrospective-card.is-win .deal-retrospective-media-wash {
+  background:
+    linear-gradient(
+      90deg,
+      rgb(255 255 255 / 96%) 0%,
+      rgb(255 255 255 / 82%) 16%,
+      rgb(255 255 255 / 42%) 42%,
+      rgb(255 255 255 / 10%) 68%,
+      transparent 100%
+    );
+}
+
+@media (max-width: 767px) {
+  .deal-retrospective-card.is-win .deal-retrospective-media {
+    width: 68% !important;
+  }
+
+  .deal-retrospective-card.is-win .deal-retrospective-image {
+    object-position: 84% 14% !important;
+  }
+}
+
+@media (max-width: 620px) {
+  .deal-retrospective-card.is-win .deal-retrospective-media {
+    width: 66% !important;
+  }
+}
+
+
+
+/* =========================================================
+   SOLUTIONING TOOLKIT — 4 × 2 GRID REFINEMENT
+   Prevents label/arrow collisions and removes the compressed
+   eight-column desktop presentation.
+========================================================== */
+.solutioning-toolkit-section .opportunities-panel-header {
+  margin-bottom: 16px;
+}
+
+.solutioning-toolkit-section .opportunities-panel-title-group {
+  width: 100%;
+}
+
+.solutioning-toolkit-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 14px !important;
+}
+
+.toolkit-card {
+  min-height: 152px !important;
+  grid-template-rows: 58px minmax(0, 1fr);
+  align-items: start;
+  padding: 18px 56px 18px 18px !important;
+  border-radius: 18px;
+  text-align: center;
+}
+
+.toolkit-card-icon {
+  width: 54px;
+  height: 54px;
+  justify-self: center;
+  border-radius: 14px;
+}
+
+.toolkit-card-icon svg {
+  width: 29px;
+  height: 29px;
+}
+
+.toolkit-card-label {
+  align-self: center;
+  justify-self: stretch;
+  margin-top: 10px;
+  padding-inline: 2px;
+  color: #173d91;
+  font-size: .83rem;
+  font-weight: 850;
+  line-height: 1.16;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+.toolkit-card-arrow {
+  right: 14px;
+  bottom: 14px;
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #d9e6f5;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 92%);
+  box-shadow: 0 4px 12px rgb(18 79 154 / 8%);
+  font-size: 1.18rem;
+}
+
+.toolkit-card:hover .toolkit-card-arrow {
+  transform: translateX(2px);
+}
+
+@media (max-width: 1100px) {
+  .solutioning-toolkit-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .toolkit-card {
+    min-height: 142px !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .solutioning-toolkit-section .opportunities-panel-header {
+    margin-bottom: 14px;
+  }
+
+  .solutioning-toolkit-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+  }
+
+  .toolkit-card {
+    min-height: 136px !important;
+    padding: 16px 48px 16px 14px !important;
+  }
+
+  .toolkit-card-icon {
+    width: 50px;
+    height: 50px;
+  }
+
+  .toolkit-card-label {
+    font-size: .76rem;
+  }
+
+  .toolkit-card-arrow {
+    right: 12px;
+    bottom: 12px;
+    width: 32px;
+    height: 32px;
+  }
+}
+
+@media (max-width: 480px) {
+  .solutioning-toolkit-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .toolkit-card {
+    grid-template-columns: 54px minmax(0, 1fr) 34px;
+    grid-template-rows: 1fr;
+    align-items: center;
+    min-height: 82px !important;
+    gap: 12px;
+    padding: 12px 12px !important;
+    text-align: left;
+  }
+
+  .toolkit-card-icon {
+    width: 50px;
+    height: 50px;
+    justify-self: start;
+  }
+
+  .toolkit-card-label {
+    justify-self: start;
+    margin-top: 0;
+    padding-right: 0;
+    font-size: .78rem;
+  }
+
+  .toolkit-card-arrow {
+    position: static;
+    justify-self: end;
+    width: 32px;
+    height: 32px;
+  }
+}
+
+
+
+/* =========================================================
+   H3 OPPORTUNITIES — REPOSITORY SECTIONS STACKED
+   Sales Pillars and Deal Retrospective now occupy separate
+   full-width rows instead of sharing one desktop row.
+========================================================== */
+
+.opportunities-repository-grid {
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 16px;
+}
+
+/* Keep Sales Pillars as three image cards across the full-width panel. */
+.sales-pillars-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+/* Keep Win / Loss side-by-side, now with enough horizontal room for copy. */
+.deal-retrospective-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.sales-pillars-panel,
+.deal-retrospective-panel {
+  width: 100%;
+  min-width: 0;
+}
+
+/* Restore comfortable copy width now that the retrospective panel is full-width. */
+.deal-retrospective-content {
+  width: min(48%, 300px);
+}
+
+.deal-retrospective-card.is-win .deal-retrospective-media,
+.deal-retrospective-card.is-loss .deal-retrospective-media {
+  width: 70% !important;
+}
+
+@media (max-width: 900px) {
+  .opportunities-repository-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .sales-pillars-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .deal-retrospective-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .deal-retrospective-content {
+    width: min(52%, 270px);
+  }
+}
+
+@media (max-width: 700px) {
+  .sales-pillars-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .deal-retrospective-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .deal-retrospective-content {
+    width: min(58%, 240px);
+  }
+}
+
+
+
+/* =========================================================
+   H3 OPPORTUNITIES — SOLUTIONING TOOLKIT VISUAL BEAUTIFY
+   Turns the toolkit cards into a more designed, image-led
+   portal style while preserving the 4 x 2 layout.
+========================================================== */
+.solutioning-toolkit-section {
+  padding: 18px 18px 20px;
+  border-radius: 28px;
+  background:
+    linear-gradient(180deg, #ffffff 0%, #fbfdff 100%),
+    radial-gradient(circle at top right, rgb(77 140 255 / 8%), transparent 34%);
+  box-shadow: 0 10px 26px rgb(16 79 158 / 5%);
+}
+
+.solutioning-toolkit-section .opportunities-panel-header {
+  margin-bottom: 18px;
+}
+
+.solutioning-toolkit-section .opportunities-panel-title-group {
+  align-items: center;
+}
+
+.solutioning-toolkit-section .opportunities-panel-icon {
+  width: 88px;
+  height: 88px;
+  border-radius: 24px;
+  box-shadow: 0 16px 34px rgb(25 74 196 / 16%);
+}
+
+.solutioning-toolkit-section .opportunities-panel-title-group h2 {
+  font-size: clamp(1.5rem, 2vw, 1.86rem);
+  letter-spacing: -0.035em;
+}
+
+.solutioning-toolkit-section .opportunities-panel-title-group p {
+  margin-top: 4px;
+  font-size: 0.9rem;
+  color: #5f7db0;
+}
+
+.solutioning-toolkit-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 16px !important;
+}
+
+.toolkit-card {
+  --toolkit-accent-rgb: 93 150 255;
+  --toolkit-deep: #2258d6;
+  --toolkit-tint: #edf4ff;
+  --toolkit-surface: #f9fbff;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  min-height: 164px !important;
+  padding: 18px 58px 18px 18px !important;
+  border-radius: 22px;
+  border: 1px solid color-mix(in srgb, var(--toolkit-deep) 12%, #dbe8f5);
+  background:
+    linear-gradient(180deg, #ffffff 0%, var(--toolkit-surface) 100%);
+  box-shadow:
+    0 10px 24px rgb(18 80 157 / 5%),
+    inset 0 1px 0 rgb(255 255 255 / 92%);
+  text-align: left;
+  overflow: hidden;
+  isolation: isolate;
+  transition:
+    transform 180ms ease,
+    box-shadow 220ms ease,
+    border-color 180ms ease;
+}
+
+.toolkit-card::before {
+  content: "";
+  position: absolute;
+  right: -34px;
+  bottom: -48px;
+  width: 86%;
+  height: 90px;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 18% 24%, rgb(var(--toolkit-accent-rgb) / 0.13), transparent 28%),
+    linear-gradient(180deg, rgb(var(--toolkit-accent-rgb) / 0.16), rgb(var(--toolkit-accent-rgb) / 0.06));
+  transform: rotate(5deg);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.toolkit-card::after {
+  content: "";
+  position: absolute;
+  top: -10px;
+  right: -6px;
+  width: 118px;
+  height: 118px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, rgb(var(--toolkit-accent-rgb) / 0.10) 0%, rgb(var(--toolkit-accent-rgb) / 0.04) 36%, transparent 66%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.toolkit-card:hover {
+  transform: translateY(-4px);
+  border-color: color-mix(in srgb, var(--toolkit-deep) 20%, #dbe8f5);
+  box-shadow:
+    0 18px 34px rgb(18 80 157 / 10%),
+    inset 0 1px 0 rgb(255 255 255 / 94%);
+}
+
+.toolkit-card-icon,
+.toolkit-card-label,
+.toolkit-card-arrow {
+  position: relative;
+  z-index: 1;
+}
+
+.toolkit-card-icon {
+  width: 76px;
+  height: 76px;
+  justify-self: start;
+  align-self: flex-start;
+  border-radius: 20px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--toolkit-deep) 10%, #ffffff) 0%, color-mix(in srgb, var(--toolkit-deep) 5%, var(--toolkit-tint)) 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 84%),
+    0 10px 18px rgb(22 82 168 / 8%);
+}
+
+.toolkit-card-icon svg {
+  width: 34px;
+  height: 34px;
+  color: var(--toolkit-deep);
+}
+
+.toolkit-card-label {
+  justify-self: start;
+  align-self: flex-start;
+  margin-top: auto;
+  max-width: calc(100% - 8px);
+  padding-right: 8px;
+  color: #1d469d;
+  font-size: 0.9rem;
+  font-weight: 850;
+  line-height: 1.06;
+  letter-spacing: -0.02em;
+  text-align: left;
+  text-wrap: balance;
+}
+
+.toolkit-card-arrow {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  width: 42px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid color-mix(in srgb, var(--toolkit-deep) 14%, #d9e6f5);
+  border-radius: 50%;
+  background: rgb(255 255 255 / 96%);
+  color: var(--toolkit-deep);
+  box-shadow: 0 8px 18px rgb(18 79 154 / 10%);
+  font-size: 1.28rem;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.toolkit-card:hover .toolkit-card-arrow {
+  transform: translateX(2px);
+  box-shadow: 0 10px 22px rgb(18 79 154 / 14%);
+}
+
+.toolkit-card.is-blue {
+  --toolkit-accent-rgb: 93 150 255;
+  --toolkit-deep: #2361da;
+  --toolkit-tint: #eaf2ff;
+  --toolkit-surface: #f9fbff;
+}
+
+.toolkit-card.is-teal {
+  --toolkit-accent-rgb: 89 215 212;
+  --toolkit-deep: #108b98;
+  --toolkit-tint: #e8fbfb;
+  --toolkit-surface: #f9fefe;
+}
+
+.toolkit-card.is-purple {
+  --toolkit-accent-rgb: 197 171 255;
+  --toolkit-deep: #6f33dd;
+  --toolkit-tint: #f3edff;
+  --toolkit-surface: #fcfbff;
+}
+
+.toolkit-card.is-orange {
+  --toolkit-accent-rgb: 255 191 131;
+  --toolkit-deep: #df7e12;
+  --toolkit-tint: #fff2e4;
+  --toolkit-surface: #fffdfa;
+}
+
+@media (max-width: 1180px) {
+  .solutioning-toolkit-section .opportunities-panel-icon {
+    width: 78px;
+    height: 78px;
+  }
+
+  .toolkit-card {
+    min-height: 156px !important;
+    padding: 16px 54px 16px 16px !important;
+  }
+
+  .toolkit-card-icon {
+    width: 70px;
+    height: 70px;
+    border-radius: 18px;
+  }
+
+  .toolkit-card-label {
+    font-size: 0.84rem;
+  }
+}
+
+@media (max-width: 1100px) {
+  .solutioning-toolkit-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .solutioning-toolkit-section {
+    padding: 14px 14px 16px;
+    border-radius: 24px;
+  }
+
+  .solutioning-toolkit-section .opportunities-panel-header {
+    margin-bottom: 14px;
+  }
+
+  .solutioning-toolkit-section .opportunities-panel-icon {
+    width: 70px;
+    height: 70px;
+    border-radius: 20px;
+  }
+
+  .solutioning-toolkit-section .opportunities-panel-title-group h2 {
+    font-size: 1.34rem;
+  }
+
+  .solutioning-toolkit-section .opportunities-panel-title-group p {
+    font-size: 0.8rem;
+  }
+
+  .solutioning-toolkit-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+  }
+
+  .toolkit-card {
+    min-height: 148px !important;
+    padding: 14px 50px 14px 14px !important;
+    border-radius: 18px;
+  }
+
+  .toolkit-card-icon {
+    width: 62px;
+    height: 62px;
+    border-radius: 16px;
+  }
+
+  .toolkit-card-icon svg {
+    width: 30px;
+    height: 30px;
+  }
+
+  .toolkit-card-label {
+    font-size: 0.78rem;
+  }
+
+  .toolkit-card-arrow {
+    width: 38px;
+    height: 38px;
+    right: 12px;
+    bottom: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .solutioning-toolkit-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .toolkit-card {
+    min-height: 112px !important;
+    padding: 14px 50px 14px 14px !important;
+  }
+
+  .toolkit-card-icon {
+    width: 56px;
+    height: 56px;
+  }
+
+  .toolkit-card-label {
+    font-size: 0.86rem;
+  }
+}
+
+
+
+/* =========================================================
+   H3 OPPORTUNITIES — SOLUTIONING TOOLKIT ASSET HEADER
+   Uses the approved Drive-backed background and tools icon.
+========================================================== */
+.solutioning-toolkit-section .solutioning-toolkit-header {
+  position: relative;
+  min-height: 238px;
+  margin: -2px -2px 20px;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid #dce9f7;
+  border-radius: 26px;
+  background: #f8fbff;
+  box-shadow:
+    0 14px 32px rgb(18 77 154 / 7%),
+    inset 0 1px 0 rgb(255 255 255 / 88%);
+  isolation: isolate;
+}
+
+.solutioning-toolkit-header-media,
+.solutioning-toolkit-header-bg-image,
+.solutioning-toolkit-header-bg-fallback,
+.solutioning-toolkit-header-wash {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.solutioning-toolkit-header-media {
+  z-index: 0;
+  overflow: hidden;
+  border-radius: inherit;
+}
+
+.solutioning-toolkit-header-bg-image {
+  display: block;
+  object-fit: cover;
+  object-position: right center;
+}
+
+.solutioning-toolkit-header-bg-fallback {
+  border: 0;
+  border-radius: inherit;
+  background:
+    radial-gradient(circle at 84% 24%, rgb(51 109 255 / 0.13), transparent 28%),
+    linear-gradient(135deg, #ffffff 0%, #f4f9ff 58%, #eef3ff 100%);
+}
+
+.solutioning-toolkit-header-wash {
+  background:
+    linear-gradient(
+      90deg,
+      rgb(255 255 255 / 0.99) 0%,
+      rgb(255 255 255 / 0.96) 30%,
+      rgb(255 255 255 / 0.78) 47%,
+      rgb(255 255 255 / 0.24) 67%,
+      transparent 84%
+    );
+  pointer-events: none;
+}
+
+.solutioning-toolkit-header-content {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 126px minmax(0, 1fr);
+  align-items: center;
+  gap: 26px;
+  min-height: 238px;
+  padding: 24px 34px 24px 28px;
+}
+
+.solutioning-toolkit-header-icon {
+  position: relative;
+  display: block;
+  width: 118px;
+  height: 118px;
+  overflow: hidden;
+  border-radius: 30px;
+  background: linear-gradient(145deg, #1684ff 0%, #1746f0 56%, #5134f2 100%);
+  border: 4px solid rgb(255 255 255 / 78%);
+  box-shadow:
+    0 20px 40px rgb(20 83 210 / 22%),
+    0 0 0 1px rgb(82 141 255 / 25%);
+}
+
+.solutioning-toolkit-header-icon::before {
+  content: "";
+  position: absolute;
+  inset: -40% 40% 52% -18%;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.18);
+  transform: rotate(-18deg);
+  z-index: 2;
+  pointer-events: none;
+}
+
+.solutioning-toolkit-header-icon-image,
+.solutioning-toolkit-header-icon-fallback {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.solutioning-toolkit-header-icon-image {
+  display: block;
+  object-fit: cover;
+  object-position: center;
+  transform: scale(1.5);
+  transform-origin: center;
+}
+
+.solutioning-toolkit-header-icon-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: inherit;
+  color: #fff;
+  background: linear-gradient(145deg, #1684ff 0%, #1746f0 58%, #5134f2 100%);
+}
+
+.solutioning-toolkit-header-copy {
+  min-width: 0;
+  max-width: 760px;
+  padding-top: 2px;
+}
+
+.solutioning-toolkit-kicker {
+  margin: 0 0 7px;
+  color: #4e7de6;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.solutioning-toolkit-header-copy h2 {
+  margin: 0;
+  color: #0e2f8f;
+  font-size: clamp(2.1rem, 3vw, 3.1rem);
+  line-height: 0.98;
+  letter-spacing: -0.05em;
+}
+
+.solutioning-toolkit-subtitle {
+  margin: 10px 0 0;
+  color: #617cae;
+  font-size: clamp(0.94rem, 1.25vw, 1.14rem);
+  font-weight: 560;
+  line-height: 1.35;
+}
+
+.solutioning-toolkit-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.solutioning-toolkit-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 34px;
+  padding: 7px 13px;
+  border: 1px solid #dce7f5;
+  border-radius: 999px;
+  color: #173d91;
+  background: rgb(255 255 255 / 0.82);
+  box-shadow: 0 8px 18px rgb(18 79 154 / 6%);
+  backdrop-filter: blur(8px);
+  font-size: 0.72rem;
+  font-weight: 820;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.solutioning-toolkit-badge > span:first-child {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 7px;
+  font-size: 0.76rem;
+}
+
+.solutioning-toolkit-badge.is-blue > span:first-child {
+  color: #2563eb;
+  background: #edf4ff;
+}
+
+.solutioning-toolkit-badge.is-teal > span:first-child {
+  color: #0f9da5;
+  background: #eafafa;
+}
+
+.solutioning-toolkit-badge.is-purple > span:first-child {
+  color: #7843e7;
+  background: #f2edff;
+}
+
+@media (max-width: 1180px) {
+  .solutioning-toolkit-section .solutioning-toolkit-header {
+    min-height: 216px;
+  }
+
+  .solutioning-toolkit-header-content {
+    grid-template-columns: 108px minmax(0, 1fr);
+    gap: 22px;
+    min-height: 216px;
+    padding: 22px 28px 22px 24px;
+  }
+
+  .solutioning-toolkit-header-icon {
+    width: 102px;
+    height: 102px;
+    border-radius: 27px;
+  }
+
+  .solutioning-toolkit-header-copy h2 {
+    font-size: clamp(1.9rem, 3vw, 2.65rem);
+  }
+}
+
+@media (max-width: 820px) {
+  .solutioning-toolkit-section .solutioning-toolkit-header {
+    min-height: 208px;
+    border-radius: 22px;
+  }
+
+  .solutioning-toolkit-header-content {
+    grid-template-columns: 88px minmax(0, 1fr);
+    gap: 18px;
+    min-height: 208px;
+    padding: 20px;
+  }
+
+  .solutioning-toolkit-header-icon {
+    width: 84px;
+    height: 84px;
+    border-width: 3px;
+    border-radius: 24px;
+  }
+
+  .solutioning-toolkit-header-wash {
+    background:
+      linear-gradient(
+        90deg,
+        rgb(255 255 255 / 0.99) 0%,
+        rgb(255 255 255 / 0.96) 40%,
+        rgb(255 255 255 / 0.78) 62%,
+        rgb(255 255 255 / 0.42) 82%,
+        transparent 100%
+      );
+  }
+
+  .solutioning-toolkit-kicker {
+    font-size: 0.63rem;
+    letter-spacing: 0.16em;
+  }
+
+  .solutioning-toolkit-header-copy h2 {
+    font-size: 1.9rem;
+  }
+
+  .solutioning-toolkit-subtitle {
+    margin-top: 7px;
+    font-size: 0.84rem;
+  }
+
+  .solutioning-toolkit-badges {
+    gap: 7px;
+    margin-top: 12px;
+  }
+
+  .solutioning-toolkit-badge {
+    min-height: 31px;
+    padding: 6px 10px;
+    font-size: 0.64rem;
+  }
+}
+
+@media (max-width: 620px) {
+  .solutioning-toolkit-section .solutioning-toolkit-header {
+    min-height: auto;
+    margin-inline: 0;
+  }
+
+  .solutioning-toolkit-header-content {
+    grid-template-columns: 70px minmax(0, 1fr);
+    gap: 14px;
+    min-height: 0;
+    padding: 18px 16px;
+  }
+
+  .solutioning-toolkit-header-icon {
+    width: 66px;
+    height: 66px;
+    border-radius: 20px;
+  }
+
+  .solutioning-toolkit-header-bg-image {
+    object-position: 62% center;
+  }
+
+  .solutioning-toolkit-header-wash {
+    background: linear-gradient(90deg, rgb(255 255 255 / 0.99) 0%, rgb(255 255 255 / 0.96) 60%, rgb(255 255 255 / 0.72) 100%);
+  }
+
+  .solutioning-toolkit-kicker {
+    margin-bottom: 4px;
+    font-size: 0.56rem;
+    letter-spacing: 0.13em;
+  }
+
+  .solutioning-toolkit-header-copy h2 {
+    font-size: 1.5rem;
+  }
+
+  .solutioning-toolkit-subtitle {
+    font-size: 0.76rem;
+  }
+
+  .solutioning-toolkit-badges {
+    grid-column: 1 / -1;
+    margin-left: -84px;
+    padding-left: 84px;
+  }
+
+  .solutioning-toolkit-badge {
+    padding-inline: 9px;
+    font-size: 0.6rem;
+  }
+}
+
+@media (max-width: 460px) {
+  .solutioning-toolkit-header-content {
+    grid-template-columns: 58px minmax(0, 1fr);
+    gap: 12px;
+    padding: 16px 14px;
+  }
+
+  .solutioning-toolkit-header-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 18px;
+  }
+
+  .solutioning-toolkit-header-copy h2 {
+    font-size: 1.3rem;
+  }
+
+  .solutioning-toolkit-subtitle {
+    font-size: 0.7rem;
+  }
+
+  .solutioning-toolkit-badges {
+    display: none;
+  }
+}
+
+
+
+/* =========================================================
+   H3 OPPORTUNITIES — REPOSITORY SECTION VISUAL REFRESH
+   Expands image presence, reduces compression, and gives the
+   Sales Pillars + Deal Retrospective panels a stronger layout.
+========================================================== */
+.opportunities-repository-grid {
+  gap: 20px !important;
+}
+
+.sales-pillars-panel,
+.deal-retrospective-panel {
+  padding: 20px 20px 22px !important;
+  border-radius: 32px !important;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%) !important;
+  box-shadow: 0 12px 30px rgb(18 80 157 / 5%), inset 0 1px 0 rgb(255 255 255 / 80%);
+}
+
+.sales-pillars-panel .opportunities-panel-header,
+.deal-retrospective-panel .opportunities-panel-header {
+  margin-bottom: 18px !important;
+}
+
+.sales-pillars-panel .opportunities-panel-title-group,
+.deal-retrospective-panel .opportunities-panel-title-group {
+  align-items: center;
+  gap: 16px;
+}
+
+.sales-pillars-panel .opportunities-panel-icon,
+.deal-retrospective-panel .opportunities-panel-icon {
+  width: 70px !important;
+  height: 70px !important;
+  border-radius: 20px !important;
+  box-shadow: 0 12px 28px rgb(26 82 198 / 16%);
+}
+
+.sales-pillars-panel .opportunities-panel-title-group h2,
+.deal-retrospective-panel .opportunities-panel-title-group h2 {
+  font-size: clamp(1.45rem, 2vw, 1.9rem) !important;
+  line-height: 1.03 !important;
+  letter-spacing: -0.03em;
+}
+
+.sales-pillars-panel .opportunities-panel-title-group p,
+.deal-retrospective-panel .opportunities-panel-title-group p {
+  font-size: 0.94rem !important;
+  color: #6682b5 !important;
+}
+
+.sales-pillars-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 18px !important;
+}
+
+.sales-pillar-card {
+  position: relative;
+  min-height: 292px !important;
+  padding: 0 !important;
+  border: 1px solid #d8e4f4 !important;
+  border-radius: 26px !important;
+  overflow: hidden !important;
+  background: linear-gradient(180deg, #eef5ff 0%, #dce9fb 100%) !important;
+  box-shadow: 0 12px 28px rgb(16 79 154 / 7%), inset 0 1px 0 rgb(255 255 255 / 78%) !important;
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+
+.sales-pillar-card:hover {
+  transform: translateY(-4px);
+  border-color: #cadef5 !important;
+  box-shadow: 0 18px 34px rgb(16 79 154 / 11%), inset 0 1px 0 rgb(255 255 255 / 86%) !important;
+}
+
+.sales-pillar-media,
+.sales-pillar-media > img,
+.sales-pillar-media > .sales-pillar-fallback {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: inherit !important;
+}
+
+.sales-pillar-media {
+  overflow: hidden;
+}
+
+.sales-pillar-media::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 44%;
+  background:
+    linear-gradient(180deg, transparent 0%, rgb(8 42 112 / 0.16) 34%, rgb(8 42 112 / 0.84) 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.sales-pillar-card img,
+.sales-pillar-card .sales-pillar-fallback {
+  object-fit: cover !important;
+}
+
+.sales-pillar-card strong,
+.sales-pillar-card .sales-pillar-arrow {
+  position: absolute !important;
+  z-index: 2;
+}
+
+.sales-pillar-card strong {
+  left: 24px;
+  right: 86px;
+  bottom: 18px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: #ffffff !important;
+  font-size: 1.02rem !important;
+  font-weight: 850 !important;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  text-shadow: 0 1px 4px rgb(0 0 0 / 20%);
+}
+
+.sales-pillar-card strong::before {
+  content: "";
+  flex: 0 0 24px;
+  width: 24px;
+  height: 24px;
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center;
+  filter: drop-shadow(0 1px 2px rgb(0 0 0 / 18%));
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 21h18'/%3E%3Cpath d='M5 21V7l7-4 7 4v14'/%3E%3Cpath d='M9 9h6'/%3E%3Cpath d='M9 13h6'/%3E%3Cpath d='M9 17h6'/%3E%3C/svg%3E");
+}
+
+.sales-pillar-arrow {
+  right: 22px !important;
+  bottom: 16px !important;
+  width: 54px !important;
+  height: 54px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 50% !important;
+  background: rgb(255 255 255 / 96%) !important;
+  border: 1px solid rgb(214 226 242 / 88%) !important;
+  color: #244a98 !important;
+  font-size: 2rem !important;
+  line-height: 1 !important;
+  box-shadow: 0 12px 24px rgb(15 76 146 / 10%) !important;
+}
+
+.deal-retrospective-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 20px !important;
+}
+
+.deal-retrospective-card {
+  position: relative !important;
+  min-height: 286px !important;
+  border-radius: 26px !important;
+  border: 1px solid #dbe7f2 !important;
+  overflow: hidden !important;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%) !important;
+  box-shadow: 0 12px 28px rgb(16 79 154 / 6%), inset 0 1px 0 rgb(255 255 255 / 80%) !important;
+}
+
+.deal-retrospective-card.is-win {
+  background: linear-gradient(90deg, #f7fcfa 0%, #eff8f3 38%, #ffffff 100%) !important;
+}
+
+.deal-retrospective-card.is-loss {
+  background: linear-gradient(90deg, #fffaf9 0%, #fff2f0 38%, #ffffff 100%) !important;
+}
+
+.deal-retrospective-media {
+  position: absolute !important;
+  top: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 64% !important;
+  height: 100% !important;
+  border-radius: 0 !important;
+  overflow: hidden !important;
+}
+
+.deal-retrospective-image,
+.deal-retrospective-fallback {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
+.deal-retrospective-media-wash {
+  position: absolute !important;
+  inset: 0 !important;
+  background: linear-gradient(90deg, rgba(255,255,255,0.94) 0%, rgba(255,255,255,0.78) 18%, rgba(255,255,255,0.28) 44%, rgba(255,255,255,0) 70%) !important;
+}
+
+.deal-retrospective-content {
+  position: relative !important;
+  z-index: 1 !important;
+  width: min(40%, 290px) !important;
+  height: 100% !important;
+  padding: 34px 26px 24px 26px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  justify-content: flex-start !important;
+  gap: 16px !important;
+}
+
+.deal-retrospective-icon {
+  width: 58px !important;
+  height: 58px !important;
+  border-radius: 18px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 84%);
+}
+
+.deal-retrospective-card.is-win .deal-retrospective-icon {
+  background: #e5f5ec !important;
+  color: #18804a !important;
+}
+
+.deal-retrospective-card.is-loss .deal-retrospective-icon {
+  background: #fcebea !important;
+  color: #c8423f !important;
+}
+
+.deal-retrospective-copy {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  max-width: 100% !important;
+}
+
+.deal-retrospective-copy strong {
+  font-size: 1.25rem !important;
+  line-height: 1.02 !important;
+  letter-spacing: -0.03em !important;
+}
+
+.deal-retrospective-card.is-win .deal-retrospective-copy strong {
+  color: #177a49 !important;
+}
+
+.deal-retrospective-card.is-loss .deal-retrospective-copy strong {
+  color: #c43935 !important;
+}
+
+.deal-retrospective-copy > span {
+  color: #586f9d !important;
+  font-size: 0.92rem !important;
+  line-height: 1.35 !important;
+}
+
+.deal-retrospective-arrow {
+  margin-top: auto !important;
+  width: 54px !important;
+  height: 54px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 50% !important;
+  background: rgb(255 255 255 / 96%) !important;
+  border: 1px solid rgb(214 226 242 / 88%) !important;
+  color: #244a98 !important;
+  font-size: 2rem !important;
+  line-height: 1 !important;
+  box-shadow: 0 12px 24px rgb(15 76 146 / 10%) !important;
+}
+
+@media (max-width: 1180px) {
+  .sales-pillar-card {
+    min-height: 250px !important;
+  }
+
+  .deal-retrospective-card {
+    min-height: 248px !important;
+  }
+
+  .deal-retrospective-content {
+    width: min(44%, 270px) !important;
+  }
+}
+
+@media (max-width: 980px) {
+  .sales-pillars-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .sales-pillar-card:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .deal-retrospective-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .deal-retrospective-card {
+    min-height: 250px !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .sales-pillars-panel,
+  .deal-retrospective-panel {
+    padding: 16px 16px 18px !important;
+    border-radius: 26px !important;
+  }
+
+  .sales-pillars-panel .opportunities-panel-icon,
+  .deal-retrospective-panel .opportunities-panel-icon {
+    width: 62px !important;
+    height: 62px !important;
+    border-radius: 18px !important;
+  }
+
+  .sales-pillars-grid,
+  .deal-retrospective-grid {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+
+  .sales-pillar-card,
+  .deal-retrospective-card {
+    min-height: 220px !important;
+  }
+
+  .sales-pillar-card strong {
+    left: 18px;
+    right: 78px;
+    bottom: 16px;
+    font-size: 0.96rem !important;
+  }
+
+  .sales-pillar-arrow,
+  .deal-retrospective-arrow {
+    width: 48px !important;
+    height: 48px !important;
+    font-size: 1.78rem !important;
+  }
+
+  .sales-pillar-arrow {
+    right: 18px !important;
+    bottom: 14px !important;
+  }
+
+  .deal-retrospective-media {
+    width: 100% !important;
+  }
+
+  .deal-retrospective-media-wash {
+    background: linear-gradient(180deg, rgba(255,255,255,0.75) 0%, rgba(255,255,255,0.58) 32%, rgba(255,255,255,0.12) 52%, rgba(255,255,255,0.0) 100%) !important;
+  }
+
+  .deal-retrospective-content {
+    width: min(70%, 320px) !important;
+    padding: 22px 18px 18px 18px !important;
+    gap: 12px !important;
+  }
+
+  .deal-retrospective-icon {
+    width: 52px !important;
+    height: 52px !important;
+    border-radius: 16px !important;
+  }
+
+  .deal-retrospective-copy strong {
+    font-size: 1.08rem !important;
+  }
+
+  .deal-retrospective-copy > span {
+    font-size: 0.84rem !important;
+  }
+}
+
+
+
+/* =========================================================
+   H3 OPPORTUNITIES — REPOSITORY CLEANUP FIXES
+   - remove duplicate icon treatment in Sales Pillars
+   - improve Win/Loss content alignment
+   - use hero-like left white fade into imagery
+   - reveal loss flag more clearly
+========================================================== */
+
+/* Sales Pillars: keep the title clean and remove duplicate icon cue */
+.sales-pillar-card strong::before {
+  content: none !important;
+  display: none !important;
+}
+
+.sales-pillar-card strong {
+  gap: 0 !important;
+  left: 28px !important;
+}
+
+/* Win/Loss: make the left copy read like a hero banner content block */
+.deal-retrospective-card {
+  min-height: 274px !important;
+}
+
+.deal-retrospective-content {
+  width: 42% !important;
+  max-width: 360px !important;
+  min-width: 250px !important;
+  padding: 34px 28px 26px 28px !important;
+  justify-content: center !important;
+  gap: 14px !important;
+}
+
+.deal-retrospective-copy {
+  gap: 10px !important;
+}
+
+.deal-retrospective-copy strong {
+  font-size: 1.18rem !important;
+  line-height: 1.05 !important;
+  text-wrap: balance;
+}
+
+.deal-retrospective-copy > span {
+  max-width: 240px !important;
+  font-size: 0.94rem !important;
+  line-height: 1.34 !important;
+  text-wrap: pretty;
+}
+
+.deal-retrospective-media {
+  width: 72% !important;
+  left: 28% !important;
+  right: 0 !important;
+}
+
+.deal-retrospective-image,
+.deal-retrospective-fallback {
+  object-fit: cover !important;
+}
+
+.deal-retrospective-card.is-win .deal-retrospective-image,
+.deal-retrospective-card.is-win .deal-retrospective-fallback {
+  object-position: 72% center !important;
+}
+
+.deal-retrospective-card.is-loss .deal-retrospective-image,
+.deal-retrospective-card.is-loss .deal-retrospective-fallback {
+  object-position: right center !important;
+}
+
+/* hero-banner-like white fade from the left into the image */
+.deal-retrospective-media-wash {
+  background:
+    linear-gradient(90deg,
+      rgba(255,255,255,1) 0%,
+      rgba(255,255,255,0.97) 10%,
+      rgba(255,255,255,0.90) 18%,
+      rgba(255,255,255,0.72) 28%,
+      rgba(255,255,255,0.42) 42%,
+      rgba(255,255,255,0.14) 56%,
+      rgba(255,255,255,0) 72%) !important;
+}
+
+.deal-retrospective-card.is-win {
+  background: linear-gradient(90deg, #f8fdfb 0%, #eff8f3 32%, #ffffff 100%) !important;
+}
+
+.deal-retrospective-card.is-loss {
+  background: linear-gradient(90deg, #fffaf9 0%, #fff2f0 32%, #ffffff 100%) !important;
+}
+
+.deal-retrospective-icon {
+  width: 56px !important;
+  height: 56px !important;
+}
+
+.deal-retrospective-arrow {
+  margin-top: 6px !important;
+}
+
+/* keep loss flag visible on smaller widths too */
+@media (max-width: 1180px) {
+  .deal-retrospective-content {
+    width: 45% !important;
+    max-width: 340px !important;
+    min-width: 228px !important;
+  }
+
+  .deal-retrospective-media {
+    width: 68% !important;
+    left: 32% !important;
+  }
+
+  .deal-retrospective-card.is-loss .deal-retrospective-image,
+  .deal-retrospective-card.is-loss .deal-retrospective-fallback {
+    object-position: 88% center !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .deal-retrospective-content {
+    width: 48% !important;
+    min-width: 220px !important;
+    padding: 26px 22px 20px 22px !important;
+  }
+
+  .deal-retrospective-media {
+    width: 70% !important;
+    left: 30% !important;
+  }
+
+  .deal-retrospective-copy strong {
+    font-size: 1.08rem !important;
+  }
+
+  .deal-retrospective-copy > span {
+    max-width: 210px !important;
+    font-size: 0.88rem !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .sales-pillar-card strong {
+    left: 18px !important;
+  }
+
+  .deal-retrospective-card {
+    min-height: 230px !important;
+  }
+
+  .deal-retrospective-media {
+    inset: 0 !important;
+    width: 100% !important;
+    left: 0 !important;
+  }
+
+  .deal-retrospective-media-wash {
+    background: linear-gradient(180deg,
+      rgba(255,255,255,0.88) 0%,
+      rgba(255,255,255,0.68) 24%,
+      rgba(255,255,255,0.34) 46%,
+      rgba(255,255,255,0.06) 72%,
+      rgba(255,255,255,0) 100%) !important;
+  }
+
+  .deal-retrospective-content {
+    width: min(78%, 330px) !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    justify-content: flex-start !important;
+    gap: 12px !important;
+  }
+
+  .deal-retrospective-copy strong {
+    font-size: 1.04rem !important;
+  }
+
+  .deal-retrospective-copy > span {
+    max-width: 100% !important;
+    font-size: 0.84rem !important;
+  }
+
+  .deal-retrospective-card.is-loss .deal-retrospective-image,
+  .deal-retrospective-card.is-loss .deal-retrospective-fallback {
+    object-position: 84% center !important;
+  }
+}
+
+
+
+/* =========================================================
+   SALES PILLARS — ICON CORRECTION
+   Keep the intended icon beside each label and remove the
+   older duplicate decorative icon anchored to the card.
+========================================================== */
+
+/* Remove the older duplicate card-level building icon. */
+.sales-pillar-card::before {
+  content: none !important;
+  display: none !important;
+}
+
+/* Restore the intended icon that belongs with the label. */
+.sales-pillar-card strong::before {
+  content: "" !important;
+  display: inline-block !important;
+  flex: 0 0 24px !important;
+  width: 24px !important;
+  height: 24px !important;
+  background-repeat: no-repeat !important;
+  background-size: contain !important;
+  background-position: center !important;
+  filter: drop-shadow(0 1px 2px rgb(0 0 0 / 18%));
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 21h18'/%3E%3Cpath d='M5 21V7l7-4 7 4v14'/%3E%3Cpath d='M9 9h6'/%3E%3Cpath d='M9 13h6'/%3E%3Cpath d='M9 17h6'/%3E%3C/svg%3E") !important;
+}
+
+.sales-pillar-card strong {
+  left: 24px !important;
+  gap: 10px !important;
+}
+
+
+
+/* =========================================================
+   OPPORTUNITIES REPOSITORIES — REFERENCE MATCH REFINEMENT
+   Compact proportions + true hero-style Win/Loss fade.
+========================================================== */
+
+/* ---------- Shared panel scale ---------- */
+.opportunities-repository-grid {
+  gap: 16px !important;
+}
+
+.sales-pillars-panel,
+.deal-retrospective-panel {
+  padding: 14px 16px 16px !important;
+  border-radius: 24px !important;
+}
+
+.sales-pillars-panel .opportunities-panel-header,
+.deal-retrospective-panel .opportunities-panel-header {
+  margin-bottom: 12px !important;
+}
+
+.sales-pillars-panel .opportunities-panel-title-group,
+.deal-retrospective-panel .opportunities-panel-title-group {
+  gap: 12px !important;
+}
+
+.sales-pillars-panel .opportunities-panel-icon,
+.deal-retrospective-panel .opportunities-panel-icon {
+  width: 54px !important;
+  height: 54px !important;
+  border-radius: 15px !important;
+  box-shadow: 0 8px 18px rgb(26 82 198 / 13%) !important;
+}
+
+.sales-pillars-panel .opportunities-panel-icon svg,
+.deal-retrospective-panel .opportunities-panel-icon svg {
+  width: 27px !important;
+  height: 27px !important;
+}
+
+.sales-pillars-panel .opportunities-panel-title-group h2,
+.deal-retrospective-panel .opportunities-panel-title-group h2 {
+  font-size: clamp(1.12rem, 1.45vw, 1.38rem) !important;
+  line-height: 1.04 !important;
+  letter-spacing: -0.025em !important;
+}
+
+.sales-pillars-panel .opportunities-panel-title-group p,
+.deal-retrospective-panel .opportunities-panel-title-group p {
+  margin-top: 3px !important;
+  font-size: 0.72rem !important;
+  line-height: 1.25 !important;
+}
+
+/* ---------- Sales Pillars ---------- */
+.sales-pillars-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 14px !important;
+}
+
+.sales-pillar-card {
+  min-height: 208px !important;
+  height: 208px !important;
+  border-radius: 18px !important;
+  box-shadow: 0 8px 20px rgb(16 79 154 / 6%) !important;
+}
+
+/* remove the older duplicate card-level icon */
+.sales-pillar-card::before {
+  content: none !important;
+  display: none !important;
+}
+
+.sales-pillar-media::after {
+  height: 38% !important;
+  background:
+    linear-gradient(
+      180deg,
+      transparent 0%,
+      rgb(8 42 112 / 0.10) 28%,
+      rgb(8 42 112 / 0.82) 100%
+    ) !important;
+}
+
+/* keep exactly one intended icon beside the label */
+.sales-pillar-card strong::before {
+  content: "" !important;
+  display: inline-block !important;
+  flex: 0 0 19px !important;
+  width: 19px !important;
+  height: 19px !important;
+  background-repeat: no-repeat !important;
+  background-size: contain !important;
+  background-position: center !important;
+  filter: drop-shadow(0 1px 2px rgb(0 0 0 / 16%));
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 21h18'/%3E%3Cpath d='M5 21V7l7-4 7 4v14'/%3E%3Cpath d='M9 9h6'/%3E%3Cpath d='M9 13h6'/%3E%3Cpath d='M9 17h6'/%3E%3C/svg%3E") !important;
+}
+
+.sales-pillar-card strong {
+  left: 16px !important;
+  right: 62px !important;
+  bottom: 13px !important;
+  gap: 7px !important;
+  font-size: 0.82rem !important;
+  line-height: 1 !important;
+}
+
+.sales-pillar-arrow {
+  right: 13px !important;
+  bottom: 10px !important;
+  width: 38px !important;
+  height: 38px !important;
+  font-size: 1.35rem !important;
+  box-shadow: 0 6px 14px rgb(15 76 146 / 9%) !important;
+}
+
+/* ---------- Win / Loss Repository ---------- */
+.deal-retrospective-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 16px !important;
+}
+
+.deal-retrospective-card,
+.deal-retrospective-card.is-win,
+.deal-retrospective-card.is-loss {
+  min-height: 208px !important;
+  height: 208px !important;
+  border-radius: 18px !important;
+  background: #ffffff !important;
+  box-shadow: 0 8px 20px rgb(16 79 154 / 6%) !important;
+}
+
+/* Image becomes the full-card hero background. */
+.deal-retrospective-media,
+.deal-retrospective-card.is-win .deal-retrospective-media,
+.deal-retrospective-card.is-loss .deal-retrospective-media {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: inherit !important;
+  overflow: hidden !important;
+}
+
+.deal-retrospective-image,
+.deal-retrospective-fallback {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
+/* Independent focal points preserve both summit flags. */
+.deal-retrospective-card.is-win .deal-retrospective-image,
+.deal-retrospective-card.is-win .deal-retrospective-fallback {
+  object-position: 72% 46% !important;
+}
+
+.deal-retrospective-card.is-loss .deal-retrospective-image,
+.deal-retrospective-card.is-loss .deal-retrospective-fallback {
+  object-position: 96% 45% !important;
+}
+
+/* White hero area on the left, progressively revealing the image. */
+.deal-retrospective-media-wash,
+.deal-retrospective-card.is-win .deal-retrospective-media-wash,
+.deal-retrospective-card.is-loss .deal-retrospective-media-wash {
+  position: absolute !important;
+  inset: 0 !important;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(255,255,255,1) 0%,
+      rgba(255,255,255,1) 24%,
+      rgba(255,255,255,0.96) 31%,
+      rgba(255,255,255,0.82) 39%,
+      rgba(255,255,255,0.58) 48%,
+      rgba(255,255,255,0.30) 58%,
+      rgba(255,255,255,0.10) 67%,
+      rgba(255,255,255,0) 76%
+    ) !important;
+}
+
+/* Compact content block, overlaid on the white side. */
+.deal-retrospective-content {
+  position: relative !important;
+  z-index: 2 !important;
+  width: 42% !important;
+  max-width: 250px !important;
+  min-width: 0 !important;
+  height: 100% !important;
+  padding: 22px 16px 16px 20px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  justify-content: center !important;
+  gap: 9px !important;
+}
+
+.deal-retrospective-icon {
+  width: 42px !important;
+  height: 42px !important;
+  border-radius: 12px !important;
+}
+
+.deal-retrospective-icon svg {
+  width: 25px !important;
+  height: 25px !important;
+}
+
+.deal-retrospective-copy {
+  gap: 4px !important;
+  max-width: 210px !important;
+}
+
+.deal-retrospective-copy strong {
+  font-size: 0.94rem !important;
+  line-height: 1.04 !important;
+  letter-spacing: -0.018em !important;
+}
+
+.deal-retrospective-copy > span {
+  max-width: 210px !important;
+  font-size: 0.68rem !important;
+  line-height: 1.28 !important;
+}
+
+.deal-retrospective-arrow {
+  margin-top: 3px !important;
+  width: 38px !important;
+  height: 38px !important;
+  font-size: 1.35rem !important;
+  box-shadow: 0 6px 14px rgb(15 76 146 / 9%) !important;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1180px) {
+  .sales-pillar-card {
+    min-height: 190px !important;
+    height: 190px !important;
+  }
+
+  .deal-retrospective-card,
+  .deal-retrospective-card.is-win,
+  .deal-retrospective-card.is-loss {
+    min-height: 194px !important;
+    height: 194px !important;
+  }
+
+  .deal-retrospective-content {
+    width: 44% !important;
+    max-width: 235px !important;
+  }
+
+  .deal-retrospective-card.is-loss .deal-retrospective-image,
+  .deal-retrospective-card.is-loss .deal-retrospective-fallback {
+    object-position: 98% 45% !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .sales-pillars-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .sales-pillar-card:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .deal-retrospective-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .deal-retrospective-card,
+  .deal-retrospective-card.is-win,
+  .deal-retrospective-card.is-loss {
+    min-height: 198px !important;
+    height: 198px !important;
+  }
+
+  .deal-retrospective-content {
+    width: 38% !important;
+    max-width: 255px !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .sales-pillars-panel,
+  .deal-retrospective-panel {
+    padding: 12px 12px 14px !important;
+    border-radius: 20px !important;
+  }
+
+  .sales-pillars-panel .opportunities-panel-icon,
+  .deal-retrospective-panel .opportunities-panel-icon {
+    width: 48px !important;
+    height: 48px !important;
+    border-radius: 14px !important;
+  }
+
+  .sales-pillars-panel .opportunities-panel-title-group h2,
+  .deal-retrospective-panel .opportunities-panel-title-group h2 {
+    font-size: 1.02rem !important;
+  }
+
+  .sales-pillars-panel .opportunities-panel-title-group p,
+  .deal-retrospective-panel .opportunities-panel-title-group p {
+    font-size: 0.66rem !important;
+  }
+
+  .sales-pillars-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .sales-pillar-card,
+  .sales-pillar-card:last-child {
+    grid-column: auto !important;
+    min-height: 188px !important;
+    height: 188px !important;
+  }
+
+  .deal-retrospective-card,
+  .deal-retrospective-card.is-win,
+  .deal-retrospective-card.is-loss {
+    min-height: 190px !important;
+    height: 190px !important;
+  }
+
+  .deal-retrospective-content {
+    width: 54% !important;
+    max-width: 235px !important;
+    padding: 18px 12px 14px 16px !important;
+  }
+
+  .deal-retrospective-media-wash,
+  .deal-retrospective-card.is-win .deal-retrospective-media-wash,
+  .deal-retrospective-card.is-loss .deal-retrospective-media-wash {
+    background:
+      linear-gradient(
+        90deg,
+        rgba(255,255,255,1) 0%,
+        rgba(255,255,255,0.98) 31%,
+        rgba(255,255,255,0.78) 45%,
+        rgba(255,255,255,0.42) 60%,
+        rgba(255,255,255,0.10) 74%,
+        rgba(255,255,255,0) 84%
+      ) !important;
+  }
+
+  .deal-retrospective-card.is-loss .deal-retrospective-image,
+  .deal-retrospective-card.is-loss .deal-retrospective-fallback {
+    object-position: 100% 44% !important;
+  }
+}
+
+
+/* =========================================================
+   QUICK ACCESS — 2-ROW VISUAL REFRESH
+   Converts the compact single-row strip into a polished
+   2-row card layout inspired by the approved mockup.
+========================================================== */
+
+.opportunities-quick-access {
+  position: relative !important;
+  overflow: hidden !important;
+  margin: 0 18px 18px !important;
+  padding: 20px 20px 22px !important;
+  border-radius: 28px !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.96) 0%, rgba(248,251,255,.98) 100%) !important;
+  border: 1px solid #d8e8f7 !important;
+  box-shadow:
+    0 16px 34px rgba(31, 86, 161, 0.08),
+    inset 0 1px 0 rgba(255,255,255,.92) !important;
+}
+
+.opportunities-quick-access::before {
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  background:
+    radial-gradient(circle at 12% 82%, rgba(91, 146, 255, 0.10), transparent 28%),
+    radial-gradient(circle at 92% 12%, rgba(148, 187, 255, 0.10), transparent 28%),
+    linear-gradient(140deg, rgba(255,255,255,0) 58%, rgba(215,228,255,.42) 100%) !important;
+  pointer-events: none !important;
+}
+
+.opportunities-quick-access::after {
+  content: "" !important;
+  position: absolute !important;
+  top: 0 !important;
+  right: 0 !important;
+  width: 44% !important;
+  height: 100% !important;
+  background:
+    linear-gradient(160deg, rgba(255,255,255,0) 10%, rgba(230,239,255,.55) 70%),
+    linear-gradient(145deg,
+      rgba(255,255,255,0) 44%,
+      rgba(255,255,255,.40) 45%,
+      rgba(255,255,255,0) 46%,
+      rgba(255,255,255,0) 59%,
+      rgba(255,255,255,.34) 60%,
+      rgba(255,255,255,0) 61%,
+      rgba(255,255,255,0) 72%,
+      rgba(255,255,255,.28) 73%,
+      rgba(255,255,255,0) 74%) !important;
+  opacity: .95 !important;
+  pointer-events: none !important;
+}
+
+.opportunities-quick-access-header,
+#opportunities-quick-access-grid {
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+.opportunities-quick-access-header {
+  margin-bottom: 18px !important;
+}
+
+.opportunities-quick-access-title-group {
+  display: grid !important;
+  grid-template-columns: 64px minmax(0, 1fr) !important;
+  grid-template-areas:
+    "icon title"
+    "icon desc" !important;
+  column-gap: 14px !important;
+  row-gap: 4px !important;
+  align-items: center !important;
+}
+
+.quick-access-bolt {
+  grid-area: icon !important;
+  width: 56px !important;
+  height: 56px !important;
+  border-radius: 50% !important;
+  font-size: 1.7rem !important;
+  font-weight: 900 !important;
+  background:
+    radial-gradient(circle at 28% 30%, rgba(120, 199, 255, 0.70), transparent 34%),
+    linear-gradient(135deg, #2f7cff 0%, #5d43f4 100%) !important;
+  box-shadow:
+    0 16px 26px rgba(57, 108, 255, 0.20),
+    0 0 0 10px rgba(103, 142, 255, 0.10) !important;
+}
+
+.opportunities-quick-access-title-group h2 {
+  grid-area: title !important;
+  margin: 0 !important;
+  font-size: clamp(1.45rem, 2vw, 2rem) !important;
+  line-height: 1.02 !important;
+  letter-spacing: -0.03em !important;
+  color: #16379a !important;
+}
+
+.opportunities-quick-access-title-group p {
+  grid-area: desc !important;
+  margin: 0 !important;
+  font-size: 0.82rem !important;
+  line-height: 1.35 !important;
+  color: #6c88bb !important;
+}
+
+.opportunities-quick-access-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 14px 18px !important;
+  align-items: stretch !important;
+}
+
+.opportunities-quick-card {
+  position: relative !important;
+  display: grid !important;
+  grid-template-columns: 76px minmax(0, 1fr) 58px !important;
+  align-items: center !important;
+  min-height: 110px !important;
+  padding: 14px 18px !important;
+  border-radius: 24px !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.92) 0%, rgba(255,255,255,.80) 100%) !important;
+  border: 1px solid color-mix(in srgb, var(--quick-accent) 28%, #d9e5f6) !important;
+  box-shadow:
+    0 10px 22px rgba(17, 73, 149, 0.05),
+    inset 0 1px 0 rgba(255,255,255,.90) !important;
+  transition:
+    transform .22s ease,
+    box-shadow .22s ease,
+    border-color .22s ease !important;
+}
+
+.opportunities-quick-card:hover {
+  transform: translateY(-2px) !important;
+  box-shadow:
+    0 16px 28px rgba(17, 73, 149, 0.08),
+    inset 0 1px 0 rgba(255,255,255,.95) !important;
+  border-color: color-mix(in srgb, var(--quick-accent) 44%, #d6e3f4) !important;
+}
+
+.opportunities-quick-card::before {
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  border-radius: inherit !important;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.40), rgba(255,255,255,0) 55%),
+    linear-gradient(180deg, rgba(255,255,255,0) 46%, color-mix(in srgb, var(--quick-tint) 78%, white) 100%) !important;
+  pointer-events: none !important;
+}
+
+.opportunities-quick-icon {
+  width: 62px !important;
+  height: 62px !important;
+  border-radius: 18px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: var(--quick-accent) !important;
+  background: color-mix(in srgb, var(--quick-tint) 88%, white) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.75),
+    0 8px 18px rgba(50, 90, 160, 0.06) !important;
+}
+
+.opportunities-quick-icon svg {
+  width: 30px !important;
+  height: 30px !important;
+  stroke-width: 2 !important;
+}
+
+.opportunities-quick-card > span:nth-child(2) {
+  position: relative !important;
+  z-index: 1 !important;
+  max-width: 11ch !important;
+  font-size: 0.88rem !important;
+  line-height: 1.02 !important;
+  font-weight: 850 !important;
+  letter-spacing: -0.02em !important;
+  color: #17389b !important;
+  text-wrap: balance !important;
+}
+
+.opportunities-quick-arrow {
+  position: relative !important;
+  z-index: 1 !important;
+  width: 42px !important;
+  height: 42px !important;
+  border-radius: 999px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: var(--quick-deep) !important;
+  background: color-mix(in srgb, var(--quick-tint) 92%, white) !important;
+  border: 1px solid color-mix(in srgb, var(--quick-accent) 22%, #d5e2f3) !important;
+  box-shadow: 0 5px 12px rgba(19, 77, 152, 0.05) !important;
+  font-size: 1.9rem !important;
+  line-height: 1 !important;
+}
+
+@media (max-width: 1180px) {
+  .opportunities-quick-access-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .opportunities-quick-card {
+    min-height: 102px !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .opportunities-quick-access {
+    margin-inline: 14px !important;
+    padding: 16px 14px 16px !important;
+    border-radius: 22px !important;
+  }
+
+  .opportunities-quick-access::after {
+    width: 58% !important;
+  }
+
+  .opportunities-quick-access-header {
+    margin-bottom: 14px !important;
+  }
+
+  .opportunities-quick-access-title-group {
+    grid-template-columns: 54px minmax(0, 1fr) !important;
+    column-gap: 12px !important;
+  }
+
+  .quick-access-bolt {
+    width: 48px !important;
+    height: 48px !important;
+    font-size: 1.4rem !important;
+    box-shadow:
+      0 12px 20px rgba(57, 108, 255, 0.18),
+      0 0 0 8px rgba(103, 142, 255, 0.09) !important;
+  }
+
+  .opportunities-quick-access-title-group h2 {
+    font-size: 1.22rem !important;
+  }
+
+  .opportunities-quick-access-title-group p {
+    font-size: 0.75rem !important;
+  }
+
+  .opportunities-quick-access-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  .opportunities-quick-card {
+    grid-template-columns: 68px minmax(0, 1fr) 52px !important;
+    min-height: 92px !important;
+    padding: 12px 14px !important;
+    border-radius: 20px !important;
+  }
+
+  .opportunities-quick-icon {
+    width: 54px !important;
+    height: 54px !important;
+    border-radius: 16px !important;
+  }
+
+  .opportunities-quick-icon svg {
+    width: 27px !important;
+    height: 27px !important;
+  }
+
+  .opportunities-quick-card > span:nth-child(2) {
+    font-size: 0.83rem !important;
+    max-width: none !important;
+  }
+
+  .opportunities-quick-arrow {
+    width: 38px !important;
+    height: 38px !important;
+    font-size: 1.7rem !important;
+  }
+}
+
+
+/* =========================================================
+   QUICK ACCESS — COMPACT REFERENCE MATCH
+   Keeps the approved 3x2 design while reducing scale and
+   tightening spacing to match the visual reference.
+========================================================== */
+
+.opportunities-quick-access {
+  margin: 0 18px 16px !important;
+  padding: 13px 16px 15px !important;
+  border-radius: 22px !important;
+  box-shadow:
+    0 10px 24px rgba(31, 86, 161, 0.055),
+    inset 0 1px 0 rgba(255,255,255,.94) !important;
+}
+
+/* smoother, lighter wave treatment with no visible center seam */
+.opportunities-quick-access::before {
+  background:
+    radial-gradient(circle at 10% 90%, rgba(91,146,255,.065), transparent 27%),
+    radial-gradient(circle at 94% 10%, rgba(148,187,255,.07), transparent 25%),
+    linear-gradient(150deg, rgba(255,255,255,0) 55%, rgba(220,232,255,.24) 100%) !important;
+}
+
+.opportunities-quick-access::after {
+  width: 50% !important;
+  height: 100% !important;
+  background:
+    radial-gradient(120% 90% at 100% 0%,
+      rgba(218,230,255,.44) 0%,
+      rgba(226,236,255,.24) 34%,
+      rgba(255,255,255,0) 70%),
+    linear-gradient(156deg,
+      rgba(255,255,255,0) 36%,
+      rgba(255,255,255,.36) 37%,
+      rgba(255,255,255,0) 38%,
+      rgba(255,255,255,0) 58%,
+      rgba(255,255,255,.28) 59%,
+      rgba(255,255,255,0) 60%,
+      rgba(255,255,255,0) 74%,
+      rgba(255,255,255,.22) 75%,
+      rgba(255,255,255,0) 76%) !important;
+  opacity: .72 !important;
+}
+
+.opportunities-quick-access-header {
+  margin-bottom: 10px !important;
+}
+
+.opportunities-quick-access-title-group {
+  grid-template-columns: 48px minmax(0, 1fr) !important;
+  column-gap: 10px !important;
+  row-gap: 1px !important;
+}
+
+.quick-access-bolt {
+  width: 42px !important;
+  height: 42px !important;
+  font-size: 1.22rem !important;
+  box-shadow:
+    0 9px 18px rgba(57,108,255,.16),
+    0 0 0 7px rgba(103,142,255,.075) !important;
+}
+
+.opportunities-quick-access-title-group h2 {
+  font-size: clamp(1.18rem, 1.55vw, 1.48rem) !important;
+  line-height: 1 !important;
+  letter-spacing: -0.025em !important;
+}
+
+.opportunities-quick-access-title-group p {
+  font-size: .68rem !important;
+  line-height: 1.22 !important;
+}
+
+.opportunities-quick-access-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 10px 13px !important;
+}
+
+.opportunities-quick-card {
+  grid-template-columns: 56px minmax(0, 1fr) 42px !important;
+  min-height: 78px !important;
+  padding: 9px 12px !important;
+  border-radius: 18px !important;
+  box-shadow:
+    0 6px 14px rgba(17,73,149,.04),
+    inset 0 1px 0 rgba(255,255,255,.92) !important;
+}
+
+.opportunities-quick-card:hover {
+  transform: translateY(-1px) !important;
+  box-shadow:
+    0 10px 18px rgba(17,73,149,.065),
+    inset 0 1px 0 rgba(255,255,255,.96) !important;
+}
+
+.opportunities-quick-card::before {
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.34), rgba(255,255,255,0) 52%),
+    linear-gradient(180deg,
+      rgba(255,255,255,0) 54%,
+      color-mix(in srgb, var(--quick-tint) 66%, white) 100%) !important;
+}
+
+.opportunities-quick-icon {
+  width: 46px !important;
+  height: 46px !important;
+  border-radius: 13px !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.76),
+    0 5px 12px rgba(50,90,160,.045) !important;
+}
+
+.opportunities-quick-icon svg {
+  width: 24px !important;
+  height: 24px !important;
+  stroke-width: 2 !important;
+}
+
+.opportunities-quick-card > span:nth-child(2) {
+  max-width: 10ch !important;
+  font-size: .75rem !important;
+  line-height: 1.04 !important;
+  font-weight: 830 !important;
+  letter-spacing: -0.018em !important;
+}
+
+.opportunities-quick-arrow {
+  width: 32px !important;
+  height: 32px !important;
+  font-size: 1.4rem !important;
+  box-shadow: 0 4px 9px rgba(19,77,152,.04) !important;
+}
+
+/* Hold the desktop 3-column layout longer, like the reference. */
+@media (max-width: 980px) {
+  .opportunities-quick-access-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .opportunities-quick-access {
+    margin-inline: 14px !important;
+    padding: 13px !important;
+    border-radius: 20px !important;
+  }
+
+  .opportunities-quick-access::after {
+    width: 64% !important;
+  }
+
+  .opportunities-quick-access-header {
+    margin-bottom: 10px !important;
+  }
+
+  .opportunities-quick-access-title-group {
+    grid-template-columns: 44px minmax(0, 1fr) !important;
+    column-gap: 9px !important;
+  }
+
+  .quick-access-bolt {
+    width: 38px !important;
+    height: 38px !important;
+    font-size: 1.08rem !important;
+    box-shadow:
+      0 8px 14px rgba(57,108,255,.14),
+      0 0 0 6px rgba(103,142,255,.07) !important;
+  }
+
+  .opportunities-quick-access-title-group h2 {
+    font-size: 1.08rem !important;
+  }
+
+  .opportunities-quick-access-title-group p {
+    font-size: .64rem !important;
+  }
+
+  .opportunities-quick-access-grid {
+    grid-template-columns: 1fr !important;
+    gap: 9px !important;
+  }
+
+  .opportunities-quick-card {
+    grid-template-columns: 52px minmax(0, 1fr) 40px !important;
+    min-height: 70px !important;
+    padding: 8px 11px !important;
+    border-radius: 17px !important;
+  }
+
+  .opportunities-quick-icon {
+    width: 43px !important;
+    height: 43px !important;
+    border-radius: 12px !important;
+  }
+
+  .opportunities-quick-icon svg {
+    width: 22px !important;
+    height: 22px !important;
+  }
+
+  .opportunities-quick-card > span:nth-child(2) {
+    max-width: none !important;
+    font-size: .74rem !important;
+  }
+
+  .opportunities-quick-arrow {
+    width: 31px !important;
+    height: 31px !important;
+    font-size: 1.32rem !important;
+  }
+}
+
+
+/* =========================================================
+   QUICK ACCESS — LABEL SPACING FIX
+   Gives the label column more breathing room so long labels
+   do not wrap awkwardly (e.g., "Competitors").
+========================================================== */
+
+.opportunities-quick-card {
+  grid-template-columns: 56px minmax(0, 1fr) 38px !important;
+  column-gap: 12px !important;
+}
+
+.opportunities-quick-card > span:nth-child(2) {
+  max-width: 13.5ch !important;
+  width: 100% !important;
+  line-height: 1.08 !important;
+  text-wrap: pretty !important;
+}
+
+.opportunities-quick-arrow {
+  width: 30px !important;
+  height: 30px !important;
+  font-size: 1.3rem !important;
+  justify-self: end !important;
+}
+
+@media (max-width: 767px) {
+  .opportunities-quick-card {
+    grid-template-columns: 52px minmax(0, 1fr) 38px !important;
+    column-gap: 11px !important;
+  }
+
+  .opportunities-quick-card > span:nth-child(2) {
+    max-width: 14ch !important;
+    line-height: 1.08 !important;
+  }
+
+  .opportunities-quick-arrow {
+    width: 30px !important;
+    height: 30px !important;
+    font-size: 1.28rem !important;
+  }
+}
+
 </style>

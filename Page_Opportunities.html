@@ -310,31 +310,83 @@
     class="solutioning-toolkit-section opportunities-panel"
     aria-labelledby="solutioning-toolkit-title"
   >
-    <header class="opportunities-panel-header">
-      <div class="opportunities-panel-title-group">
-        <span class="opportunities-panel-icon is-toolkit" aria-hidden="true">
-          <svg width="30" height="30" viewBox="0 0 24 24" fill="none"
-               stroke="currentColor" stroke-width="2"
-               stroke-linecap="round" stroke-linejoin="round">
-            <path d="M14.7 6.3a4 4 0 0 0-5-5L7.8 3.2l3 3 1.9-1.9a2 2 0 0 1 2.8 2.8L13.6 9l3 3 1.9-1.9a4 4 0 0 0-3.8-3.8Z"/>
-            <path d="m2 22 8.5-8.5M13.5 10.5 22 19l-3 3-8.5-8.5"/>
-          </svg>
-        </span>
-
-        <div>
-          <h2 id="solutioning-toolkit-title">Solutioning Toolkit</h2>
-          <p>Everything you need to craft the right solution, faster.</p>
-        </div>
+    <header class="opportunities-panel-header solutioning-toolkit-header">
+      <div class="solutioning-toolkit-header-media" aria-hidden="true">
+        <img
+          id="solutioning-toolkit-header-bg-image"
+          class="solutioning-toolkit-header-bg-image"
+          data-image-key="solutioning-toolkit-header-bg"
+          alt=""
+          width="2200"
+          height="720"
+          loading="lazy"
+          decoding="async"
+          fetchpriority="low"
+          hidden
+        >
+        <span
+          id="solutioning-toolkit-header-bg-fallback"
+          class="image-placeholder solutioning-toolkit-header-bg-fallback"
+          data-image-fallback="solutioning-toolkit-header-bg"
+          role="img"
+          aria-label="Solutioning Toolkit header visual unavailable"
+          hidden
+        ></span>
+        <span class="solutioning-toolkit-header-wash" aria-hidden="true"></span>
       </div>
 
-      <button
-        class="opportunities-view-all"
-        type="button"
-        data-opportunities-action="view-all-templates"
-      >
-        <span>View All Templates</span>
-        <span aria-hidden="true">→</span>
-      </button>
+      <div class="solutioning-toolkit-header-content">
+        <span class="solutioning-toolkit-header-icon" aria-hidden="true">
+          <img
+            id="solutioning-toolkit-header-icon-image"
+            class="solutioning-toolkit-header-icon-image"
+            data-image-key="opportunities-solutioning-toolkit-header-icon"
+            alt=""
+            width="900"
+            height="900"
+            loading="lazy"
+            decoding="async"
+            fetchpriority="low"
+            hidden
+          >
+          <span
+            id="solutioning-toolkit-header-icon-fallback"
+            class="image-placeholder solutioning-toolkit-header-icon-fallback"
+            data-image-fallback="opportunities-solutioning-toolkit-header-icon"
+            role="img"
+            aria-label="Solutioning Toolkit tools icon unavailable"
+            hidden
+          >
+            <svg width="42" height="42" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14.7 6.3a4 4 0 0 0-5-5L7.8 3.2l3 3 1.9-1.9a2 2 0 0 1 2.8 2.8L13.6 9l3 3 1.9-1.9a4 4 0 0 0-3.8-3.8Z"/>
+              <path d="m2 22 8.5-8.5M13.5 10.5 22 19l-3 3-8.5-8.5"/>
+            </svg>
+          </span>
+        </span>
+
+        <div class="solutioning-toolkit-header-copy">
+          <p class="solutioning-toolkit-kicker">SOLUTIONS ENABLEMENT</p>
+          <h2 id="solutioning-toolkit-title">Solutioning Toolkit</h2>
+          <p class="solutioning-toolkit-subtitle">Everything you need to craft the right solution, faster.</p>
+
+          <div class="solutioning-toolkit-badges" aria-label="Toolkit benefits">
+            <span class="solutioning-toolkit-badge is-blue">
+              <span aria-hidden="true">⚡</span>
+              <span>Proven frameworks</span>
+            </span>
+            <span class="solutioning-toolkit-badge is-teal">
+              <span aria-hidden="true">◫</span>
+              <span>Standardized templates</span>
+            </span>
+            <span class="solutioning-toolkit-badge is-purple">
+              <span aria-hidden="true">▣</span>
+              <span>Built for your success</span>
+            </span>
+          </div>
+        </div>
+      </div>
     </header>
 
     <div id="solutioning-toolkit-grid" class="solutioning-toolkit-grid" aria-live="polite">
@@ -805,7 +857,7 @@
             <path d="M14 2v5h5M9 12h7M9 16h7"/>
           </svg>
         </span>
-        <span>Case Studies</span>
+        <span>Case<br>Studies</span>
         <span class="opportunities-quick-arrow" aria-hidden="true">›</span>
       </button>
 

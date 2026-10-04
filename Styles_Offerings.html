@@ -1481,4 +1481,3134 @@
         animation-iteration-count: 1 !important;
       }
     }
+
+
+    /* =========================================================
+       H2 OFFERINGS — CORE OFFERINGS PREMIUM SHOWCASE V5
+       Modular Styles_Offerings implementation
+       - one premium outer section card
+       - no Centers of Excellence filter row
+       - 5 / 3 / 2 / 1 responsive grid
+       - static Standard Artifact rows (not buttons)
+       - Explore Offering is the only primary card CTA
+       ========================================================= */
+
+    .offerings-core-section {
+      position: relative;
+      z-index: 4;
+      box-sizing: border-box;
+      width: calc(100% - 40px);
+      margin: 20px 20px 30px;
+      padding: 22px 24px 24px;
+      overflow: hidden;
+      border: 1px solid #D7E8F5;
+      border-radius: 22px;
+      background:
+        radial-gradient(
+          circle at 92% 0%,
+          rgb(64 153 255 / 8%),
+          transparent 30%
+        ),
+        linear-gradient(
+          180deg,
+          #FFFFFF 0%,
+          #FBFDFF 100%
+        );
+      box-shadow:
+        0 14px 36px rgb(3 49 113 / 8%),
+        inset 0 1px 0 rgb(255 255 255 / 90%);
+    }
+
+    .offerings-core-section::before {
+      content: "";
+      position: absolute;
+      z-index: -1;
+      top: -110px;
+      right: -7%;
+      width: 58%;
+      height: 250px;
+      pointer-events: none;
+      border-radius: 50%;
+      background:
+        radial-gradient(
+          ellipse at center,
+          rgb(78 170 255 / 10%) 0 30%,
+          transparent 68%
+        );
+      transform: rotate(-5deg);
+    }
+
+    /* ---------- Editorial header ---------- */
+
+    .offerings-core-header {
+      display: block;
+      margin: 0 0 20px;
+    }
+
+    .offerings-core-heading {
+      display: block;
+      max-width: 760px;
+    }
+
+    .offerings-core-accent {
+      display: block;
+      width: 52px;
+      height: 5px;
+      margin: 0 0 10px;
+      border-radius: 999px;
+      background:
+        linear-gradient(
+          90deg,
+          #0757EF 0%,
+          #00D4D8 100%
+        );
+      box-shadow: 0 2px 7px rgb(7 87 239 / 15%);
+    }
+
+    .offerings-core-heading h2,
+    .offerings-section-title-row h2 {
+      margin: 0;
+      color: #071F63;
+      font-size: 30px;
+      font-weight: 900;
+      line-height: 1.05;
+      letter-spacing: .04em;
+    }
+
+    .offerings-core-heading > p {
+      margin: 5px 0 0;
+      color: #5B7291;
+      font-size: 15px;
+      font-weight: 530;
+      line-height: 1.35;
+    }
+
+    .offerings-core-header .offerings-section-heading {
+      width: 100%;
+    }
+
+    /* ---------- Responsive card grid ---------- */
+
+    .core-offerings-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      align-items: stretch;
+      gap: 14px;
+      min-height: 0;
+      margin: 0;
+    }
+
+    /* ---------- Offering cards ---------- */
+
+    .core-offering-card {
+      --card-accent: #168BFF;
+      --card-accent-deep: #0755D8;
+      --card-tint: #EFF7FF;
+
+      position: relative;
+      display: flex;
+      min-width: 0;
+      min-height: 575px !important;
+      flex-direction: column;
+      overflow: hidden;
+      box-sizing: border-box;
+      padding: 0;
+      border: 1px solid color-mix(in srgb, var(--card-accent) 28%, #D7E8F5);
+      border-radius: 16px;
+      background:
+        linear-gradient(
+          160deg,
+          var(--card-tint) 0%,
+          #FFFFFF 30%,
+          #FFFFFF 100%
+        );
+      box-shadow:
+        0 7px 20px rgb(1 45 108 / 5%),
+        inset 0 1px 0 rgb(255 255 255 / 82%);
+      isolation: isolate;
+      transition:
+        transform 180ms ease,
+        border-color 180ms ease,
+        box-shadow 180ms ease;
+    }
+
+    .core-offering-card.is-data {
+      --card-accent: #7B35F3;
+      --card-accent-deep: #5820D1;
+      --card-tint: #F6F0FF;
+    }
+
+    .core-offering-card.is-cloud {
+      --card-accent: #08AEB8;
+      --card-accent-deep: #087E89;
+      --card-tint: #EEFCFC;
+    }
+
+    .core-offering-card.is-netsec {
+      --card-accent: #FF4D4D;
+      --card-accent-deep: #D82E39;
+      --card-tint: #FFF2F2;
+    }
+
+    .core-offering-card.is-edge {
+      --card-accent: #FF9815;
+      --card-accent-deep: #DB7000;
+      --card-tint: #FFF8ED;
+    }
+
+    .core-offering-card::before {
+      height: 38%;
+      background:
+        radial-gradient(
+          circle at 76% 8%,
+          color-mix(in srgb, var(--card-accent) 14%, transparent),
+          transparent 58%
+        );
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      .core-offering-card:hover {
+        transform: translateY(-3px);
+        border-color: color-mix(in srgb, var(--card-accent) 48%, #D7E8F5);
+        box-shadow:
+          0 13px 30px rgb(2 48 111 / 10%),
+          inset 0 1px 0 rgb(255 255 255 / 88%);
+      }
+    }
+
+    /* ---------- Number and individual COE badge ---------- */
+
+    .core-offering-card-topline {
+      position: absolute;
+      z-index: 4;
+      top: 12px;
+      left: 14px;
+      right: 12px;
+      min-height: 30px;
+      padding: 0;
+      pointer-events: none;
+    }
+
+    .core-offering-number {
+      color: var(--card-accent-deep);
+      font-size: 24px;
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: -.035em;
+    }
+
+    .core-offering-coe-chip {
+      min-height: 30px;
+      padding: 5px 12px;
+      border: 1.5px solid var(--card-accent);
+      border-radius: 8px;
+      color: var(--card-accent-deep);
+      background: rgb(255 255 255 / 78%);
+      box-shadow: 0 3px 8px color-mix(in srgb, var(--card-accent) 10%, transparent);
+      font-size: 11px;
+      font-weight: 850;
+      line-height: 1;
+    }
+
+    /* ---------- Artwork ---------- */
+
+    .core-offering-visual {
+      position: relative;
+      height: 180px;
+      min-height: 170px;
+      max-height: 195px;
+      margin: 0;
+      padding: 34px 14px 0;
+      overflow: hidden;
+      border-radius: 0;
+      background:
+        radial-gradient(
+          circle at 50% 55%,
+          color-mix(in srgb, var(--card-accent) 10%, white),
+          rgb(255 255 255 / 56%) 58%,
+          transparent 80%
+        );
+    }
+
+    .core-offering-visual::after {
+      content: "";
+      position: absolute;
+      z-index: 2;
+      inset: auto 0 0;
+      height: 38px;
+      pointer-events: none;
+      background:
+        linear-gradient(
+          180deg,
+          transparent,
+          rgb(255 255 255 / 90%)
+        );
+    }
+
+    .core-offering-image,
+    .core-offering-image-fallback {
+      inset: 34px 14px 0;
+      width: calc(100% - 28px);
+      height: calc(100% - 34px);
+    }
+
+    .core-offering-image {
+      padding: 0;
+      object-fit: contain;
+      object-position: center;
+      transition: transform 180ms ease;
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      .core-offering-card:hover .core-offering-image {
+        transform: scale(1.015);
+      }
+    }
+
+    /* ---------- Content ---------- */
+
+    .core-offering-content {
+      display: flex;
+      min-width: 0;
+      flex: 1 1 auto;
+      flex-direction: column;
+      padding: 14px 14px 0;
+    }
+
+    .core-offering-content h3 {
+      margin: 0;
+      color: #071F63;
+      font-size: 21px;
+      font-weight: 900;
+      line-height: 1.05;
+      letter-spacing: -.025em;
+    }
+
+    .core-offering-coe {
+      min-height: 0;
+      margin: 3px 0 15px;
+      color: var(--card-accent-deep);
+      font-size: 11.5px;
+      font-weight: 750;
+      line-height: 1.25;
+    }
+
+    .core-offering-description {
+      min-height: 78px;
+      margin: 0 0 12px;
+      color: #526987;
+      font-size: 12.5px;
+      font-weight: 520;
+      line-height: 1.4;
+      overflow-wrap: normal;
+      word-break: normal;
+    }
+
+    /* ---------- Static Standard Artifacts ---------- */
+
+    .core-offering-card .offering-artifacts-static {
+      display: block;
+      margin-top: auto;
+      padding-top: 10px;
+      border-top: 1px solid #DCE8F4;
+    }
+
+    .core-offering-card .offering-artifacts-title {
+      margin: 0 0 8px;
+      color: #36547D;
+      font-size: 10.5px;
+      font-weight: 850;
+      line-height: 1;
+      letter-spacing: .035em;
+    }
+
+    .offering-artifact-list {
+      display: grid;
+      gap: 6px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .core-offering-card .offering-artifact {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      width: 100%;
+      min-height: 36px;
+      box-sizing: border-box;
+      padding: 5px 10px;
+      border: 1px solid #E6EEF6;
+      border-radius: 10px;
+      color: #526987;
+      background: #F6F9FC;
+      font-size: 11.5px;
+      font-weight: 580;
+      line-height: 1.2;
+      cursor: default;
+      transform: none;
+      box-shadow: none;
+      user-select: text;
+    }
+
+    .core-offering-card .offering-artifact .artifact-icon {
+      width: 25px;
+      height: 25px;
+      flex: 0 0 auto;
+      border-radius: 7px;
+      color: var(--card-accent-deep);
+      background: color-mix(in srgb, var(--card-accent) 12%, white);
+      box-shadow: none;
+      font-size: 12px;
+    }
+
+    /* ---------- Primary CTA ---------- */
+
+    .core-offering-card > .offering-explore-button {
+      justify-content: space-between;
+      width: calc(100% - 28px);
+      min-height: 42px;
+      margin: 10px 14px 14px;
+      padding: 8px 14px;
+      border-radius: 12px;
+      color: #FFFFFF;
+      background:
+        linear-gradient(
+          135deg,
+          var(--card-accent),
+          var(--card-accent-deep)
+        );
+      box-shadow:
+        0 6px 14px color-mix(in srgb, var(--card-accent) 18%, transparent),
+        inset 0 1px 0 rgb(255 255 255 / 22%);
+      font-size: 12.5px;
+      font-weight: 820;
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      .core-offering-card > .offering-explore-button:hover {
+        transform: translateY(-1px);
+        filter: brightness(1.03);
+        box-shadow:
+          0 7px 16px color-mix(in srgb, var(--card-accent) 22%, transparent),
+          inset 0 1px 0 rgb(255 255 255 / 26%);
+      }
+    }
+
+    /* ---------- Responsive layout ---------- */
+
+    @media (min-width: 1500px) {
+      .core-offerings-grid {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+      }
+    }
+
+    @media (min-width: 1200px) and (max-width: 1499px) {
+      .offerings-core-section {
+        padding: 20px;
+      }
+
+      .core-offerings-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+      }
+
+      .core-offering-card {
+        min-height: 575px !important;
+      }
+
+      .core-offering-visual {
+        height: 190px;
+        max-height: 190px;
+      }
+    }
+
+    @media (min-width: 768px) and (max-width: 1199px) {
+      .offerings-core-section {
+        width: calc(100% - 36px);
+        margin: 18px 18px 28px;
+        padding: 18px;
+        border-radius: 20px;
+      }
+
+      .offerings-core-heading h2 {
+        font-size: 26px;
+      }
+
+      .offerings-core-heading > p {
+        font-size: 14px;
+      }
+
+      .core-offerings-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .core-offering-card {
+        min-height: 565px !important;
+      }
+
+      .core-offering-visual {
+        height: 190px;
+        max-height: 200px;
+      }
+    }
+
+    @media (max-width: 767px) {
+      .offerings-core-section {
+        width: auto;
+        margin: 14px 0 24px;
+        padding: 16px 12px 18px;
+        border-radius: 18px;
+      }
+
+      .offerings-core-header {
+        margin-bottom: 16px;
+      }
+
+      .offerings-core-accent {
+        width: 44px;
+        height: 4px;
+        margin-bottom: 8px;
+      }
+
+      .offerings-core-heading h2 {
+        font-size: 24px;
+      }
+
+      .offerings-core-heading > p {
+        font-size: 13px;
+      }
+
+      .core-offerings-grid {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 12px;
+      }
+
+      .core-offering-card {
+        min-height: 0 !important;
+      }
+
+      .core-offering-visual {
+        height: 180px;
+        min-height: 180px;
+        max-height: 180px;
+      }
+
+      .core-offering-content {
+        padding: 14px 14px 0;
+      }
+
+      .core-offering-description {
+        min-height: 0;
+      }
+
+      .core-offering-card .offering-artifact {
+        min-height: 40px;
+        font-size: 12px;
+      }
+
+      .core-offering-card .offering-artifact .artifact-icon {
+        width: 27px;
+        height: 27px;
+      }
+
+      .core-offering-card > .offering-explore-button {
+        min-height: 44px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .core-offering-card,
+      .core-offering-image,
+      .core-offering-card > .offering-explore-button {
+        transition: none !important;
+      }
+
+      .core-offering-card:hover,
+      .core-offering-card:hover .core-offering-image,
+      .core-offering-card > .offering-explore-button:hover {
+        transform: none !important;
+      }
+    }
+
+
+
+    /* =========================================================
+       H2 OFFERINGS — CORE HEADER + ARTIFACT ICON POLISH V6
+       ========================================================= */
+
+    /* ---------- Premium compact header ---------- */
+
+    .offerings-core-header-premium {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      min-height: 118px;
+      box-sizing: border-box;
+      margin: -4px -6px 20px;
+      padding: 18px 22px;
+      overflow: hidden;
+      border: 1px solid #DDEAF6;
+      border-radius: 18px;
+      background:
+        radial-gradient(circle at 84% 15%, rgb(77 169 255 / 13%), transparent 27%),
+        linear-gradient(105deg, #FFFFFF 0%, #F8FCFF 47%, #EEF7FF 100%);
+      box-shadow:
+        0 8px 22px rgb(3 49 113 / 6%),
+        inset 0 1px 0 rgb(255 255 255 / 92%);
+    }
+
+    .offerings-core-header-premium::before,
+    .offerings-core-header-premium::after {
+      content: "";
+      position: absolute;
+      pointer-events: none;
+    }
+
+    .offerings-core-header-premium::before {
+      right: -4%;
+      bottom: -76px;
+      width: 46%;
+      height: 150px;
+      border-radius: 50%;
+      border: 20px solid rgb(62 150 255 / 7%);
+      transform: rotate(-8deg);
+    }
+
+    .offerings-core-header-premium::after {
+      right: 10%;
+      top: -75px;
+      width: 32%;
+      height: 120px;
+      border-radius: 50%;
+      background: rgb(69 175 255 / 5%);
+      transform: rotate(10deg);
+    }
+
+    .offerings-core-header-icon {
+      position: relative;
+      z-index: 2;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 66px;
+      height: 66px;
+      flex: 0 0 auto;
+      border: 1px solid rgb(255 255 255 / 82%);
+      border-radius: 18px;
+      color: #FFFFFF;
+      background:
+        linear-gradient(
+          145deg,
+          #0870FF 0%,
+          #1451E8 58%,
+          #5B43F4 100%
+        );
+      box-shadow:
+        0 10px 24px rgb(11 91 228 / 22%),
+        inset 0 1px 0 rgb(255 255 255 / 30%);
+    }
+
+    .offerings-core-header-icon::after {
+      content: "";
+      position: absolute;
+      inset: 7px;
+      border: 1px solid rgb(255 255 255 / 18%);
+      border-radius: 13px;
+    }
+
+    .offerings-core-header-icon svg {
+      position: relative;
+      z-index: 1;
+      width: 34px;
+      height: 34px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .offerings-core-heading {
+      position: relative;
+      z-index: 2;
+      max-width: 760px;
+    }
+
+    .offerings-core-kicker {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0 0 7px;
+      color: #3E5E8C;
+      font-size: 10.5px;
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: .17em;
+    }
+
+    .offerings-core-kicker .offerings-core-accent {
+      width: 42px;
+      height: 4px;
+      margin: 0;
+    }
+
+    .offerings-core-heading h2,
+    .offerings-section-title-row h2 {
+      font-size: 31px;
+      line-height: 1;
+      letter-spacing: .025em;
+    }
+
+    .offerings-core-heading > p {
+      margin-top: 6px;
+      color: #587296;
+      font-size: 14px;
+      font-weight: 560;
+      line-height: 1.35;
+    }
+
+    /* ---------- Real artifact SVG icons ---------- */
+
+    .core-offering-card .offering-artifact .artifact-icon {
+      position: relative;
+      width: 28px;
+      height: 28px;
+      border: 1px solid color-mix(in srgb, var(--card-accent) 14%, transparent);
+      border-radius: 8px;
+      color: var(--card-accent-deep);
+      background:
+        linear-gradient(
+          145deg,
+          color-mix(in srgb, var(--card-accent) 13%, white),
+          color-mix(in srgb, var(--card-accent) 5%, white)
+        );
+      box-shadow:
+        inset 0 1px 0 rgb(255 255 255 / 88%);
+    }
+
+    .core-offering-card .offering-artifact .artifact-icon svg {
+      width: 16px;
+      height: 16px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.75;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .core-offering-card .offering-artifact {
+      gap: 10px;
+    }
+
+    /* ---------- Responsive header ---------- */
+
+    @media (max-width: 1199px) {
+      .offerings-core-header-premium {
+        min-height: 108px;
+        padding: 16px 18px;
+      }
+
+      .offerings-core-header-icon {
+        width: 58px;
+        height: 58px;
+        border-radius: 16px;
+      }
+
+      .offerings-core-header-icon svg {
+        width: 30px;
+        height: 30px;
+      }
+
+      .offerings-core-heading h2 {
+        font-size: 28px;
+      }
+    }
+
+    @media (max-width: 767px) {
+      .offerings-core-header-premium {
+        align-items: flex-start;
+        min-height: 0;
+        margin: -2px -2px 16px;
+        padding: 15px;
+        gap: 12px;
+        border-radius: 16px;
+      }
+
+      .offerings-core-header-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 14px;
+      }
+
+      .offerings-core-header-icon svg {
+        width: 25px;
+        height: 25px;
+      }
+
+      .offerings-core-kicker {
+        gap: 7px;
+        margin-bottom: 6px;
+        font-size: 8.5px;
+        letter-spacing: .13em;
+      }
+
+      .offerings-core-kicker .offerings-core-accent {
+        width: 28px;
+        height: 3px;
+      }
+
+      .offerings-core-heading h2 {
+        font-size: 22px;
+      }
+
+      .offerings-core-heading > p {
+        margin-top: 5px;
+        font-size: 12px;
+      }
+    }
+
+
+
+    /* =========================================================
+       H2 OFFERINGS — INTEGRATED CORE HEADER ASSET V7
+       - CORE OFFERINGS stays beside the left icon
+       - new Drive-backed decorative header asset on the right
+       - removes the nested "card inside a card" appearance
+       - header is integrated into the main Core Offerings section
+       ========================================================= */
+
+    .offerings-core-section {
+      padding-top: 18px;
+    }
+
+    .offerings-core-header-premium {
+      position: relative;
+      display: block;
+      min-height: 138px;
+      margin: 0 0 20px;
+      padding: 0;
+      overflow: hidden;
+
+      /* Remove the inner-card appearance. */
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .offerings-core-header-premium::before,
+    .offerings-core-header-premium::after {
+      content: none;
+    }
+
+    /* Decorative asset sits only in the header region. */
+    .offerings-core-header-media,
+    .offerings-core-header-bg-image,
+    .offerings-core-header-bg-fallback {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .offerings-core-header-media {
+      z-index: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .offerings-core-header-bg-image {
+      display: block;
+      object-fit: cover;
+      object-position: center right;
+      opacity: .96;
+    }
+
+    .offerings-core-header-bg-fallback {
+      border: 0;
+      border-radius: 0;
+      background:
+        linear-gradient(
+          100deg,
+          transparent 0%,
+          rgb(226 244 255 / 38%) 44%,
+          #EAF6FF 100%
+        );
+    }
+
+    /*
+     * White fade protects the title and deliberately leaves the
+     * strongest portion of the artwork on the right half.
+     */
+    .offerings-core-header-premium::after {
+      content: "";
+      position: absolute;
+      z-index: 1;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(
+          90deg,
+          #FFFFFF 0%,
+          rgb(255 255 255 / 99%) 30%,
+          rgb(255 255 255 / 92%) 43%,
+          rgb(255 255 255 / 54%) 59%,
+          rgb(255 255 255 / 8%) 82%,
+          transparent 100%
+        );
+    }
+
+    .offerings-core-header-content {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 18px;
+      width: 100%;
+      min-height: 138px;
+      box-sizing: border-box;
+      padding: 18px 22px 18px 10px;
+    }
+
+    .offerings-core-header-icon {
+      width: 68px;
+      height: 68px;
+      flex: 0 0 68px;
+      margin: 0;
+      border-radius: 18px;
+    }
+
+    .offerings-core-heading {
+      display: block;
+      width: auto;
+      max-width: 620px;
+      margin: 0;
+      text-align: left;
+    }
+
+    .offerings-core-kicker {
+      justify-content: flex-start;
+      margin: 0 0 7px;
+    }
+
+    .offerings-core-heading h2,
+    .offerings-section-title-row h2 {
+      margin: 0;
+      text-align: left;
+      font-size: 31px;
+      line-height: 1;
+      letter-spacing: .025em;
+    }
+
+    .offerings-core-heading > p {
+      margin: 6px 0 0;
+      text-align: left;
+    }
+
+    /* The first card row begins immediately after the integrated banner. */
+    .core-offerings-grid {
+      margin-top: 0;
+    }
+
+    @media (max-width: 1199px) {
+      .offerings-core-header-premium {
+        min-height: 124px;
+      }
+
+      .offerings-core-header-content {
+        min-height: 124px;
+        gap: 15px;
+        padding: 16px 16px 16px 8px;
+      }
+
+      .offerings-core-header-icon {
+        width: 60px;
+        height: 60px;
+        flex-basis: 60px;
+      }
+
+      .offerings-core-header-premium::after {
+        background:
+          linear-gradient(
+            90deg,
+            #FFFFFF 0%,
+            rgb(255 255 255 / 98%) 40%,
+            rgb(255 255 255 / 75%) 61%,
+            rgb(255 255 255 / 16%) 88%,
+            transparent 100%
+          );
+      }
+    }
+
+    @media (max-width: 767px) {
+      .offerings-core-section {
+        padding-top: 14px;
+      }
+
+      .offerings-core-header-premium {
+        min-height: 112px;
+        margin-bottom: 16px;
+      }
+
+      .offerings-core-header-content {
+        min-height: 112px;
+        align-items: center;
+        gap: 11px;
+        padding: 12px 8px;
+      }
+
+      .offerings-core-header-icon {
+        width: 48px;
+        height: 48px;
+        flex-basis: 48px;
+        border-radius: 14px;
+      }
+
+      .offerings-core-header-premium::after {
+        background:
+          linear-gradient(
+            90deg,
+            #FFFFFF 0%,
+            rgb(255 255 255 / 98%) 58%,
+            rgb(255 255 255 / 66%) 78%,
+            rgb(255 255 255 / 14%) 100%
+          );
+      }
+
+      .offerings-core-header-bg-image {
+        object-position: 70% center;
+      }
+
+      .offerings-core-kicker {
+        font-size: 8px;
+        letter-spacing: .11em;
+      }
+
+      .offerings-core-heading h2 {
+        font-size: 21px;
+      }
+
+      .offerings-core-heading > p {
+        max-width: 235px;
+        font-size: 11.5px;
+      }
+    }
+
+
+
+    /* =========================================================
+       H2 OFFERINGS — CORE OFFERINGS OUTER CARD REMOVAL V8
+       Clarification:
+       - KEEP the Core Offerings header as its own premium card
+       - REMOVE only the large outer card wrapping the full section
+       - KEEP the five individual offering cards unchanged
+       ========================================================= */
+
+    /* Remove the full-section outer card treatment. */
+    .offerings-core-section {
+      width: auto !important;
+      margin: 18px 20px 30px !important;
+      padding: 0 !important;
+      overflow: visible !important;
+      border: 0 !important;
+      border-radius: 0 !important;
+      background: transparent !important;
+      box-shadow: none !important;
+    }
+
+    .offerings-core-section::before {
+      content: none !important;
+    }
+
+    /* Restore the header itself as a standalone premium card. */
+    .offerings-core-header-premium {
+      position: relative !important;
+      display: block !important;
+      min-height: 138px !important;
+      margin: 0 0 20px !important;
+      padding: 0 !important;
+      overflow: hidden !important;
+      border: 1px solid #D7E8F5 !important;
+      border-radius: 20px !important;
+      background: #FFFFFF !important;
+      box-shadow:
+        0 12px 30px rgb(3 49 113 / 8%),
+        inset 0 1px 0 rgb(255 255 255 / 92%) !important;
+    }
+
+    /*
+     * The header image remains inside the header card and fades
+     * toward the left so the logo/title stay readable.
+     */
+    .offerings-core-header-premium::after {
+      content: "" !important;
+      position: absolute !important;
+      z-index: 1 !important;
+      inset: 0 !important;
+      pointer-events: none !important;
+      background:
+        linear-gradient(
+          90deg,
+          #FFFFFF 0%,
+          rgb(255 255 255 / 99%) 30%,
+          rgb(255 255 255 / 93%) 43%,
+          rgb(255 255 255 / 56%) 60%,
+          rgb(255 255 255 / 10%) 83%,
+          transparent 100%
+        ) !important;
+    }
+
+    .offerings-core-header-media {
+      border-radius: inherit;
+    }
+
+    .offerings-core-header-bg-image,
+    .offerings-core-header-bg-fallback {
+      border-radius: inherit;
+    }
+
+    .offerings-core-header-content {
+      min-height: 138px !important;
+      padding: 18px 22px !important;
+    }
+
+    /* Cards now sit directly beneath the header card. */
+    .core-offerings-grid {
+      margin-top: 0 !important;
+      padding: 0 !important;
+    }
+
+    @media (max-width: 1199px) {
+      .offerings-core-section {
+        margin: 16px 18px 28px !important;
+      }
+
+      .offerings-core-header-premium {
+        min-height: 124px !important;
+        border-radius: 18px !important;
+      }
+
+      .offerings-core-header-content {
+        min-height: 124px !important;
+        padding: 16px 18px !important;
+      }
+    }
+
+    @media (max-width: 767px) {
+      .offerings-core-section {
+        margin: 14px 0 24px !important;
+      }
+
+      .offerings-core-header-premium {
+        min-height: 112px !important;
+        margin-bottom: 16px !important;
+        border-radius: 16px !important;
+      }
+
+      .offerings-core-header-content {
+        min-height: 112px !important;
+        padding: 12px !important;
+      }
+    }
+
+
+
+    /* =========================================================
+       H2 OFFERINGS — AI ACCELERATORS + QUOTE LANES V9
+       Based on AI_Accelerators_Beautification_Update_Spec.md
+       ========================================================= */
+
+    /* ---------------------------------------------------------
+       Section rhythm + header
+       --------------------------------------------------------- */
+
+    .offerings-accelerators-section {
+      position: relative;
+      z-index: 2;
+      margin: 24px 20px 20px;
+      padding: 0;
+      background: transparent;
+      content-visibility: auto;
+      contain-intrinsic-size: 1px 520px;
+    }
+
+    .offerings-accelerators-header {
+      display: flex;
+      align-items: center;
+      min-height: 40px;
+      margin: 0 4px 16px;
+      padding: 0;
+    }
+
+    .offerings-accelerators-header .offerings-section-title-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      width: 100%;
+      flex-wrap: nowrap;
+    }
+
+    .offerings-accelerators-header .offerings-section-title-row h2 {
+      flex: 0 0 auto;
+      margin: 0;
+      color: #071F63;
+      font-size: 27px;
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: -.025em;
+    }
+
+    .offerings-accelerators-header .offerings-section-rule {
+      width: 82px;
+      height: 5px;
+      flex: 0 0 82px;
+      margin: 0;
+      border-radius: 999px;
+      background:
+        linear-gradient(
+          90deg,
+          #1263F5 0%,
+          #00C9D4 100%
+        );
+    }
+
+    .offerings-accelerators-header .offerings-section-title-row p {
+      width: auto;
+      margin: 0;
+      color: #4169AE;
+      font-size: 14px;
+      font-weight: 680;
+      line-height: 1.2;
+      white-space: normal;
+    }
+
+    /* ---------------------------------------------------------
+       Accelerator grid
+       --------------------------------------------------------- */
+
+    .ai-accelerators-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      align-items: stretch;
+      gap: 16px;
+    }
+
+    /* ---------------------------------------------------------
+       Accelerator cards
+       --------------------------------------------------------- */
+
+    .ai-accelerator-card {
+      --accelerator-accent: #168BFF;
+      --accelerator-deep: #0755D8;
+      --accelerator-tint: #EFF7FF;
+
+      position: relative;
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) minmax(190px, .75fr);
+      grid-template-rows: minmax(0, 1fr) auto;
+      min-width: 0;
+      min-height: 300px;
+      overflow: hidden;
+      box-sizing: border-box;
+      padding: 18px 18px 16px;
+      border: 1px solid color-mix(in srgb, var(--accelerator-accent) 24%, #DCEAF5);
+      border-radius: 18px;
+      background:
+        radial-gradient(
+          circle at 20% 20%,
+          color-mix(in srgb, var(--accelerator-accent) 10%, white),
+          transparent 36%
+        ),
+        linear-gradient(
+          150deg,
+          color-mix(in srgb, var(--accelerator-accent) 5%, white),
+          #FFFFFF 50%,
+          #FFFFFF 100%
+        );
+      box-shadow:
+        0 12px 28px rgb(3 49 113 / 7%),
+        inset 0 1px 0 rgb(255 255 255 / 90%);
+      isolation: isolate;
+      transition:
+        transform 180ms ease,
+        border-color 180ms ease,
+        box-shadow 180ms ease;
+    }
+
+    .ai-accelerator-card.is-personal-ai {
+      --accelerator-accent: #7B35F3;
+      --accelerator-deep: #5820D1;
+      --accelerator-tint: #F6F0FF;
+    }
+
+    .ai-accelerator-card.is-sovereign-ai {
+      --accelerator-accent: #08AEB8;
+      --accelerator-deep: #087E89;
+      --accelerator-tint: #EEFCFC;
+    }
+
+    .ai-accelerator-card::after {
+      content: "";
+      position: absolute;
+      z-index: -1;
+      left: -8%;
+      right: -8%;
+      bottom: -82px;
+      height: 150px;
+      pointer-events: none;
+      border-radius: 50%;
+      background:
+        color-mix(
+          in srgb,
+          var(--accelerator-accent) 7%,
+          white
+        );
+      transform: rotate(-3deg);
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      .ai-accelerator-card:hover {
+        transform: translateY(-3px);
+        border-color:
+          color-mix(
+            in srgb,
+            var(--accelerator-accent) 42%,
+            #DCEAF5
+          );
+        box-shadow:
+          0 16px 34px rgb(3 49 113 / 11%),
+          inset 0 1px 0 rgb(255 255 255 / 92%);
+      }
+    }
+
+    /* ---------------------------------------------------------
+       Accelerator main content
+       --------------------------------------------------------- */
+
+    .ai-accelerator-main {
+      position: relative;
+      z-index: 2;
+      display: grid;
+      grid-template-columns: 126px minmax(0, 1fr);
+      align-items: center;
+      gap: 18px;
+      min-width: 0;
+      min-height: 184px;
+      padding: 0 18px 8px 0;
+      border-right: 0;
+    }
+
+    .ai-accelerator-icon {
+      position: relative;
+      width: 116px;
+      height: 116px;
+      overflow: visible;
+      border-radius: 50%;
+      background: var(--accelerator-tint);
+      outline:
+        8px solid
+        color-mix(
+          in srgb,
+          var(--accelerator-accent) 6%,
+          transparent
+        );
+      box-shadow:
+        0 10px 24px
+        color-mix(
+          in srgb,
+          var(--accelerator-accent) 20%,
+          transparent
+        ),
+        inset 0 0 0 1px rgb(255 255 255 / 78%);
+      transition: transform 180ms ease;
+    }
+
+    .ai-accelerator-icon img,
+    .ai-accelerator-icon .image-placeholder {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+    }
+
+    .ai-accelerator-icon img {
+      display: block;
+      object-fit: cover;
+      object-position: center;
+    }
+
+    .ai-accelerator-icon .image-placeholder {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 0;
+      color: var(--accelerator-deep);
+      background: var(--accelerator-tint);
+      font-size: .9rem;
+      font-weight: 900;
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      .ai-accelerator-card:hover .ai-accelerator-icon {
+        transform: scale(1.02);
+      }
+    }
+
+    .ai-accelerator-copy {
+      min-width: 0;
+      min-height: 105px;
+      padding: 0;
+    }
+
+    .ai-accelerator-copy h3 {
+      margin: 0;
+      color: #071F63;
+      font-size: 21px;
+      font-weight: 900;
+      line-height: 1.05;
+      letter-spacing: -.02em;
+    }
+
+    .ai-accelerator-coe {
+      margin: 4px 0 6px;
+      color: var(--accelerator-deep);
+      font-size: 12px;
+      font-weight: 800;
+      line-height: 1.25;
+    }
+
+    .ai-accelerator-copy > p:last-child {
+      max-width: 290px;
+      margin: 0;
+      color: #45658E;
+      font-size: 13px;
+      font-weight: 540;
+      line-height: 1.4;
+      overflow-wrap: normal;
+      word-break: normal;
+    }
+
+    /* ---------------------------------------------------------
+       Accelerator artifacts — informational, not interactive
+       --------------------------------------------------------- */
+
+    .ai-accelerator-artifacts {
+      position: relative;
+      z-index: 2;
+      display: block;
+      min-width: 0;
+      margin: 0;
+      padding: 0 0 0 18px;
+      border-top: 0;
+      border-left: 1px solid #DCE8F4;
+    }
+
+    .ai-accelerator-artifacts .offering-artifacts-title {
+      margin: 0 0 9px;
+      color: #36547D;
+      font-size: 10.5px;
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: .035em;
+    }
+
+    .ai-accelerator-artifacts .offering-artifact-list {
+      display: grid;
+      gap: 7px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .ai-accelerator-artifacts .offering-artifact {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 46px;
+      box-sizing: border-box;
+      padding: 7px 11px;
+      border: 1px solid #E3ECF5;
+      border-radius: 12px;
+      color: #526987;
+      background: rgb(247 250 253 / 95%);
+      font-size: 12px;
+      font-weight: 580;
+      line-height: 1.2;
+      cursor: default;
+      transform: none;
+      box-shadow: none;
+      user-select: text;
+    }
+
+    .ai-accelerator-artifacts .artifact-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 31px;
+      height: 31px;
+      flex: 0 0 auto;
+      border: 1px solid
+        color-mix(
+          in srgb,
+          var(--accelerator-accent) 14%,
+          transparent
+        );
+      border-radius: 8px;
+      color: var(--accelerator-deep);
+      background:
+        color-mix(
+          in srgb,
+          var(--accelerator-accent) 11%,
+          white
+        );
+      box-shadow: inset 0 1px 0 rgb(255 255 255 / 88%);
+    }
+
+    .ai-accelerator-artifacts .artifact-icon svg {
+      width: 17px;
+      height: 17px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.75;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    /* ---------------------------------------------------------
+       Accelerator CTA
+       --------------------------------------------------------- */
+
+    .ai-accelerator-card > .offering-explore-button {
+      position: relative;
+      z-index: 2;
+      grid-column: 1 / 2;
+      justify-content: space-between;
+      width: min(300px, 100%);
+      min-height: 54px;
+      margin: 12px 0 0;
+      padding: 10px 22px;
+      border-radius: 999px;
+      color: #FFFFFF;
+      background:
+        linear-gradient(
+          135deg,
+          var(--accelerator-accent),
+          var(--accelerator-deep)
+        );
+      box-shadow:
+        0 7px 17px
+        color-mix(
+          in srgb,
+          var(--accelerator-accent) 20%,
+          transparent
+        ),
+        inset 0 1px 0 rgb(255 255 255 / 24%);
+      font-size: 14px;
+      font-weight: 830;
+      line-height: 1;
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      .ai-accelerator-card > .offering-explore-button:hover {
+        transform: translateY(-2px);
+        filter: brightness(1.03);
+        box-shadow:
+          0 9px 20px
+          color-mix(
+            in srgb,
+            var(--accelerator-accent) 24%,
+            transparent
+          ),
+          inset 0 1px 0 rgb(255 255 255 / 28%);
+      }
+    }
+
+    /* ---------------------------------------------------------
+       Quote / delivery lanes
+       --------------------------------------------------------- */
+
+    .offerings-quote-section {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      align-items: stretch;
+      gap: 24px;
+      margin: 22px 20px 24px;
+      padding: 0;
+      background: transparent;
+      content-visibility: auto;
+      contain-intrinsic-size: 1px 160px;
+    }
+
+    .offerings-quote-divider {
+      display: none;
+    }
+
+    .offerings-quote-card {
+      position: relative;
+      display: grid;
+      grid-template-columns: 126px minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 22px;
+      min-width: 0;
+      min-height: 150px;
+      box-sizing: border-box;
+      overflow: hidden;
+      padding: 18px 22px;
+      border: 1px solid #DCEAF5;
+      border-radius: 18px;
+      background:
+        radial-gradient(circle at 13% 50%, rgb(64 151 255 / 7%), transparent 25%),
+        linear-gradient(105deg, #FFFFFF 0%, #F8FCFF 72%, #FFFFFF 100%);
+      box-shadow:
+        0 10px 24px rgb(3 49 113 / 6%),
+        inset 0 1px 0 rgb(255 255 255 / 90%);
+      isolation: isolate;
+    }
+
+    .offerings-quote-card::after {
+      content: "";
+      position: absolute;
+      z-index: -1;
+      left: -8%;
+      right: -8%;
+      bottom: -94px;
+      height: 140px;
+      border-radius: 50%;
+      background: rgb(61 151 255 / 6%);
+      transform: rotate(-3deg);
+      pointer-events: none;
+    }
+
+    .offerings-quote-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 104px;
+      height: 104px;
+      border-radius: 50%;
+      color: #FFFFFF;
+      background:
+        linear-gradient(
+          145deg,
+          #0B6BFF 0%,
+          #0730A9 100%
+        );
+      outline: 9px solid rgb(22 105 255 / 6%);
+      box-shadow:
+        0 10px 24px rgb(7 76 199 / 20%),
+        inset 0 1px 0 rgb(255 255 255 / 25%);
+    }
+
+    .offerings-quote-icon svg {
+      width: 50px;
+      height: 50px;
+    }
+
+    .offerings-quote-copy {
+      min-width: 0;
+      padding-right: 22px;
+      border-right: 1px solid #D9E7F4;
+    }
+
+    .offerings-quote-copy h2 {
+      margin: 0;
+      color: #0B2DA3;
+      font-size: 22px;
+      font-weight: 900;
+      line-height: 1.05;
+      letter-spacing: -.015em;
+    }
+
+    .offerings-quote-copy p {
+      margin: 5px 0 0;
+      color: #4169AE;
+      font-size: 13px;
+      font-weight: 650;
+      line-height: 1.3;
+    }
+
+    .offerings-quote-button {
+      justify-content: space-between;
+      width: 255px;
+      min-width: 0;
+      min-height: 52px;
+      padding: 10px 18px;
+      border: 1px solid #B9D8F7;
+      border-radius: 999px;
+      color: #0B4BB7;
+      background: #F4FAFF;
+      box-shadow: 0 4px 11px rgb(0 72 180 / 5%);
+      font-size: 14px;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      .offerings-quote-button:hover {
+        transform: translateY(-1px);
+        background: #FFFFFF;
+        box-shadow: 0 7px 18px rgb(0 72 180 / 10%);
+      }
+    }
+
+    /* ---------------------------------------------------------
+       Focus states
+       --------------------------------------------------------- */
+
+    .ai-accelerator-card > .offering-explore-button:focus-visible,
+    .offerings-quote-button:focus-visible {
+      outline: 3px solid rgb(0 121 255 / 40%);
+      outline-offset: 3px;
+    }
+
+    /* Static artifacts never behave like controls. */
+    .ai-accelerator-artifacts .offering-artifact {
+      pointer-events: auto;
+    }
+
+    /* ---------------------------------------------------------
+       Responsive: 768–1199px
+       --------------------------------------------------------- */
+
+    @media (min-width: 768px) and (max-width: 1199px) {
+      .offerings-accelerators-section {
+        margin: 20px 18px 18px;
+      }
+
+      .offerings-accelerators-header .offerings-section-title-row {
+        flex-wrap: wrap;
+        gap: 9px 12px;
+      }
+
+      .offerings-accelerators-header .offerings-section-title-row h2 {
+        font-size: 25px;
+      }
+
+      .offerings-accelerators-header .offerings-section-rule {
+        width: 64px;
+        flex-basis: 64px;
+      }
+
+      .offerings-accelerators-header .offerings-section-title-row p {
+        font-size: 13px;
+      }
+
+      .ai-accelerators-grid {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 14px;
+      }
+
+      .ai-accelerator-card {
+        grid-template-columns: minmax(0, 1.35fr) minmax(220px, .65fr);
+        min-height: 292px;
+      }
+
+      .ai-accelerator-main {
+        grid-template-columns: 118px minmax(0, 1fr);
+      }
+
+      .ai-accelerator-icon {
+        width: 106px;
+        height: 106px;
+      }
+
+      .offerings-quote-section {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 14px;
+        margin: 20px 18px 22px;
+      }
+    }
+
+    /* ---------------------------------------------------------
+       Responsive: mobile
+       --------------------------------------------------------- */
+
+    @media (max-width: 767px) {
+      .offerings-accelerators-section {
+        margin: 18px 0 16px;
+      }
+
+      .offerings-accelerators-header {
+        min-height: 0;
+        margin: 0 4px 14px;
+      }
+
+      .offerings-accelerators-header .offerings-section-title-row {
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 8px 10px;
+      }
+
+      .offerings-accelerators-header .offerings-section-title-row h2 {
+        font-size: 22px;
+      }
+
+      .offerings-accelerators-header .offerings-section-rule {
+        width: 50px;
+        height: 4px;
+        flex-basis: 50px;
+        margin-top: 9px;
+      }
+
+      .offerings-accelerators-header .offerings-section-title-row p {
+        width: 100%;
+        font-size: 12px;
+      }
+
+      .ai-accelerators-grid {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 12px;
+      }
+
+      .ai-accelerator-card {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: auto auto auto;
+        min-height: 0;
+        padding: 15px;
+        border-radius: 16px;
+      }
+
+      .ai-accelerator-main {
+        grid-template-columns: 96px minmax(0, 1fr);
+        min-height: 0;
+        gap: 14px;
+        padding: 0 0 14px;
+      }
+
+      .ai-accelerator-icon {
+        width: 86px;
+        height: 86px;
+        outline-width: 6px;
+      }
+
+      .ai-accelerator-copy {
+        min-height: 0;
+      }
+
+      .ai-accelerator-copy h3 {
+        font-size: 18px;
+      }
+
+      .ai-accelerator-coe {
+        font-size: 11px;
+      }
+
+      .ai-accelerator-copy > p:last-child {
+        font-size: 12px;
+      }
+
+      .ai-accelerator-artifacts {
+        grid-column: auto;
+        padding: 13px 0 0;
+        border-top: 1px solid #DCE8F4;
+        border-left: 0;
+      }
+
+      .ai-accelerator-artifacts .offering-artifact {
+        min-height: 42px;
+      }
+
+      .ai-accelerator-card > .offering-explore-button {
+        grid-column: auto;
+        width: 100%;
+        min-height: 46px;
+        margin-top: 13px;
+        font-size: 13px;
+      }
+
+      .offerings-quote-section {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 12px;
+        margin: 18px 0 22px;
+      }
+
+      .offerings-quote-card {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 12px;
+        min-height: 0;
+        padding: 16px;
+        border-radius: 16px;
+      }
+
+      .offerings-quote-icon {
+        width: 72px;
+        height: 72px;
+        outline-width: 6px;
+      }
+
+      .offerings-quote-icon svg {
+        width: 36px;
+        height: 36px;
+      }
+
+      .offerings-quote-copy {
+        padding-right: 0;
+        border-right: 0;
+      }
+
+      .offerings-quote-copy h2 {
+        font-size: 19px;
+      }
+
+      .offerings-quote-copy p {
+        font-size: 12px;
+      }
+
+      .offerings-quote-button {
+        width: 100%;
+        min-height: 46px;
+        font-size: 13px;
+      }
+    }
+
+    /* ---------------------------------------------------------
+       Reduced motion
+       --------------------------------------------------------- */
+
+    @media (prefers-reduced-motion: reduce) {
+      .ai-accelerator-card,
+      .ai-accelerator-icon,
+      .ai-accelerator-card > .offering-explore-button,
+      .offerings-quote-button {
+        transition: none !important;
+      }
+
+      .ai-accelerator-card:hover,
+      .ai-accelerator-card:hover .ai-accelerator-icon,
+      .ai-accelerator-card > .offering-explore-button:hover,
+      .offerings-quote-button:hover {
+        transform: none !important;
+      }
+    }
+
+
+
+    /* =========================================================
+       H2 OFFERINGS — AI ACCELERATORS LAYOUT HARDENING V10
+       Fixes regression where older wrapping/grid rules collapse
+       the copy column into a narrow vertical strip.
+       ========================================================= */
+
+    @media (min-width: 1200px) {
+      .offerings-page .ai-accelerators-grid {
+        display: grid !important;
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        align-items: stretch !important;
+        gap: 16px !important;
+      }
+
+      .offerings-page .ai-accelerator-card {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) 220px !important;
+        grid-template-rows: minmax(0, 1fr) 54px !important;
+        column-gap: 18px !important;
+        row-gap: 12px !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        height: 310px !important;
+        min-height: 310px !important;
+        max-height: 310px !important;
+        padding: 18px !important;
+        align-items: stretch !important;
+      }
+
+      .offerings-page .ai-accelerator-card .ai-accelerator-main {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        grid-column: 1 !important;
+        grid-row: 1 !important;
+        width: auto !important;
+        min-width: 0 !important;
+        max-width: none !important;
+        height: auto !important;
+        min-height: 0 !important;
+        gap: 18px !important;
+        padding: 0 18px 0 0 !important;
+        margin: 0 !important;
+        border: 0 !important;
+      }
+
+      .offerings-page .ai-accelerator-card .ai-accelerator-icon {
+        position: relative !important;
+        flex: 0 0 116px !important;
+        width: 116px !important;
+        min-width: 116px !important;
+        max-width: 116px !important;
+        height: 116px !important;
+        min-height: 116px !important;
+        max-height: 116px !important;
+        margin: 0 !important;
+        align-self: center !important;
+      }
+
+      .offerings-page .ai-accelerator-card .ai-accelerator-copy {
+        display: block !important;
+        flex: 1 1 auto !important;
+        width: auto !important;
+        min-width: 0 !important;
+        max-width: none !important;
+        min-height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        writing-mode: horizontal-tb !important;
+        text-orientation: mixed !important;
+      }
+
+      .offerings-page .ai-accelerator-card .ai-accelerator-copy h3,
+      .offerings-page .ai-accelerator-card .ai-accelerator-copy p {
+        width: auto !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        writing-mode: horizontal-tb !important;
+        text-orientation: mixed !important;
+        white-space: normal !important;
+        word-break: normal !important;
+        overflow-wrap: normal !important;
+        hyphens: none !important;
+      }
+
+      .offerings-page .ai-accelerator-card .ai-accelerator-copy h3 {
+        margin: 0 !important;
+        font-size: 21px !important;
+        line-height: 1.06 !important;
+      }
+
+      .offerings-page .ai-accelerator-card .ai-accelerator-coe {
+        margin: 5px 0 7px !important;
+        font-size: 12px !important;
+        line-height: 1.25 !important;
+      }
+
+      .offerings-page .ai-accelerator-card .ai-accelerator-copy > p:last-child {
+        max-width: 290px !important;
+        margin: 0 !important;
+        font-size: 13px !important;
+        line-height: 1.38 !important;
+      }
+
+      .offerings-page .ai-accelerator-card .ai-accelerator-artifacts {
+        display: block !important;
+        grid-column: 2 !important;
+        grid-row: 1 !important;
+        width: auto !important;
+        min-width: 0 !important;
+        max-width: none !important;
+        height: auto !important;
+        margin: 0 !important;
+        padding: 0 0 0 18px !important;
+        border-top: 0 !important;
+        border-left: 1px solid #DCE8F4 !important;
+        writing-mode: horizontal-tb !important;
+      }
+
+      .offerings-page .ai-accelerator-card
+        .ai-accelerator-artifacts .offering-artifacts-title {
+        width: auto !important;
+        margin: 0 0 9px !important;
+        white-space: nowrap !important;
+        word-break: normal !important;
+        overflow-wrap: normal !important;
+      }
+
+      .offerings-page .ai-accelerator-card
+        .ai-accelerator-artifacts .offering-artifact-list {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 7px !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+
+      .offerings-page .ai-accelerator-card
+        .ai-accelerator-artifacts .offering-artifact {
+        display: flex !important;
+        align-items: center !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        min-height: 46px !important;
+        padding: 7px 11px !important;
+        white-space: nowrap !important;
+        word-break: normal !important;
+        overflow-wrap: normal !important;
+      }
+
+      .offerings-page .ai-accelerator-card > .offering-explore-button {
+        grid-column: 1 !important;
+        grid-row: 2 !important;
+        align-self: end !important;
+        justify-self: start !important;
+        width: min(300px, 100%) !important;
+        min-width: 0 !important;
+        height: 54px !important;
+        min-height: 54px !important;
+        max-height: 54px !important;
+        margin: 0 !important;
+      }
+    }
+
+    @media (min-width: 768px) and (max-width: 1199px) {
+      .offerings-page .ai-accelerator-card {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) 230px !important;
+        grid-template-rows: minmax(0, 1fr) 52px !important;
+        gap: 14px 18px !important;
+        min-height: 292px !important;
+        height: auto !important;
+        max-height: none !important;
+      }
+
+      .offerings-page .ai-accelerator-card .ai-accelerator-main {
+        display: flex !important;
+        align-items: center !important;
+        min-width: 0 !important;
+        gap: 16px !important;
+        padding-right: 16px !important;
+        border: 0 !important;
+      }
+
+      .offerings-page .ai-accelerator-card .ai-accelerator-copy {
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+        writing-mode: horizontal-tb !important;
+      }
+
+      .offerings-page .ai-accelerator-card .ai-accelerator-copy h3,
+      .offerings-page .ai-accelerator-card .ai-accelerator-copy p {
+        white-space: normal !important;
+        word-break: normal !important;
+        overflow-wrap: normal !important;
+      }
+
+      .offerings-page .ai-accelerator-card .ai-accelerator-artifacts {
+        grid-column: 2 !important;
+        grid-row: 1 !important;
+        padding-left: 16px !important;
+        border-left: 1px solid #DCE8F4 !important;
+        border-top: 0 !important;
+      }
+
+      .offerings-page .ai-accelerator-card > .offering-explore-button {
+        grid-column: 1 !important;
+        grid-row: 2 !important;
+        margin: 0 !important;
+        min-height: 52px !important;
+      }
+    }
+
+    @media (max-width: 767px) {
+      .offerings-page .ai-accelerator-card .ai-accelerator-copy,
+      .offerings-page .ai-accelerator-card .ai-accelerator-copy h3,
+      .offerings-page .ai-accelerator-card .ai-accelerator-copy p {
+        writing-mode: horizontal-tb !important;
+        text-orientation: mixed !important;
+        word-break: normal !important;
+        overflow-wrap: normal !important;
+        hyphens: none !important;
+      }
+    }
+
+
+
+    /* =========================================================
+       H2 OFFERINGS — AI ACCELERATORS FINAL PROPORTION FIX V11
+       Matches the approved visual reference at real app widths.
+       Key correction: the artifact column is reduced so the
+       title/description column always has enough horizontal room.
+       ========================================================= */
+
+    @media (min-width: 1200px) {
+
+      /* ---------- Three accelerator cards ---------- */
+
+      .offerings-page .ai-accelerators-grid {
+        display: grid !important;
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        gap: 16px !important;
+        align-items: stretch !important;
+      }
+
+      .offerings-page .ai-accelerators-grid > .ai-accelerator-card {
+        display: grid !important;
+
+        /*
+         * Realistic proportions for ~500–650px card widths:
+         * left = artwork + readable copy
+         * right = compact artifact rail
+         */
+        grid-template-columns: minmax(0, 1fr) 190px !important;
+        grid-template-rows: minmax(0, 1fr) 54px !important;
+        column-gap: 14px !important;
+        row-gap: 12px !important;
+
+        width: 100% !important;
+        min-width: 0 !important;
+        height: 306px !important;
+        min-height: 306px !important;
+        max-height: 306px !important;
+        box-sizing: border-box !important;
+        padding: 16px !important;
+
+        align-items: stretch !important;
+        overflow: hidden !important;
+      }
+
+      /* ---------- Left content block ---------- */
+
+      .offerings-page .ai-accelerators-grid > .ai-accelerator-card
+        > .ai-accelerator-main {
+        display: grid !important;
+        grid-template-columns: 100px minmax(0, 1fr) !important;
+        align-items: center !important;
+        gap: 14px !important;
+
+        grid-column: 1 !important;
+        grid-row: 1 !important;
+
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: none !important;
+        height: auto !important;
+        min-height: 0 !important;
+
+        margin: 0 !important;
+        padding: 0 !important;
+        border: 0 !important;
+      }
+
+      .offerings-page .ai-accelerators-grid > .ai-accelerator-card
+        .ai-accelerator-icon {
+        position: relative !important;
+        align-self: center !important;
+        justify-self: center !important;
+
+        width: 96px !important;
+        min-width: 96px !important;
+        max-width: 96px !important;
+        height: 96px !important;
+        min-height: 96px !important;
+        max-height: 96px !important;
+
+        margin: 0 !important;
+        flex: none !important;
+        overflow: visible !important;
+      }
+
+      .offerings-page .ai-accelerators-grid > .ai-accelerator-card
+        .ai-accelerator-copy {
+        display: block !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: none !important;
+        min-height: 0 !important;
+
+        margin: 0 !important;
+        padding: 0 !important;
+
+        writing-mode: horizontal-tb !important;
+        text-orientation: mixed !important;
+      }
+
+      .offerings-page .ai-accelerators-grid > .ai-accelerator-card
+        .ai-accelerator-copy h3 {
+        display: block !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+
+        margin: 0 !important;
+        color: #071F63 !important;
+        font-size: 18px !important;
+        font-weight: 900 !important;
+        line-height: 1.06 !important;
+        letter-spacing: -.02em !important;
+
+        writing-mode: horizontal-tb !important;
+        text-orientation: mixed !important;
+        white-space: normal !important;
+        word-break: keep-all !important;
+        overflow-wrap: normal !important;
+        hyphens: none !important;
+      }
+
+      .offerings-page .ai-accelerators-grid > .ai-accelerator-card
+        .ai-accelerator-coe {
+        display: block !important;
+        width: 100% !important;
+
+        margin: 5px 0 7px !important;
+        font-size: 11px !important;
+        font-weight: 800 !important;
+        line-height: 1.25 !important;
+
+        writing-mode: horizontal-tb !important;
+        white-space: normal !important;
+        word-break: normal !important;
+        overflow-wrap: normal !important;
+      }
+
+      .offerings-page .ai-accelerators-grid > .ai-accelerator-card
+        .ai-accelerator-copy > p:last-child {
+        display: block !important;
+        width: 100% !important;
+        max-width: 220px !important;
+
+        margin: 0 !important;
+        color: #45658E !important;
+        font-size: 11.5px !important;
+        font-weight: 540 !important;
+        line-height: 1.36 !important;
+
+        writing-mode: horizontal-tb !important;
+        white-space: normal !important;
+        word-break: normal !important;
+        overflow-wrap: normal !important;
+        hyphens: none !important;
+      }
+
+      /* ---------- Right artifact rail ---------- */
+
+      .offerings-page .ai-accelerators-grid > .ai-accelerator-card
+        > .ai-accelerator-artifacts {
+        display: block !important;
+
+        grid-column: 2 !important;
+        grid-row: 1 !important;
+
+        width: 190px !important;
+        min-width: 190px !important;
+        max-width: 190px !important;
+        height: auto !important;
+        min-height: 0 !important;
+
+        margin: 0 !important;
+        padding: 2px 0 0 14px !important;
+
+        border-top: 0 !important;
+        border-left: 1px solid #DCE8F4 !important;
+
+        writing-mode: horizontal-tb !important;
+      }
+
+      .offerings-page .ai-accelerators-grid > .ai-accelerator-card
+        .ai-accelerator-artifacts .offering-artifacts-title {
+        display: block !important;
+        width: auto !important;
+        max-width: none !important;
+
+        margin: 0 0 8px !important;
+        color: #36547D !important;
+        font-size: 9.5px !important;
+        font-weight: 900 !important;
+        line-height: 1 !important;
+        letter-spacing: .035em !important;
+
+        white-space: nowrap !important;
+        word-break: normal !important;
+        overflow-wrap: normal !important;
+      }
+
+      .offerings-page .ai-accelerators-grid > .ai-accelerator-card
+        .ai-accelerator-artifacts .offering-artifact-list {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 6px !important;
+
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+
+      .offerings-page .ai-accelerators-grid > .ai-accelerator-card
+        .ai-accelerator-artifacts .offering-artifact {
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+
+        width: 100% !important;
+        min-width: 0 !important;
+        min-height: 42px !important;
+        box-sizing: border-box !important;
+
+        padding: 6px 9px !important;
+        border-radius: 11px !important;
+
+        font-size: 10.5px !important;
+        line-height: 1.15 !important;
+
+        white-space: nowrap !important;
+        word-break: normal !important;
+        overflow-wrap: normal !important;
+      }
+
+      .offerings-page .ai-accelerators-grid > .ai-accelerator-card
+        .ai-accelerator-artifacts .artifact-icon {
+        width: 28px !important;
+        min-width: 28px !important;
+        height: 28px !important;
+        flex: 0 0 28px !important;
+      }
+
+      .offerings-page .ai-accelerators-grid > .ai-accelerator-card
+        .ai-accelerator-artifacts .artifact-icon svg {
+        width: 15px !important;
+        height: 15px !important;
+      }
+
+      /* ---------- Primary CTA ---------- */
+
+      .offerings-page .ai-accelerators-grid > .ai-accelerator-card
+        > .offering-explore-button {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+
+        grid-column: 1 !important;
+        grid-row: 2 !important;
+        align-self: end !important;
+        justify-self: start !important;
+
+        width: min(290px, 100%) !important;
+        min-width: 0 !important;
+        max-width: 290px !important;
+        height: 50px !important;
+        min-height: 50px !important;
+        max-height: 50px !important;
+
+        margin: 0 !important;
+        padding: 9px 20px !important;
+
+        border: 0 !important;
+        border-radius: 999px !important;
+
+        color: #FFFFFF !important;
+        font-size: 12.5px !important;
+        font-weight: 830 !important;
+        line-height: 1 !important;
+
+        background:
+          linear-gradient(
+            135deg,
+            var(--accelerator-accent),
+            var(--accelerator-deep)
+          ) !important;
+
+        box-shadow:
+          0 7px 17px
+          color-mix(
+            in srgb,
+            var(--accelerator-accent) 20%,
+            transparent
+          ),
+          inset 0 1px 0 rgb(255 255 255 / 24%) !important;
+      }
+
+      /* ---------- Two lower quote cards ---------- */
+
+      .offerings-page .offerings-quote-section {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 24px !important;
+
+        margin: 22px 20px 24px !important;
+        padding: 0 !important;
+
+        background: transparent !important;
+      }
+
+      .offerings-page .offerings-quote-section
+        > .offerings-quote-card {
+        display: grid !important;
+        grid-template-columns: 100px minmax(0, 1fr) 235px !important;
+        align-items: center !important;
+        gap: 20px !important;
+
+        width: 100% !important;
+        min-width: 0 !important;
+        height: 150px !important;
+        min-height: 150px !important;
+        max-height: 150px !important;
+
+        box-sizing: border-box !important;
+        padding: 18px 22px !important;
+
+        overflow: hidden !important;
+      }
+
+      .offerings-page .offerings-quote-section
+        .offerings-quote-icon {
+        width: 92px !important;
+        min-width: 92px !important;
+        max-width: 92px !important;
+        height: 92px !important;
+        min-height: 92px !important;
+        max-height: 92px !important;
+
+        margin: 0 !important;
+        justify-self: center !important;
+      }
+
+      .offerings-page .offerings-quote-section
+        .offerings-quote-icon svg {
+        width: 44px !important;
+        height: 44px !important;
+      }
+
+      .offerings-page .offerings-quote-section
+        .offerings-quote-copy {
+        display: block !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: none !important;
+
+        margin: 0 !important;
+        padding: 0 20px 0 0 !important;
+
+        border-right: 1px solid #D9E7F4 !important;
+
+        writing-mode: horizontal-tb !important;
+        text-orientation: mixed !important;
+      }
+
+      .offerings-page .offerings-quote-section
+        .offerings-quote-copy h2 {
+        display: block !important;
+        width: 100% !important;
+        max-width: none !important;
+
+        margin: 0 !important;
+        color: #0B2DA3 !important;
+        font-size: 19px !important;
+        font-weight: 900 !important;
+        line-height: 1.05 !important;
+
+        writing-mode: horizontal-tb !important;
+        white-space: normal !important;
+        word-break: keep-all !important;
+        overflow-wrap: normal !important;
+        hyphens: none !important;
+      }
+
+      .offerings-page .offerings-quote-section
+        .offerings-quote-copy p {
+        display: block !important;
+        width: 100% !important;
+        max-width: 340px !important;
+
+        margin: 5px 0 0 !important;
+        color: #4169AE !important;
+        font-size: 11.5px !important;
+        font-weight: 650 !important;
+        line-height: 1.3 !important;
+
+        writing-mode: horizontal-tb !important;
+        white-space: normal !important;
+        word-break: normal !important;
+        overflow-wrap: normal !important;
+        hyphens: none !important;
+      }
+
+      .offerings-page .offerings-quote-section
+        .offerings-quote-button {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+
+        width: 235px !important;
+        min-width: 235px !important;
+        max-width: 235px !important;
+        height: 50px !important;
+        min-height: 50px !important;
+        max-height: 50px !important;
+
+        margin: 0 !important;
+        padding: 9px 18px !important;
+
+        border-radius: 999px !important;
+
+        font-size: 12.5px !important;
+        line-height: 1 !important;
+      }
+
+      .offerings-page .offerings-quote-divider {
+        display: none !important;
+      }
+    }
+
+    /* =========================================================
+       Medium desktop: preserve the approved horizontal layout,
+       but slightly reduce fixed rails before cards stack.
+       ========================================================= */
+    @media (min-width: 1200px) and (max-width: 1450px) {
+      .offerings-page .ai-accelerators-grid > .ai-accelerator-card {
+        grid-template-columns: minmax(0, 1fr) 172px !important;
+        padding: 14px !important;
+        column-gap: 12px !important;
+      }
+
+      .offerings-page .ai-accelerators-grid > .ai-accelerator-card
+        > .ai-accelerator-main {
+        grid-template-columns: 88px minmax(0, 1fr) !important;
+        gap: 11px !important;
+      }
+
+      .offerings-page .ai-accelerators-grid > .ai-accelerator-card
+        .ai-accelerator-icon {
+        width: 84px !important;
+        min-width: 84px !important;
+        max-width: 84px !important;
+        height: 84px !important;
+        min-height: 84px !important;
+        max-height: 84px !important;
+      }
+
+      .offerings-page .ai-accelerators-grid > .ai-accelerator-card
+        > .ai-accelerator-artifacts {
+        width: 172px !important;
+        min-width: 172px !important;
+        max-width: 172px !important;
+        padding-left: 11px !important;
+      }
+
+      .offerings-page .ai-accelerators-grid > .ai-accelerator-card
+        .ai-accelerator-copy h3 {
+        font-size: 16px !important;
+      }
+
+      .offerings-page .ai-accelerators-grid > .ai-accelerator-card
+        .ai-accelerator-copy > p:last-child {
+        font-size: 10.5px !important;
+      }
+
+      .offerings-page .offerings-quote-section
+        > .offerings-quote-card {
+        grid-template-columns: 88px minmax(0, 1fr) 210px !important;
+        gap: 16px !important;
+      }
+
+      .offerings-page .offerings-quote-section
+        .offerings-quote-icon {
+        width: 82px !important;
+        min-width: 82px !important;
+        max-width: 82px !important;
+        height: 82px !important;
+        min-height: 82px !important;
+        max-height: 82px !important;
+      }
+
+      .offerings-page .offerings-quote-section
+        .offerings-quote-button {
+        width: 210px !important;
+        min-width: 210px !important;
+        max-width: 210px !important;
+      }
+    }
+
+    /* =========================================================
+       Tablet: one accelerator card per row, still horizontal.
+       ========================================================= */
+    @media (min-width: 768px) and (max-width: 1199px) {
+
+      .offerings-page .ai-accelerators-grid {
+        grid-template-columns: minmax(0, 1fr) !important;
+      }
+
+      .offerings-page .ai-accelerators-grid > .ai-accelerator-card {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) 220px !important;
+        grid-template-rows: minmax(0, 1fr) 52px !important;
+        gap: 14px 18px !important;
+
+        height: 292px !important;
+        min-height: 292px !important;
+        max-height: 292px !important;
+      }
+
+      .offerings-page .ai-accelerators-grid > .ai-accelerator-card
+        > .ai-accelerator-main {
+        display: grid !important;
+        grid-template-columns: 106px minmax(0, 1fr) !important;
+        gap: 16px !important;
+        min-width: 0 !important;
+      }
+
+      .offerings-page .ai-accelerators-grid > .ai-accelerator-card
+        .ai-accelerator-copy h3,
+      .offerings-page .ai-accelerators-grid > .ai-accelerator-card
+        .ai-accelerator-copy p {
+        writing-mode: horizontal-tb !important;
+        word-break: normal !important;
+        overflow-wrap: normal !important;
+      }
+
+      .offerings-page .ai-accelerators-grid > .ai-accelerator-card
+        > .ai-accelerator-artifacts {
+        grid-column: 2 !important;
+        grid-row: 1 !important;
+        width: auto !important;
+        min-width: 0 !important;
+        max-width: none !important;
+        padding-left: 16px !important;
+        border-left: 1px solid #DCE8F4 !important;
+        border-top: 0 !important;
+      }
+
+      .offerings-page .ai-accelerators-grid > .ai-accelerator-card
+        > .offering-explore-button {
+        grid-column: 1 !important;
+        grid-row: 2 !important;
+        width: min(300px, 100%) !important;
+        height: 52px !important;
+        min-height: 52px !important;
+        max-height: 52px !important;
+        margin: 0 !important;
+      }
+
+      .offerings-page .offerings-quote-section {
+        grid-template-columns: minmax(0, 1fr) !important;
+        gap: 14px !important;
+      }
+
+      .offerings-page .offerings-quote-section
+        > .offerings-quote-card {
+        grid-template-columns: 96px minmax(0, 1fr) 230px !important;
+        min-height: 148px !important;
+        height: 148px !important;
+        max-height: 148px !important;
+      }
+    }
+
+    /* =========================================================
+       Mobile: intentionally stacked.
+       ========================================================= */
+    @media (max-width: 767px) {
+      .offerings-page .ai-accelerators-grid > .ai-accelerator-card,
+      .offerings-page .offerings-quote-section > .offerings-quote-card {
+        height: auto !important;
+        max-height: none !important;
+      }
+
+      .offerings-page .ai-accelerator-copy,
+      .offerings-page .ai-accelerator-copy h3,
+      .offerings-page .ai-accelerator-copy p,
+      .offerings-page .offerings-quote-copy,
+      .offerings-page .offerings-quote-copy h2,
+      .offerings-page .offerings-quote-copy p {
+        writing-mode: horizontal-tb !important;
+        text-orientation: mixed !important;
+        word-break: normal !important;
+        overflow-wrap: normal !important;
+        hyphens: none !important;
+      }
+    }
+
+
+
+    /* =========================================================
+       H2 OFFERINGS — AI ACCELERATORS TARGET MATCH V12
+       Final proportion tuning against approved reference.
+       ========================================================= */
+
+    /* ---------------------------------------------------------
+       Section atmosphere + header
+       --------------------------------------------------------- */
+
+    .offerings-accelerators-section {
+      position: relative !important;
+      isolation: isolate !important;
+    }
+
+    .offerings-accelerators-section::before {
+      content: "" !important;
+      position: absolute !important;
+      z-index: -2 !important;
+      left: -20px !important;
+      right: -20px !important;
+      top: -38px !important;
+      height: 230px !important;
+      pointer-events: none !important;
+      background:
+        radial-gradient(
+          circle at 94% 18%,
+          rgb(40 137 255 / 8%) 0 2px,
+          transparent 2.5px
+        ) 0 0 / 18px 18px,
+        linear-gradient(
+          165deg,
+          rgb(227 243 255 / 52%) 0%,
+          transparent 42%
+        ) !important;
+      mask-image:
+        linear-gradient(
+          90deg,
+          transparent 0%,
+          #000 24%,
+          #000 100%
+        ) !important;
+      opacity: .55 !important;
+    }
+
+    .offerings-accelerators-section::after {
+      content: "" !important;
+      position: absolute !important;
+      z-index: -1 !important;
+      left: -3% !important;
+      right: -3% !important;
+      top: 20px !important;
+      height: 120px !important;
+      pointer-events: none !important;
+      border-radius: 50% !important;
+      border-top: 2px solid rgb(255 255 255 / 72%) !important;
+      transform: rotate(-2deg) !important;
+      box-shadow:
+        0 -22px 42px rgb(88 174 255 / 6%) !important;
+    }
+
+    .offerings-page .offerings-accelerators-header {
+      margin-bottom: 14px !important;
+    }
+
+    .offerings-page .offerings-accelerators-header
+      .offerings-section-title-row h2 {
+      font-size: 26px !important;
+    }
+
+    .offerings-page .offerings-accelerators-header
+      .offerings-section-title-row p {
+      color: #4169AE !important;
+      font-size: 13.5px !important;
+      font-style: italic !important;
+      font-weight: 650 !important;
+    }
+
+    /* ---------------------------------------------------------
+       Desktop target proportions
+       --------------------------------------------------------- */
+
+    @media (min-width: 1200px) {
+
+      .offerings-page .ai-accelerators-grid {
+        gap: 14px !important;
+      }
+
+      .offerings-page .ai-accelerators-grid > .ai-accelerator-card {
+        grid-template-columns: minmax(0, 1fr) 156px !important;
+        grid-template-rows: minmax(0, 1fr) 46px !important;
+        column-gap: 12px !important;
+        row-gap: 8px !important;
+
+        height: 246px !important;
+        min-height: 246px !important;
+        max-height: 246px !important;
+
+        padding: 14px !important;
+        border-radius: 16px !important;
+      }
+
+      .offerings-page .ai-accelerators-grid > .ai-accelerator-card
+        > .ai-accelerator-main {
+        grid-template-columns: 80px minmax(0, 1fr) !important;
+        gap: 10px !important;
+        padding: 0 !important;
+      }
+
+      .offerings-page .ai-accelerators-grid > .ai-accelerator-card
+        .ai-accelerator-icon {
+        width: 78px !important;
+        min-width: 78px !important;
+        max-width: 78px !important;
+        height: 78px !important;
+        min-height: 78px !important;
+        max-height: 78px !important;
+        outline-width: 6px !important;
+      }
+
+      .offerings-page .ai-accelerators-grid > .ai-accelerator-card
+        .ai-accelerator-copy h3 {
+        font-size: 16.5px !important;
+        line-height: 1.04 !important;
+        white-space: nowrap !important;
+      }
+
+      .offerings-page .ai-accelerators-grid > .ai-accelerator-card
+        .ai-accelerator-coe {
+        margin: 4px 0 5px !important;
+        font-size: 10.5px !important;
+        line-height: 1.18 !important;
+      }
+
+      .offerings-page .ai-accelerators-grid > .ai-accelerator-card
+        .ai-accelerator-copy > p:last-child {
+        width: 100% !important;
+        max-width: 250px !important;
+        font-size: 10.5px !important;
+        line-height: 1.28 !important;
+      }
+
+      .offerings-page .ai-accelerators-grid > .ai-accelerator-card
+        > .ai-accelerator-artifacts {
+        width: 156px !important;
+        min-width: 156px !important;
+        max-width: 156px !important;
+        padding: 0 0 0 10px !important;
+      }
+
+      .offerings-page .ai-accelerators-grid > .ai-accelerator-card
+        .ai-accelerator-artifacts .offering-artifacts-title {
+        margin: 0 0 6px !important;
+        font-size: 8.5px !important;
+      }
+
+      .offerings-page .ai-accelerators-grid > .ai-accelerator-card
+        .ai-accelerator-artifacts .offering-artifact-list {
+        gap: 5px !important;
+      }
+
+      .offerings-page .ai-accelerators-grid > .ai-accelerator-card
+        .ai-accelerator-artifacts .offering-artifact {
+        min-height: 36px !important;
+        padding: 5px 7px !important;
+        gap: 7px !important;
+        border-radius: 10px !important;
+        font-size: 9.5px !important;
+      }
+
+      .offerings-page .ai-accelerators-grid > .ai-accelerator-card
+        .ai-accelerator-artifacts .artifact-icon {
+        width: 24px !important;
+        min-width: 24px !important;
+        height: 24px !important;
+        flex-basis: 24px !important;
+        border-radius: 7px !important;
+      }
+
+      .offerings-page .ai-accelerators-grid > .ai-accelerator-card
+        .ai-accelerator-artifacts .artifact-icon svg {
+        width: 13px !important;
+        height: 13px !important;
+      }
+
+      .offerings-page .ai-accelerators-grid > .ai-accelerator-card
+        > .offering-explore-button {
+        width: min(250px, 100%) !important;
+        max-width: 250px !important;
+        height: 46px !important;
+        min-height: 46px !important;
+        max-height: 46px !important;
+        padding: 8px 18px !important;
+        font-size: 11.5px !important;
+      }
+
+      .offerings-page .ai-accelerator-card::after {
+        bottom: -106px !important;
+        height: 138px !important;
+      }
+
+      /* -------------------------------------------------------
+         Lower quote row — target height and horizontal balance
+         ------------------------------------------------------- */
+
+      .offerings-page .offerings-quote-section {
+        gap: 18px !important;
+        margin-top: 18px !important;
+      }
+
+      .offerings-page .offerings-quote-section
+        > .offerings-quote-card {
+        grid-template-columns: 78px minmax(0, 1fr) 190px !important;
+        gap: 14px !important;
+
+        height: 118px !important;
+        min-height: 118px !important;
+        max-height: 118px !important;
+
+        padding: 14px 18px !important;
+        border-radius: 16px !important;
+      }
+
+      .offerings-page .offerings-quote-section
+        .offerings-quote-icon {
+        width: 72px !important;
+        min-width: 72px !important;
+        max-width: 72px !important;
+        height: 72px !important;
+        min-height: 72px !important;
+        max-height: 72px !important;
+        outline-width: 6px !important;
+      }
+
+      .offerings-page .offerings-quote-section
+        .offerings-quote-icon svg {
+        width: 34px !important;
+        height: 34px !important;
+      }
+
+      .offerings-page .offerings-quote-section
+        .offerings-quote-copy {
+        padding-right: 16px !important;
+      }
+
+      .offerings-page .offerings-quote-section
+        .offerings-quote-copy h2 {
+        font-size: 17px !important;
+        line-height: 1.03 !important;
+        white-space: nowrap !important;
+      }
+
+      .offerings-page .offerings-quote-section
+        .offerings-quote-copy p {
+        max-width: none !important;
+        margin-top: 4px !important;
+        font-size: 10.5px !important;
+        line-height: 1.22 !important;
+        white-space: nowrap !important;
+      }
+
+      .offerings-page .offerings-quote-section
+        .offerings-quote-button {
+        width: 190px !important;
+        min-width: 190px !important;
+        max-width: 190px !important;
+        height: 44px !important;
+        min-height: 44px !important;
+        max-height: 44px !important;
+        padding: 8px 14px !important;
+        font-size: 11.5px !important;
+      }
+
+      .offerings-page .offerings-quote-card::after {
+        bottom: -102px !important;
+        height: 126px !important;
+      }
+    }
+
+    /* ---------------------------------------------------------
+       Intermediate desktop — avoid title wrapping while keeping
+       all three cards in one row.
+       --------------------------------------------------------- */
+
+    @media (min-width: 1200px) and (max-width: 1450px) {
+
+      .offerings-page .ai-accelerators-grid > .ai-accelerator-card {
+        grid-template-columns: minmax(0, 1fr) 142px !important;
+        padding: 12px !important;
+        column-gap: 9px !important;
+      }
+
+      .offerings-page .ai-accelerators-grid > .ai-accelerator-card
+        > .ai-accelerator-main {
+        grid-template-columns: 70px minmax(0, 1fr) !important;
+        gap: 8px !important;
+      }
+
+      .offerings-page .ai-accelerators-grid > .ai-accelerator-card
+        .ai-accelerator-icon {
+        width: 68px !important;
+        min-width: 68px !important;
+        max-width: 68px !important;
+        height: 68px !important;
+        min-height: 68px !important;
+        max-height: 68px !important;
+      }
+
+      .offerings-page .ai-accelerators-grid > .ai-accelerator-card
+        > .ai-accelerator-artifacts {
+        width: 142px !important;
+        min-width: 142px !important;
+        max-width: 142px !important;
+        padding-left: 8px !important;
+      }
+
+      .offerings-page .ai-accelerators-grid > .ai-accelerator-card
+        .ai-accelerator-copy h3 {
+        font-size: 14.5px !important;
+      }
+
+      .offerings-page .ai-accelerators-grid > .ai-accelerator-card
+        .ai-accelerator-copy > p:last-child {
+        font-size: 9.5px !important;
+      }
+
+      .offerings-page .offerings-quote-section
+        > .offerings-quote-card {
+        grid-template-columns: 68px minmax(0, 1fr) 165px !important;
+        gap: 11px !important;
+      }
+
+      .offerings-page .offerings-quote-section
+        .offerings-quote-icon {
+        width: 64px !important;
+        min-width: 64px !important;
+        max-width: 64px !important;
+        height: 64px !important;
+        min-height: 64px !important;
+        max-height: 64px !important;
+      }
+
+      .offerings-page .offerings-quote-section
+        .offerings-quote-button {
+        width: 165px !important;
+        min-width: 165px !important;
+        max-width: 165px !important;
+        font-size: 10.5px !important;
+      }
+    }
+
+    /* ---------------------------------------------------------
+       Tablet remains readable and horizontal.
+       --------------------------------------------------------- */
+
+    @media (min-width: 768px) and (max-width: 1199px) {
+
+      .offerings-page .ai-accelerators-grid > .ai-accelerator-card {
+        height: 250px !important;
+        min-height: 250px !important;
+        max-height: 250px !important;
+        grid-template-columns: minmax(0, 1fr) 190px !important;
+      }
+
+      .offerings-page .ai-accelerators-grid > .ai-accelerator-card
+        > .ai-accelerator-main {
+        grid-template-columns: 86px minmax(0, 1fr) !important;
+      }
+
+      .offerings-page .ai-accelerators-grid > .ai-accelerator-card
+        .ai-accelerator-icon {
+        width: 82px !important;
+        height: 82px !important;
+      }
+
+      .offerings-page .offerings-quote-section
+        > .offerings-quote-card {
+        height: 122px !important;
+        min-height: 122px !important;
+        max-height: 122px !important;
+        grid-template-columns: 76px minmax(0, 1fr) 190px !important;
+      }
+
+      .offerings-page .offerings-quote-section
+        .offerings-quote-copy h2 {
+        white-space: nowrap !important;
+      }
+    }
+
+    /* ---------------------------------------------------------
+       Do not force no-wrap behavior on small phones.
+       --------------------------------------------------------- */
+
+    @media (max-width: 767px) {
+      .offerings-page .ai-accelerator-copy h3,
+      .offerings-page .offerings-quote-copy h2,
+      .offerings-page .offerings-quote-copy p {
+        white-space: normal !important;
+      }
+    }
+
 </style>

@@ -1361,4 +1361,46 @@
         max-height: 305px !important;
       }
     }
+
+
+    /* =========================================================
+       ONESCA — SHARED HERO OVERLAP PARITY V12
+       Home is the reference:
+       - all page heroes already share the same height
+       - the first content block overlaps the hero by 82px
+       Apply the same visual relationship to every primary page.
+       ========================================================= */
+
+    @media (min-width: 768px) {
+      .overview-reference-grid,
+      .offerings-core-section,
+      .opportunities-entry-section,
+      .programs-entry-section,
+      .delivery-knowledge-section,
+      .governance-frameworks-section,
+      .tools-toolkit,
+      .support-options {
+        position: relative !important;
+        z-index: 5 !important;
+        margin-top: -82px !important;
+      }
+    }
+
+    /*
+     * Home removes its hero overlap on mobile, so all other pages do
+     * the same. This prevents the first section from competing with the
+     * compact 320px / 305px mobile hero.
+     */
+    @media (max-width: 767px) {
+      .overview-reference-grid,
+      .offerings-core-section,
+      .opportunities-entry-section,
+      .programs-entry-section,
+      .delivery-knowledge-section,
+      .governance-frameworks-section,
+      .tools-toolkit,
+      .support-options {
+        margin-top: 0 !important;
+      }
+    }
 </style>

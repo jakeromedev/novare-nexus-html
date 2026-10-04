@@ -104,36 +104,47 @@
     class="offerings-core-section"
     aria-labelledby="core-offerings-title"
   >
-    <header class="offerings-section-header offerings-core-header">
-      <div class="offerings-section-heading">
-        <div class="offerings-section-title-row">
-          <h2 id="core-offerings-title">CORE OFFERINGS</h2>
-          <span class="offerings-section-rule" aria-hidden="true"></span>
-          <p>End-to-end solutions, reimagined with AI.</p>
-        </div>
+    <header class="offerings-section-header offerings-core-header offerings-core-header-premium">
+      <div class="offerings-core-header-media" aria-hidden="true">
+        <img
+          id="core-offerings-header-bg-image"
+          class="offerings-core-header-bg-image"
+          data-image-key="core-offerings-header-bg"
+          alt=""
+          width="2400"
+          height="800"
+          loading="lazy"
+          decoding="async"
+          fetchpriority="low"
+          hidden
+        >
+        <div
+          id="core-offerings-header-bg-fallback"
+          class="image-placeholder offerings-core-header-bg-fallback"
+          data-image-fallback="core-offerings-header-bg"
+          hidden
+        ></div>
       </div>
 
-      <div class="offerings-coe-filter" role="group" aria-label="Filter Core Offerings by Center of Excellence">
-        <span class="offerings-coe-filter-label">CENTERS OF EXCELLENCE:</span>
+      <div class="offerings-core-header-content">
+        <div class="offerings-core-header-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <path d="M5.5 7.5h5v5h-5z"></path>
+            <path d="M13.5 4.5h5v5h-5z"></path>
+            <path d="M13.5 14.5h5v5h-5z"></path>
+            <path d="M10.5 10h3M16 9.5v5"></path>
+          </svg>
+        </div>
 
-        <button type="button" class="offerings-coe-chip is-experience" data-offerings-filter="experience" aria-controls="core-offerings-grid" aria-pressed="false">
-          EXPERIENCE
-        </button>
-        <button type="button" class="offerings-coe-chip is-data" data-offerings-filter="data" aria-controls="core-offerings-grid" aria-pressed="false">
-          DATA
-        </button>
-        <button type="button" class="offerings-coe-chip is-cloud" data-offerings-filter="cloud" aria-controls="core-offerings-grid" aria-pressed="false">
-          CLOUD
-        </button>
-        <button type="button" class="offerings-coe-chip is-edge" data-offerings-filter="edge" aria-controls="core-offerings-grid" aria-pressed="false">
-          EDGE
-        </button>
-        <button type="button" class="offerings-coe-chip is-infra" data-offerings-filter="infra" aria-controls="core-offerings-grid" aria-pressed="false">
-          INFRA
-        </button>
-        <button type="button" class="offerings-coe-chip is-netsec" data-offerings-filter="netsec" aria-controls="core-offerings-grid" aria-pressed="false">
-          NETSEC
-        </button>
+        <div class="offerings-section-heading offerings-core-heading">
+          <div class="offerings-core-kicker">
+            <span class="offerings-core-accent" aria-hidden="true"></span>
+            <span>AI-POWERED PORTFOLIO</span>
+          </div>
+
+          <h2 id="core-offerings-title">CORE OFFERINGS</h2>
+          <p>End-to-end solutions, reimagined with AI.</p>
+        </div>
       </div>
     </header>
 
@@ -184,20 +195,40 @@
             faster, and more intuitive digital experiences.
           </p>
 
-          <div class="offering-artifacts">
+          <div class="offering-artifacts offering-artifacts-static">
             <p class="offering-artifacts-title">STANDARD ARTIFACTS</p>
-            <button type="button" data-offerings-action="sofa-pitchbook">
-              <span class="artifact-icon" aria-hidden="true">▣</span>
-              <span>Pitchbook</span>
-            </button>
-            <button type="button" data-offerings-action="sofa-discovery-guide">
-              <span class="artifact-icon" aria-hidden="true">▣</span>
-              <span>Discovery Guide</span>
-            </button>
-            <button type="button" data-offerings-action="sofa-standard-proposal">
-              <span class="artifact-icon" aria-hidden="true">▣</span>
-              <span>Standard Proposal</span>
-            </button>
+            <ul class="offering-artifact-list" aria-label="Standard artifacts">
+              <li class="offering-artifact">
+                <span class="artifact-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+  <path d="M6 3.75h9.5L19 7.25v13H6z"></path>
+  <path d="M15.5 3.75v3.5H19"></path>
+  <path d="M9 11h7M9 14h7M9 17h5"></path>
+</svg>
+                </span>
+                <span>Pitchbook</span>
+              </li>
+              <li class="offering-artifact">
+                <span class="artifact-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+  <path d="M4.5 5.5c2.8-.9 5.2-.5 7.5 1.2v12.1c-2.3-1.7-4.7-2.1-7.5-1.2z"></path>
+  <path d="M19.5 5.5c-2.8-.9-5.2-.5-7.5 1.2v12.1c2.3-1.7 4.7-2.1 7.5-1.2z"></path>
+</svg>
+                </span>
+                <span>Discovery Guide</span>
+              </li>
+              <li class="offering-artifact">
+                <span class="artifact-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+  <path d="M6 3.75h9.5L19 7.25v13H6z"></path>
+  <path d="M15.5 3.75v3.5H19"></path>
+  <path d="M9 12.25l1.6 1.6 3.4-3.6"></path>
+  <path d="M9 17h7"></path>
+</svg>
+                </span>
+                <span>Standard Proposal</span>
+              </li>
+            </ul>
           </div>
         </div>
 
@@ -256,20 +287,40 @@
             designed for regulated and highly governed environments.
           </p>
 
-          <div class="offering-artifacts">
+          <div class="offering-artifacts offering-artifacts-static">
             <p class="offering-artifacts-title">STANDARD ARTIFACTS</p>
-            <button type="button" data-offerings-action="rafa-pitchbook">
-              <span class="artifact-icon" aria-hidden="true">▣</span>
-              <span>Pitchbook</span>
-            </button>
-            <button type="button" data-offerings-action="rafa-discovery-guide">
-              <span class="artifact-icon" aria-hidden="true">▣</span>
-              <span>Discovery Guide</span>
-            </button>
-            <button type="button" data-offerings-action="rafa-standard-proposal">
-              <span class="artifact-icon" aria-hidden="true">▣</span>
-              <span>Standard Proposal</span>
-            </button>
+            <ul class="offering-artifact-list" aria-label="Standard artifacts">
+              <li class="offering-artifact">
+                <span class="artifact-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+  <path d="M6 3.75h9.5L19 7.25v13H6z"></path>
+  <path d="M15.5 3.75v3.5H19"></path>
+  <path d="M9 11h7M9 14h7M9 17h5"></path>
+</svg>
+                </span>
+                <span>Pitchbook</span>
+              </li>
+              <li class="offering-artifact">
+                <span class="artifact-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+  <path d="M4.5 5.5c2.8-.9 5.2-.5 7.5 1.2v12.1c-2.3-1.7-4.7-2.1-7.5-1.2z"></path>
+  <path d="M19.5 5.5c-2.8-.9-5.2-.5-7.5 1.2v12.1c2.3-1.7 4.7-2.1 7.5-1.2z"></path>
+</svg>
+                </span>
+                <span>Discovery Guide</span>
+              </li>
+              <li class="offering-artifact">
+                <span class="artifact-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+  <path d="M6 3.75h9.5L19 7.25v13H6z"></path>
+  <path d="M15.5 3.75v3.5H19"></path>
+  <path d="M9 12.25l1.6 1.6 3.4-3.6"></path>
+  <path d="M9 17h7"></path>
+</svg>
+                </span>
+                <span>Standard Proposal</span>
+              </li>
+            </ul>
           </div>
         </div>
 
@@ -328,20 +379,40 @@
             cloud agents for greater agility and observability.
           </p>
 
-          <div class="offering-artifacts">
+          <div class="offering-artifacts offering-artifacts-static">
             <p class="offering-artifacts-title">STANDARD ARTIFACTS</p>
-            <button type="button" data-offerings-action="mcloud-pitchbook">
-              <span class="artifact-icon" aria-hidden="true">▣</span>
-              <span>Pitchbook</span>
-            </button>
-            <button type="button" data-offerings-action="mcloud-discovery-guide">
-              <span class="artifact-icon" aria-hidden="true">▣</span>
-              <span>Discovery Guide</span>
-            </button>
-            <button type="button" data-offerings-action="mcloud-standard-proposal">
-              <span class="artifact-icon" aria-hidden="true">▣</span>
-              <span>Standard Proposal</span>
-            </button>
+            <ul class="offering-artifact-list" aria-label="Standard artifacts">
+              <li class="offering-artifact">
+                <span class="artifact-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+  <path d="M6 3.75h9.5L19 7.25v13H6z"></path>
+  <path d="M15.5 3.75v3.5H19"></path>
+  <path d="M9 11h7M9 14h7M9 17h5"></path>
+</svg>
+                </span>
+                <span>Pitchbook</span>
+              </li>
+              <li class="offering-artifact">
+                <span class="artifact-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+  <path d="M4.5 5.5c2.8-.9 5.2-.5 7.5 1.2v12.1c-2.3-1.7-4.7-2.1-7.5-1.2z"></path>
+  <path d="M19.5 5.5c-2.8-.9-5.2-.5-7.5 1.2v12.1c2.3-1.7 4.7-2.1 7.5-1.2z"></path>
+</svg>
+                </span>
+                <span>Discovery Guide</span>
+              </li>
+              <li class="offering-artifact">
+                <span class="artifact-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+  <path d="M6 3.75h9.5L19 7.25v13H6z"></path>
+  <path d="M15.5 3.75v3.5H19"></path>
+  <path d="M9 12.25l1.6 1.6 3.4-3.6"></path>
+  <path d="M9 17h7"></path>
+</svg>
+                </span>
+                <span>Standard Proposal</span>
+              </li>
+            </ul>
           </div>
         </div>
 
@@ -400,20 +471,40 @@
             security agents built for always-on protection.
           </p>
 
-          <div class="offering-artifacts">
+          <div class="offering-artifacts offering-artifacts-static">
             <p class="offering-artifacts-title">STANDARD ARTIFACTS</p>
-            <button type="button" data-offerings-action="msoc-pitchbook">
-              <span class="artifact-icon" aria-hidden="true">▣</span>
-              <span>Pitchbook</span>
-            </button>
-            <button type="button" data-offerings-action="msoc-discovery-guide">
-              <span class="artifact-icon" aria-hidden="true">▣</span>
-              <span>Discovery Guide</span>
-            </button>
-            <button type="button" data-offerings-action="msoc-standard-proposal">
-              <span class="artifact-icon" aria-hidden="true">▣</span>
-              <span>Standard Proposal</span>
-            </button>
+            <ul class="offering-artifact-list" aria-label="Standard artifacts">
+              <li class="offering-artifact">
+                <span class="artifact-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+  <path d="M6 3.75h9.5L19 7.25v13H6z"></path>
+  <path d="M15.5 3.75v3.5H19"></path>
+  <path d="M9 11h7M9 14h7M9 17h5"></path>
+</svg>
+                </span>
+                <span>Pitchbook</span>
+              </li>
+              <li class="offering-artifact">
+                <span class="artifact-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+  <path d="M4.5 5.5c2.8-.9 5.2-.5 7.5 1.2v12.1c-2.3-1.7-4.7-2.1-7.5-1.2z"></path>
+  <path d="M19.5 5.5c-2.8-.9-5.2-.5-7.5 1.2v12.1c2.3-1.7 4.7-2.1 7.5-1.2z"></path>
+</svg>
+                </span>
+                <span>Discovery Guide</span>
+              </li>
+              <li class="offering-artifact">
+                <span class="artifact-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+  <path d="M6 3.75h9.5L19 7.25v13H6z"></path>
+  <path d="M15.5 3.75v3.5H19"></path>
+  <path d="M9 12.25l1.6 1.6 3.4-3.6"></path>
+  <path d="M9 17h7"></path>
+</svg>
+                </span>
+                <span>Standard Proposal</span>
+              </li>
+            </ul>
           </div>
         </div>
 
@@ -472,20 +563,40 @@
             edge agents anywhere, anytime.
           </p>
 
-          <div class="offering-artifacts">
+          <div class="offering-artifacts offering-artifacts-static">
             <p class="offering-artifacts-title">STANDARD ARTIFACTS</p>
-            <button type="button" data-offerings-action="ms-pitchbook">
-              <span class="artifact-icon" aria-hidden="true">▣</span>
-              <span>Pitchbook</span>
-            </button>
-            <button type="button" data-offerings-action="ms-discovery-guide">
-              <span class="artifact-icon" aria-hidden="true">▣</span>
-              <span>Discovery Guide</span>
-            </button>
-            <button type="button" data-offerings-action="ms-standard-proposal">
-              <span class="artifact-icon" aria-hidden="true">▣</span>
-              <span>Standard Proposal</span>
-            </button>
+            <ul class="offering-artifact-list" aria-label="Standard artifacts">
+              <li class="offering-artifact">
+                <span class="artifact-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+  <path d="M6 3.75h9.5L19 7.25v13H6z"></path>
+  <path d="M15.5 3.75v3.5H19"></path>
+  <path d="M9 11h7M9 14h7M9 17h5"></path>
+</svg>
+                </span>
+                <span>Pitchbook</span>
+              </li>
+              <li class="offering-artifact">
+                <span class="artifact-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+  <path d="M4.5 5.5c2.8-.9 5.2-.5 7.5 1.2v12.1c-2.3-1.7-4.7-2.1-7.5-1.2z"></path>
+  <path d="M19.5 5.5c-2.8-.9-5.2-.5-7.5 1.2v12.1c2.3-1.7 4.7-2.1 7.5-1.2z"></path>
+</svg>
+                </span>
+                <span>Discovery Guide</span>
+              </li>
+              <li class="offering-artifact">
+                <span class="artifact-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+  <path d="M6 3.75h9.5L19 7.25v13H6z"></path>
+  <path d="M15.5 3.75v3.5H19"></path>
+  <path d="M9 12.25l1.6 1.6 3.4-3.6"></path>
+  <path d="M9 17h7"></path>
+</svg>
+                </span>
+                <span>Standard Proposal</span>
+              </li>
+            </ul>
           </div>
         </div>
 
@@ -509,7 +620,7 @@
     class="offerings-accelerators-section"
     aria-labelledby="ai-accelerators-title"
   >
-    <header class="offerings-section-header">
+    <header class="offerings-section-header offerings-accelerators-header">
       <div class="offerings-section-title-row">
         <h2 id="ai-accelerators-title">AI ACCELERATORS</h2>
         <span class="offerings-section-rule" aria-hidden="true"></span>
@@ -556,26 +667,47 @@
           </div>
         </div>
 
-        <div class="offering-artifacts ai-accelerator-artifacts">
-          <p class="offering-artifacts-title">STANDARD ARTIFACTS</p>
-          <button type="button" data-offerings-action="ai-education-pitchbook">
-            <span class="artifact-icon" aria-hidden="true">▣</span>
-            <span>Pitchbook</span>
-          </button>
-          <button type="button" data-offerings-action="ai-education-discovery-guide">
-            <span class="artifact-icon" aria-hidden="true">▣</span>
-            <span>Discovery Guide</span>
-          </button>
-          <button type="button" data-offerings-action="ai-education-standard-proposal">
-            <span class="artifact-icon" aria-hidden="true">▣</span>
-            <span>Standard Proposal</span>
-          </button>
-        </div>
+          <div class="offering-artifacts ai-accelerator-artifacts offering-artifacts-static">
+            <p class="offering-artifacts-title">STANDARD ARTIFACTS</p>
+            <ul class="offering-artifact-list" aria-label="Standard artifacts">
+            <li class="offering-artifact">
+              <span class="artifact-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+  <path d="M6 3.75h9.5L19 7.25v13H6z"></path>
+  <path d="M15.5 3.75v3.5H19"></path>
+  <path d="M9 11h7M9 14h7M9 17h5"></path>
+</svg>
+              </span>
+              <span>Pitchbook</span>
+            </li>
+            <li class="offering-artifact">
+              <span class="artifact-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+  <path d="M4.5 5.5c2.8-.9 5.2-.5 7.5 1.2v12.1c-2.3-1.7-4.7-2.1-7.5-1.2z"></path>
+  <path d="M19.5 5.5c-2.8-.9-5.2-.5-7.5 1.2v12.1c2.3-1.7 4.7-2.1 7.5-1.2z"></path>
+</svg>
+              </span>
+              <span>Discovery Guide</span>
+            </li>
+            <li class="offering-artifact">
+              <span class="artifact-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+  <path d="M6 3.75h9.5L19 7.25v13H6z"></path>
+  <path d="M15.5 3.75v3.5H19"></path>
+  <path d="M9 12.25l1.6 1.6 3.4-3.6"></path>
+  <path d="M9 17h7"></path>
+</svg>
+              </span>
+              <span>Standard Proposal</span>
+            </li>
+            </ul>
+          </div>
 
         <button
           class="offering-explore-button"
           type="button"
           data-offerings-action="explore-ai-education"
+          aria-label="Explore AI Education offering"
         >
           <span>Explore Offering</span>
           <span aria-hidden="true">→</span>
@@ -619,26 +751,47 @@
           </div>
         </div>
 
-        <div class="offering-artifacts ai-accelerator-artifacts">
-          <p class="offering-artifacts-title">STANDARD ARTIFACTS</p>
-          <button type="button" data-offerings-action="personal-ai-pitchbook">
-            <span class="artifact-icon" aria-hidden="true">▣</span>
-            <span>Pitchbook</span>
-          </button>
-          <button type="button" data-offerings-action="personal-ai-discovery-guide">
-            <span class="artifact-icon" aria-hidden="true">▣</span>
-            <span>Discovery Guide</span>
-          </button>
-          <button type="button" data-offerings-action="personal-ai-standard-proposal">
-            <span class="artifact-icon" aria-hidden="true">▣</span>
-            <span>Standard Proposal</span>
-          </button>
-        </div>
+          <div class="offering-artifacts ai-accelerator-artifacts offering-artifacts-static">
+            <p class="offering-artifacts-title">STANDARD ARTIFACTS</p>
+            <ul class="offering-artifact-list" aria-label="Standard artifacts">
+            <li class="offering-artifact">
+              <span class="artifact-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+  <path d="M6 3.75h9.5L19 7.25v13H6z"></path>
+  <path d="M15.5 3.75v3.5H19"></path>
+  <path d="M9 11h7M9 14h7M9 17h5"></path>
+</svg>
+              </span>
+              <span>Pitchbook</span>
+            </li>
+            <li class="offering-artifact">
+              <span class="artifact-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+  <path d="M4.5 5.5c2.8-.9 5.2-.5 7.5 1.2v12.1c-2.3-1.7-4.7-2.1-7.5-1.2z"></path>
+  <path d="M19.5 5.5c-2.8-.9-5.2-.5-7.5 1.2v12.1c2.3-1.7 4.7-2.1 7.5-1.2z"></path>
+</svg>
+              </span>
+              <span>Discovery Guide</span>
+            </li>
+            <li class="offering-artifact">
+              <span class="artifact-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+  <path d="M6 3.75h9.5L19 7.25v13H6z"></path>
+  <path d="M15.5 3.75v3.5H19"></path>
+  <path d="M9 12.25l1.6 1.6 3.4-3.6"></path>
+  <path d="M9 17h7"></path>
+</svg>
+              </span>
+              <span>Standard Proposal</span>
+            </li>
+            </ul>
+          </div>
 
         <button
           class="offering-explore-button"
           type="button"
           data-offerings-action="explore-personal-ai"
+          aria-label="Explore Personal AI offering"
         >
           <span>Explore Offering</span>
           <span aria-hidden="true">→</span>
@@ -682,26 +835,47 @@
           </div>
         </div>
 
-        <div class="offering-artifacts ai-accelerator-artifacts">
-          <p class="offering-artifacts-title">STANDARD ARTIFACTS</p>
-          <button type="button" data-offerings-action="sovereign-ai-pitchbook">
-            <span class="artifact-icon" aria-hidden="true">▣</span>
-            <span>Pitchbook</span>
-          </button>
-          <button type="button" data-offerings-action="sovereign-ai-discovery-guide">
-            <span class="artifact-icon" aria-hidden="true">▣</span>
-            <span>Discovery Guide</span>
-          </button>
-          <button type="button" data-offerings-action="sovereign-ai-standard-proposal">
-            <span class="artifact-icon" aria-hidden="true">▣</span>
-            <span>Standard Proposal</span>
-          </button>
-        </div>
+          <div class="offering-artifacts ai-accelerator-artifacts offering-artifacts-static">
+            <p class="offering-artifacts-title">STANDARD ARTIFACTS</p>
+            <ul class="offering-artifact-list" aria-label="Standard artifacts">
+            <li class="offering-artifact">
+              <span class="artifact-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+  <path d="M6 3.75h9.5L19 7.25v13H6z"></path>
+  <path d="M15.5 3.75v3.5H19"></path>
+  <path d="M9 11h7M9 14h7M9 17h5"></path>
+</svg>
+              </span>
+              <span>Pitchbook</span>
+            </li>
+            <li class="offering-artifact">
+              <span class="artifact-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+  <path d="M4.5 5.5c2.8-.9 5.2-.5 7.5 1.2v12.1c-2.3-1.7-4.7-2.1-7.5-1.2z"></path>
+  <path d="M19.5 5.5c-2.8-.9-5.2-.5-7.5 1.2v12.1c2.3-1.7 4.7-2.1 7.5-1.2z"></path>
+</svg>
+              </span>
+              <span>Discovery Guide</span>
+            </li>
+            <li class="offering-artifact">
+              <span class="artifact-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+  <path d="M6 3.75h9.5L19 7.25v13H6z"></path>
+  <path d="M15.5 3.75v3.5H19"></path>
+  <path d="M9 12.25l1.6 1.6 3.4-3.6"></path>
+  <path d="M9 17h7"></path>
+</svg>
+              </span>
+              <span>Standard Proposal</span>
+            </li>
+            </ul>
+          </div>
 
         <button
           class="offering-explore-button"
           type="button"
           data-offerings-action="explore-sovereign-ai"
+          aria-label="Explore Sovereign AI offering"
         >
           <span>Explore Offering</span>
           <span aria-hidden="true">→</span>
@@ -739,6 +913,7 @@
         class="offerings-quote-button"
         type="button"
         data-offerings-action="quote-supply-deliver"
+        aria-label="Generate a quote for Supply and Deliver"
       >
         <span>Generate a Quote</span>
         <span aria-hidden="true">→</span>
@@ -767,6 +942,7 @@
         class="offerings-quote-button"
         type="button"
         data-offerings-action="quote-staff-aug"
+        aria-label="Generate a quote for MRS / Staff Aug"
       >
         <span>Generate a Quote</span>
         <span aria-hidden="true">→</span>

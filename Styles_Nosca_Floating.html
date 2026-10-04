@@ -1643,4 +1643,41 @@
       }
     }
 
+
+
+    /* =========================================================
+       ASK NOSCA — DESKTOP STACKING / Z-INDEX FIX
+       The launcher previously lived inside #nexus-sidebar's z-index: 5
+       stacking context, allowing page cards/sections to paint above it.
+       Raise the sidebar itself on desktop so the robot + tooltip can
+       extend over the workspace without being clipped/covered.
+       ========================================================= */
+    @media (min-width: 1200px) and (hover: hover) and (pointer: fine) {
+
+      #nexus-sidebar {
+        z-index: 220 !important;
+        overflow: visible !important;
+      }
+
+      #nexus-sidebar .nosca-launcher.has-desktop-robot {
+        z-index: 230 !important;
+        overflow: visible !important;
+      }
+
+      #nexus-sidebar .nosca-launcher.has-desktop-robot
+        .nosca-desktop-robot-hover {
+        z-index: 231 !important;
+      }
+
+      #nexus-sidebar .nosca-launcher.has-desktop-robot
+        .nosca-desktop-tooltip {
+        z-index: 232 !important;
+      }
+
+      #nexus-sidebar .nosca-launcher.has-desktop-robot
+        .nosca-desktop-status {
+        z-index: 233 !important;
+      }
+    }
+
 </style>

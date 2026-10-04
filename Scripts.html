@@ -1756,6 +1756,11 @@
 
   // H2 OFFERINGS — Phase 1–4 asset registry.
   const offeringsAssetRegistry = {
+    "core-offerings-header-bg": {
+      fileId: "1FYCwcxltBFljihIM_43Q5ZXiUTuW97Sp",
+      viewerUrl: "https://drive.google.com/file/d/1FYCwcxltBFljihIM_43Q5ZXiUTuW97Sp/view?usp=drive_link",
+      phase: 2
+    },
     "offerings-hero": {
       fileId: "1F7k7e96IrRUZGdZur6hapf6Lla_jQ2Wr",
       viewerUrl: "https://drive.google.com/file/d/1F7k7e96IrRUZGdZur6hapf6Lla_jQ2Wr/view?usp=drive_link",
@@ -1994,18 +1999,47 @@
       .replace(/'/g, "&#039;");
   }
 
+  function getOfferingArtifactIconSvg(label) {
+    const normalized = String(label || "").trim().toLowerCase();
+
+    if (normalized === "pitchbook") {
+      return '<svg viewBox="0 0 24 24" aria-hidden="true">' +
+        '<path d="M6 3.75h9.5L19 7.25v13H6z"></path>' +
+        '<path d="M15.5 3.75v3.5H19"></path>' +
+        '<path d="M9 11h7M9 14h7M9 17h5"></path>' +
+      '</svg>';
+    }
+
+    if (normalized === "discovery guide") {
+      return '<svg viewBox="0 0 24 24" aria-hidden="true">' +
+        '<path d="M4.5 5.5c2.8-.9 5.2-.5 7.5 1.2v12.1c-2.3-1.7-4.7-2.1-7.5-1.2z"></path>' +
+        '<path d="M19.5 5.5c-2.8-.9-5.2-.5-7.5 1.2v12.1c2.3-1.7 4.7-2.1 7.5-1.2z"></path>' +
+      '</svg>';
+    }
+
+    return '<svg viewBox="0 0 24 24" aria-hidden="true">' +
+      '<path d="M6 3.75h9.5L19 7.25v13H6z"></path>' +
+      '<path d="M15.5 3.75v3.5H19"></path>' +
+      '<path d="M9 12.25l1.6 1.6 3.4-3.6"></path>' +
+      '<path d="M9 17h7"></path>' +
+    '</svg>';
+  }
+
   function renderOfferingArtifacts(artifacts) {
     const items = Array.isArray(artifacts) ? artifacts : [];
 
-    return '<div class="offering-artifacts">' +
+    return '<div class="offering-artifacts offering-artifacts-static">' +
       '<p class="offering-artifacts-title">STANDARD ARTIFACTS</p>' +
-      items.map(function (item) {
-        return '<button type="button" data-offerings-action="' +
-          escapeOfferingsHtml(item.action) + '">' +
-          '<span class="artifact-icon" aria-hidden="true">▣</span>' +
-          '<span>' + escapeOfferingsHtml(item.label) + '</span>' +
-        '</button>';
-      }).join("") +
+      '<ul class="offering-artifact-list" aria-label="Standard artifacts">' +
+        items.map(function (item) {
+          return '<li class="offering-artifact">' +
+            '<span class="artifact-icon" aria-hidden="true">' +
+              getOfferingArtifactIconSvg(item.label) +
+            '</span>' +
+            '<span>' + escapeOfferingsHtml(item.label) + '</span>' +
+          '</li>';
+        }).join("") +
+      '</ul>' +
     '</div>';
   }
 
@@ -2084,18 +2118,22 @@
               '<p>' + escapeOfferingsHtml(item.description) + '</p>' +
             '</div>' +
           '</div>' +
-          '<div class="offering-artifacts ai-accelerator-artifacts">' +
+          '<div class="offering-artifacts ai-accelerator-artifacts offering-artifacts-static">' +
             '<p class="offering-artifacts-title">STANDARD ARTIFACTS</p>' +
-            (Array.isArray(item.artifacts) ? item.artifacts : []).map(function (artifact) {
-              return '<button type="button" data-offerings-action="' +
-                escapeOfferingsHtml(artifact.action) + '">' +
-                '<span class="artifact-icon" aria-hidden="true">▣</span>' +
-                '<span>' + escapeOfferingsHtml(artifact.label) + '</span>' +
-              '</button>';
-            }).join("") +
+            '<ul class="offering-artifact-list" aria-label="Standard artifacts">' +
+              (Array.isArray(item.artifacts) ? item.artifacts : []).map(function (artifact) {
+                return '<li class="offering-artifact">' +
+                  '<span class="artifact-icon" aria-hidden="true">' +
+                    getOfferingArtifactIconSvg(artifact.label) +
+                  '</span>' +
+                  '<span>' + escapeOfferingsHtml(artifact.label) + '</span>' +
+                '</li>';
+              }).join("") +
+            '</ul>' +
           '</div>' +
           '<button class="offering-explore-button" type="button" data-offerings-action="' +
-            escapeOfferingsHtml(item.exploreAction) + '">' +
+            escapeOfferingsHtml(item.exploreAction) + '" aria-label="Explore ' +
+            title + ' offering">' +
             '<span>Explore Offering</span><span aria-hidden="true">→</span>' +
           '</button>' +
         '</article>';
@@ -2126,7 +2164,8 @@
             '<p>' + escapeOfferingsHtml(item.description) + '</p>' +
           '</div>' +
           '<button class="offerings-quote-button" type="button" data-offerings-action="' +
-            escapeOfferingsHtml(item.action) + '">' +
+            escapeOfferingsHtml(item.action) + '" aria-label="Generate a quote for ' +
+            escapeOfferingsHtml(item.title) + '">' +
             '<span>Generate a Quote</span><span aria-hidden="true">→</span>' +
           '</button>' +
         '</article>';
@@ -2141,6 +2180,12 @@
 
   function bindOfferingsPageAssets(pageRoot) {
     if (!pageRoot) return;
+
+    bindOfferingsAsset(
+      pageRoot.querySelector("#core-offerings-header-bg-image"),
+      pageRoot.querySelector("#core-offerings-header-bg-fallback"),
+      2400
+    );
 
     bindOfferingsAsset(
       pageRoot.querySelector("#offerings-hero-image"),
@@ -3802,52 +3847,6 @@
     return labels[action] || "This offering item";
   }
 
-  function applyOfferingsFilter(pageRoot, filterKey, announce) {
-    if (!pageRoot) return;
-
-    const normalizedFilter = String(filterKey || "").toLowerCase();
-    const cards = Array.from(pageRoot.querySelectorAll(".core-offering-card"));
-    const chips = Array.from(pageRoot.querySelectorAll("[data-offerings-filter]"));
-
-    pageRoot.dataset.activeOfferingFilter = normalizedFilter;
-
-    cards.forEach(function (card) {
-      const matches = !normalizedFilter || card.dataset.coe === normalizedFilter;
-      card.hidden = !matches;
-      card.setAttribute("aria-hidden", String(!matches));
-    });
-
-    chips.forEach(function (chip) {
-      const selected = chip.dataset.offeringsFilter === normalizedFilter && Boolean(normalizedFilter);
-      chip.setAttribute("aria-pressed", String(selected));
-      chip.classList.toggle("is-selected", selected);
-    });
-
-    const grid = pageRoot.querySelector("#core-offerings-grid");
-    if (grid) {
-      grid.classList.toggle("is-filtered", Boolean(normalizedFilter));
-    }
-
-    if (announce) {
-      const activeChip = chips.find(function (chip) {
-        return chip.dataset.offeringsFilter === normalizedFilter;
-      });
-
-      showOfferingsStatus(
-        pageRoot,
-        normalizedFilter && activeChip
-          ? "Showing " + activeChip.textContent.trim() + " Core Offerings. Select it again to show all."
-          : "Showing all Core Offerings."
-      );
-    }
-  }
-
-  function handleOfferingsFilter(pageRoot, chip) {
-    const requested = chip.dataset.offeringsFilter || "";
-    const current = pageRoot.dataset.activeOfferingFilter || "";
-    applyOfferingsFilter(pageRoot, current === requested ? "" : requested, true);
-  }
-
   function handleOfferingsAction(pageRoot, action) {
     if (!action) return;
 
@@ -3861,12 +3860,6 @@
     if (!pageRoot || pageRoot.dataset.offeringsInteractionsInitialized === "true") return;
 
     pageRoot.addEventListener("click", function (event) {
-      const filterChip = event.target.closest("[data-offerings-filter]");
-      if (filterChip && pageRoot.contains(filterChip)) {
-        handleOfferingsFilter(pageRoot, filterChip);
-        return;
-      }
-
       const actionTrigger = event.target.closest("[data-offerings-action]");
       if (actionTrigger && pageRoot.contains(actionTrigger)) {
         handleOfferingsAction(pageRoot, actionTrigger.dataset.offeringsAction || "");
@@ -3881,9 +3874,7 @@
 
     NexusAPI.getOfferingsContent(
       function (data) {
-        const activeFilter = pageRoot.dataset.activeOfferingFilter || "";
         renderOfferingsContent(pageRoot, data);
-        applyOfferingsFilter(pageRoot, activeFilter, false);
         retryFailedOfferingsAssets(pageRoot);
       },
       function () {
@@ -3913,12 +3904,6 @@
 
       initializeOfferingsInteractions(
         pageRoot
-      );
-
-      applyOfferingsFilter(
-        pageRoot,
-        "",
-        false
       );
 
       pageRoot.dataset.pageInitialized =

@@ -487,4 +487,700 @@
         transform: none !important;
       }
     }
+
+
+    /* =========================================================
+       H1 OVERVIEW — SOLUTION GROUP SHOWCASE V2
+       Approved visual:
+       - stronger editorial section heading
+       - premium 3-column solution-group cards on desktop
+       - one capability per row
+       - equalized capability regions across all three groups
+       - larger imagery and video CTA
+       - subtle card/image interaction
+       ========================================================= */
+
+    .overview-solution-groups {
+      position: relative;
+      isolation: isolate;
+      overflow: hidden;
+      margin: 24px 20px 38px;
+      padding: 26px 14px 20px;
+      border-radius: 24px;
+      background:
+        radial-gradient(circle at 84% 0%, rgb(82 176 255 / 10%), transparent 30%),
+        linear-gradient(180deg, rgb(248 252 255 / 92%), rgb(247 252 255 / 68%) 55%, transparent 100%);
+    }
+
+    .overview-solution-groups::before {
+      content: "";
+      position: absolute;
+      z-index: -1;
+      top: -96px;
+      right: -4%;
+      width: 66%;
+      height: 245px;
+      pointer-events: none;
+      border-radius: 50%;
+      background:
+        radial-gradient(ellipse at center, rgb(74 162 255 / 14%) 0 30%, transparent 68%),
+        linear-gradient(155deg, transparent 28%, rgb(64 151 255 / 7%) 48%, transparent 70%);
+      transform: rotate(-5deg);
+      filter: blur(.2px);
+    }
+
+    .overview-section-header-showcase {
+      display: block;
+      margin: 0 12px 26px;
+    }
+
+    .overview-section-header-showcase .overview-section-heading {
+      max-width: 850px;
+    }
+
+    .overview-section-header-showcase .overview-section-kicker-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 0 0 10px;
+    }
+
+    .overview-section-header-showcase .overview-section-accent {
+      width: 54px;
+      height: 5px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #0757EF 0%, #00D4D8 100%);
+      box-shadow: 0 3px 9px rgb(7 87 239 / 14%);
+    }
+
+    .overview-section-header-showcase .overview-section-kicker {
+      margin: 0;
+      color: #36547D;
+      font-size: .72rem;
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: .20em;
+    }
+
+    .overview-section-header-showcase #overview-solution-groups-title {
+      margin: 0;
+      color: #071F63;
+      font-size: clamp(2rem, 2.55vw, 2.85rem);
+      font-weight: 900;
+      line-height: 1.02;
+      letter-spacing: -.045em;
+    }
+
+    .overview-section-header-showcase .overview-section-heading > p {
+      max-width: 720px;
+      margin: 9px 0 0;
+      color: #5A7293;
+      font-size: clamp(.82rem, 1.05vw, 1rem);
+      font-weight: 520;
+      line-height: 1.42;
+    }
+
+    .overview-solution-group-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      align-items: stretch;
+      gap: 20px;
+    }
+
+    .overview-solution-card,
+    .overview-solution-card.is-modernization {
+      grid-column: auto;
+      display: flex;
+      min-width: 0;
+      flex-direction: column;
+      overflow: hidden;
+      border: 1px solid color-mix(in srgb, var(--group-accent) 24%, #D7E8F5);
+      border-radius: 20px;
+      background: #FFFFFF;
+      box-shadow:
+        0 16px 38px rgb(3 49 113 / 9%),
+        inset 0 1px 0 rgb(255 255 255 / 90%);
+      transition:
+        transform .24s cubic-bezier(.2, .8, .2, 1),
+        box-shadow .24s ease,
+        border-color .24s ease;
+    }
+
+    .overview-solution-card:hover {
+      transform: translateY(-4px);
+      border-color: color-mix(in srgb, var(--group-accent) 48%, #D7E8F5);
+      box-shadow:
+        0 22px 48px rgb(3 49 113 / 13%),
+        0 0 0 1px color-mix(in srgb, var(--group-accent) 10%, transparent);
+    }
+
+    .overview-solution-banner,
+    .overview-solution-card.is-modernization .overview-solution-banner {
+      position: relative;
+      min-height: 300px;
+      overflow: hidden;
+      isolation: isolate;
+    }
+
+    .overview-solution-image {
+      transition: transform .55s cubic-bezier(.2, .75, .2, 1), filter .4s ease;
+    }
+
+    .overview-solution-card:hover .overview-solution-image {
+      transform: scale(1.025);
+      filter: saturate(1.04) contrast(1.02);
+    }
+
+    .overview-solution-image-shade,
+    .is-experience .overview-solution-image-shade,
+    .is-modernization .overview-solution-image-shade {
+      background:
+        linear-gradient(
+          90deg,
+          color-mix(in srgb, var(--group-accent-dark) 76%, #071B4F) 0%,
+          color-mix(in srgb, var(--group-accent-dark) 54%, #071B4F) 31%,
+          rgb(4 27 78 / 28%) 59%,
+          transparent 84%
+        );
+    }
+
+    .overview-solution-banner-copy {
+      position: absolute;
+      z-index: 2;
+      inset: 0 auto 0 0;
+      display: flex;
+      width: min(74%, 390px);
+      height: 100%;
+      box-sizing: border-box;
+      flex-direction: column;
+      align-items: flex-start;
+      padding: 28px 28px 26px;
+      color: #FFFFFF;
+      text-shadow: 0 2px 9px rgb(0 20 65 / 28%);
+    }
+
+    .overview-solution-banner-copy::before {
+      display: block;
+      margin-bottom: 13px;
+      color: rgb(255 255 255 / 90%);
+      font-size: .66rem;
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: .20em;
+    }
+
+    .is-experience .overview-solution-banner-copy::before {
+      content: "EXPERIENCE";
+    }
+
+    .is-intelligence .overview-solution-banner-copy::before {
+      content: "INTELLIGENCE";
+    }
+
+    .is-modernization .overview-solution-banner-copy::before {
+      content: "MODERNIZATION";
+    }
+
+    .overview-solution-banner-copy h3 {
+      margin: 0;
+      max-width: 100%;
+      font-size: clamp(1.45rem, 1.65vw, 1.9rem);
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: -.035em;
+    }
+
+    .overview-solution-label {
+      margin: 4px 0 13px;
+      font-size: clamp(1.05rem, 1.18vw, 1.34rem);
+      font-weight: 780;
+      line-height: 1.05;
+    }
+
+    .overview-solution-description {
+      max-width: 310px;
+      margin: 0;
+      color: rgb(255 255 255 / 94%);
+      font-size: .84rem;
+      font-weight: 540;
+      line-height: 1.42;
+    }
+
+    .overview-solution-description br {
+      display: none;
+    }
+
+    .overview-video-button {
+      min-height: 42px;
+      margin-top: auto;
+      padding: 6px 16px 6px 8px;
+      gap: 9px;
+      border: 1px solid rgb(255 255 255 / 78%);
+      border-radius: 999px;
+      color: var(--group-accent-dark);
+      background: rgb(255 255 255 / 96%);
+      box-shadow: 0 8px 22px rgb(0 20 65 / 16%);
+      font-size: .76rem;
+      font-weight: 850;
+      text-shadow: none;
+      transition:
+        transform .18s ease,
+        box-shadow .18s ease,
+        background-color .18s ease;
+    }
+
+    .overview-video-button:hover {
+      transform: translateY(-2px);
+      background: #FFFFFF;
+      box-shadow: 0 11px 26px rgb(0 20 65 / 20%);
+    }
+
+    .overview-play-icon {
+      width: 28px;
+      height: 28px;
+      flex: 0 0 auto;
+      box-shadow: 0 4px 12px color-mix(in srgb, var(--group-accent) 28%, transparent);
+    }
+
+    /*
+     * One capability per row.
+     * Keep the total capability area equal across groups so Experience,
+     * Intelligence, and Modernization align despite having 2 / 2 / 3 items.
+     */
+    .overview-capability-grid,
+    .overview-capability-grid-2,
+    .overview-capability-grid-3,
+    .overview-solution-card.is-modernization .overview-capability-grid-3 {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) !important;
+      gap: 10px;
+      min-height: 294px;
+      padding: 16px;
+      background:
+        linear-gradient(
+          180deg,
+          color-mix(in srgb, var(--group-accent) 7%, white),
+          #FFFFFF 78%
+        );
+    }
+
+    .overview-capability-grid-2 {
+      grid-template-rows: repeat(2, minmax(0, 1fr));
+    }
+
+    .overview-capability-grid-3,
+    .overview-solution-card.is-modernization .overview-capability-grid-3 {
+      grid-template-rows: repeat(3, minmax(0, 1fr));
+    }
+
+    .overview-capability-card,
+    .overview-capability-grid-3 .overview-capability-card {
+      display: grid;
+      grid-template-columns: 58px minmax(0, 1fr) 38px;
+      align-items: center;
+      gap: 14px;
+      min-width: 0;
+      min-height: 0;
+      padding: 12px 14px;
+      border: 1px solid color-mix(in srgb, var(--group-accent) 15%, #DCEBF6);
+      border-radius: 15px;
+      color: #123C9B;
+      background: rgb(255 255 255 / 96%);
+      box-shadow:
+        0 4px 13px rgb(0 47 112 / 4%),
+        inset 0 1px 0 rgb(255 255 255 / 88%);
+      transition:
+        transform .18s ease,
+        border-color .18s ease,
+        box-shadow .18s ease,
+        background-color .18s ease;
+    }
+
+    .overview-capability-card:hover,
+    .overview-capability-grid-3 .overview-capability-card:hover {
+      transform: translateY(-2px);
+      border-color: color-mix(in srgb, var(--group-accent) 46%, #DCEBF6);
+      background: #FFFFFF;
+      box-shadow: 0 9px 21px rgb(0 47 112 / 9%);
+    }
+
+    .overview-capability-icon,
+    .overview-capability-grid-3 .overview-capability-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 58px;
+      height: 58px;
+      border-radius: 16px;
+      color: var(--group-accent-dark);
+      background: color-mix(in srgb, var(--group-accent) 10%, white);
+    }
+
+    .overview-capability-icon svg,
+    .overview-capability-grid-3 .overview-capability-icon svg {
+      width: 31px;
+      height: 31px;
+    }
+
+    .overview-capability-copy {
+      gap: 5px;
+      min-width: 0;
+    }
+
+    .overview-capability-copy strong,
+    .overview-capability-grid-3 .overview-capability-copy strong {
+      color: #102E84;
+      font-size: .88rem;
+      font-weight: 900;
+      line-height: 1.05;
+      letter-spacing: -.015em;
+    }
+
+    .overview-capability-copy > span,
+    .overview-capability-grid-3 .overview-capability-copy > span {
+      color: #587092;
+      font-size: .72rem;
+      font-weight: 540;
+      line-height: 1.36;
+      overflow-wrap: normal;
+      word-break: normal;
+      hyphens: none;
+    }
+
+    .overview-capability-copy br {
+      display: none;
+    }
+
+    .overview-capability-chevron,
+    .overview-capability-grid-3 .overview-capability-chevron {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      justify-self: end;
+      align-self: center;
+      width: 34px;
+      height: 34px;
+      border: 1px solid #DCE8F4;
+      border-radius: 50%;
+      color: #58759A;
+      background: #F6FAFE;
+      box-shadow: 0 2px 7px rgb(0 47 112 / 4%);
+      font-size: 1.45rem;
+      line-height: 1;
+      transition:
+        transform .18s ease,
+        color .18s ease,
+        border-color .18s ease,
+        background-color .18s ease;
+    }
+
+    .overview-capability-card:hover .overview-capability-chevron {
+      transform: translateX(2px);
+      color: var(--group-accent-dark);
+      border-color: color-mix(in srgb, var(--group-accent) 32%, #DCE8F4);
+      background: color-mix(in srgb, var(--group-accent) 6%, white);
+    }
+
+    /* Two columns for medium desktop / tablet landscape. */
+    @media (min-width: 768px) and (max-width: 1199px) {
+      .overview-solution-groups {
+        margin: 20px 18px 34px;
+        padding: 22px 12px 18px;
+      }
+
+      .overview-solution-group-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .overview-solution-card.is-modernization {
+        grid-column: auto;
+      }
+
+      .overview-solution-banner,
+      .overview-solution-card.is-modernization .overview-solution-banner {
+        min-height: 275px;
+      }
+
+      .overview-capability-grid,
+      .overview-capability-grid-2,
+      .overview-capability-grid-3,
+      .overview-solution-card.is-modernization .overview-capability-grid-3 {
+        min-height: 280px;
+      }
+    }
+
+    /* Single-column mobile presentation. */
+    @media (max-width: 767px) {
+      .overview-solution-groups {
+        margin: 18px 0 28px;
+        padding: 18px 0 6px;
+        border-radius: 18px;
+      }
+
+      .overview-section-header-showcase {
+        margin: 0 4px 18px;
+      }
+
+      .overview-section-header-showcase .overview-section-kicker-row {
+        gap: 9px;
+        margin-bottom: 8px;
+      }
+
+      .overview-section-header-showcase .overview-section-accent {
+        width: 38px;
+        height: 4px;
+      }
+
+      .overview-section-header-showcase .overview-section-kicker {
+        font-size: .58rem;
+        letter-spacing: .16em;
+      }
+
+      .overview-section-header-showcase #overview-solution-groups-title {
+        font-size: clamp(1.65rem, 8vw, 2.05rem);
+      }
+
+      .overview-section-header-showcase .overview-section-heading > p {
+        margin-top: 7px;
+        font-size: .73rem;
+      }
+
+      .overview-solution-group-grid {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 15px;
+      }
+
+      .overview-solution-banner,
+      .overview-solution-card.is-modernization .overview-solution-banner {
+        min-height: 265px;
+      }
+
+      .overview-solution-banner-copy {
+        width: min(82%, 340px);
+        padding: 22px 20px;
+      }
+
+      .overview-solution-banner-copy::before {
+        margin-bottom: 10px;
+        font-size: .58rem;
+      }
+
+      .overview-solution-description {
+        font-size: .76rem;
+      }
+
+      .overview-video-button {
+        min-height: 38px;
+        font-size: .69rem;
+      }
+
+      .overview-play-icon {
+        width: 25px;
+        height: 25px;
+      }
+
+      .overview-capability-grid,
+      .overview-capability-grid-2,
+      .overview-capability-grid-3,
+      .overview-solution-card.is-modernization .overview-capability-grid-3 {
+        height: auto;
+        min-height: 0;
+        grid-template-rows: none;
+        padding: 12px;
+      }
+
+      .overview-capability-card,
+      .overview-capability-grid-3 .overview-capability-card {
+        grid-template-columns: 50px minmax(0, 1fr) 34px;
+        min-height: 84px;
+        padding: 10px 11px;
+      }
+
+      .overview-capability-icon,
+      .overview-capability-grid-3 .overview-capability-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 14px;
+      }
+
+      .overview-capability-copy strong,
+      .overview-capability-grid-3 .overview-capability-copy strong {
+        font-size: .80rem;
+      }
+
+      .overview-capability-copy > span,
+      .overview-capability-grid-3 .overview-capability-copy > span {
+        font-size: .67rem;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .overview-solution-card,
+      .overview-solution-image,
+      .overview-video-button,
+      .overview-capability-card,
+      .overview-capability-chevron {
+        transition: none !important;
+      }
+
+      .overview-solution-card:hover,
+      .overview-solution-card:hover .overview-solution-image,
+      .overview-video-button:hover,
+      .overview-capability-card:hover {
+        transform: none !important;
+      }
+    }
+
+
+
+    /* =========================================================
+       H1 OVERVIEW — SOLUTION GROUP SHOWCASE COMPACT V3
+       Keeps the approved visual but reduces desktop footprint.
+       ========================================================= */
+    @media (min-width: 1200px) {
+      .overview-solution-groups {
+        margin: 18px 20px 28px !important;
+        padding: 20px 12px 16px !important;
+        border-radius: 20px !important;
+      }
+
+      .overview-section-header-showcase {
+        margin: 0 10px 18px !important;
+      }
+
+      .overview-section-header-showcase .overview-section-kicker-row {
+        margin-bottom: 7px !important;
+      }
+
+      .overview-section-header-showcase .overview-section-accent {
+        width: 46px !important;
+        height: 4px !important;
+      }
+
+      .overview-section-header-showcase .overview-section-kicker {
+        font-size: .62rem !important;
+        letter-spacing: .18em !important;
+      }
+
+      .overview-section-header-showcase #overview-solution-groups-title {
+        font-size: clamp(1.75rem, 2.15vw, 2.35rem) !important;
+        line-height: 1.02 !important;
+      }
+
+      .overview-section-header-showcase .overview-section-heading > p {
+        margin-top: 6px !important;
+        font-size: .82rem !important;
+      }
+
+      .overview-solution-group-grid {
+        gap: 16px !important;
+      }
+
+      .overview-solution-card,
+      .overview-solution-card.is-modernization {
+        border-radius: 17px !important;
+      }
+
+      .overview-solution-banner,
+      .overview-solution-card.is-modernization .overview-solution-banner {
+        min-height: 225px !important;
+        height: 225px !important;
+      }
+
+      .overview-solution-banner-copy {
+        width: min(76%, 350px) !important;
+        padding: 20px 20px 18px !important;
+      }
+
+      .overview-solution-banner-copy::before {
+        margin-bottom: 9px !important;
+        font-size: .58rem !important;
+      }
+
+      .overview-solution-banner-copy h3 {
+        font-size: clamp(1.25rem, 1.45vw, 1.55rem) !important;
+      }
+
+      .overview-solution-label {
+        margin: 2px 0 8px !important;
+        font-size: clamp(.92rem, 1.02vw, 1.08rem) !important;
+      }
+
+      .overview-solution-description {
+        max-width: 300px !important;
+        font-size: .72rem !important;
+        line-height: 1.35 !important;
+      }
+
+      .overview-video-button {
+        min-height: 34px !important;
+        margin-top: auto !important;
+        padding: 4px 12px 4px 6px !important;
+        gap: 7px !important;
+        font-size: .67rem !important;
+      }
+
+      .overview-play-icon {
+        width: 23px !important;
+        height: 23px !important;
+      }
+
+      .overview-play-icon svg {
+        width: 10px !important;
+        height: 10px !important;
+      }
+
+      .overview-capability-grid,
+      .overview-capability-grid-2,
+      .overview-capability-grid-3,
+      .overview-solution-card.is-modernization .overview-capability-grid-3 {
+        min-height: 220px !important;
+        padding: 11px !important;
+        gap: 8px !important;
+      }
+
+      .overview-capability-card,
+      .overview-capability-grid-3 .overview-capability-card {
+        grid-template-columns: 46px minmax(0, 1fr) 30px !important;
+        gap: 10px !important;
+        padding: 9px 10px !important;
+        border-radius: 12px !important;
+      }
+
+      .overview-capability-icon,
+      .overview-capability-grid-3 .overview-capability-icon {
+        width: 46px !important;
+        height: 46px !important;
+        border-radius: 13px !important;
+      }
+
+      .overview-capability-icon svg,
+      .overview-capability-grid-3 .overview-capability-icon svg {
+        width: 25px !important;
+        height: 25px !important;
+      }
+
+      .overview-capability-copy {
+        gap: 3px !important;
+      }
+
+      .overview-capability-copy strong,
+      .overview-capability-grid-3 .overview-capability-copy strong {
+        font-size: .76rem !important;
+      }
+
+      .overview-capability-copy > span,
+      .overview-capability-grid-3 .overview-capability-copy > span {
+        font-size: .62rem !important;
+        line-height: 1.3 !important;
+      }
+
+      .overview-capability-chevron,
+      .overview-capability-grid-3 .overview-capability-chevron {
+        width: 29px !important;
+        height: 29px !important;
+        font-size: 1.2rem !important;
+      }
+    }
+
 </style>

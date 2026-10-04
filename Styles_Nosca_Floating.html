@@ -639,4 +639,1008 @@
         transition: none !important;
       }
     }
+
+
+    /* =========================================================
+       ASK NOSCA — PLAYFUL DESKTOP ROBOT LAUNCHER
+       Desktop/laptop only. Tablet and mobile retain the existing
+       launcher treatment from Styles_Responsive.html.
+       ========================================================= */
+
+    .nosca-desktop-asset {
+      display: none !important;
+    }
+
+    @media (min-width: 1200px) and (hover: hover) and (pointer: fine) {
+      #nexus-sidebar .nosca-launcher.has-desktop-robot {
+        position: fixed !important;
+        left: 0 !important;
+        right: auto !important;
+        bottom: 10px !important;
+        z-index: 136 !important;
+
+        width: 92px !important;
+        min-width: 92px !important;
+        height: 190px !important;
+        min-height: 190px !important;
+
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: visible !important;
+
+        border: 0 !important;
+        border-radius: 0 !important;
+        color: transparent !important;
+        background: transparent !important;
+        box-shadow: none !important;
+
+        isolation: isolate;
+        transform: none !important;
+        transform-origin: left bottom;
+        cursor: pointer;
+      }
+
+      /* Hide the old pill completely on desktop.
+         The peeking robot itself becomes the idle launcher. */
+      #nexus-sidebar .nosca-launcher.has-desktop-robot > svg,
+      #nexus-sidebar .nosca-launcher.has-desktop-robot > span {
+        display: none !important;
+      }
+
+      #nexus-sidebar .nosca-launcher.has-desktop-robot .nosca-desktop-asset {
+        position: absolute !important;
+        display: block !important;
+        max-width: none !important;
+        max-height: none !important;
+        user-select: none !important;
+        -webkit-user-drag: none;
+        will-change: transform, opacity, filter;
+      }
+
+      /* IDLE:
+         robot peeks from the extreme left edge and remains partly hidden. */
+      #nexus-sidebar .nosca-launcher.has-desktop-robot .nosca-desktop-robot-idle {
+        left: -47px !important;
+        bottom: -5px !important;
+        width: 144px !important;
+        height: auto !important;
+        z-index: 1;
+
+        opacity: 1 !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
+
+        transform: translate3d(0, 0, 0) scale(1);
+        transform-origin: left bottom;
+
+        filter: drop-shadow(0 12px 20px rgb(0 56 149 / 17%));
+
+        transition:
+          opacity 150ms ease,
+          transform 280ms cubic-bezier(.2, .85, .2, 1),
+          filter 220ms ease;
+
+        animation: nosca-desktop-peek-idle 6.5s ease-in-out infinite;
+      }
+
+      /* HOVER:
+         full robot/button stays fully hidden until pointer/focus enters. */
+      #nexus-sidebar .nosca-launcher.has-desktop-robot .nosca-desktop-robot-hover {
+        left: -15px !important;
+        bottom: -7px !important;
+        width: 322px !important;
+        height: auto !important;
+        z-index: 2;
+
+        opacity: 0 !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+
+        transform: translate3d(-26px, 12px, 0) scale(.90) rotate(-1deg);
+        transform-origin: left bottom;
+
+        filter: drop-shadow(0 16px 26px rgb(0 56 149 / 20%));
+
+        transition:
+          opacity 190ms ease,
+          visibility 0s linear 240ms,
+          transform 330ms cubic-bezier(.18, 1.18, .28, 1),
+          filter 220ms ease;
+      }
+
+      #nexus-sidebar .nosca-launcher.has-desktop-robot .nosca-desktop-tooltip {
+        left: 205px !important;
+        bottom: 106px !important;
+        width: 212px !important;
+        height: auto !important;
+        z-index: 3;
+
+        opacity: 0 !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+
+        transform: translate3d(-18px, 8px, 0) scale(.92);
+        transform-origin: left bottom;
+
+        filter: drop-shadow(0 12px 22px rgb(0 46 128 / 16%));
+
+        transition:
+          opacity 160ms ease 80ms,
+          visibility 0s linear 260ms,
+          transform 260ms cubic-bezier(.2, .9, .22, 1) 80ms;
+      }
+
+      /* On hover/focus, hide the peeking robot first... */
+      #nexus-sidebar .nosca-launcher.has-desktop-robot:hover .nosca-desktop-robot-idle,
+      #nexus-sidebar .nosca-launcher.has-desktop-robot:focus-visible .nosca-desktop-robot-idle {
+        opacity: 0 !important;
+        pointer-events: none !important;
+        transform: translate3d(-12px, 4px, 0) scale(.94);
+        animation-play-state: paused;
+      }
+
+      /* ...then reveal the full NOSCA robot/button. */
+      #nexus-sidebar .nosca-launcher.has-desktop-robot:hover .nosca-desktop-robot-hover,
+      #nexus-sidebar .nosca-launcher.has-desktop-robot:focus-visible .nosca-desktop-robot-hover {
+        opacity: 1 !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
+        transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
+        transition-delay: 0s;
+      }
+
+      #nexus-sidebar .nosca-launcher.has-desktop-robot.has-desktop-tooltip:hover .nosca-desktop-tooltip,
+      #nexus-sidebar .nosca-launcher.has-desktop-robot.has-desktop-tooltip:focus-visible .nosca-desktop-tooltip {
+        opacity: 1 !important;
+        visibility: visible !important;
+        transform: translate3d(0, 0, 0) scale(1);
+        transition-delay: 100ms, 0s, 100ms;
+      }
+
+      #nexus-sidebar .nosca-launcher.has-desktop-robot:focus-visible {
+        outline: none !important;
+      }
+
+      #nexus-sidebar .nosca-launcher.has-desktop-robot:focus-visible::before {
+        content: "";
+        position: absolute;
+        left: 2px;
+        bottom: 8px;
+        width: 76px;
+        height: 166px;
+        border: 2px solid rgb(56 151 255 / 58%);
+        border-radius: 34px;
+        box-shadow: 0 0 0 4px rgb(56 151 255 / 12%);
+        pointer-events: none;
+      }
+
+      #nexus-sidebar .nosca-launcher.has-desktop-robot.is-thinking .nosca-desktop-robot-idle,
+      #nexus-sidebar .nosca-launcher.has-desktop-robot.is-thinking .nosca-desktop-robot-hover {
+        animation: nosca-desktop-thinking-glow 1.35s ease-in-out infinite !important;
+      }
+
+      #nexus-sidebar .nosca-launcher.has-desktop-robot.is-chat-open {
+        opacity: 0 !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+        transform: translate3d(-18px, 8px, 0) scale(.78) !important;
+      }
+    }
+
+    @keyframes nosca-desktop-peek-idle {
+      0%, 72%, 100% {
+        transform: translate3d(0, 0, 0) scale(1);
+      }
+      78% {
+        transform: translate3d(4px, -2px, 0) rotate(.7deg) scale(1.01);
+      }
+      84% {
+        transform: translate3d(1px, 0, 0) rotate(-.3deg) scale(1);
+      }
+    }
+
+    @keyframes nosca-desktop-thinking-glow {
+      0%, 100% {
+        filter:
+          drop-shadow(0 14px 22px rgb(0 56 149 / 18%))
+          brightness(1);
+      }
+      50% {
+        filter:
+          drop-shadow(0 16px 28px rgb(0 117 255 / 34%))
+          brightness(1.08);
+      }
+    }
+
+
+
+    /* =========================================================
+       ASK NOSCA — FINAL IDLE VISIBILITY OVERRIDE
+       Keep this at the end so it wins over earlier launcher rules.
+       ========================================================= */
+    @media (min-width: 1200px) and (hover: hover) and (pointer: fine) {
+      #nexus-sidebar .nosca-launcher.has-desktop-robot {
+        left: 0 !important;
+        bottom: 10px !important;
+        width: 150px !important;
+        min-width: 150px !important;
+        height: 205px !important;
+        min-height: 205px !important;
+      }
+
+      #nexus-sidebar .nosca-launcher.has-desktop-robot .nosca-desktop-robot-idle {
+        left: 20px !important;
+        bottom: -2px !important;
+        width: 188px !important;
+        height: auto !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+      }
+    }
+
+
+
+    /* =========================================================
+       ASK NOSCA — EDGE POSITION + 30% SIZE REDUCTION
+       Final override. Desktop only.
+       ========================================================= */
+    @media (min-width: 1200px) and (hover: hover) and (pointer: fine) {
+      #nexus-sidebar .nosca-launcher.has-desktop-robot {
+        left: 0 !important;
+        bottom: 8px !important;
+        width: 110px !important;
+        min-width: 110px !important;
+        height: 150px !important;
+        min-height: 150px !important;
+      }
+
+      #nexus-sidebar .nosca-launcher.has-desktop-robot .nosca-desktop-robot-idle {
+        left: -20px !important;
+        bottom: 0 !important;
+        width: 132px !important;
+        height: auto !important;
+      }
+    }
+
+
+
+    /* =========================================================
+       ASK NOSCA — THINKING + SUCCESS ROBOT STATES
+       Uses the existing launcher state classes from Scripts_Nosca:
+       .is-thinking while a minimized request is pending
+       .has-unread when a completed answer is waiting
+       Desktop only.
+       ========================================================= */
+    @media (min-width: 1200px) and (hover: hover) and (pointer: fine) {
+
+      /* The two state-specific assets are hidden until their matching
+         state becomes active. */
+      #nexus-sidebar .nosca-launcher.has-desktop-robot .nosca-desktop-robot-thinking,
+      #nexus-sidebar .nosca-launcher.has-desktop-robot .nosca-desktop-robot-success {
+        left: -20px !important;
+        bottom: 0 !important;
+        width: 132px !important;
+        height: auto !important;
+        z-index: 2;
+        opacity: 0 !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+        transform: translate3d(-7px, 5px, 0) scale(.94);
+        transform-origin: left bottom;
+        transition:
+          opacity 190ms ease,
+          visibility 0s linear 220ms,
+          transform 280ms cubic-bezier(.18, 1.08, .28, 1),
+          filter 220ms ease;
+      }
+
+      /* Thinking state replaces the idle robot. */
+      #nexus-sidebar .nosca-launcher.has-desktop-robot.has-desktop-thinking.is-thinking
+        .nosca-desktop-robot-idle {
+        opacity: 0 !important;
+        visibility: hidden !important;
+        animation: none !important;
+      }
+
+      #nexus-sidebar .nosca-launcher.has-desktop-robot.has-desktop-thinking.is-thinking
+        .nosca-desktop-robot-thinking {
+        opacity: 1 !important;
+        visibility: visible !important;
+        transform: translate3d(0, 0, 0) scale(1);
+        filter:
+          drop-shadow(0 12px 20px rgb(0 72 185 / 20%))
+          brightness(1.03);
+        animation: nosca-thinking-character 1.8s ease-in-out infinite;
+      }
+
+      /* Ready/success state replaces the idle robot after the answer
+         has finished while the panel is minimized. */
+      #nexus-sidebar .nosca-launcher.has-desktop-robot.has-desktop-success.has-unread:not(.is-thinking)
+        .nosca-desktop-robot-idle {
+        opacity: 0 !important;
+        visibility: hidden !important;
+        animation: none !important;
+      }
+
+      #nexus-sidebar .nosca-launcher.has-desktop-robot.has-desktop-success.has-unread:not(.is-thinking)
+        .nosca-desktop-robot-success {
+        opacity: 1 !important;
+        visibility: visible !important;
+        transform: translate3d(0, 0, 0) scale(1);
+        filter:
+          drop-shadow(0 12px 22px rgb(0 126 111 / 18%))
+          brightness(1.03);
+        animation: nosca-success-pop 520ms cubic-bezier(.16, 1.28, .3, 1) both;
+      }
+
+      /* Hide the old generic spinner/check badges when the robot assets
+         are driving the desktop state. */
+      #nexus-sidebar .nosca-launcher.has-desktop-robot.is-thinking::after,
+      #nexus-sidebar .nosca-launcher.has-desktop-robot.has-unread::after {
+        display: none !important;
+        content: none !important;
+      }
+
+      /* Status bubbles are HTML/CSS, not image assets, so they remain
+         crisp and easy to change later. */
+      #nexus-sidebar .nosca-launcher.has-desktop-robot .nosca-desktop-status {
+        position: absolute;
+        left: 92px;
+        bottom: 88px;
+        z-index: 5;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        min-height: 36px;
+        padding: 8px 12px;
+        border: 1px solid rgb(123 171 237 / 35%);
+        border-radius: 14px;
+        color: #102c67;
+        background: rgb(255 255 255 / 96%);
+        box-shadow:
+          0 9px 24px rgb(3 52 128 / 14%),
+          inset 0 1px 0 rgb(255 255 255 / 86%);
+        font-size: .72rem;
+        line-height: 1;
+        white-space: nowrap;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transform: translate3d(-10px, 7px, 0) scale(.92);
+        transform-origin: left bottom;
+        transition:
+          opacity 160ms ease,
+          visibility 0s linear 210ms,
+          transform 240ms cubic-bezier(.2, .9, .22, 1);
+      }
+
+      #nexus-sidebar .nosca-launcher.has-desktop-robot .nosca-desktop-status::before {
+        content: "";
+        position: absolute;
+        left: -7px;
+        bottom: 10px;
+        width: 13px;
+        height: 13px;
+        border-left: 1px solid rgb(123 171 237 / 25%);
+        border-bottom: 1px solid rgb(123 171 237 / 25%);
+        background: rgb(255 255 255 / 96%);
+        transform: rotate(45deg);
+      }
+
+      #nexus-sidebar .nosca-launcher.has-desktop-robot.is-thinking
+        .nosca-desktop-status-thinking {
+        opacity: 1;
+        visibility: visible;
+        transform: translate3d(0, 0, 0) scale(1);
+        transition-delay: 90ms, 0s, 90ms;
+      }
+
+      #nexus-sidebar .nosca-launcher.has-desktop-robot.has-unread:not(.is-thinking)
+        .nosca-desktop-status-success {
+        opacity: 1;
+        visibility: visible;
+        transform: translate3d(0, 0, 0) scale(1);
+        transition-delay: 90ms, 0s, 90ms;
+      }
+
+      .nosca-desktop-status-thinking i {
+        display: inline-block;
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: #2679ef;
+        animation: nosca-status-dot 1s ease-in-out infinite;
+      }
+
+      .nosca-desktop-status-thinking i:nth-of-type(2) {
+        animation-delay: 120ms;
+      }
+
+      .nosca-desktop-status-thinking i:nth-of-type(3) {
+        animation-delay: 240ms;
+      }
+
+      .nosca-desktop-ready-check {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 21px;
+        height: 21px;
+        border-radius: 50%;
+        color: #fff;
+        background: linear-gradient(135deg, #43df91, #11ae69);
+        box-shadow: 0 4px 10px rgb(17 174 105 / 24%);
+        font-size: .75rem;
+        font-weight: 900;
+      }
+
+      /* During active loading / ready states, status takes precedence
+         over the regular hover personality. */
+      #nexus-sidebar .nosca-launcher.has-desktop-robot.is-thinking:hover
+        .nosca-desktop-robot-hover,
+      #nexus-sidebar .nosca-launcher.has-desktop-robot.is-thinking:focus-visible
+        .nosca-desktop-robot-hover,
+      #nexus-sidebar .nosca-launcher.has-desktop-robot.has-unread:hover
+        .nosca-desktop-robot-hover,
+      #nexus-sidebar .nosca-launcher.has-desktop-robot.has-unread:focus-visible
+        .nosca-desktop-robot-hover,
+      #nexus-sidebar .nosca-launcher.has-desktop-robot.is-thinking:hover
+        .nosca-desktop-tooltip,
+      #nexus-sidebar .nosca-launcher.has-desktop-robot.is-thinking:focus-visible
+        .nosca-desktop-tooltip,
+      #nexus-sidebar .nosca-launcher.has-desktop-robot.has-unread:hover
+        .nosca-desktop-tooltip,
+      #nexus-sidebar .nosca-launcher.has-desktop-robot.has-unread:focus-visible
+        .nosca-desktop-tooltip {
+        opacity: 0 !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+      }
+
+      #nexus-sidebar .nosca-launcher.has-desktop-robot.is-thinking:hover
+        .nosca-desktop-robot-thinking,
+      #nexus-sidebar .nosca-launcher.has-desktop-robot.is-thinking:focus-visible
+        .nosca-desktop-robot-thinking,
+      #nexus-sidebar .nosca-launcher.has-desktop-robot.has-unread:hover
+        .nosca-desktop-robot-success,
+      #nexus-sidebar .nosca-launcher.has-desktop-robot.has-unread:focus-visible
+        .nosca-desktop-robot-success {
+        opacity: 1 !important;
+        visibility: visible !important;
+      }
+    }
+
+    @keyframes nosca-thinking-character {
+      0%, 100% {
+        transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
+        filter:
+          drop-shadow(0 12px 20px rgb(0 72 185 / 20%))
+          brightness(1.02);
+      }
+      50% {
+        transform: translate3d(2px, -3px, 0) scale(1.015) rotate(.5deg);
+        filter:
+          drop-shadow(0 14px 25px rgb(0 128 255 / 28%))
+          brightness(1.08);
+      }
+    }
+
+    @keyframes nosca-success-pop {
+      0% {
+        opacity: 0;
+        transform: translate3d(-6px, 7px, 0) scale(.86) rotate(-1.5deg);
+      }
+      70% {
+        opacity: 1;
+        transform: translate3d(1px, -2px, 0) scale(1.035) rotate(.4deg);
+      }
+      100% {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
+      }
+    }
+
+    @keyframes nosca-status-dot {
+      0%, 60%, 100% {
+        opacity: .32;
+        transform: translateY(0) scale(.88);
+      }
+      30% {
+        opacity: 1;
+        transform: translateY(-2px) scale(1);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .nosca-desktop-robot-thinking,
+      .nosca-desktop-robot-success,
+      .nosca-desktop-status,
+      .nosca-desktop-status-thinking i {
+        animation: none !important;
+        transition: none !important;
+      }
+    }
+
+
+
+    /* =========================================================
+       ASK NOSCA — HIGH-VISIBILITY THINKING WAVE
+       Recreates the stronger blue/cyan animated treatment used by
+       the older "Thinking..." launcher, adapted to the vertical tab.
+       ========================================================= */
+    @media (min-width: 1200px) and (hover: hover) and (pointer: fine) {
+
+      /* Keep the thinking character visually anchored to the edge. */
+      #nexus-sidebar .nosca-launcher.has-desktop-robot
+        .nosca-desktop-robot-thinking {
+        left: -31px !important;
+        bottom: 0 !important;
+        width: 132px !important;
+      }
+
+      /* The scan must render ABOVE the PNG, otherwise the opaque image
+         hides it. This overlay tracks the vertical Ask NOSCA tab. */
+      #nexus-sidebar .nosca-launcher.has-desktop-robot.is-thinking::after {
+        content: "" !important;
+        position: absolute !important;
+
+        left: 1px !important;
+        right: auto !important;
+        top: auto !important;
+        bottom: 5px !important;
+
+        display: block !important;
+        width: 56px !important;
+        height: 143px !important;
+
+        z-index: 6 !important;
+        pointer-events: none !important;
+
+        border: 1px solid rgb(97 238 255 / 42%) !important;
+        border-radius: 28px !important;
+
+        /*
+          Base tint + a concentrated cyan wave.
+          background-position animates downward, giving the same
+          "processing energy" feel as the old horizontal button.
+        */
+        background:
+          linear-gradient(
+            180deg,
+            rgb(32 102 255 / 9%) 0%,
+            rgb(32 102 255 / 9%) 100%
+          ),
+          linear-gradient(
+            180deg,
+            transparent 0%,
+            transparent 29%,
+            rgb(44 156 255 / 8%) 35%,
+            rgb(32 201 255 / 34%) 42%,
+            rgb(97 245 255 / 78%) 48%,
+            rgb(225 255 255 / 98%) 50%,
+            rgb(95 243 255 / 82%) 52%,
+            rgb(22 195 255 / 38%) 58%,
+            rgb(31 117 255 / 10%) 65%,
+            transparent 72%,
+            transparent 100%
+          ) !important;
+
+        background-size:
+          100% 100%,
+          100% 250% !important;
+
+        background-position:
+          0 0,
+          0 -160% !important;
+
+        box-shadow:
+          inset 0 0 18px rgb(74 225 255 / 22%),
+          inset 0 0 5px rgb(255 255 255 / 16%),
+          0 0 9px rgb(30 184 255 / 24%),
+          0 0 18px rgb(21 115 255 / 14%) !important;
+
+        opacity: 1 !important;
+        visibility: visible !important;
+
+        /* Screen makes the animated light visibly sit on top of
+           the blue PNG while preserving the robot artwork. */
+        mix-blend-mode: screen !important;
+
+        animation:
+          nosca-thinking-wave-vertical
+          1.55s
+          cubic-bezier(.45, 0, .55, 1)
+          infinite !important;
+      }
+
+      /* Add a subtle outer cyan pulse around the vertical tab while
+         processing, similar to the glowing outline of the old pill. */
+      #nexus-sidebar .nosca-launcher.has-desktop-robot.is-thinking::before {
+        content: "" !important;
+        position: absolute !important;
+        left: -3px !important;
+        bottom: 1px !important;
+        width: 64px !important;
+        height: 151px !important;
+        z-index: 5 !important;
+        pointer-events: none !important;
+
+        border: 2px solid rgb(83 228 255 / 64%) !important;
+        border-radius: 32px !important;
+
+        background: transparent !important;
+
+        box-shadow:
+          0 0 8px rgb(68 219 255 / 26%),
+          0 0 18px rgb(25 126 255 / 14%),
+          inset 0 0 9px rgb(71 218 255 / 9%) !important;
+
+        opacity: .62;
+        animation:
+          nosca-thinking-outline-pulse
+          1.55s
+          ease-in-out
+          infinite !important;
+      }
+
+      /* Robot activity remains deliberately subtle; the wave is now
+         the primary loading cue. */
+      #nexus-sidebar .nosca-launcher.has-desktop-robot.has-desktop-thinking.is-thinking
+        .nosca-desktop-robot-thinking {
+        animation:
+          nosca-thinking-character-soft
+          1.9s
+          ease-in-out
+          infinite !important;
+      }
+    }
+
+    @keyframes nosca-thinking-wave-vertical {
+      0% {
+        background-position:
+          0 0,
+          0 -160%;
+        filter: brightness(.94);
+      }
+
+      18% {
+        filter: brightness(1.08);
+      }
+
+      52% {
+        filter: brightness(1.18);
+      }
+
+      82% {
+        filter: brightness(1.05);
+      }
+
+      100% {
+        background-position:
+          0 0,
+          0 160%;
+        filter: brightness(.94);
+      }
+    }
+
+    @keyframes nosca-thinking-outline-pulse {
+      0%, 100% {
+        opacity: .46;
+        transform: scale(.985);
+      }
+
+      50% {
+        opacity: .86;
+        transform: scale(1.012);
+      }
+    }
+
+    @keyframes nosca-thinking-character-soft {
+      0%, 100% {
+        transform:
+          translate3d(0, 0, 0)
+          scale(1)
+          rotate(0deg);
+
+        filter:
+          drop-shadow(0 12px 20px rgb(0 72 185 / 18%))
+          brightness(1);
+      }
+
+      50% {
+        transform:
+          translate3d(1px, -1px, 0)
+          scale(1.006)
+          rotate(.18deg);
+
+        filter:
+          drop-shadow(0 14px 24px rgb(0 137 255 / 25%))
+          brightness(1.045);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      #nexus-sidebar .nosca-launcher.has-desktop-robot.is-thinking::after,
+      #nexus-sidebar .nosca-launcher.has-desktop-robot.is-thinking::before,
+      #nexus-sidebar .nosca-launcher.has-desktop-robot.has-desktop-thinking.is-thinking
+        .nosca-desktop-robot-thinking {
+        animation: none !important;
+      }
+
+      #nexus-sidebar .nosca-launcher.has-desktop-robot.is-thinking::after {
+        background-position:
+          0 0,
+          0 52% !important;
+        opacity: .42 !important;
+      }
+    }
+
+
+
+    /* =========================================================
+       ASK NOSCA — CLEAN VERTICAL LOADING WAVE
+       Fixes:
+       - removes oversized cyan capsule / outline
+       - constrains animation to the actual Ask NOSCA tab
+       - makes the scan band visibly travel top -> bottom
+       - moves thinking robot slightly farther into view
+       ========================================================= */
+    @media (min-width: 1200px) and (hover: hover) and (pointer: fine) {
+
+      /* Bring the visible robot/tab slightly farther into the viewport
+         while keeping it attached to the left edge. */
+      #nexus-sidebar .nosca-launcher.has-desktop-robot
+        .nosca-desktop-robot-thinking {
+        left: -12px !important;
+        bottom: 0 !important;
+        width: 124px !important;
+      }
+
+      /* Remove the previous large glowing outline completely. */
+      #nexus-sidebar .nosca-launcher.has-desktop-robot.is-thinking::before {
+        content: none !important;
+        display: none !important;
+        animation: none !important;
+        border: 0 !important;
+        box-shadow: none !important;
+        background: none !important;
+      }
+
+      /* Narrow scan overlay aligned only over the blue vertical tab. */
+      #nexus-sidebar .nosca-launcher.has-desktop-robot.is-thinking::after {
+        content: "" !important;
+        position: absolute !important;
+
+        left: 10px !important;
+        right: auto !important;
+        top: auto !important;
+        bottom: 5px !important;
+
+        display: block !important;
+        width: 39px !important;
+        height: 111px !important;
+
+        z-index: 7 !important;
+        pointer-events: none !important;
+
+        border: 0 !important;
+        border-radius: 20px !important;
+
+        /* Only the travelling light band is drawn.
+           No permanent outline or large background glow. */
+        background:
+          linear-gradient(
+            180deg,
+            transparent 0%,
+            transparent 33%,
+            rgb(21 126 255 / 5%) 38%,
+            rgb(23 185 255 / 20%) 43%,
+            rgb(53 227 255 / 58%) 47%,
+            rgb(197 252 255 / 94%) 50%,
+            rgb(62 231 255 / 66%) 53%,
+            rgb(28 180 255 / 25%) 58%,
+            rgb(20 108 255 / 7%) 63%,
+            transparent 68%,
+            transparent 100%
+          ) !important;
+
+        background-size: 100% 265% !important;
+        background-position: 0 -165% !important;
+
+        box-shadow:
+          inset 0 0 8px rgb(72 227 255 / 10%),
+          0 0 5px rgb(66 224 255 / 8%) !important;
+
+        opacity: 1 !important;
+        visibility: visible !important;
+
+        mix-blend-mode: screen !important;
+
+        animation:
+          nosca-clean-tab-wave
+          1.45s
+          linear
+          infinite !important;
+      }
+
+      /* Keep the mascot stable. The loading wave should be the main motion. */
+      #nexus-sidebar .nosca-launcher.has-desktop-robot.has-desktop-thinking.is-thinking
+        .nosca-desktop-robot-thinking {
+        animation:
+          nosca-thinking-gentle-breathe
+          2.1s
+          ease-in-out
+          infinite !important;
+      }
+    }
+
+    @keyframes nosca-clean-tab-wave {
+      0% {
+        background-position: 0 -165%;
+        opacity: .42;
+      }
+
+      12% {
+        opacity: .92;
+      }
+
+      50% {
+        opacity: 1;
+      }
+
+      88% {
+        opacity: .92;
+      }
+
+      100% {
+        background-position: 0 165%;
+        opacity: .42;
+      }
+    }
+
+    @keyframes nosca-thinking-gentle-breathe {
+      0%, 100% {
+        transform: translate3d(0, 0, 0) scale(1);
+        filter:
+          drop-shadow(0 11px 18px rgb(0 77 187 / 17%))
+          brightness(1);
+      }
+
+      50% {
+        transform: translate3d(0, -1px, 0) scale(1.004);
+        filter:
+          drop-shadow(0 12px 21px rgb(0 135 255 / 22%))
+          brightness(1.035);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      #nexus-sidebar .nosca-launcher.has-desktop-robot.is-thinking::after,
+      #nexus-sidebar .nosca-launcher.has-desktop-robot.has-desktop-thinking.is-thinking
+        .nosca-desktop-robot-thinking {
+        animation: none !important;
+      }
+
+      #nexus-sidebar .nosca-launcher.has-desktop-robot.is-thinking::after {
+        background-position: 0 50% !important;
+        opacity: .32 !important;
+      }
+    }
+
+
+
+    /* =========================================================
+       ASK NOSCA — PRE-INIT STATUS FLASH FIX
+       Prevent Thinking / Ready labels from appearing as normal
+       launcher text before desktop robot initialization finishes.
+       ========================================================= */
+
+    /* Always hide desktop-only status UI before the enhanced launcher
+       has initialized. This also prevents first-paint flashes. */
+    .nosca-desktop-status {
+      display: none !important;
+    }
+
+    @media (min-width: 1200px) and (hover: hover) and (pointer: fine) {
+
+      /* Only make status bubbles part of layout after robot mode
+         has actually initialized. They remain visually hidden until
+         their corresponding state becomes active. */
+      #nexus-sidebar .nosca-launcher.has-desktop-robot
+        .nosca-desktop-status {
+        display: inline-flex !important;
+      }
+
+      #nexus-sidebar .nosca-launcher.has-desktop-robot
+        .nosca-desktop-status-thinking,
+      #nexus-sidebar .nosca-launcher.has-desktop-robot
+        .nosca-desktop-status-success {
+        opacity: 0 !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+      }
+
+      #nexus-sidebar .nosca-launcher.has-desktop-robot.is-thinking
+        .nosca-desktop-status-thinking {
+        opacity: 1 !important;
+        visibility: visible !important;
+      }
+
+      #nexus-sidebar .nosca-launcher.has-desktop-robot.has-unread:not(.is-thinking)
+        .nosca-desktop-status-success {
+        opacity: 1 !important;
+        visibility: visible !important;
+      }
+    }
+
+
+
+    /* =========================================================
+       ASK NOSCA — 30% SMALLER HOVER / REVEAL STATE
+       Desktop only.
+       ========================================================= */
+    @media (min-width: 1200px) and (hover: hover) and (pointer: fine) {
+
+      /* Full hover robot + Ask NOSCA button: ~30% smaller */
+      #nexus-sidebar .nosca-launcher.has-desktop-robot
+        .nosca-desktop-robot-hover {
+        left: -10px !important;
+        bottom: -4px !important;
+        width: 225px !important;
+      }
+
+      /* Speech bubble scaled with the hover mascot */
+      #nexus-sidebar .nosca-launcher.has-desktop-robot
+        .nosca-desktop-tooltip {
+        left: 143px !important;
+        bottom: 74px !important;
+        width: 148px !important;
+      }
+    }
+
+
+
+    /* =========================================================
+       ASK NOSCA — HOVER STATE 30% REDUCTION
+       Correct interpretation: 70% of original size.
+       ========================================================= */
+    @media (min-width: 1200px) and (hover: hover) and (pointer: fine) {
+
+      #nexus-sidebar .nosca-launcher.has-desktop-robot
+        .nosca-desktop-robot-hover {
+        left: -10px !important;
+        bottom: -4px !important;
+        width: 225px !important;
+      }
+
+      #nexus-sidebar .nosca-launcher.has-desktop-robot
+        .nosca-desktop-tooltip {
+        left: 143px !important;
+        bottom: 74px !important;
+        width: 148px !important;
+      }
+    }
+
+
+
+    /* =========================================================
+       ASK NOSCA — THINKING STATE EDGE ATTACHMENT FIX
+       - keeps the thinking robot visibly attached to the left edge
+       - nudges the thinking status bubble closer to the robot
+       ========================================================= */
+    @media (min-width: 1200px) and (hover: hover) and (pointer: fine) {
+      #nexus-sidebar .nosca-launcher.has-desktop-robot.has-desktop-thinking.is-thinking
+        .nosca-desktop-robot-thinking {
+        left: -34px !important;
+        bottom: 0 !important;
+        width: 124px !important;
+      }
+
+      #nexus-sidebar .nosca-launcher.has-desktop-robot.is-thinking
+        .nosca-desktop-status-thinking {
+        left: 72px !important;
+        bottom: 94px !important;
+      }
+    }
+
 </style>

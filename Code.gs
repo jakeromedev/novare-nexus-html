@@ -46,11 +46,206 @@ function getServerStatus() {
 function getCurrentUser() {
   const email = String(Session.getActiveUser().getEmail() || '').trim();
 
-  return {
-    name: getDisplayNameFromEmail_(email),
+  console.log('[Nexus User Debug] getCurrentUser() started.');
+  console.log('[Nexus User Debug] Active user email:', email || '(blank)');
+
+  const fallbackName = getDisplayNameFromEmail_(email);
+  const peopleProfile = getCurrentUserPeopleProfile_(email);
+
+  const result = {
+    name: peopleProfile.name || fallbackName,
     email: email,
-    department: 'OneSCA'
+    department: 'OneSCA',
+    photoUrl: peopleProfile.photoUrl || '',
+    photoIsDefault: Boolean(peopleProfile.photoIsDefault)
   };
+
+  console.log('[Nexus User Debug] getCurrentUser() result:', JSON.stringify({
+    name: result.name,
+    email: result.email,
+    department: result.department,
+    hasPhotoUrl: Boolean(result.photoUrl),
+    photoIsDefault: result.photoIsDefault,
+    photoUrlPreview: result.photoUrl
+      ? result.photoUrl.substring(0, 120)
+      : ''
+  }));
+
+  return result;
+}
+
+/**
+ * Returns the signed-in Workspace user's People API profile when available.
+ *
+ * Safety behavior:
+ * - Requires a non-empty Session.getActiveUser() email.
+ * - Accepts People API data only when one of the returned email addresses
+ *   matches the active Apps Script user. This prevents accidentally showing
+ *   the deployer's profile when execution identity differs from the visitor.
+ * - Failure to enable/use the People API never breaks the navbar; initials
+ *   remain the frontend fallback.
+ *
+ * Apps Script setup:
+ * Services (+) -> People API -> Add
+ */
+function getCurrentUserPeopleProfile_(activeEmail) {
+  const fallback = {
+    name: '',
+    photoUrl: '',
+    photoIsDefault: false
+  };
+
+  const normalizedActiveEmail = String(activeEmail || '')
+    .trim()
+    .toLowerCase();
+
+  if (!normalizedActiveEmail) {
+    console.warn(
+      '[Nexus User Debug] Active email is blank. People API lookup skipped.'
+    );
+    return fallback;
+  }
+
+  try {
+    console.log(
+      '[Nexus User Debug] Starting People API lookup for:',
+      normalizedActiveEmail
+    );
+    const peopleServiceAvailable = Boolean(
+      typeof People !== 'undefined' &&
+      People &&
+      People.People &&
+      typeof People.People.get === 'function'
+    );
+
+    console.log(
+      '[Nexus User Debug] People advanced service available:',
+      peopleServiceAvailable
+    );
+
+    if (!peopleServiceAvailable) {
+      console.warn(
+        '[Nexus User Debug] People API is not available. ' +
+        'Enable Apps Script Services > People API.'
+      );
+      return fallback;
+    }
+
+    const person = People.People.get('people/me', {
+      personFields: 'names,emailAddresses,photos'
+    }) || {};
+
+    console.log('[Nexus User Debug] People API raw counts:', JSON.stringify({
+      names: Array.isArray(person.names) ? person.names.length : 0,
+      emailAddresses: Array.isArray(person.emailAddresses)
+        ? person.emailAddresses.length
+        : 0,
+      photos: Array.isArray(person.photos) ? person.photos.length : 0
+    }));
+
+    const peopleEmails = Array.isArray(person.emailAddresses)
+      ? person.emailAddresses
+          .map(function (entry) {
+            return String(
+              entry && entry.value ? entry.value : ''
+            ).trim().toLowerCase();
+          })
+          .filter(Boolean)
+      : [];
+
+    console.log(
+      '[Nexus User Debug] People API emails:',
+      JSON.stringify(peopleEmails)
+    );
+
+    const belongsToActiveUser = peopleEmails.some(function (value) {
+      return value === normalizedActiveEmail;
+    });
+
+    console.log(
+      '[Nexus User Debug] People API identity match:',
+      belongsToActiveUser
+    );
+
+    if (!belongsToActiveUser) {
+      console.warn(
+        '[Nexus User] People API identity did not match the active user; ' +
+        'profile photo was ignored.'
+      );
+      return fallback;
+    }
+
+    const names = Array.isArray(person.names)
+      ? person.names
+      : [];
+
+    const photos = Array.isArray(person.photos)
+      ? person.photos
+      : [];
+
+    const preferredName = names.find(function (entry) {
+      return Boolean(
+        entry &&
+        entry.displayName &&
+        entry.metadata &&
+        entry.metadata.primary
+      );
+    }) || names.find(function (entry) {
+      return Boolean(entry && entry.displayName);
+    });
+
+    const preferredPhoto = photos.find(function (entry) {
+      return Boolean(
+        entry &&
+        entry.url &&
+        entry.metadata &&
+        entry.metadata.primary
+      );
+    }) || photos.find(function (entry) {
+      return Boolean(entry && entry.url);
+    });
+
+    const resolvedProfile = {
+      name: preferredName
+        ? String(preferredName.displayName || '').trim()
+        : '',
+      photoUrl: preferredPhoto
+        ? String(preferredPhoto.url || '').trim()
+        : '',
+      photoIsDefault: Boolean(
+        preferredPhoto &&
+        preferredPhoto.default === true
+      )
+    };
+
+    console.log(
+      '[Nexus User Debug] Selected People profile:',
+      JSON.stringify({
+        name: resolvedProfile.name,
+        hasPhotoUrl: Boolean(resolvedProfile.photoUrl),
+        photoIsDefault: resolvedProfile.photoIsDefault,
+        photoUrlPreview: resolvedProfile.photoUrl
+          ? resolvedProfile.photoUrl.substring(0, 120)
+          : ''
+      })
+    );
+
+    return resolvedProfile;
+  } catch (error) {
+    console.error(
+      '[Nexus User Debug] People API lookup failed:',
+      error && error.stack
+        ? error.stack
+        : String(error)
+    );
+
+    console.warn(
+      '[Nexus User] Unable to load the Google profile picture. ' +
+      'Using initials fallback.'
+    );
+
+    return fallback;
+  }
 }
 
 /**

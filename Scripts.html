@@ -170,6 +170,26 @@
   const shellAssetRegistry = {
     "nexus-logo": {
       viewerUrl: "https://drive.google.com/file/d/1Bd_y884skBv0TUHV7kXjzZWZRnTQ6EGU/view?usp=drive_link"
+    },
+    "floating-ask-nosca-robot-idle": {
+      fileId: "1QlfOcW1jMxNQkj5Dof99qourbKirgKgP",
+      viewerUrl: "https://drive.google.com/file/d/1QlfOcW1jMxNQkj5Dof99qourbKirgKgP/view?usp=drive_link"
+    },
+    "floating-ask-nosca-robot-hover": {
+      fileId: "1WUcdd9hkqYJfNgQ3Btfjt5NmeWkK0vIL",
+      viewerUrl: "https://drive.google.com/file/d/1WUcdd9hkqYJfNgQ3Btfjt5NmeWkK0vIL/view?usp=drive_link"
+    },
+    "floating-ask-nosca-tooltip": {
+      fileId: "1xT8hDEQF7OdjI2AOTvr1lJ2SjEdX9T2Q",
+      viewerUrl: "https://drive.google.com/file/d/1xT8hDEQF7OdjI2AOTvr1lJ2SjEdX9T2Q/view?usp=drive_link"
+    },
+    "floating-ask-nosca-robot-thinking": {
+      fileId: "1VjPpxJIVzRQ36fWz_wbyDnZhKf3lF-tS",
+      viewerUrl: "https://drive.google.com/file/d/1VjPpxJIVzRQ36fWz_wbyDnZhKf3lF-tS/view?usp=drive_link"
+    },
+    "floating-ask-nosca-robot-success": {
+      fileId: "1EUVBRH-nplxux91ih5lFA6Bmp8oMf0rl",
+      viewerUrl: "https://drive.google.com/file/d/1EUVBRH-nplxux91ih5lFA6Bmp8oMf0rl/view?usp=drive_link"
     }
   };
 
@@ -4108,10 +4128,99 @@
   function initializeShellAssets() {
     const image = document.getElementById("nexus-logo-image");
     const fallback = document.getElementById("nexus-logo-fallback");
-    if (!image) return;
 
-    const asset = shellAssetRegistry[image.dataset.imageKey];
-    bindImageCandidates(image, fallback, getDriveImageCandidates(asset, 900));
+    if (image) {
+      const asset = shellAssetRegistry[image.dataset.imageKey];
+      bindImageCandidates(image, fallback, getDriveImageCandidates(asset, 900));
+    }
+
+    const launcher = document.getElementById("nosca-launcher");
+    const noscaDesktopAssets = [
+      {
+        image: document.getElementById("floating-ask-nosca-robot-idle-image"),
+        width: 720
+      },
+      {
+        image: document.getElementById("floating-ask-nosca-robot-hover-image"),
+        width: 1050
+      },
+      {
+        image: document.getElementById("floating-ask-nosca-tooltip-image"),
+        width: 760
+      },
+      {
+        image: document.getElementById("floating-ask-nosca-robot-thinking-image"),
+        width: 820
+      },
+      {
+        image: document.getElementById("floating-ask-nosca-robot-success-image"),
+        width: 820
+      }
+    ];
+
+    function refreshNoscaDesktopAssets() {
+      if (!launcher) return;
+
+      const idle = document.getElementById("floating-ask-nosca-robot-idle-image");
+      const hover = document.getElementById("floating-ask-nosca-robot-hover-image");
+      const tooltip = document.getElementById("floating-ask-nosca-tooltip-image");
+      const thinking = document.getElementById("floating-ask-nosca-robot-thinking-image");
+      const success = document.getElementById("floating-ask-nosca-robot-success-image");
+
+      function isAssetReady(image) {
+        return Boolean(
+          image &&
+          (
+            image.dataset.assetState === "loaded" ||
+            (image.complete && image.naturalWidth > 0)
+          )
+        );
+      }
+
+      const coreReady = Boolean(
+        isAssetReady(idle) &&
+        isAssetReady(hover)
+      );
+
+      launcher.classList.toggle("has-desktop-robot", coreReady);
+      launcher.classList.toggle(
+        "has-desktop-tooltip",
+        isAssetReady(tooltip)
+      );
+      launcher.classList.toggle(
+        "has-desktop-thinking",
+        isAssetReady(thinking)
+      );
+      launcher.classList.toggle(
+        "has-desktop-success",
+        isAssetReady(success)
+      );
+    }
+
+    noscaDesktopAssets.forEach(function (item) {
+      if (!item.image) return;
+
+      function scheduleNoscaDesktopAssetRefresh() {
+        // bindImageCandidates updates data-asset-state inside its onload handler.
+        // Deferring this check guarantees we evaluate the final loaded/error state.
+        window.requestAnimationFrame(refreshNoscaDesktopAssets);
+        window.setTimeout(refreshNoscaDesktopAssets, 0);
+      }
+
+      item.image.addEventListener("load", scheduleNoscaDesktopAssetRefresh);
+      item.image.addEventListener("error", scheduleNoscaDesktopAssetRefresh);
+
+      const asset = shellAssetRegistry[item.image.dataset.imageKey];
+      bindImageCandidates(
+        item.image,
+        null,
+        getDriveImageCandidates(asset, item.width)
+      );
+    });
+
+    refreshNoscaDesktopAssets();
+    window.setTimeout(refreshNoscaDesktopAssets, 120);
+    window.setTimeout(refreshNoscaDesktopAssets, 900);
   }
 
   const aiActionIcons = [
@@ -5734,7 +5843,9 @@
     getCurrentUserFallback() {
       return {
         name: currentUser.name,
-        email: currentUser.email
+        email: currentUser.email,
+        photoUrl: "",
+        photoIsDefault: false
       };
     },
 
@@ -5748,10 +5859,17 @@
 
       google.script.run
         .withSuccessHandler(function (user) {
+          console.log(
+            "[Nexus User Debug] Raw getCurrentUser() response:",
+            user
+          );
+
           const normalized = user && typeof user === "object"
             ? {
                 name: String(user.name || "").trim(),
-                email: String(user.email || "").trim()
+                email: String(user.email || "").trim(),
+                photoUrl: String(user.photoUrl || "").trim(),
+                photoIsDefault: user.photoIsDefault === true
               }
             : fallback;
 
@@ -5760,9 +5878,27 @@
           }
 
           if (!normalized.name) normalized.name = fallback.name;
+
+          console.log(
+            "[Nexus User Debug] Normalized current user:",
+            {
+              name: normalized.name,
+              email: normalized.email,
+              hasPhotoUrl: Boolean(normalized.photoUrl),
+              photoIsDefault: normalized.photoIsDefault,
+              photoUrlPreview: normalized.photoUrl
+                ? normalized.photoUrl.substring(0, 120)
+                : ""
+            }
+          );
+
           if (onSuccess) onSuccess(normalized);
         })
         .withFailureHandler(function (error) {
+          console.error(
+            "[Nexus User Debug] getCurrentUser() Apps Script call failed:",
+            error
+          );
           console.warn("Unable to load the signed-in Google user; using navbar fallback.", error);
           if (onFailure) onFailure(error);
           if (onSuccess) onSuccess(fallback);
@@ -6398,11 +6534,129 @@
       .toUpperCase() || "U";
   }
 
+  function renderUserAvatar(userAvatar, options) {
+    if (!userAvatar) return;
+
+    const data = options && typeof options === "object"
+      ? options
+      : {};
+
+    const displayName = String(data.displayName || "User").trim() || "User";
+    const email = String(data.email || "").trim();
+    const photoUrl = String(data.photoUrl || "").trim();
+    const photoIsDefault = data.photoIsDefault === true;
+
+    console.log(
+      "[Nexus User Debug] renderUserAvatar() called:",
+      {
+        displayName: displayName,
+        email: email,
+        hasPhotoUrl: Boolean(photoUrl),
+        photoIsDefault: photoIsDefault,
+        photoUrlPreview: photoUrl
+          ? photoUrl.substring(0, 120)
+          : ""
+      }
+    );
+
+    const renderInitials = function () {
+      userAvatar.textContent = getUserInitials({
+        name: displayName,
+        email: email
+      });
+
+      userAvatar.style.backgroundImage = "";
+      userAvatar.style.backgroundSize = "";
+      userAvatar.style.backgroundPosition = "";
+      userAvatar.style.backgroundRepeat = "";
+      userAvatar.classList.remove("has-profile-photo");
+      userAvatar.setAttribute(
+        "aria-label",
+        displayName + " avatar"
+      );
+    };
+
+    renderInitials();
+
+    // Keep the Nexus initials treatment when Google only returns its
+    // generic/default avatar.
+    if (!photoUrl) {
+      console.warn(
+        "[Nexus User Debug] No profile photo URL returned. Using initials."
+      );
+      return;
+    }
+
+    if (photoIsDefault) {
+      console.warn(
+        "[Nexus User Debug] Google returned a default profile image. " +
+        "Keeping initials fallback."
+      );
+      return;
+    }
+
+    console.log(
+      "[Nexus User Debug] Attempting to preload Google profile photo:",
+      photoUrl
+    );
+
+    const image = new Image();
+
+    image.onload = function () {
+      console.log(
+        "[Nexus User Debug] Profile photo loaded successfully:",
+        {
+          naturalWidth: image.naturalWidth,
+          naturalHeight: image.naturalHeight
+        }
+      );
+
+      if (!document.contains(userAvatar)) {
+        console.warn(
+          "[Nexus User Debug] Avatar element is no longer in the DOM."
+        );
+        return;
+      }
+
+      const safePhotoUrl = photoUrl.replace(/"/g, "%22");
+
+      userAvatar.textContent = "";
+      userAvatar.style.backgroundImage =
+        'url("' + safePhotoUrl + '")';
+      userAvatar.style.backgroundSize = "cover";
+      userAvatar.style.backgroundPosition = "center";
+      userAvatar.style.backgroundRepeat = "no-repeat";
+      userAvatar.classList.add("has-profile-photo");
+      userAvatar.setAttribute(
+        "aria-label",
+        displayName + " profile picture"
+      );
+    };
+
+    image.onerror = function (event) {
+      console.error(
+        "[Nexus User Debug] Profile photo failed to load in browser:",
+        {
+          photoUrl: photoUrl,
+          event: event
+        }
+      );
+      renderInitials();
+    };
+
+    console.log(
+      "[Nexus User Debug] Setting preloader image.src now."
+    );
+    image.src = photoUrl;
+  }
+
   function renderCurrentUser(user) {
     const fallback = NexusAPI.getCurrentUserFallback();
     const resolved = user && typeof user === "object" ? user : fallback;
     const displayName = String(resolved.name || resolved.email || fallback.name).trim() || fallback.name;
     const email = String(resolved.email || "").trim();
+    const photoUrl = String(resolved.photoUrl || "").trim();
+    const photoIsDefault = resolved.photoIsDefault === true;
     const userName = document.getElementById("user-name");
     const userEmail = document.getElementById("user-email");
     const userAvatar = document.getElementById("user-avatar");
@@ -6421,8 +6675,12 @@
     }
 
     if (userAvatar) {
-      userAvatar.textContent = getUserInitials({ name: displayName, email: email });
-      userAvatar.setAttribute("aria-label", displayName + " avatar");
+      renderUserAvatar(userAvatar, {
+        displayName: displayName,
+        email: email,
+        photoUrl: photoUrl,
+        photoIsDefault: photoIsDefault
+      });
     }
 
     if (userProfile) {
@@ -6443,6 +6701,11 @@
   }
 
   function initializeUser() {
+    console.log(
+      "[Nexus User Debug] initializeUser(); Apps Script available:",
+      NexusAPI.isAppsScriptAvailable()
+    );
+
     NexusAPI.getCurrentUser(
       function (user) {
         renderCurrentUser(user);

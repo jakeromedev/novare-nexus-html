@@ -1511,4 +1511,1413 @@
         align-self: end;
       }
     }
+
+
+    /* =========================================================
+       H6 GOVERNANCE — BEAUTIFIED 3x2 FRAMEWORKS V4
+       ========================================================= */
+
+    .governance-page .governance-frameworks-section {
+      position: relative !important;
+      z-index: 5 !important;
+      padding: 18px 20px 22px !important;
+      background:
+        radial-gradient(circle at 12% 0%, rgb(36 125 255 / 4%), transparent 23%),
+        linear-gradient(180deg, #F8FCFF 0%, #F5FAFF 100%) !important;
+    }
+
+    /* ---------- premium frameworks header ---------- */
+
+    .governance-page .governance-frameworks-header--visual {
+      position: relative !important;
+      display: grid !important;
+      grid-template-columns: minmax(0, 1.15fr) minmax(430px, .85fr) !important;
+      align-items: stretch !important;
+      gap: 18px !important;
+      min-height: 176px !important;
+      margin: 0 0 16px !important;
+      padding: 20px 22px 18px !important;
+      overflow: hidden !important;
+      border: 1px solid #CFE2F4 !important;
+      border-radius: 22px !important;
+      background:
+        radial-gradient(circle at 86% 6%, rgb(33 139 255 / 9%), transparent 27%),
+        linear-gradient(145deg, #FFFFFF 0%, #F0F8FF 100%) !important;
+      box-shadow:
+        0 14px 30px rgb(3 49 113 / 7%),
+        inset 0 1px 0 rgb(255 255 255 / 92%) !important;
+      isolation: isolate !important;
+    }
+
+    .governance-page .governance-frameworks-header--visual::before {
+      content: "" !important;
+      position: absolute !important;
+      z-index: 0 !important;
+      left: 42% !important;
+      right: -8% !important;
+      bottom: -85px !important;
+      height: 155px !important;
+      border-radius: 50% !important;
+      background: linear-gradient(90deg, rgb(29 126 255 / 5%), rgb(19 205 216 / 10%)) !important;
+      transform: rotate(-4deg) !important;
+      pointer-events: none !important;
+    }
+
+    .governance-page .governance-frameworks-header-copy {
+      position: relative !important;
+      z-index: 4 !important;
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: center !important;
+      min-width: 0 !important;
+      padding: 4px 0 2px 8px !important;
+    }
+
+    .governance-page .governance-frameworks-eyebrow {
+      margin: 0 0 9px !important;
+      color: #276BD9 !important;
+      font-size: .66rem !important;
+      font-weight: 880 !important;
+      line-height: 1 !important;
+      letter-spacing: .30em !important;
+    }
+
+    .governance-page .governance-frameworks-header--visual h2 {
+      margin: 0 !important;
+      color: #071F63 !important;
+      font-size: clamp(2.05rem, 2.35vw, 2.85rem) !important;
+      font-weight: 900 !important;
+      line-height: .98 !important;
+      letter-spacing: -.035em !important;
+      white-space: normal !important;
+    }
+
+    .governance-page .governance-frameworks-rule {
+      display: block !important;
+      width: 82px !important;
+      height: 4px !important;
+      margin: 13px 0 10px !important;
+      border-radius: 999px !important;
+      background: linear-gradient(90deg, #1766F4 0%, #1F91FF 52%, #10C9D8 100%) !important;
+    }
+
+    .governance-page .governance-frameworks-description {
+      max-width: 820px !important;
+      margin: 0 !important;
+      color: #506B93 !important;
+      font-size: .80rem !important;
+      font-weight: 560 !important;
+      line-height: 1.35 !important;
+      white-space: normal !important;
+      overflow-wrap: normal !important;
+    }
+
+    .governance-page .governance-frameworks-header-visual {
+      position: relative !important;
+      z-index: 2 !important;
+      min-width: 0 !important;
+      height: 138px !important;
+      align-self: center !important;
+      overflow: hidden !important;
+      border-radius: 20px !important;
+    }
+
+    .governance-page .governance-frameworks-header-visual::before {
+      content: "" !important;
+      position: absolute !important;
+      z-index: 3 !important;
+      inset: 0 !important;
+      pointer-events: none !important;
+      background: linear-gradient(90deg, #F4FAFF 0%, rgb(244 250 255 / 75%) 13%, transparent 40%) !important;
+    }
+
+    .governance-page .governance-frameworks-header-image,
+    .governance-page .governance-frameworks-header-fallback {
+      position: absolute !important;
+      inset: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+      border: 0 !important;
+      border-radius: inherit !important;
+    }
+
+    .governance-page .governance-frameworks-header-image {
+      display: block !important;
+      object-fit: cover !important;
+      object-position: center 44% !important;
+      transform: scale(1.04) !important;
+      filter: saturate(.94) contrast(.98) drop-shadow(0 12px 22px rgb(0 73 169 / 8%)) !important;
+    }
+
+    .governance-page .governance-frameworks-header-fallback {
+      background:
+        radial-gradient(circle at 74% 50%, rgb(31 132 255 / 16%), transparent 42%),
+        linear-gradient(145deg, #EDF7FF, #DDF1FF) !important;
+    }
+
+    /* ---------- 3 x 2 framework grid ---------- */
+
+    .governance-page .governance-frameworks-grid {
+      display: grid !important;
+      grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+      grid-auto-rows: 1fr !important;
+      gap: 16px !important;
+      align-items: stretch !important;
+    }
+
+    /* ---------- landscape cards ---------- */
+
+    .governance-page .governance-framework-card {
+      --gov-card-accent: #1766F4;
+      --gov-card-deep: #0F49CC;
+      --gov-card-soft: #EAF3FF;
+
+      position: relative !important;
+      display: grid !important;
+      grid-template-columns: 54px minmax(0, 1fr) 43% !important;
+      grid-template-rows: minmax(0, 1fr) !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      height: 306px !important;
+      min-height: 306px !important;
+      max-height: 306px !important;
+      overflow: hidden !important;
+      border: 1px solid color-mix(in srgb, var(--gov-card-accent) 20%, #D8E7F4) !important;
+      border-radius: 20px !important;
+      background:
+        radial-gradient(circle at 85% 24%, color-mix(in srgb, var(--gov-card-accent) 8%, transparent), transparent 33%),
+        linear-gradient(145deg, #FFFFFF 0%, color-mix(in srgb, var(--gov-card-soft) 38%, white) 100%) !important;
+      box-shadow:
+        0 12px 25px rgb(3 49 113 / 6%),
+        inset 0 1px 0 rgb(255 255 255 / 92%) !important;
+      transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease !important;
+      isolation: isolate !important;
+    }
+
+    .governance-page .governance-framework-card.is-teal {
+      --gov-card-accent: #0BAFA4;
+      --gov-card-deep: #087D7F;
+      --gov-card-soft: #E7FAF8;
+    }
+
+    .governance-page .governance-framework-card.is-blue {
+      --gov-card-accent: #1766F4;
+      --gov-card-deep: #0F49CC;
+      --gov-card-soft: #EAF3FF;
+    }
+
+    .governance-page .governance-framework-card.is-purple {
+      --gov-card-accent: #7836EC;
+      --gov-card-deep: #5D23CF;
+      --gov-card-soft: #F2EBFF;
+    }
+
+    .governance-page .governance-framework-card.is-orange {
+      --gov-card-accent: #FF5A1F;
+      --gov-card-deep: #E63D12;
+      --gov-card-soft: #FFF0E8;
+    }
+
+    .governance-page .governance-framework-card.is-cyan {
+      --gov-card-accent: #08AFC4;
+      --gov-card-deep: #087F99;
+      --gov-card-soft: #E8F9FC;
+    }
+
+    .governance-page .governance-framework-card::after {
+      content: "" !important;
+      position: absolute !important;
+      z-index: 0 !important;
+      left: -8% !important;
+      right: -4% !important;
+      bottom: -83px !important;
+      height: 120px !important;
+      border-radius: 50% !important;
+      background: color-mix(in srgb, var(--gov-card-accent) 7%, transparent) !important;
+      pointer-events: none !important;
+      transform: rotate(2deg) !important;
+    }
+
+    .governance-page .governance-card-number {
+      position: relative !important;
+      z-index: 5 !important;
+      grid-column: 1 !important;
+      grid-row: 1 !important;
+      align-self: start !important;
+      justify-self: center !important;
+      top: auto !important;
+      left: auto !important;
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      margin-top: 19px !important;
+      color: var(--gov-card-deep) !important;
+      font-size: 1.40rem !important;
+      font-weight: 900 !important;
+      line-height: 1 !important;
+      text-shadow: none !important;
+    }
+
+    .governance-page .governance-card-number::after {
+      content: "" !important;
+      display: block !important;
+      width: 28px !important;
+      height: 3px !important;
+      margin-top: 12px !important;
+      border-radius: 999px !important;
+      background: linear-gradient(90deg, var(--gov-card-accent), color-mix(in srgb, var(--gov-card-accent) 58%, #6FE5EE)) !important;
+    }
+
+    .governance-page .governance-card-body {
+      position: relative !important;
+      z-index: 4 !important;
+      grid-column: 2 !important;
+      grid-row: 1 !important;
+      display: grid !important;
+      grid-template-rows: auto auto minmax(0, 1fr) auto !important;
+      align-content: stretch !important;
+      min-width: 0 !important;
+      min-height: 0 !important;
+      padding: 20px 8px 16px 0 !important;
+    }
+
+    .governance-page .governance-card-body h3 {
+      display: block !important;
+      min-height: 0 !important;
+      margin: 0 !important;
+      color: #071F63 !important;
+      font-size: .96rem !important;
+      font-weight: 900 !important;
+      line-height: 1.04 !important;
+      letter-spacing: -.022em !important;
+      overflow-wrap: normal !important;
+      word-break: normal !important;
+      hyphens: none !important;
+    }
+
+    .governance-page .governance-card-description {
+      min-height: 0 !important;
+      max-width: 295px !important;
+      margin: 8px 0 0 !important;
+      color: #4F678B !important;
+      font-size: .64rem !important;
+      font-weight: 560 !important;
+      line-height: 1.30 !important;
+      overflow-wrap: normal !important;
+      word-break: normal !important;
+    }
+
+    .governance-page .governance-card-visual {
+      position: relative !important;
+      z-index: 1 !important;
+      grid-column: 3 !important;
+      grid-row: 1 !important;
+      width: 100% !important;
+      height: 100% !important;
+      min-height: 0 !important;
+      overflow: hidden !important;
+      border-radius: 48% 19px 19px 42% !important;
+      background: var(--gov-card-soft) !important;
+    }
+
+    .governance-page .governance-card-visual::after {
+      content: "" !important;
+      position: absolute !important;
+      z-index: 3 !important;
+      inset: 0 !important;
+      pointer-events: none !important;
+      background: linear-gradient(90deg, #FFFFFF 0%, rgb(255 255 255 / 82%) 8%, rgb(255 255 255 / 28%) 28%, transparent 58%) !important;
+    }
+
+    .governance-page .governance-card-visual img,
+    .governance-page .governance-card-fallback {
+      position: absolute !important;
+      inset: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+      border-radius: inherit !important;
+    }
+
+    .governance-page .governance-card-visual img {
+      object-fit: cover !important;
+      object-position: center !important;
+      transform: scale(1.03) !important;
+      transition: transform 300ms cubic-bezier(.2,.75,.2,1), filter 220ms ease !important;
+    }
+
+    .governance-page .governance-resource-list {
+      display: grid !important;
+      grid-template-rows: repeat(4, minmax(24px, auto)) !important;
+      align-content: start !important;
+      gap: 3px !important;
+      min-height: 0 !important;
+      margin: 10px 0 8px !important;
+      padding: 0 !important;
+    }
+
+    .governance-page .governance-resource-list li {
+      position: relative !important;
+      display: grid !important;
+      grid-template-columns: 22px minmax(0, 1fr) 12px !important;
+      align-items: center !important;
+      gap: 6px !important;
+      min-width: 0 !important;
+      min-height: 24px !important;
+      padding: 0 !important;
+      color: #214B9E !important;
+      font-size: .60rem !important;
+      font-weight: 650 !important;
+      line-height: 1.12 !important;
+      overflow-wrap: normal !important;
+      word-break: normal !important;
+    }
+
+    .governance-page .governance-resource-icon {
+      width: 19px !important;
+      height: 21px !important;
+      border-radius: 5px !important;
+      color: var(--gov-card-deep) !important;
+      background: color-mix(in srgb, var(--gov-card-accent) 10%, white) !important;
+      box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--gov-card-accent) 13%, #E1EAF4) !important;
+    }
+
+    .governance-page .governance-resource-icon svg {
+      width: 12px !important;
+      height: 12px !important;
+    }
+
+    .governance-page .governance-resource-list li::before {
+      content: none !important;
+      display: none !important;
+    }
+
+    .governance-page .governance-resource-list li::after {
+      content: "›" !important;
+      display: block !important;
+      grid-column: 3 !important;
+      justify-self: end !important;
+      color: var(--gov-card-accent) !important;
+      font-size: .96rem !important;
+      line-height: 1 !important;
+    }
+
+    .governance-page .governance-card-cta {
+      justify-self: start !important;
+      width: auto !important;
+      min-width: 150px !important;
+      min-height: 36px !important;
+      margin: 4px 0 0 !important;
+      padding: 0 16px !important;
+      border: 1px solid color-mix(in srgb, var(--gov-card-accent) 20%, #D8E7F4) !important;
+      border-radius: 999px !important;
+      color: var(--gov-card-deep) !important;
+      background: color-mix(in srgb, var(--gov-card-accent) 7%, white) !important;
+      box-shadow:
+        0 4px 11px rgb(3 49 113 / 4%),
+        inset 0 1px 0 rgb(255 255 255 / 88%) !important;
+      font-size: .61rem !important;
+      font-weight: 820 !important;
+      transition: transform 160ms ease, background 160ms ease, border-color 160ms ease, box-shadow 160ms ease !important;
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      .governance-page .governance-framework-card:hover {
+        transform: translateY(-3px) !important;
+        border-color: color-mix(in srgb, var(--gov-card-accent) 38%, #D8E7F4) !important;
+        box-shadow:
+          0 17px 32px rgb(3 49 113 / 10%),
+          inset 0 1px 0 rgb(255 255 255 / 94%) !important;
+      }
+
+      .governance-page .governance-framework-card:hover .governance-card-visual img {
+        transform: scale(1.055) !important;
+        filter: saturate(1.04) contrast(1.02) !important;
+      }
+
+      .governance-page .governance-card-cta:hover {
+        transform: translateY(-1px) !important;
+        border-color: color-mix(in srgb, var(--gov-card-accent) 38%, #D8E7F4) !important;
+        background: #FFFFFF !important;
+        box-shadow: 0 7px 15px rgb(3 49 113 / 7%) !important;
+      }
+    }
+
+    /* ---------- responsive ---------- */
+
+    @media (min-width: 901px) and (max-width: 1250px) {
+      .governance-page .governance-frameworks-header--visual {
+        grid-template-columns: minmax(0, 1fr) minmax(330px, .75fr) !important;
+        min-height: 164px !important;
+      }
+
+      .governance-page .governance-frameworks-header-visual {
+        height: 126px !important;
+      }
+
+      .governance-page .governance-frameworks-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 14px !important;
+      }
+
+      .governance-page .governance-framework-card {
+        grid-template-columns: 52px minmax(0, 1fr) 42% !important;
+        height: 300px !important;
+        min-height: 300px !important;
+        max-height: 300px !important;
+      }
+    }
+
+    @media (min-width: 621px) and (max-width: 900px) {
+      .governance-page .governance-frameworks-section {
+        padding-inline: 14px !important;
+      }
+
+      .governance-page .governance-frameworks-header--visual {
+        grid-template-columns: minmax(0, 1fr) 34% !important;
+        min-height: 152px !important;
+        padding: 18px !important;
+      }
+
+      .governance-page .governance-frameworks-eyebrow {
+        font-size: .58rem !important;
+      }
+
+      .governance-page .governance-frameworks-header--visual h2 {
+        font-size: 1.80rem !important;
+      }
+
+      .governance-page .governance-frameworks-description {
+        font-size: .70rem !important;
+      }
+
+      .governance-page .governance-frameworks-header-visual {
+        height: 112px !important;
+      }
+
+      .governance-page .governance-frameworks-grid {
+        grid-template-columns: minmax(0, 1fr) !important;
+        gap: 12px !important;
+      }
+
+      .governance-page .governance-framework-card {
+        grid-template-columns: 52px minmax(0, 1fr) 40% !important;
+        height: 292px !important;
+        min-height: 292px !important;
+        max-height: 292px !important;
+      }
+    }
+
+    @media (max-width: 620px) {
+      .governance-page .governance-frameworks-section {
+        padding: 14px 10px 18px !important;
+      }
+
+      .governance-page .governance-frameworks-header--visual {
+        display: block !important;
+        min-height: auto !important;
+        margin-bottom: 12px !important;
+        padding: 17px 16px !important;
+        border-radius: 18px !important;
+      }
+
+      .governance-page .governance-frameworks-header-copy {
+        padding: 0 !important;
+      }
+
+      .governance-page .governance-frameworks-eyebrow {
+        margin-bottom: 7px !important;
+        font-size: .54rem !important;
+      }
+
+      .governance-page .governance-frameworks-header--visual h2 {
+        font-size: 1.55rem !important;
+      }
+
+      .governance-page .governance-frameworks-rule {
+        width: 58px !important;
+        height: 3px !important;
+        margin: 10px 0 8px !important;
+      }
+
+      .governance-page .governance-frameworks-description {
+        max-width: 100% !important;
+        font-size: .67rem !important;
+      }
+
+      .governance-page .governance-frameworks-header-visual {
+        display: none !important;
+      }
+
+      .governance-page .governance-frameworks-grid {
+        grid-template-columns: minmax(0, 1fr) !important;
+        gap: 10px !important;
+      }
+
+      .governance-page .governance-framework-card {
+        grid-template-columns: 44px minmax(0, 1fr) !important;
+        grid-template-rows: auto 150px !important;
+        height: auto !important;
+        min-height: 360px !important;
+        max-height: none !important;
+        border-radius: 17px !important;
+      }
+
+      .governance-page .governance-card-number {
+        grid-column: 1 !important;
+        grid-row: 1 !important;
+        margin-top: 16px !important;
+        font-size: 1.10rem !important;
+      }
+
+      .governance-page .governance-card-number::after {
+        width: 22px !important;
+        margin-top: 8px !important;
+      }
+
+      .governance-page .governance-card-body {
+        grid-column: 2 !important;
+        grid-row: 1 !important;
+        padding: 16px 12px 12px 0 !important;
+      }
+
+      .governance-page .governance-card-body h3 {
+        font-size: .86rem !important;
+      }
+
+      .governance-page .governance-card-description {
+        font-size: .61rem !important;
+      }
+
+      .governance-page .governance-card-visual {
+        grid-column: 1 / -1 !important;
+        grid-row: 2 !important;
+        width: 100% !important;
+        height: 150px !important;
+        border-radius: 0 0 17px 17px !important;
+      }
+
+      .governance-page .governance-card-visual::after {
+        background: linear-gradient(180deg, #FFFFFF 0%, rgb(255 255 255 / 26%) 28%, transparent 62%) !important;
+      }
+
+      .governance-page .governance-resource-list {
+        grid-template-rows: repeat(4, minmax(22px, auto)) !important;
+        margin-top: 8px !important;
+      }
+
+      .governance-page .governance-resource-list li {
+        min-height: 22px !important;
+        font-size: .58rem !important;
+      }
+
+      .governance-page .governance-card-cta {
+        min-width: 135px !important;
+        min-height: 34px !important;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .governance-page .governance-framework-card,
+      .governance-page .governance-card-visual img,
+      .governance-page .governance-card-cta {
+        transition: none !important;
+      }
+
+      .governance-page .governance-framework-card:hover,
+      .governance-page .governance-framework-card:hover .governance-card-visual img,
+      .governance-page .governance-card-cta:hover {
+        transform: none !important;
+      }
+    }
+
+
+
+
+/* =========================================================
+   Governance frameworks header asset swap + card background refinement
+   - uses governance-frameworks-header-visual asset
+   - removes stark white card surfaces behind the framework content
+========================================================= */
+
+.governance-page .governance-frameworks-header--visual {
+  grid-template-columns: minmax(0, 1.12fr) minmax(470px, .88fr) !important;
+  background:
+    radial-gradient(circle at 88% 8%, rgb(37 128 255 / 10%), transparent 29%),
+    linear-gradient(145deg, #FFFFFF 0%, #F2F8FF 100%) !important;
+}
+
+.governance-page .governance-frameworks-header-visual {
+  height: 146px !important;
+  border-radius: 22px !important;
+}
+
+.governance-page .governance-frameworks-header-image {
+  object-position: center 50% !important;
+  transform: scale(1.02) !important;
+  filter: saturate(.98) contrast(.99) drop-shadow(0 14px 22px rgb(0 73 169 / 9%)) !important;
+}
+
+.governance-page .governance-framework-card {
+  background:
+    radial-gradient(circle at 86% 18%, color-mix(in srgb, var(--gov-card-accent) 10%, transparent), transparent 34%),
+    linear-gradient(145deg,
+      color-mix(in srgb, var(--gov-card-soft) 72%, white) 0%,
+      color-mix(in srgb, var(--gov-card-soft) 92%, white) 100%) !important;
+  box-shadow:
+    0 12px 24px rgb(3 49 113 / 5%),
+    inset 0 1px 0 rgb(255 255 255 / 70%) !important;
+  backdrop-filter: blur(7px) !important;
+}
+
+.governance-page .governance-framework-card::before {
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 0 !important;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 18%) 0%, rgb(255 255 255 / 4%) 100%),
+    linear-gradient(90deg, color-mix(in srgb, var(--gov-card-accent) 3%, transparent), transparent 30%) !important;
+  pointer-events: none !important;
+}
+
+.governance-page .governance-card-body,
+.governance-page .governance-resource-list,
+.governance-page .governance-resource-list li {
+  background: transparent !important;
+}
+
+.governance-page .governance-card-visual {
+  background: color-mix(in srgb, var(--gov-card-soft) 78%, white) !important;
+}
+
+.governance-page .governance-card-visual::after {
+  background: linear-gradient(90deg, rgb(255 255 255 / 36%) 0%, rgb(255 255 255 / 16%) 18%, transparent 54%) !important;
+}
+
+@media (min-width: 901px) and (max-width: 1250px) {
+  .governance-page .governance-frameworks-header--visual {
+    grid-template-columns: minmax(0, 1fr) minmax(360px, .76fr) !important;
+  }
+
+  .governance-page .governance-frameworks-header-visual {
+    height: 134px !important;
+  }
+}
+
+@media (min-width: 621px) and (max-width: 900px) {
+  .governance-page .governance-frameworks-header-visual {
+    height: 116px !important;
+  }
+}
+
+
+/* =========================================================
+   Governance card visual edge fade refinement
+   - removes the obvious curved cutout on card images
+   - replaces it with a softer fade from content area to image
+========================================================= */
+
+.governance-page .governance-card-visual {
+  border-radius: 0 19px 19px 0 !important;
+  background:
+    linear-gradient(90deg,
+      color-mix(in srgb, var(--gov-card-soft) 96%, white) 0%,
+      color-mix(in srgb, var(--gov-card-soft) 90%, white) 12%,
+      color-mix(in srgb, var(--gov-card-soft) 62%, white) 24%,
+      transparent 42%) !important;
+}
+
+.governance-page .governance-card-visual::after {
+  background:
+    linear-gradient(90deg,
+      color-mix(in srgb, var(--gov-card-soft) 98%, white) 0%,
+      rgb(255 255 255 / 88%) 8%,
+      rgb(255 255 255 / 58%) 18%,
+      rgb(255 255 255 / 22%) 32%,
+      transparent 46%),
+    linear-gradient(180deg,
+      rgb(255 255 255 / 0%) 0%,
+      rgb(255 255 255 / 8%) 100%) !important;
+}
+
+.governance-page .governance-card-visual img,
+.governance-page .governance-card-fallback {
+  border-radius: 0 19px 19px 0 !important;
+}
+
+.governance-page .governance-card-visual img {
+  object-position: center center !important;
+  transform: scale(1.035) !important;
+}
+
+@media (max-width: 900px) {
+  .governance-page .governance-card-visual,
+  .governance-page .governance-card-visual img,
+  .governance-page .governance-card-fallback {
+    border-radius: 0 0 17px 17px !important;
+  }
+
+  .governance-page .governance-card-visual::after {
+    background:
+      linear-gradient(180deg,
+        color-mix(in srgb, var(--gov-card-soft) 96%, white) 0%,
+        rgb(255 255 255 / 42%) 18%,
+        transparent 54%) !important;
+  }
+}
+
+
+/* =========================================================
+   Governance card image fade V2
+   True transparency mask for a broad, seamless content-to-image fade.
+   The image extends beneath the copy instead of beginning at a hard edge.
+========================================================= */
+
+@media (min-width: 901px) {
+  .governance-page .governance-framework-card {
+    /* Keep the existing content grid while allowing the image to extend
+       underneath the right side of the content area. */
+    position: relative !important;
+  }
+
+  .governance-page .governance-card-visual {
+    position: absolute !important;
+    z-index: 1 !important;
+    top: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    left: auto !important;
+
+    /* Start the artwork around 42% of the card so the fade has room to breathe. */
+    width: 58% !important;
+    height: 100% !important;
+    min-height: 0 !important;
+
+    overflow: hidden !important;
+    border-radius: 0 19px 19px 0 !important;
+    background: transparent !important;
+    pointer-events: none !important;
+  }
+
+  .governance-page .governance-card-visual::after {
+    /* No white curtain over the image. Keep only a very light finishing glaze. */
+    content: "" !important;
+    position: absolute !important;
+    z-index: 3 !important;
+    inset: 0 !important;
+    pointer-events: none !important;
+    background:
+      linear-gradient(180deg,
+        rgb(255 255 255 / 3%) 0%,
+        transparent 36%,
+        rgb(255 255 255 / 4%) 100%) !important;
+  }
+
+  .governance-page .governance-card-visual img,
+  .governance-page .governance-card-fallback {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 0 19px 19px 0 !important;
+
+    /* True alpha fade. The theme-colored card surface shows through naturally. */
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent 0%,
+      rgb(0 0 0 / 4%) 8%,
+      rgb(0 0 0 / 12%) 16%,
+      rgb(0 0 0 / 28%) 26%,
+      rgb(0 0 0 / 50%) 38%,
+      rgb(0 0 0 / 72%) 49%,
+      rgb(0 0 0 / 90%) 59%,
+      #000 70%,
+      #000 100%
+    ) !important;
+    mask-image: linear-gradient(
+      to right,
+      transparent 0%,
+      rgb(0 0 0 / 4%) 8%,
+      rgb(0 0 0 / 12%) 16%,
+      rgb(0 0 0 / 28%) 26%,
+      rgb(0 0 0 / 50%) 38%,
+      rgb(0 0 0 / 72%) 49%,
+      rgb(0 0 0 / 90%) 59%,
+      #000 70%,
+      #000 100%
+    ) !important;
+    -webkit-mask-repeat: no-repeat !important;
+    mask-repeat: no-repeat !important;
+    -webkit-mask-size: 100% 100% !important;
+    mask-size: 100% 100% !important;
+  }
+
+  .governance-page .governance-card-visual img {
+    display: block !important;
+    object-fit: cover !important;
+    object-position: center center !important;
+    transform: scale(1.035) !important;
+    filter: saturate(.98) contrast(.99) !important;
+  }
+
+  /* Keep all interactive/card content safely above the image. */
+  .governance-page .governance-card-number,
+  .governance-page .governance-card-body {
+    position: relative !important;
+    z-index: 5 !important;
+  }
+}
+
+/* Tablet/mobile: retain a vertical fade because the artwork moves below content. */
+@media (max-width: 900px) {
+  .governance-page .governance-card-visual {
+    position: relative !important;
+    width: 100% !important;
+    height: 150px !important;
+    border-radius: 0 0 17px 17px !important;
+    background: transparent !important;
+  }
+
+  .governance-page .governance-card-visual img,
+  .governance-page .governance-card-fallback {
+    border-radius: 0 0 17px 17px !important;
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      transparent 0%,
+      rgb(0 0 0 / 24%) 18%,
+      rgb(0 0 0 / 62%) 36%,
+      #000 56%,
+      #000 100%
+    ) !important;
+    mask-image: linear-gradient(
+      to bottom,
+      transparent 0%,
+      rgb(0 0 0 / 24%) 18%,
+      rgb(0 0 0 / 62%) 36%,
+      #000 56%,
+      #000 100%
+    ) !important;
+  }
+
+  .governance-page .governance-card-visual::after {
+    background: transparent !important;
+  }
+}
+
+
+/* =========================================================
+   Governance hero-to-content seam fix
+   - restores the shared Nexus desktop hero overlap
+   - removes the visible section background strip below the hero
+========================================================= */
+
+@media (min-width: 768px) {
+  .governance-page .governance-frameworks-section {
+    position: relative !important;
+    z-index: 5 !important;
+    margin-top: -82px !important;
+    padding-top: 12px !important;
+    background: transparent !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .governance-page .governance-frameworks-section {
+    margin-top: 0 !important;
+    background: transparent !important;
+  }
+}
+
+
+
+/* =========================================================
+   GOVERNANCE FRAMEWORKS — COMPACT DESKTOP REFINEMENT
+   Slightly reduces overall height while preserving the 3x2
+   visual hierarchy, card identity, image fade and readability.
+========================================================= */
+
+@media (min-width: 1251px) {
+  .governance-page .governance-frameworks-grid {
+    gap: 14px !important;
+  }
+
+  .governance-page .governance-framework-card {
+    height: 274px !important;
+    min-height: 274px !important;
+    max-height: 274px !important;
+    grid-template-columns: 50px minmax(0, 1fr) 40% !important;
+    border-radius: 18px !important;
+  }
+
+  .governance-page .governance-card-number {
+    margin-top: 16px !important;
+    font-size: 1.23rem !important;
+  }
+
+  .governance-page .governance-card-number::after {
+    width: 25px !important;
+    height: 3px !important;
+    margin-top: 9px !important;
+  }
+
+  .governance-page .governance-card-body {
+    padding: 16px 7px 13px 0 !important;
+    grid-template-rows: auto auto minmax(0, 1fr) auto !important;
+  }
+
+  .governance-page .governance-card-body h3 {
+    font-size: .90rem !important;
+    line-height: 1.03 !important;
+  }
+
+  .governance-page .governance-card-description {
+    max-width: 280px !important;
+    margin-top: 6px !important;
+    font-size: .61rem !important;
+    line-height: 1.27 !important;
+  }
+
+  .governance-page .governance-resource-list {
+    grid-template-rows: repeat(4, minmax(21px, auto)) !important;
+    gap: 2px !important;
+    margin: 7px 0 6px !important;
+  }
+
+  .governance-page .governance-resource-list li {
+    grid-template-columns: 20px minmax(0, 1fr) 11px !important;
+    gap: 5px !important;
+    min-height: 21px !important;
+    font-size: .57rem !important;
+    line-height: 1.08 !important;
+  }
+
+  .governance-page .governance-resource-icon {
+    width: 18px !important;
+    height: 19px !important;
+    border-radius: 5px !important;
+  }
+
+  .governance-page .governance-resource-icon svg {
+    width: 11px !important;
+    height: 11px !important;
+  }
+
+  .governance-page .governance-resource-list li::after {
+    font-size: .88rem !important;
+  }
+
+  .governance-page .governance-card-cta {
+    min-width: 138px !important;
+    min-height: 32px !important;
+    margin-top: 2px !important;
+    padding: 0 14px !important;
+    font-size: .58rem !important;
+  }
+
+  .governance-page .governance-card-visual {
+    width: 55% !important;
+    border-radius: 0 17px 17px 0 !important;
+  }
+
+  .governance-page .governance-card-visual img,
+  .governance-page .governance-card-fallback {
+    border-radius: 0 17px 17px 0 !important;
+  }
+
+  .governance-page .governance-card-visual img {
+    transform: scale(1.03) !important;
+  }
+
+  .governance-page .governance-framework-card::after {
+    bottom: -88px !important;
+    height: 108px !important;
+  }
+}
+
+@media (min-width: 901px) and (max-width: 1250px) {
+  .governance-page .governance-framework-card {
+    height: 276px !important;
+    min-height: 276px !important;
+    max-height: 276px !important;
+  }
+
+  .governance-page .governance-card-body {
+    padding-top: 16px !important;
+    padding-bottom: 13px !important;
+  }
+
+  .governance-page .governance-resource-list {
+    margin-top: 7px !important;
+    margin-bottom: 6px !important;
+  }
+
+  .governance-page .governance-card-cta {
+    min-height: 33px !important;
+  }
+}
+
+@media (max-width: 620px) {
+  .governance-page .governance-framework-card {
+    min-height: 340px !important;
+  }
+
+  .governance-page .governance-card-visual {
+    height: 138px !important;
+  }
+
+  .governance-page .governance-card-body {
+    padding-top: 14px !important;
+  }
+}
+
+
+
+/* =========================================================
+   GOVERNANCE QUICK ACCESS — BEAUTIFIED 3 x 2 REFINEMENT
+========================================================= */
+
+.governance-page .governance-quick-access {
+  position: relative !important;
+  overflow: hidden !important;
+  margin: 18px 20px 18px !important;
+  padding: 16px 18px 18px !important;
+  border: 1px solid #D4E5F5 !important;
+  border-radius: 20px !important;
+  background:
+    radial-gradient(circle at 92% 8%, rgb(64 146 255 / 7%), transparent 28%),
+    linear-gradient(145deg, #FFFFFF 0%, #F5FAFF 100%) !important;
+  box-shadow:
+    0 12px 26px rgb(3 49 113 / 6%),
+    inset 0 1px 0 rgb(255 255 255 / 88%) !important;
+  isolation: isolate !important;
+}
+
+.governance-page .governance-quick-access::before {
+  content: "" !important;
+  position: absolute !important;
+  z-index: 0 !important;
+  left: 32% !important;
+  right: -7% !important;
+  bottom: -78px !important;
+  height: 118px !important;
+  border-radius: 50% !important;
+  background:
+    linear-gradient(
+      90deg,
+      rgb(33 116 255 / 4%),
+      rgb(18 201 215 / 7%)
+    ) !important;
+  transform: rotate(-2deg) !important;
+  pointer-events: none !important;
+}
+
+.governance-page .governance-quick-access > * {
+  position: relative !important;
+  z-index: 2 !important;
+}
+
+.governance-page .governance-quick-access-header {
+  margin: 0 0 14px !important;
+}
+
+.governance-page .governance-quick-access-title-group {
+  display: grid !important;
+  grid-template-columns: 54px minmax(0, 1fr) !important;
+  grid-template-rows: auto auto !important;
+  align-items: center !important;
+  column-gap: 13px !important;
+  row-gap: 2px !important;
+}
+
+.governance-page .governance-quick-bolt {
+  grid-column: 1 !important;
+  grid-row: 1 / 3 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 52px !important;
+  height: 52px !important;
+  border-radius: 14px !important;
+  color: #FFFFFF !important;
+  background:
+    linear-gradient(
+      145deg,
+      #2C7FFF 0%,
+      #185DEB 66%,
+      #1146C9 100%
+    ) !important;
+  box-shadow:
+    0 9px 18px rgb(31 97 232 / 18%),
+    inset 0 1px 0 rgb(255 255 255 / 26%) !important;
+  font-size: 1.65rem !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+  transform: none !important;
+}
+
+.governance-page .governance-quick-access-title-group h2 {
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+  align-self: end !important;
+  margin: 0 !important;
+  color: #071F63 !important;
+  font-size: 1.28rem !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+  letter-spacing: -.02em !important;
+}
+
+.governance-page .governance-quick-access-title-group p {
+  grid-column: 2 !important;
+  grid-row: 2 !important;
+  align-self: start !important;
+  width: auto !important;
+  margin: 4px 0 0 !important;
+  color: #5A7398 !important;
+  font-size: .72rem !important;
+  font-weight: 560 !important;
+  line-height: 1.2 !important;
+}
+
+.governance-page .governance-quick-access-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  grid-template-rows: repeat(2, minmax(72px, auto)) !important;
+  gap: 10px 12px !important;
+}
+
+.governance-page .governance-quick-card {
+  --quick-accent: #216CF3;
+  --quick-deep: #1554D0;
+  --quick-tint: #EAF4FF;
+
+  position: relative !important;
+  display: grid !important;
+  grid-template-columns: 44px minmax(0, 1fr) 30px !important;
+  align-items: center !important;
+  gap: 12px !important;
+
+  min-width: 0 !important;
+  min-height: 72px !important;
+  padding: 10px 12px !important;
+
+  border: 1px solid
+    color-mix(
+      in srgb,
+      var(--quick-accent) 16%,
+      #D9E8F5
+    ) !important;
+  border-radius: 14px !important;
+
+  color: #071F63 !important;
+  background:
+    linear-gradient(
+      145deg,
+      rgb(255 255 255 / 96%) 0%,
+      color-mix(in srgb, var(--quick-tint) 44%, white) 100%
+    ) !important;
+
+  box-shadow:
+    0 5px 13px rgb(3 49 113 / 4%),
+    inset 0 1px 0 rgb(255 255 255 / 92%) !important;
+
+  text-align: left !important;
+  font-size: .78rem !important;
+  font-weight: 820 !important;
+  line-height: 1.12 !important;
+
+  transition:
+    transform 170ms ease,
+    border-color 170ms ease,
+    box-shadow 170ms ease !important;
+}
+
+.governance-page .governance-quick-card:nth-child(1) {
+  --quick-accent: #216CF3;
+  --quick-deep: #1554D0;
+  --quick-tint: #EAF4FF;
+}
+
+.governance-page .governance-quick-card:nth-child(2) {
+  --quick-accent: #7138E8;
+  --quick-deep: #5924C9;
+  --quick-tint: #F1EBFF;
+}
+
+.governance-page .governance-quick-card:nth-child(3) {
+  --quick-accent: #06A7B7;
+  --quick-deep: #087F92;
+  --quick-tint: #E7FAFB;
+}
+
+.governance-page .governance-quick-card:nth-child(4) {
+  --quick-accent: #D98410;
+  --quick-deep: #B76600;
+  --quick-tint: #FFF5E6;
+}
+
+.governance-page .governance-quick-card:nth-child(5) {
+  --quick-accent: #D94A83;
+  --quick-deep: #B72C66;
+  --quick-tint: #FFF0F6;
+}
+
+.governance-page .governance-quick-card:nth-child(6) {
+  --quick-accent: #5B50D8;
+  --quick-deep: #4339BC;
+  --quick-tint: #F0EFFF;
+}
+
+.governance-page .governance-quick-icon {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 11px !important;
+  color: var(--quick-deep) !important;
+  background:
+    color-mix(
+      in srgb,
+      var(--quick-accent) 9%,
+      white
+    ) !important;
+  box-shadow:
+    inset 0 0 0 1px
+      color-mix(
+        in srgb,
+        var(--quick-accent) 11%,
+        #E2EBF4
+      ) !important;
+}
+
+.governance-page .governance-quick-icon svg {
+  width: 24px !important;
+  height: 24px !important;
+}
+
+.governance-page .governance-quick-card > span:nth-child(2) {
+  min-width: 0 !important;
+  color: #0A347F !important;
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+  hyphens: none !important;
+}
+
+.governance-page .governance-quick-arrow {
+  justify-self: end !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 28px !important;
+  height: 28px !important;
+  border: 1px solid
+    color-mix(
+      in srgb,
+      var(--quick-accent) 15%,
+      #DAE5EF
+    ) !important;
+  border-radius: 50% !important;
+  color: var(--quick-deep) !important;
+  background: rgb(255 255 255 / 74%) !important;
+  font-size: 1rem !important;
+  font-weight: 680 !important;
+  line-height: 1 !important;
+  box-shadow:
+    0 3px 8px rgb(3 49 113 / 4%) !important;
+  transition:
+    transform 170ms ease,
+    background 170ms ease,
+    border-color 170ms ease !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .governance-page .governance-quick-card:hover {
+    transform: translateY(-2px) !important;
+    border-color:
+      color-mix(
+        in srgb,
+        var(--quick-accent) 38%,
+        #D9E8F5
+      ) !important;
+    box-shadow:
+      0 10px 20px rgb(3 49 113 / 7%),
+      inset 0 1px 0 rgb(255 255 255 / 94%) !important;
+  }
+
+  .governance-page .governance-quick-card:hover
+    .governance-quick-arrow {
+    transform: translateX(2px) !important;
+    border-color:
+      color-mix(
+        in srgb,
+        var(--quick-accent) 34%,
+        #DAE5EF
+      ) !important;
+    background:
+      color-mix(
+        in srgb,
+        var(--quick-accent) 6%,
+        white
+      ) !important;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1080px) {
+  .governance-page .governance-quick-access {
+    margin-inline: 14px !important;
+  }
+
+  .governance-page .governance-quick-access-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-template-rows: auto !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .governance-page .governance-quick-access {
+    margin: 14px 12px 14px !important;
+    padding: 14px !important;
+    border-radius: 18px !important;
+  }
+
+  .governance-page .governance-quick-access-title-group {
+    grid-template-columns: 48px minmax(0, 1fr) !important;
+  }
+
+  .governance-page .governance-quick-bolt {
+    width: 48px !important;
+    height: 48px !important;
+    border-radius: 12px !important;
+    font-size: 1.45rem !important;
+  }
+
+  .governance-page .governance-quick-access-title-group h2 {
+    font-size: 1.10rem !important;
+  }
+
+  .governance-page .governance-quick-access-title-group p {
+    width: auto !important;
+    margin: 4px 0 0 !important;
+    font-size: .66rem !important;
+  }
+
+  .governance-page .governance-quick-access-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: auto !important;
+    gap: 8px !important;
+  }
+
+  .governance-page .governance-quick-card {
+    grid-template-columns: 42px minmax(0, 1fr) 28px !important;
+    min-height: 64px !important;
+    padding: 9px 10px !important;
+  }
+
+  .governance-page .governance-quick-icon {
+    width: 42px !important;
+    height: 42px !important;
+  }
+}
+
 </style>

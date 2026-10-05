@@ -574,6 +574,11 @@
       viewerUrl: "https://drive.google.com/file/d/1TIUxIfPqQ4KX8deywO-qFfdWVajwPVbs/view?usp=drive_link",
       phase: 1
     },
+    "governance-frameworks-header-visual": {
+      fileId: "1Be8ob8VJhQStANYtzNwlh_1E6bU2K3ya",
+      viewerUrl: "https://drive.google.com/file/d/1Be8ob8VJhQStANYtzNwlh_1E6bU2K3ya/view?usp=drive_link",
+      phase: 2
+    },
     "governance-iso-compliance": {
       fileId: "1WxJJeWTMEggRNt1XvyaIC-3WQJtvQVX6",
       viewerUrl: "https://drive.google.com/file/d/1WxJJeWTMEggRNt1XvyaIC-3WQJtvQVX6/view?usp=drive_link",
@@ -816,6 +821,12 @@
       pageRoot.querySelector("#governance-hero-image"),
       pageRoot.querySelector("#governance-hero-fallback"),
       2400
+    );
+
+    bindGovernanceAsset(
+      pageRoot.querySelector("#governance-frameworks-header-image"),
+      pageRoot.querySelector("#governance-frameworks-header-fallback"),
+      1600
     );
 
     governancePageData.frameworks.forEach(function (item) {

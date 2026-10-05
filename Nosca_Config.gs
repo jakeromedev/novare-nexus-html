@@ -14,34 +14,33 @@ const NOSCA_CONFIG = Object.freeze({
   sheets: Object.freeze({
     index: 'NOSCA_Index',
     logs: 'NOSCA_Logs',
-    feedback: 'NOSCA_Feedback'
+    feedback: 'NOSCA_Feedback',
+    admins: 'NOSCA_Admins'
+  }),
+
+  admins: Object.freeze({
+    emailColumn: 1,
+    startRow: 2,
+    cacheSeconds: 300,
+    cacheKey: 'NEXUS_ADMIN_EMAILS_V1'
   }),
 
   indexHeaders: Object.freeze([
-    'Item ID',
-    'Item Type',
-    'Item Name',
+    'File ID',
+    'File Name',
     'Folder Path',
-    'Hierarchy Context',
     'Document Type',
     'File Format',
     'MIME Type',
     'Modified At',
     'Drive URL',
-    'Generated Keywords',
-    'Manual Keywords',
+    'Keywords',
     'Indexed At',
     'Status',
     'Error / Notes'
   ]),
 
-  itemTypes: Object.freeze({
-    file: 'File',
-    folder: 'Folder'
-  }),
-
   documentTypes: Object.freeze({
-    folder: 'Folder',
     ee: 'EE',
     proposal: 'Proposal',
     presentation: 'Presentation',
@@ -53,7 +52,6 @@ const NOSCA_CONFIG = Object.freeze({
   }),
 
   fileFormats: Object.freeze({
-    folder: 'Folder',
     googleDoc: 'Google Doc',
     googleSheet: 'Google Sheet',
     googleSlides: 'Google Slides',
@@ -95,34 +93,19 @@ const NOSCA_CONFIG = Object.freeze({
   drivePageSize: 250,
 
   metadataAliases: Object.freeze([
-    // Client identity. Do NOT automatically add CashHub simply because a
-    // file belongs to PJL/Cebuana; PJL has projects beyond CashHub.
     Object.freeze({
-      canonical: 'pjl',
-      kind: 'client',
       matchAny: Object.freeze([
-        'pjl',
         'pj lhuillier',
         'cebuana lhuillier',
-        'cebuana'
+        'cebuana',
+        'cash hub',
+        'cashhub'
       ]),
       add: Object.freeze([
         'pjl',
         'pj lhuillier',
         'cebuana',
-        'cebuana lhuillier'
-      ])
-    }),
-
-    // Project/product identity is intentionally separate from the client.
-    Object.freeze({
-      canonical: 'cashhub',
-      kind: 'project',
-      matchAny: Object.freeze([
-        'cashhub',
-        'cash hub'
-      ]),
-      add: Object.freeze([
+        'cebuana lhuillier',
         'cashhub',
         'cash hub'
       ])
@@ -184,18 +167,8 @@ const NOSCA_CONFIG = Object.freeze({
     maxCandidateFiles: 5,
 
     // Number of index-only results returned for "find/show/list documents"
-    // requests. These may include folders and Office/PDF metadata-only files.
+    // requests. These may include Office/PDF files that are metadata-only.
     maxDocumentLookupResults: 12,
-
-    // Broad navigation searches must match enough of the actual client /
-    // project context. This prevents a generic word such as "renewal" from
-    // pulling unrelated projects into a PJL/CashHub result set.
-    minLookupCoverage: 0.60,
-    minLookupMatchedTerms: 2,
-
-    // Broad lookups intentionally surface a small number of matching folders
-    // in addition to the strongest EE / Proposal / Presentation files.
-    maxFolderLookupResults: 2,
 
     // Chunking settings after a candidate file has been extracted.
     chunkChars: 2600,

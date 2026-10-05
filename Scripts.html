@@ -28,7 +28,7 @@
 
   // 3. CURRENT USER FALLBACK
   // Production identity is loaded from Code.gs -> getCurrentUser().
-  const currentUser = { name: "Novare User", email: "" };
+  const currentUser = { name: "Novare User", email: "", isAdmin: false, role: "user" };
 
   // 4. GLOBAL SHELL DOM REFERENCES
   const dom = {
@@ -5847,7 +5847,9 @@
         name: currentUser.name,
         email: currentUser.email,
         photoUrl: "",
-        photoIsDefault: false
+        photoIsDefault: false,
+        isAdmin: currentUser.isAdmin === true,
+        role: currentUser.isAdmin === true ? "admin" : "user"
       };
     },
 
@@ -5871,7 +5873,9 @@
                 name: String(user.name || "").trim(),
                 email: String(user.email || "").trim(),
                 photoUrl: String(user.photoUrl || "").trim(),
-                photoIsDefault: user.photoIsDefault === true
+                photoIsDefault: user.photoIsDefault === true,
+                isAdmin: user.isAdmin === true,
+                role: user.isAdmin === true ? "admin" : "user"
               }
             : fallback;
 
@@ -5888,6 +5892,8 @@
               email: normalized.email,
               hasPhotoUrl: Boolean(normalized.photoUrl),
               photoIsDefault: normalized.photoIsDefault,
+              isAdmin: normalized.isAdmin,
+              role: normalized.role,
               photoUrlPreview: normalized.photoUrl
                 ? normalized.photoUrl.substring(0, 120)
                 : ""
@@ -5905,7 +5911,7 @@
           if (onFailure) onFailure(error);
           if (onSuccess) onSuccess(fallback);
         })
-        .getCurrentUser();
+        .getNexusCurrentUser();
     },
 
     getServerStatus(onSuccess, onFailure) {
@@ -6659,6 +6665,8 @@
     const email = String(resolved.email || "").trim();
     const photoUrl = String(resolved.photoUrl || "").trim();
     const photoIsDefault = resolved.photoIsDefault === true;
+    const isAdmin = resolved.isAdmin === true;
+    const role = isAdmin ? "admin" : "user";
     const userName = document.getElementById("user-name");
     const userEmail = document.getElementById("user-email");
     const userAvatar = document.getElementById("user-avatar");
@@ -6671,9 +6679,28 @@
     }
 
     if (userEmail) {
-      userEmail.textContent = email || "Email unavailable";
-      if (email) userEmail.title = email;
-      else userEmail.removeAttribute("title");
+      userEmail.classList.toggle("user-admin-badge", isAdmin);
+
+      if (isAdmin) {
+        userEmail.textContent = "NEXUS Admin";
+        userEmail.title = email || "NEXUS Administrator";
+        userEmail.setAttribute(
+          "aria-label",
+          email
+            ? ("NEXUS Admin, " + email)
+            : "NEXUS Admin"
+        );
+      } else {
+        userEmail.textContent = email || "Email unavailable";
+
+        if (email) {
+          userEmail.title = email;
+          userEmail.setAttribute("aria-label", email);
+        } else {
+          userEmail.removeAttribute("title");
+          userEmail.removeAttribute("aria-label");
+        }
+      }
     }
 
     if (userAvatar) {
@@ -6686,9 +6713,22 @@
     }
 
     if (userProfile) {
+      userProfile.classList.toggle("is-admin", isAdmin);
+      userProfile.dataset.userRole = role;
+
       userProfile.setAttribute(
         "aria-label",
-        email ? (displayName + ", " + email) : displayName
+        isAdmin
+          ? (
+              email
+                ? (displayName + ", NEXUS Admin, " + email)
+                : (displayName + ", NEXUS Admin")
+            )
+          : (
+              email
+                ? (displayName + ", " + email)
+                : displayName
+            )
       );
 
       userProfile.classList.remove(
@@ -6699,6 +6739,10 @@
         "aria-busy",
         "false"
       );
+    }
+
+    if (dom.app) {
+      dom.app.dataset.currentUserRole = role;
     }
   }
 

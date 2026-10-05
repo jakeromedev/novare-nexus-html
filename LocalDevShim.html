@@ -2,13 +2,27 @@
 (function () {
   "use strict";
   window.NEXUS_ENV = "local";
-  // Add functions here as frontend features acquire server endpoints.
-  //
+
+  // Toggle this to false to preview a normal-user navbar locally.
+  const localUserIsAdmin = true;
+
   // Add local test URLs here if you want managed Overview links to open
   // while running ONESCA outside Apps Script.
   const localManagedLinks = Object.freeze({
     // "ov-co": "https://example.com/"
   });
+
+  function getLocalCurrentUser() {
+    return {
+      name: "Local Novare User",
+      email: "local.user@novare.com.ph",
+      department: "OneSCA",
+      photoUrl: "",
+      photoIsDefault: true,
+      isAdmin: localUserIsAdmin,
+      role: localUserIsAdmin ? "admin" : "user"
+    };
+  }
 
   const methods = Object.assign(Object.create(null), {
     getServerStatus: function () {
@@ -19,92 +33,12 @@
         timestamp: new Date().toISOString()
       };
     },
-    getCurrentUser: function () {
-      return {
-        name: "Local Novare User",
-        email: "local.user@novare.com.ph",
-        department: "OneSCA"
-      };
-    },
 
-    askNosca: function (question) {
-      const cleanQuestion = String(question || "").trim();
+    // Keep the old identity endpoint available for legacy local calls.
+    getCurrentUser: getLocalCurrentUser,
 
-      if (!cleanQuestion) {
-        throw new Error("Please enter a question for Ask NOSCA.");
-      }
-
-      console.info(
-        "🧪 [ONESCA LocalDevShim] askNosca() is returning a local mock response. No Gemini or Drive request is being made.",
-        { question: cleanQuestion }
-      );
-
-      return {
-        ok: true,
-        requestId:
-          "LOCAL-" +
-          Date.now().toString(36).toUpperCase(),
-        grounded: true,
-        answer:
-          "This is a local Ask NOSCA mock response for: “" +
-          cleanQuestion +
-          "”\n\nIn the deployed Apps Script version, this message will be replaced by the Phase 4 grounded answer generated from the approved NOSCA knowledge sources.",
-        sources: [
-          {
-            sourceIndex: 1,
-            fileName: "Local Mock Knowledge Source",
-            folderPath: "/Local Development",
-            mimeType: "application/vnd.google-apps.document",
-            driveUrl: "https://drive.google.com/"
-          }
-        ],
-        model: "LOCAL MOCK",
-        usage: {
-          promptTokenCount: 0,
-          candidatesTokenCount: 0,
-          totalTokenCount: 0
-        },
-        diagnostics: {
-          retrievalCandidateCount: 1,
-          contextChunkCount: 1,
-          contextChars: 0,
-          retrievalWarnings: []
-        },
-        elapsedMs: 180
-      };
-    },
-
-    submitNoscaFeedback: function (
-      requestId,
-      helpful,
-      comment
-    ) {
-      const normalizedRequestId =
-        String(requestId || "").trim();
-
-      if (!normalizedRequestId) {
-        throw new Error(
-          "Local feedback mock requires a Request ID."
-        );
-      }
-
-      console.info(
-        "🧪 [ONESCA LocalDevShim] submitNoscaFeedback() saved local mock feedback only.",
-        {
-          requestId: normalizedRequestId,
-          helpful: helpful ? "Yes" : "No",
-          comment: String(comment || "").trim()
-        }
-      );
-
-      return {
-        ok: true,
-        requestId: normalizedRequestId,
-        helpful: helpful ? "Yes" : "No",
-        commentSaved:
-          Boolean(String(comment || "").trim())
-      };
-    },
+    // Production Scripts.html uses this enriched identity endpoint.
+    getNexusCurrentUser: getLocalCurrentUser,
 
     getManagedLinks: function (linkKeys) {
       const requested = Array.isArray(linkKeys) ? linkKeys : [];
@@ -148,6 +82,7 @@
       };
     }
   });
+
   window.NexusLocalMocks = methods;
 
   function runner(success, failure, userObject) {
@@ -157,13 +92,15 @@
         if (name === "withFailureHandler") return function (handler) { return runner(success, handler, userObject); };
         if (name === "withUserObject") return function (value) { return runner(success, failure, value); };
         if (name === "then" || typeof name !== "string") return undefined;
+
         return function () {
           const args = Array.from(arguments);
-          // Async dispatch and independent chains mirror google.script.run usage.
+
           Promise.resolve().then(function () {
             if (!Object.prototype.hasOwnProperty.call(methods, name)) {
               throw new Error("No local mock for " + name + ". Add it to LocalDevShim.html (NexusLocalMocks).");
             }
+
             return methods[name].apply(null, args);
           }).then(function (result) {
             if (typeof success === "function") success(result, userObject);
@@ -175,8 +112,12 @@
       }
     });
   }
+
   window.google = window.google || {};
   window.google.script = window.google.script || {};
-  if (!window.google.script.run) window.google.script.run = runner();
+
+  if (!window.google.script.run) {
+    window.google.script.run = runner();
+  }
 }());
 </script>

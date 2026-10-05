@@ -1235,37 +1235,6 @@
         ? "is-purple"
         : (item.icon === "toolkit" ? "is-teal" : "is-blue");
 
-      let footer = "";
-
-      if (Array.isArray(item.metrics)) {
-        footer = '<div class="program-dashboard-metrics" aria-label="Programs dashboard summary">' +
-          item.metrics.map(function (metric) {
-            return '<div class="program-metric">' +
-              '<strong>' + escapeProgramsHtml(metric.value) + '</strong>' +
-              '<span>' + escapeProgramsHtml(metric.label) + '</span>' +
-            '</div>';
-          }).join("") +
-        '</div>';
-      } else if (Array.isArray(item.stages)) {
-        footer = '<div class="innovation-playbook-stages" aria-label="Innovation Playbook stages">' +
-          item.stages.map(function (stage) {
-            return '<button type="button" data-programs-action="' + escapeProgramsHtml(stage.id) + '">' +
-              '<span aria-hidden="true">' + escapeProgramsHtml(stage.symbol || "•") + '</span>' +
-              '<span>' + escapeProgramsHtml(stage.label) + '</span>' +
-            '</button>';
-          }).join("") +
-        '</div>';
-      } else if (Array.isArray(item.shortcuts)) {
-        footer = '<div class="program-toolkit-shortcuts" aria-label="Toolkit and Repository shortcuts">' +
-          item.shortcuts.map(function (shortcut) {
-            return '<button type="button" data-programs-action="' + escapeProgramsHtml(shortcut.id) + '">' +
-              '<span class="program-shortcut-icon" aria-hidden="true">' + programsIconSvg(shortcut.icon, 20) + '</span>' +
-              '<span>' + escapeProgramsHtml(shortcut.label) + '</span>' +
-            '</button>';
-          }).join("") +
-        '</div>';
-      }
-
       return '<article class="program-entry-card ' + themeClass + '" aria-labelledby="' + id + '-title">' +
         '<div class="program-entry-main">' +
           '<span class="program-entry-icon ' + iconClass + '" aria-hidden="true">' + programsIconSvg(item.icon, 34) + '</span>' +
@@ -1274,12 +1243,11 @@
             '<p>' + escapeProgramsHtml(item.description) + '</p>' +
           '</div>' +
           '<div class="program-entry-visual">' +
-            '<img id="' + id + '-image" data-image-key="' + imageKey + '" alt="" width="520" height="250" loading="lazy" decoding="async" fetchpriority="low">' +
+            '<img id="' + id + '-image" data-image-key="' + imageKey + '" alt="" width="720" height="360" loading="lazy" decoding="async" fetchpriority="low">' +
             '<div id="' + id + '-fallback" class="image-placeholder program-entry-fallback" data-image-fallback="' + imageKey + '" role="img" aria-label="' + title + ' visual unavailable" hidden>' + title + '</div>' +
           '</div>' +
           '<button class="program-entry-arrow" type="button" data-programs-action="' + action + '" aria-label="Open ' + title + '"><span aria-hidden="true">→</span></button>' +
         '</div>' +
-        footer +
       '</article>';
     }).join("");
   }
@@ -1322,9 +1290,10 @@
     if (!grid || !Array.isArray(items)) return;
 
     grid.innerHTML = items.map(function (item) {
-      return '<button type="button" class="programs-quick-card ' + escapeProgramsHtml(item.themeClass || "") + '" data-programs-action="' + escapeProgramsHtml(item.id) + '">' +
+      const label = escapeProgramsHtml(item.label);
+      return '<button type="button" class="programs-quick-card ' + escapeProgramsHtml(item.themeClass || "") + '" data-programs-action="' + escapeProgramsHtml(item.id) + '" aria-label="Open ' + label + '">' +
         '<span class="programs-quick-icon" aria-hidden="true">' + programsIconSvg(item.icon, 25) + '</span>' +
-        '<span>' + escapeProgramsHtml(item.label) + '</span>' +
+        '<span>' + label + '</span>' +
         '<span class="programs-quick-arrow" aria-hidden="true">→</span>' +
       '</button>';
     }).join("");

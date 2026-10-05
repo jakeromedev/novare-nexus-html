@@ -170,30 +170,6 @@
           </button>
         </div>
 
-        <div
-          class="program-dashboard-metrics"
-          aria-label="Programs dashboard summary"
-        >
-          <div class="program-metric">
-            <strong>12</strong>
-            <span>Active Programs</span>
-          </div>
-
-          <div class="program-metric">
-            <strong>8</strong>
-            <span>In Pipeline</span>
-          </div>
-
-          <div class="program-metric">
-            <strong>6</strong>
-            <span>Scaling</span>
-          </div>
-
-          <div class="program-metric">
-            <strong>92%</strong>
-            <span>On Track</span>
-          </div>
-        </div>
       </article>
 
       <!-- Innovation Playbook -->
@@ -254,30 +230,6 @@
           </button>
         </div>
 
-        <div
-          class="innovation-playbook-stages"
-          aria-label="Innovation Playbook stages"
-        >
-          <button type="button" data-programs-action="playbook-ideate">
-            <span aria-hidden="true">◎</span>
-            <span>Ideate</span>
-          </button>
-
-          <button type="button" data-programs-action="playbook-validate">
-            <span aria-hidden="true">⬡</span>
-            <span>Validate</span>
-          </button>
-
-          <button type="button" data-programs-action="playbook-build">
-            <span aria-hidden="true">◉</span>
-            <span>Build</span>
-          </button>
-
-          <button type="button" data-programs-action="playbook-scale">
-            <span aria-hidden="true">▣</span>
-            <span>Scale</span>
-          </button>
-        </div>
       </article>
 
       <!-- Toolkit & Repository -->
@@ -338,55 +290,6 @@
           </button>
         </div>
 
-        <div
-          class="program-toolkit-shortcuts"
-          aria-label="Toolkit and Repository shortcuts"
-        >
-          <button type="button" data-programs-action="program-templates">
-            <span class="program-shortcut-icon" aria-hidden="true">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-                   stroke="currentColor" stroke-width="1.9">
-                <path d="M6 3h9l3 3v15H6z"/>
-                <path d="M14 3v4h4M9 12h6M9 16h6"/>
-              </svg>
-            </span>
-            <span>Templates</span>
-          </button>
-
-          <button type="button" data-programs-action="program-case-studies">
-            <span class="program-shortcut-icon" aria-hidden="true">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-                   stroke="currentColor" stroke-width="1.9">
-                <path d="M5 4h14v16H5z"/>
-                <path d="m8 14 2-2 2 2 4-4"/>
-                <path d="M15 7h1"/>
-              </svg>
-            </span>
-            <span>Case Studies</span>
-          </button>
-
-          <button type="button" data-programs-action="program-reports">
-            <span class="program-shortcut-icon" aria-hidden="true">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-                   stroke="currentColor" stroke-width="1.9">
-                <path d="M6 3h9l3 3v15H6z"/>
-                <path d="M14 3v4h4M9 12h6M9 16h5"/>
-              </svg>
-            </span>
-            <span>Reports</span>
-          </button>
-
-          <button type="button" data-programs-action="program-references">
-            <span class="program-shortcut-icon" aria-hidden="true">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-                   stroke="currentColor" stroke-width="1.9">
-                <path d="M7 4h10v16H7z"/>
-                <path d="M10 2v4M14 2v4M10 10h4M10 14h4"/>
-              </svg>
-            </span>
-            <span>References</span>
-          </button>
-        </div>
       </article>
     </div>
   </section>
@@ -708,8 +611,11 @@
     <header class="programs-quick-access-header">
       <div class="programs-quick-access-title-group">
         <span class="programs-quick-bolt" aria-hidden="true">ϟ</span>
-        <h2 id="programs-quick-access-title">Quick Access</h2>
-        <p>Jump to commonly used resources.</p>
+
+        <div class="programs-quick-access-copy">
+          <h2 id="programs-quick-access-title">Quick Access</h2>
+          <p>Jump to commonly used resources.</p>
+        </div>
       </div>
     </header>
 
@@ -722,6 +628,7 @@
         type="button"
         class="programs-quick-card"
         data-programs-action="account-plans"
+        aria-label="Open Account Plans"
       >
         <span class="programs-quick-icon" aria-hidden="true">
           <svg width="25" height="25" viewBox="0 0 24 24" fill="none"
@@ -738,6 +645,7 @@
         type="button"
         class="programs-quick-card"
         data-programs-action="key-contacts"
+        aria-label="Open Key Contacts"
       >
         <span class="programs-quick-icon" aria-hidden="true">
           <svg width="25" height="25" viewBox="0 0 24 24" fill="none"
@@ -756,6 +664,7 @@
         type="button"
         class="programs-quick-card"
         data-programs-action="competitors"
+        aria-label="Open Competitors"
       >
         <span class="programs-quick-icon" aria-hidden="true">
           <svg width="25" height="25" viewBox="0 0 24 24" fill="none"
@@ -772,6 +681,7 @@
         type="button"
         class="programs-quick-card"
         data-programs-action="products-solutions"
+        aria-label="Open Products and Solutions"
       >
         <span class="programs-quick-icon" aria-hidden="true">
           <svg width="25" height="25" viewBox="0 0 24 24" fill="none"
@@ -789,6 +699,7 @@
         type="button"
         class="programs-quick-card"
         data-programs-action="case-studies"
+        aria-label="Open Case Studies"
       >
         <span class="programs-quick-icon" aria-hidden="true">
           <svg width="25" height="25" viewBox="0 0 24 24" fill="none"
@@ -805,6 +716,7 @@
         type="button"
         class="programs-quick-card is-purple"
         data-programs-action="partner-ecosystem"
+        aria-label="Open Partner Ecosystem"
       >
         <span class="programs-quick-icon" aria-hidden="true">
           <svg width="25" height="25" viewBox="0 0 24 24" fill="none"

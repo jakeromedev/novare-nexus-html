@@ -2088,171 +2088,2634 @@
 
 
     /* =========================================================
-       H4 PROGRAMS — IMAGE USAGE ALIGNMENT PATCH
-       Keeps the current card height, but changes how the image is
-       used so it behaves like an integrated hero/background area.
+       H4 PROGRAMS — TOP SECTION COMPACT MATCH PATCH
+       Aligns the first row with the approved compact reference.
     ========================================================== */
 
-    @media (min-width: 768px) {
-      .program-entry-card {
-        --program-image-width: 45%;
-        --program-image-height: 98px;
-        --program-image-object: center center;
-      }
+    .programs-entry-section {
+      padding: 14px 16px 10px;
+      background: linear-gradient(180deg, rgb(248 252 255 / 99%), #f8fbff);
+    }
 
-      .program-entry-card.is-dashboard {
-        --program-image-width: 47%;
-        --program-image-object: 58% center;
-      }
+    .programs-entry-grid {
+      gap: 14px;
+    }
 
-      .program-entry-card.is-playbook {
-        --program-image-width: 45%;
-        --program-image-object: 58% center;
-      }
+    .program-entry-card {
+      min-height: 120px;
+      border-radius: 18px;
+      box-shadow: 0 8px 18px rgb(11 64 142 / 6%), inset 0 1px 0 rgb(255 255 255 / 88%);
+    }
 
-      .program-entry-card.is-toolkit {
-        --program-image-width: 46%;
-        --program-image-object: 54% center;
-      }
+    .program-entry-main {
+      grid-template-columns: 50px minmax(0, 1fr) minmax(150px, 36%) 34px;
+      gap: 10px;
+      min-height: 70px;
+      padding: 12px 12px 8px 12px;
+      align-items: start;
+    }
 
+    .program-entry-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      box-shadow: 0 7px 16px rgb(0 43 128 / 14%), inset 0 1px 0 rgb(255 255 255 / 18%);
+    }
+
+    .program-entry-icon svg {
+      width: 23px;
+      height: 23px;
+    }
+
+    .program-entry-copy {
+      padding-top: 1px;
+    }
+
+    .program-entry-copy h2 {
+      font-size: .88rem;
+      line-height: 1;
+      letter-spacing: -.022em;
+    }
+
+    .program-entry-copy p {
+      max-width: 230px;
+      margin-top: 5px;
+      font-size: .60rem;
+      line-height: 1.24;
+      color: #456aa8;
+    }
+
+    .program-entry-visual {
+      min-height: 70px;
+      border-radius: 0 14px 14px 14px;
+    }
+
+    .program-entry-visual::before {
+      background: linear-gradient(90deg, rgb(255 255 255 / 28%) 0%, rgb(255 255 255 / 8%) 34%, transparent 58%);
+    }
+
+    .program-entry-visual img {
+      object-position: center;
+    }
+
+    .program-entry-arrow {
+      width: 34px;
+      height: 34px;
+      margin-top: 10px;
+      font-size: 1.08rem;
+      box-shadow: 0 5px 12px rgb(0 44 111 / 8%);
+    }
+
+    .program-dashboard-metrics,
+    .innovation-playbook-stages,
+    .program-toolkit-shortcuts {
+      min-height: 36px;
+      padding: 6px 10px 8px;
+      background: rgb(255 255 255 / 38%);
+    }
+
+    .program-dashboard-metrics {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      border-top-color: #dde8f3;
+    }
+
+    .program-metric {
+      padding-inline: 6px;
+    }
+
+    .program-metric strong {
+      font-size: 1rem;
+      line-height: 1;
+    }
+
+    .program-metric span {
+      margin-top: 4px;
+      font-size: .46rem;
+      font-weight: 760;
+      letter-spacing: .01em;
+      color: #3760a3;
+    }
+
+    .program-metric:not(:last-child)::after {
+      top: 6px;
+      bottom: 4px;
+    }
+
+    .innovation-playbook-stages {
+      gap: 8px;
+      padding-inline: 12px;
+      border-top: 1px solid rgb(137 52 228 / 12%);
+    }
+
+    .innovation-playbook-stages button {
+      min-height: 28px;
+      padding-inline: 10px;
+      gap: 5px;
+      border-radius: 999px;
+      font-size: .55rem;
+      font-weight: 780;
+      box-shadow: none;
+    }
+
+    .program-toolkit-shortcuts {
+      min-height: 38px;
+      padding-inline: 10px;
+      border-top: 1px solid rgb(12 135 139 / 12%);
+    }
+
+    .program-toolkit-shortcuts button {
+      gap: 4px;
+      padding: 3px 4px;
+      font-size: .52rem;
+      font-weight: 760;
+    }
+
+    .program-toolkit-shortcuts button:not(:last-child)::after {
+      top: 6px;
+      bottom: 6px;
+    }
+
+    .program-shortcut-icon svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    @media (max-width: 1320px) {
       .program-entry-main {
-        position: relative;
-        display: block;
-        min-height: 112px;
-        padding: 16px 16px 8px 18px;
-        overflow: hidden;
-      }
-
-      .program-entry-icon {
-        position: absolute;
-        top: 16px;
-        left: 18px;
-        z-index: 3;
-        width: 52px;
-        height: 52px;
-        border-radius: 15px;
-      }
-
-      .program-entry-icon svg {
-        width: 28px;
-        height: 28px;
-      }
-
-      .program-entry-copy {
-        position: relative;
-        z-index: 3;
-        min-height: 84px;
-        max-width: min(250px, calc(100% - var(--program-image-width) - 54px));
-        margin-left: 64px;
-        padding-top: 2px;
-      }
-
-      .program-entry-copy h2 {
-        font-size: 0.98rem;
-        line-height: 1.02;
-        letter-spacing: -0.022em;
+        grid-template-columns: 46px minmax(0, 1fr) minmax(132px, 34%) 32px;
       }
 
       .program-entry-copy p {
-        max-width: 230px;
-        margin-top: 6px;
-        font-size: 0.70rem;
-        line-height: 1.28;
+        max-width: 205px;
+      }
+    }
+
+    @media (max-width: 1024px) {
+      .program-entry-card {
+        min-height: 114px;
+      }
+
+      .program-entry-main {
+        grid-template-columns: 44px minmax(0, 1fr) minmax(122px, 32%) 30px;
+        min-height: 66px;
+        padding: 11px 10px 7px;
+      }
+
+      .program-entry-icon {
+        width: 38px;
+        height: 38px;
+      }
+
+      .program-entry-icon svg {
+        width: 21px;
+        height: 21px;
+      }
+
+      .program-entry-copy h2 {
+        font-size: .82rem;
+      }
+
+      .program-entry-copy p {
+        font-size: .56rem;
+        max-width: 190px;
       }
 
       .program-entry-visual {
-        position: absolute;
-        top: 0;
-        right: 0;
-        width: var(--program-image-width);
-        min-height: var(--program-image-height);
-        height: var(--program-image-height);
-        border-radius: 0 22px 0 20px;
-        overflow: hidden;
-        box-shadow: none;
-      }
-
-      .program-entry-visual::before {
-        background: linear-gradient(90deg, rgb(255 255 255 / 96%) 0%, rgb(255 255 255 / 72%) 18%, rgb(255 255 255 / 28%) 42%, transparent 62%);
-      }
-
-      .program-entry-visual img {
-        object-fit: cover;
-        object-position: var(--program-image-object);
+        min-height: 62px;
       }
 
       .program-entry-arrow {
-        position: absolute;
-        top: 22px;
-        right: 12px;
-        z-index: 4;
-        width: 40px;
-        height: 40px;
-        margin-top: 0;
-        font-size: 1.22rem;
-        box-shadow: 0 6px 14px rgb(0 44 111 / 10%);
+        width: 30px;
+        height: 30px;
+      }
+
+      .program-metric strong {
+        font-size: .9rem;
+      }
+
+      .program-metric span,
+      .innovation-playbook-stages button,
+      .program-toolkit-shortcuts button {
+        font-size: .48rem;
+      }
+    }
+
+    @media (max-width: 767px) {
+      .programs-entry-section {
+        padding: 14px 14px 12px;
+      }
+
+      .program-entry-card {
+        min-height: 166px;
+      }
+
+      .program-entry-main {
+        grid-template-columns: 46px minmax(0, 1fr) 34px;
+        grid-template-areas:
+          "icon copy arrow"
+          "visual visual visual";
+        gap: 10px;
+        padding: 12px;
+      }
+
+      .program-entry-icon { grid-area: icon; width: 40px; height: 40px; }
+      .program-entry-copy { grid-area: copy; }
+      .program-entry-arrow { grid-area: arrow; justify-self: end; width: 32px; height: 32px; }
+      .program-entry-visual { grid-area: visual; min-height: 88px; }
+
+      .program-entry-copy h2 {
+        font-size: .9rem;
+      }
+
+      .program-entry-copy p {
+        max-width: none;
+        font-size: .64rem;
       }
 
       .program-dashboard-metrics,
       .innovation-playbook-stages,
       .program-toolkit-shortcuts {
-        position: relative;
-        z-index: 2;
+        min-height: 58px;
+        padding: 8px 10px 10px;
       }
 
-      .innovation-playbook-stages button {
-        color: #7a2fd6;
-      }
-
-      .innovation-playbook-stages button svg,
-      .innovation-playbook-stages button i,
-      .innovation-playbook-stages button [aria-hidden="true"] {
-        color: #8c37ea;
+      .innovation-playbook-stages button,
+      .program-toolkit-shortcuts button {
+        min-height: 32px;
+        font-size: .56rem;
       }
 
       .program-toolkit-shortcuts button {
-        color: #16819a;
-      }
-
-      .program-shortcut-icon {
-        color: #1697a0;
+        font-size: .54rem;
       }
     }
 
-    @media (min-width: 768px) and (max-width: 1150px) {
+    @media (max-width: 520px) {
+      .program-dashboard-metrics {
+        row-gap: 6px;
+      }
+
+      .program-metric span {
+        font-size: .50rem;
+      }
+    }
+
+
+
+    /* =========================================================
+       H4 PROGRAMS — TOP RESOURCE CARDS / FOOTERLESS SHOWCASE V2
+       Approved direction:
+       - no extra section header
+       - no metrics/stages/repository footer strips
+       - 3 premium horizontal visual cards
+       - icon + title/copy on left
+       - image panel integrated on right
+       - compact circular arrow at bottom-left
+       ========================================================= */
+
+    .programs-entry-section {
+      position: relative;
+      z-index: 4;
+      margin: 0 !important;
+      padding: 18px 20px 20px !important;
+      background:
+        linear-gradient(
+          180deg,
+          #F8FCFF 0%,
+          #FBFDFF 100%
+        ) !important;
+    }
+
+    .programs-entry-grid {
+      display: grid !important;
+      grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+      gap: 16px !important;
+      align-items: stretch !important;
+    }
+
+    .program-entry-card {
+      --program-accent: #2169F5;
+      --program-deep: #1348CC;
+      --program-soft: #EAF4FF;
+
+      position: relative !important;
+      min-width: 0 !important;
+      height: 232px !important;
+      min-height: 232px !important;
+      max-height: 232px !important;
+      overflow: hidden !important;
+
+      border: 1px solid
+        color-mix(
+          in srgb,
+          var(--program-accent) 25%,
+          #D8E7F5
+        ) !important;
+      border-radius: 20px !important;
+
+      background:
+        radial-gradient(
+          circle at 18% 15%,
+          color-mix(in srgb, var(--program-accent) 8%, white),
+          transparent 34%
+        ),
+        linear-gradient(
+          145deg,
+          #FFFFFF 0%,
+          color-mix(in srgb, var(--program-soft) 54%, white) 100%
+        ) !important;
+
+      box-shadow:
+        0 14px 30px rgb(3 49 113 / 7%),
+        inset 0 1px 0 rgb(255 255 255 / 92%) !important;
+
+      transition:
+        transform 180ms ease,
+        border-color 180ms ease,
+        box-shadow 180ms ease !important;
+      isolation: isolate !important;
+    }
+
+    .program-entry-card.is-playbook {
+      --program-accent: #A027EF;
+      --program-deep: #7920D8;
+      --program-soft: #F5ECFF;
+    }
+
+    .program-entry-card.is-toolkit {
+      --program-accent: #19A4A7;
+      --program-deep: #087E82;
+      --program-soft: #E8FAFA;
+      grid-column: auto !important;
+    }
+
+    /*
+     * Soft lower wave like the approved visual.
+     */
+    .program-entry-card::after {
+      content: "" !important;
+      position: absolute !important;
+      z-index: 0 !important;
+      left: -10% !important;
+      right: -10% !important;
+      bottom: -76px !important;
+      height: 120px !important;
+      pointer-events: none !important;
+      border-radius: 50% !important;
+      background:
+        color-mix(
+          in srgb,
+          var(--program-accent) 7%,
+          white
+        ) !important;
+      transform: rotate(3deg) !important;
+    }
+
+    .program-entry-main {
+      position: relative !important;
+      z-index: 2 !important;
+
+      display: grid !important;
+      grid-template-columns: 78px minmax(0, 1fr) !important;
+      grid-template-rows: auto 1fr auto !important;
+      column-gap: 14px !important;
+      row-gap: 0 !important;
+
+      width: 100% !important;
+      height: 100% !important;
+      min-height: 0 !important;
+      box-sizing: border-box !important;
+
+      padding: 22px 42% 18px 22px !important;
+      align-items: start !important;
+    }
+
+    /* ---------- Icon ---------- */
+
+    .program-entry-icon {
+      position: relative !important;
+      z-index: 4 !important;
+      grid-column: 1 !important;
+      grid-row: 1 / 3 !important;
+
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+
+      width: 68px !important;
+      height: 68px !important;
+      margin: 0 !important;
+
+      border-radius: 18px !important;
+      color: #FFFFFF !important;
+
+      background:
+        linear-gradient(
+          145deg,
+          color-mix(in srgb, var(--program-accent) 88%, #3D8CFF),
+          var(--program-deep)
+        ) !important;
+
+      box-shadow:
+        0 11px 23px
+        color-mix(in srgb, var(--program-accent) 22%, transparent),
+        inset 0 1px 0 rgb(255 255 255 / 30%) !important;
+    }
+
+    .program-entry-icon svg {
+      width: 34px !important;
+      height: 34px !important;
+    }
+
+    /* ---------- Copy ---------- */
+
+    .program-entry-copy {
+      position: relative !important;
+      z-index: 4 !important;
+
+      grid-column: 2 !important;
+      grid-row: 1 / 3 !important;
+
+      min-width: 0 !important;
+      max-width: 260px !important;
+
+      padding: 5px 0 0 !important;
+      margin: 0 !important;
+    }
+
+    .program-entry-copy h2 {
+      margin: 0 !important;
+
+      color: #071F63 !important;
+      font-size: 1.08rem !important;
+      font-weight: 900 !important;
+      line-height: 1.03 !important;
+      letter-spacing: -.025em !important;
+
+      white-space: normal !important;
+      word-break: normal !important;
+      overflow-wrap: normal !important;
+      hyphens: none !important;
+    }
+
+    .program-entry-copy p {
+      max-width: 245px !important;
+      margin: 8px 0 0 !important;
+
+      color: #45658E !important;
+      font-size: .72rem !important;
+      font-weight: 540 !important;
+      line-height: 1.34 !important;
+
+      white-space: normal !important;
+      word-break: normal !important;
+      overflow-wrap: normal !important;
+      hyphens: none !important;
+    }
+
+    /* ---------- Right image panel ---------- */
+
+    .program-entry-visual {
+      position: absolute !important;
+      z-index: 1 !important;
+
+      top: 0 !important;
+      right: 0 !important;
+      bottom: 0 !important;
+      left: auto !important;
+
+      width: 45% !important;
+      height: 100% !important;
+      min-height: 0 !important;
+
+      margin: 0 !important;
+      overflow: hidden !important;
+
+      border: 0 !important;
+      border-radius: 0 20px 20px 44% !important;
+      background: var(--program-soft) !important;
+    }
+
+    .program-entry-visual img,
+    .program-entry-fallback {
+      position: absolute !important;
+      inset: 0 !important;
+
+      width: 100% !important;
+      height: 100% !important;
+
+      border: 0 !important;
+      border-radius: inherit !important;
+    }
+
+    .program-entry-visual img {
+      display: block !important;
+      object-fit: cover !important;
+      object-position: center !important;
+      transform: scale(1.02) !important;
+      transition:
+        transform 320ms cubic-bezier(.2,.75,.2,1),
+        filter 220ms ease !important;
+    }
+
+    /*
+     * White fade blends the asset into the content half rather than
+     * leaving a hard rectangular image boundary.
+     */
+    .program-entry-visual::before {
+      content: "" !important;
+      position: absolute !important;
+      z-index: 3 !important;
+      inset: 0 !important;
+      pointer-events: none !important;
+
+      background:
+        linear-gradient(
+          90deg,
+          #FFFFFF 0%,
+          rgb(255 255 255 / 94%) 8%,
+          rgb(255 255 255 / 48%) 28%,
+          transparent 58%
+        ) !important;
+    }
+
+    .program-entry-visual::after {
+      content: "" !important;
+      position: absolute !important;
+      z-index: 3 !important;
+      left: 0 !important;
+      right: 0 !important;
+      bottom: 0 !important;
+      height: 34% !important;
+      pointer-events: none !important;
+      background:
+        linear-gradient(
+          180deg,
+          transparent,
+          color-mix(in srgb, var(--program-accent) 7%, white)
+        ) !important;
+      opacity: .44 !important;
+    }
+
+    /* ---------- Arrow ---------- */
+
+    .program-entry-arrow {
+      position: absolute !important;
+      z-index: 5 !important;
+
+      left: 22px !important;
+      right: auto !important;
+      top: auto !important;
+      bottom: 18px !important;
+
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+
+      width: 42px !important;
+      height: 42px !important;
+      min-height: 42px !important;
+      margin: 0 !important;
+      padding: 0 !important;
+
+      border: 1px solid
+        color-mix(
+          in srgb,
+          var(--program-accent) 20%,
+          #D7E4F3
+        ) !important;
+      border-radius: 50% !important;
+
+      color: var(--program-deep) !important;
+      background:
+        color-mix(
+          in srgb,
+          var(--program-accent) 7%,
+          white
+        ) !important;
+
+      box-shadow:
+        0 7px 16px rgb(1 47 117 / 7%),
+        inset 0 1px 0 rgb(255 255 255 / 90%) !important;
+
+      font-size: 1.25rem !important;
+      line-height: 1 !important;
+    }
+
+    /*
+     * Footer components are intentionally removed from markup and
+     * dynamic rendering. These rules are a safety net for stale cache.
+     */
+    .program-entry-card > .program-dashboard-metrics,
+    .program-entry-card > .innovation-playbook-stages,
+    .program-entry-card > .program-toolkit-shortcuts {
+      display: none !important;
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      .program-entry-card:hover {
+        transform: translateY(-3px) !important;
+        border-color:
+          color-mix(
+            in srgb,
+            var(--program-accent) 42%,
+            #D8E7F5
+          ) !important;
+        box-shadow:
+          0 18px 38px rgb(3 49 113 / 11%),
+          inset 0 1px 0 rgb(255 255 255 / 94%) !important;
+      }
+
+      .program-entry-card:hover .program-entry-visual img {
+        transform: scale(1.045) !important;
+        filter: saturate(1.04) contrast(1.02) !important;
+      }
+
+      .program-entry-arrow:hover {
+        transform: translateX(2px) !important;
+        background:
+          color-mix(
+            in srgb,
+            var(--program-accent) 12%,
+            white
+          ) !important;
+      }
+    }
+
+    /* =========================================================
+       Medium desktop / tablet
+       ========================================================= */
+
+    @media (min-width: 768px) and (max-width: 1199px) {
+      .programs-entry-section {
+        padding: 16px 18px 18px !important;
+      }
+
+      .programs-entry-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 14px !important;
+      }
+
+      .program-entry-card.is-toolkit {
+        grid-column: 1 / -1 !important;
+      }
+
       .program-entry-card {
-        --program-image-height: 92px;
+        height: 220px !important;
+        min-height: 220px !important;
+        max-height: 220px !important;
       }
 
-      .program-entry-copy {
-        max-width: min(216px, calc(100% - var(--program-image-width) - 52px));
-      }
-
-      .program-entry-copy h2 {
-        font-size: 0.92rem;
-      }
-
-      .program-entry-copy p {
-        max-width: 200px;
-        font-size: 0.66rem;
+      .program-entry-main {
+        grid-template-columns: 68px minmax(0, 1fr) !important;
+        padding: 20px 40% 16px 20px !important;
       }
 
       .program-entry-icon {
-        width: 48px;
-        height: 48px;
+        width: 60px !important;
+        height: 60px !important;
+        border-radius: 16px !important;
       }
 
       .program-entry-icon svg {
-        width: 25px;
-        height: 25px;
+        width: 30px !important;
+        height: 30px !important;
+      }
+
+      .program-entry-copy h2 {
+        font-size: 1rem !important;
+      }
+
+      .program-entry-copy p {
+        font-size: .68rem !important;
+      }
+
+      .program-entry-visual {
+        width: 43% !important;
       }
 
       .program-entry-arrow {
-        width: 36px;
-        height: 36px;
-        top: 20px;
-        right: 10px;
+        left: 20px !important;
+        bottom: 16px !important;
+        width: 40px !important;
+        height: 40px !important;
       }
     }
+
+    /* =========================================================
+       Mobile
+       ========================================================= */
+
+    @media (max-width: 767px) {
+      .programs-entry-section {
+        padding: 14px 12px 16px !important;
+      }
+
+      .programs-entry-grid {
+        grid-template-columns: minmax(0, 1fr) !important;
+        gap: 12px !important;
+      }
+
+      .program-entry-card,
+      .program-entry-card.is-toolkit {
+        grid-column: auto !important;
+        height: 205px !important;
+        min-height: 205px !important;
+        max-height: 205px !important;
+        border-radius: 17px !important;
+      }
+
+      .program-entry-main {
+        grid-template-columns: 58px minmax(0, 1fr) !important;
+        padding: 17px 37% 14px 16px !important;
+      }
+
+      .program-entry-icon {
+        width: 52px !important;
+        height: 52px !important;
+        border-radius: 14px !important;
+      }
+
+      .program-entry-icon svg {
+        width: 27px !important;
+        height: 27px !important;
+      }
+
+      .program-entry-copy {
+        padding-top: 2px !important;
+      }
+
+      .program-entry-copy h2 {
+        font-size: .92rem !important;
+      }
+
+      .program-entry-copy p {
+        max-width: 210px !important;
+        margin-top: 6px !important;
+        font-size: .63rem !important;
+      }
+
+      .program-entry-visual {
+        width: 40% !important;
+        border-radius: 0 17px 17px 46% !important;
+      }
+
+      .program-entry-arrow {
+        left: 16px !important;
+        bottom: 14px !important;
+        width: 38px !important;
+        height: 38px !important;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .program-entry-card,
+      .program-entry-card.is-toolkit {
+        height: 190px !important;
+        min-height: 190px !important;
+        max-height: 190px !important;
+      }
+
+      .program-entry-main {
+        grid-template-columns: 50px minmax(0, 1fr) !important;
+        column-gap: 9px !important;
+        padding: 15px 32% 12px 14px !important;
+      }
+
+      .program-entry-icon {
+        width: 46px !important;
+        height: 46px !important;
+      }
+
+      .program-entry-copy h2 {
+        font-size: .84rem !important;
+      }
+
+      .program-entry-copy p {
+        font-size: .58rem !important;
+      }
+
+      .program-entry-visual {
+        width: 35% !important;
+      }
+
+      .program-entry-arrow {
+        left: 14px !important;
+        bottom: 12px !important;
+        width: 36px !important;
+        height: 36px !important;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .program-entry-card,
+      .program-entry-visual img,
+      .program-entry-arrow {
+        transition: none !important;
+      }
+
+      .program-entry-card:hover,
+      .program-entry-card:hover .program-entry-visual img,
+      .program-entry-arrow:hover {
+        transform: none !important;
+      }
+    }
+
+
+
+    /* =========================================================
+       H4 PROGRAMS — MARKET INSIGHTS + QUICK ACCESS V5
+       Approved visual direction:
+       - Market Insights remains the primary image-led section
+       - five cards across on wide desktop
+       - Quick Access becomes 2 rows x 3 cards
+       - Quick Access remains visually lighter/shorter
+       ========================================================= */
+
+    /* ---------------------------------------------------------
+       MARKET INSIGHTS — outer panel
+       --------------------------------------------------------- */
+
+    .programs-page .program-insights-panel {
+      position: relative !important;
+      margin: 18px 20px 0 !important;
+      padding: 18px 20px 20px !important;
+      overflow: hidden !important;
+
+      border: 1px solid #D7E8F5 !important;
+      border-radius: 22px !important;
+
+      background:
+        radial-gradient(circle at 92% 0%, rgb(53 145 255 / 5%), transparent 28%),
+        rgb(255 255 255 / 97%) !important;
+
+      box-shadow:
+        0 14px 32px rgb(3 49 113 / 7%),
+        inset 0 1px 0 rgb(255 255 255 / 92%) !important;
+    }
+
+    .programs-page .program-insights-panel::after {
+      content: "" !important;
+      position: absolute !important;
+      z-index: 0 !important;
+      left: -5% !important;
+      right: -5% !important;
+      bottom: -105px !important;
+      height: 150px !important;
+      pointer-events: none !important;
+      border-radius: 50% !important;
+      background: rgb(74 159 255 / 4%) !important;
+      transform: rotate(-2deg) !important;
+    }
+
+    .programs-page .program-insights-panel > * {
+      position: relative !important;
+      z-index: 1 !important;
+    }
+
+    /* ---------------------------------------------------------
+       MARKET INSIGHTS — header
+       --------------------------------------------------------- */
+
+    .programs-page .program-insights-panel .programs-panel-header {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: flex-start !important;
+      gap: 14px !important;
+      margin: 0 0 16px !important;
+    }
+
+    .programs-page .program-insights-panel .programs-panel-title-group {
+      display: flex !important;
+      align-items: center !important;
+      gap: 14px !important;
+      min-width: 0 !important;
+    }
+
+    .programs-page .program-insights-panel .programs-panel-icon {
+      width: 72px !important;
+      height: 72px !important;
+      flex: 0 0 72px !important;
+
+      border-radius: 18px !important;
+      color: #FFFFFF !important;
+
+      background:
+        linear-gradient(
+          145deg,
+          #2378FF 0%,
+          #174EDC 58%,
+          #0D33A5 100%
+        ) !important;
+
+      box-shadow:
+        0 10px 22px rgb(17 77 209 / 20%),
+        inset 0 1px 0 rgb(255 255 255 / 26%) !important;
+    }
+
+    .programs-page .program-insights-panel .programs-panel-icon svg {
+      width: 36px !important;
+      height: 36px !important;
+    }
+
+    .programs-page .program-insights-panel .programs-panel-title-group > div {
+      min-width: 0 !important;
+    }
+
+    .programs-page .program-insights-panel .programs-panel-title-group h2 {
+      margin: 0 !important;
+
+      color: #071F63 !important;
+      font-size: 26px !important;
+      font-weight: 900 !important;
+      line-height: 1.05 !important;
+      letter-spacing: -.025em !important;
+
+      word-break: normal !important;
+      overflow-wrap: normal !important;
+      hyphens: none !important;
+    }
+
+    .programs-page .program-insights-panel .programs-panel-title-group p {
+      margin: 4px 0 0 !important;
+
+      color: #56739D !important;
+      font-size: 13.5px !important;
+      font-weight: 560 !important;
+      line-height: 1.3 !important;
+
+      word-break: normal !important;
+      overflow-wrap: normal !important;
+    }
+
+    /* ---------------------------------------------------------
+       MARKET INSIGHTS — 5-card grid
+       --------------------------------------------------------- */
+
+    .programs-page .program-insights-grid {
+      display: grid !important;
+      grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+      gap: 14px !important;
+      align-items: stretch !important;
+    }
+
+    .programs-page .program-insight-card {
+      --insight-accent: #2474FF;
+      --insight-deep: #0757EF;
+      --insight-soft: #EDF5FF;
+
+      position: relative !important;
+      display: grid !important;
+      grid-template-rows: 158px minmax(0, 1fr) !important;
+
+      min-width: 0 !important;
+      height: 382px !important;
+      min-height: 382px !important;
+      max-height: 382px !important;
+
+      overflow: hidden !important;
+
+      border: 1px solid
+        color-mix(
+          in srgb,
+          var(--insight-accent) 16%,
+          #DCE8F4
+        ) !important;
+      border-radius: 16px !important;
+
+      background:
+        linear-gradient(
+          160deg,
+          #FFFFFF 0%,
+          color-mix(in srgb, var(--insight-soft) 36%, white) 100%
+        ) !important;
+
+      box-shadow:
+        0 7px 18px rgb(3 49 113 / 5%),
+        inset 0 1px 0 rgb(255 255 255 / 90%) !important;
+
+      transition:
+        transform 180ms ease,
+        border-color 180ms ease,
+        box-shadow 180ms ease !important;
+    }
+
+    .programs-page .program-insight-card:nth-child(2) {
+      --insight-accent: #7B35F3;
+      --insight-deep: #6425D8;
+      --insight-soft: #F7F0FF;
+    }
+
+    .programs-page .program-insight-card:nth-child(3) {
+      --insight-accent: #08A89D;
+      --insight-deep: #058B84;
+      --insight-soft: #ECFBF8;
+    }
+
+    .programs-page .program-insight-card:nth-child(4) {
+      --insight-accent: #2474FF;
+      --insight-deep: #0757EF;
+      --insight-soft: #EDF5FF;
+    }
+
+    .programs-page .program-insight-card:nth-child(5) {
+      --insight-accent: #E832A1;
+      --insight-deep: #C61B85;
+      --insight-soft: #FFF0FA;
+    }
+
+    /* ---------------------------------------------------------
+       MARKET INSIGHTS — imagery
+       --------------------------------------------------------- */
+
+    .programs-page .program-insight-media {
+      position: relative !important;
+      height: 158px !important;
+      min-height: 158px !important;
+      overflow: hidden !important;
+
+      border-radius: 15px 15px 0 0 !important;
+      background: #EAF3FB !important;
+    }
+
+    .programs-page .program-insight-media::after {
+      content: "" !important;
+      position: absolute !important;
+      inset: 0 !important;
+      pointer-events: none !important;
+
+      background:
+        linear-gradient(
+          180deg,
+          transparent 62%,
+          rgb(7 39 94 / 5%) 100%
+        ) !important;
+    }
+
+    .programs-page .program-insight-media img,
+    .programs-page .program-insight-fallback {
+      width: 100% !important;
+      height: 100% !important;
+      border-radius: inherit !important;
+    }
+
+    .programs-page .program-insight-media img {
+      object-fit: cover !important;
+      object-position: center !important;
+      transform: scale(1.01) !important;
+      transition: transform 280ms ease !important;
+    }
+
+    /* ---------------------------------------------------------
+       MARKET INSIGHTS — card body
+       --------------------------------------------------------- */
+
+    .programs-page .program-insight-body {
+      display: flex !important;
+      flex-direction: column !important;
+      min-width: 0 !important;
+      height: auto !important;
+
+      gap: 0 !important;
+      padding: 14px 14px 16px !important;
+    }
+
+    .programs-page .program-insight-heading {
+      display: grid !important;
+      grid-template-columns: 46px minmax(0, 1fr) !important;
+      align-items: start !important;
+      gap: 10px !important;
+      min-width: 0 !important;
+    }
+
+    .programs-page .program-insight-icon {
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+
+      width: 46px !important;
+      height: 46px !important;
+      flex: 0 0 46px !important;
+
+      border-radius: 12px !important;
+
+      color: var(--insight-deep) !important;
+      background:
+        color-mix(
+          in srgb,
+          var(--insight-accent) 10%,
+          white
+        ) !important;
+
+      box-shadow:
+        inset 0 0 0 1px
+        color-mix(
+          in srgb,
+          var(--insight-accent) 12%,
+          #E2EBF6
+        ) !important;
+    }
+
+    .programs-page .program-insight-icon svg {
+      width: 24px !important;
+      height: 24px !important;
+    }
+
+    .programs-page .program-insight-heading h3 {
+      min-width: 0 !important;
+      margin: 4px 0 0 !important;
+
+      color: #071F63 !important;
+      font-size: 15.5px !important;
+      font-weight: 900 !important;
+      line-height: 1.08 !important;
+      letter-spacing: -.018em !important;
+
+      white-space: normal !important;
+      word-break: normal !important;
+      overflow-wrap: normal !important;
+      hyphens: none !important;
+    }
+
+    .programs-page .program-insight-body > p {
+      min-width: 0 !important;
+      max-width: 100% !important;
+
+      margin: 12px 0 0 !important;
+
+      color: #526987 !important;
+      font-size: 12px !important;
+      font-weight: 540 !important;
+      line-height: 1.35 !important;
+
+      white-space: normal !important;
+      word-break: normal !important;
+      overflow-wrap: normal !important;
+      hyphens: none !important;
+    }
+
+    /* ---------------------------------------------------------
+       MARKET INSIGHTS — Explore CTA
+       --------------------------------------------------------- */
+
+    .programs-page .program-insight-cta {
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      gap: 16px !important;
+
+      width: 138px !important;
+      min-height: 42px !important;
+
+      margin: auto 0 0 !important;
+      padding: 0 17px !important;
+
+      border: 1px solid
+        color-mix(
+          in srgb,
+          var(--insight-accent) 20%,
+          #DCE8F4
+        ) !important;
+      border-radius: 999px !important;
+
+      color: var(--insight-deep) !important;
+      background:
+        color-mix(
+          in srgb,
+          var(--insight-accent) 7%,
+          white
+        ) !important;
+
+      box-shadow:
+        0 4px 11px rgb(3 49 113 / 4%),
+        inset 0 1px 0 rgb(255 255 255 / 92%) !important;
+
+      font-size: 11.5px !important;
+      font-weight: 820 !important;
+      line-height: 1 !important;
+
+      transition:
+        transform 160ms ease,
+        background 160ms ease,
+        border-color 160ms ease,
+        box-shadow 160ms ease !important;
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      .programs-page .program-insight-card:hover {
+        transform: translateY(-3px) !important;
+        border-color:
+          color-mix(
+            in srgb,
+            var(--insight-accent) 34%,
+            #DCE8F4
+          ) !important;
+        box-shadow:
+          0 14px 28px rgb(3 49 113 / 9%),
+          inset 0 1px 0 rgb(255 255 255 / 92%) !important;
+      }
+
+      .programs-page .program-insight-card:hover
+        .program-insight-media img {
+        transform: scale(1.035) !important;
+      }
+
+      .programs-page .program-insight-cta:hover {
+        transform: translateY(-1px) !important;
+        color: var(--insight-deep) !important;
+        background: #FFFFFF !important;
+        border-color:
+          color-mix(
+            in srgb,
+            var(--insight-accent) 36%,
+            #DCE8F4
+          ) !important;
+        box-shadow:
+          0 6px 15px rgb(3 75 180 / 9%) !important;
+      }
+    }
+
+    /* =========================================================
+       QUICK ACCESS — outer panel + 2 x 3 desktop layout
+       ========================================================= */
+
+    .programs-page .programs-quick-access {
+      position: relative !important;
+
+      display: grid !important;
+      grid-template-columns: 280px minmax(0, 1fr) !important;
+      align-items: center !important;
+      gap: 24px !important;
+
+      margin: 18px 20px 22px !important;
+      padding: 16px 18px 18px !important;
+
+      overflow: hidden !important;
+
+      border: 1px solid #D7E8F5 !important;
+      border-radius: 22px !important;
+
+      background:
+        radial-gradient(circle at 90% 12%, rgb(63 150 255 / 5%), transparent 28%),
+        rgb(255 255 255 / 98%) !important;
+
+      box-shadow:
+        0 12px 28px rgb(3 49 113 / 6%),
+        inset 0 1px 0 rgb(255 255 255 / 92%) !important;
+    }
+
+    .programs-page .programs-quick-access::after {
+      content: "" !important;
+      position: absolute !important;
+      z-index: 0 !important;
+      left: -6% !important;
+      right: 54% !important;
+      bottom: -78px !important;
+      height: 115px !important;
+      pointer-events: none !important;
+      border-radius: 50% !important;
+      background: rgb(70 153 255 / 7%) !important;
+      transform: rotate(4deg) !important;
+    }
+
+    .programs-page .programs-quick-access > * {
+      position: relative !important;
+      z-index: 1 !important;
+    }
+
+    /* ---------------------------------------------------------
+       QUICK ACCESS — heading block
+       --------------------------------------------------------- */
+
+    .programs-page .programs-quick-access-header {
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+
+    .programs-page .programs-quick-access-title-group {
+      display: grid !important;
+      grid-template-columns: 64px minmax(0, 1fr) !important;
+      align-items: center !important;
+      gap: 14px !important;
+
+      min-width: 0 !important;
+    }
+
+    .programs-page .programs-quick-bolt {
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+
+      width: 64px !important;
+      height: 64px !important;
+      flex: none !important;
+
+      border-radius: 17px !important;
+
+      color: #FFFFFF !important;
+      background:
+        linear-gradient(
+          145deg,
+          #7650FA 0%,
+          #4B35EE 48%,
+          #1766E8 100%
+        ) !important;
+
+      box-shadow:
+        0 10px 21px rgb(65 66 224 / 18%),
+        inset 0 1px 0 rgb(255 255 255 / 26%) !important;
+
+      font-size: 32px !important;
+      font-weight: 900 !important;
+      line-height: 1 !important;
+      transform: none !important;
+    }
+
+    .programs-page .programs-quick-access-copy {
+      min-width: 0 !important;
+    }
+
+    .programs-page .programs-quick-access-title-group h2 {
+      margin: 0 !important;
+
+      color: #071F63 !important;
+      font-size: 22px !important;
+      font-weight: 900 !important;
+      line-height: 1.05 !important;
+      letter-spacing: -.02em !important;
+    }
+
+    .programs-page .programs-quick-access-title-group p {
+      margin: 4px 0 0 !important;
+
+      color: #5C779D !important;
+      font-size: 12.5px !important;
+      font-weight: 550 !important;
+      line-height: 1.25 !important;
+    }
+
+    /* ---------------------------------------------------------
+       QUICK ACCESS — exactly 3 columns x 2 rows on desktop
+       --------------------------------------------------------- */
+
+    .programs-page .programs-quick-access-grid {
+      display: grid !important;
+      grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+      grid-template-rows: repeat(2, minmax(76px, auto)) !important;
+      gap: 10px 12px !important;
+
+      min-width: 0 !important;
+      width: 100% !important;
+    }
+
+    .programs-page .programs-quick-card {
+      --quick-accent: #2474FF;
+      --quick-deep: #1763DB;
+      --quick-soft: #EDF5FF;
+
+      display: grid !important;
+      grid-template-columns: 46px minmax(0, 1fr) 34px !important;
+      align-items: center !important;
+      gap: 11px !important;
+
+      min-width: 0 !important;
+      min-height: 76px !important;
+      padding: 10px 14px !important;
+
+      border: 1px solid
+        color-mix(
+          in srgb,
+          var(--quick-accent) 20%,
+          #DCE7F3
+        ) !important;
+      border-radius: 14px !important;
+
+      color: #071F63 !important;
+      background:
+        linear-gradient(
+          145deg,
+          #FFFFFF 0%,
+          var(--quick-soft) 100%
+        ) !important;
+
+      text-align: left !important;
+      font: inherit !important;
+      cursor: pointer !important;
+
+      box-shadow:
+        0 5px 13px rgb(3 49 113 / 4%),
+        inset 0 1px 0 rgb(255 255 255 / 88%) !important;
+
+      transition:
+        transform 170ms ease,
+        border-color 170ms ease,
+        box-shadow 170ms ease !important;
+    }
+
+    .programs-page
+      .programs-quick-card[data-programs-action="key-contacts"] {
+      --quick-accent: #7B35F3;
+      --quick-deep: #6425D8;
+      --quick-soft: #F7F0FF;
+    }
+
+    .programs-page
+      .programs-quick-card[data-programs-action="competitors"] {
+      --quick-accent: #08A89D;
+      --quick-deep: #058B84;
+      --quick-soft: #ECFBF8;
+    }
+
+    .programs-page
+      .programs-quick-card[data-programs-action="products-solutions"] {
+      --quick-accent: #F08312;
+      --quick-deep: #D86B00;
+      --quick-soft: #FFF6EC;
+    }
+
+    .programs-page
+      .programs-quick-card[data-programs-action="case-studies"] {
+      --quick-accent: #E83283;
+      --quick-deep: #CE1C6B;
+      --quick-soft: #FFF0F7;
+    }
+
+    .programs-page
+      .programs-quick-card[data-programs-action="partner-ecosystem"] {
+      --quick-accent: #653AE9;
+      --quick-deep: #5426CF;
+      --quick-soft: #F5F1FF;
+    }
+
+    .programs-page .programs-quick-icon {
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+
+      width: 46px !important;
+      height: 46px !important;
+      flex: 0 0 46px !important;
+
+      margin: 0 !important;
+      border-radius: 11px !important;
+
+      color: var(--quick-deep) !important;
+      background:
+        color-mix(
+          in srgb,
+          var(--quick-accent) 10%,
+          white
+        ) !important;
+
+      box-shadow:
+        inset 0 0 0 1px
+        color-mix(
+          in srgb,
+          var(--quick-accent) 10%,
+          #E2EBF5
+        ) !important;
+
+      transition: transform 170ms ease !important;
+    }
+
+    .programs-page .programs-quick-icon svg {
+      width: 24px !important;
+      height: 24px !important;
+    }
+
+    .programs-page .programs-quick-card > span:nth-child(2) {
+      min-width: 0 !important;
+
+      color: #071F63 !important;
+      font-size: 13.5px !important;
+      font-weight: 830 !important;
+      line-height: 1.1 !important;
+
+      white-space: normal !important;
+      word-break: normal !important;
+      overflow-wrap: normal !important;
+      hyphens: none !important;
+    }
+
+    .programs-page .programs-quick-arrow {
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+
+      width: 34px !important;
+      height: 34px !important;
+      flex: 0 0 34px !important;
+
+      border: 1px solid
+        color-mix(
+          in srgb,
+          var(--quick-accent) 16%,
+          #DDE7F3
+        ) !important;
+      border-radius: 50% !important;
+
+      color: var(--quick-deep) !important;
+      background:
+        color-mix(
+          in srgb,
+          var(--quick-accent) 8%,
+          white
+        ) !important;
+
+      font-size: 17px !important;
+      line-height: 1 !important;
+
+      box-shadow: inset 0 1px 0 rgb(255 255 255 / 85%) !important;
+      transition: transform 170ms ease !important;
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      .programs-page .programs-quick-card:hover {
+        transform: translateY(-2px) !important;
+        border-color:
+          color-mix(
+            in srgb,
+            var(--quick-accent) 38%,
+            #DCE7F3
+          ) !important;
+        box-shadow:
+          0 8px 20px rgb(3 49 113 / 8%),
+          inset 0 1px 0 rgb(255 255 255 / 90%) !important;
+      }
+
+      .programs-page .programs-quick-card:hover .programs-quick-icon {
+        transform: scale(1.03) !important;
+      }
+
+      .programs-page .programs-quick-card:hover .programs-quick-arrow {
+        transform: translateX(2px) !important;
+      }
+    }
+
+    /* ---------------------------------------------------------
+       Shared focus state
+       --------------------------------------------------------- */
+
+    .programs-page .program-insight-cta:focus-visible,
+    .programs-page .programs-quick-card:focus-visible {
+      outline: 3px solid rgb(0 121 255 / 40%) !important;
+      outline-offset: 3px !important;
+    }
+
+    /* =========================================================
+       LARGE / MEDIUM DESKTOP
+       Preserve five Market Insights cards down to ~1180px.
+       ========================================================= */
+
+    @media (min-width: 1181px) and (max-width: 1499px) {
+      .programs-page .program-insights-panel {
+        padding-inline: 16px !important;
+      }
+
+      .programs-page .program-insights-grid {
+        grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+        gap: 10px !important;
+      }
+
+      .programs-page .program-insight-card {
+        height: 358px !important;
+        min-height: 358px !important;
+        max-height: 358px !important;
+        grid-template-rows: 145px minmax(0, 1fr) !important;
+      }
+
+      .programs-page .program-insight-media {
+        height: 145px !important;
+        min-height: 145px !important;
+      }
+
+      .programs-page .program-insight-body {
+        padding: 12px 11px 13px !important;
+      }
+
+      .programs-page .program-insight-heading {
+        grid-template-columns: 40px minmax(0, 1fr) !important;
+        gap: 8px !important;
+      }
+
+      .programs-page .program-insight-icon {
+        width: 40px !important;
+        height: 40px !important;
+      }
+
+      .programs-page .program-insight-heading h3 {
+        font-size: 13.5px !important;
+      }
+
+      .programs-page .program-insight-body > p {
+        font-size: 10.8px !important;
+      }
+
+      .programs-page .programs-quick-access {
+        grid-template-columns: 245px minmax(0, 1fr) !important;
+        gap: 18px !important;
+      }
+
+      .programs-page .programs-quick-card {
+        grid-template-columns: 42px minmax(0, 1fr) 32px !important;
+        min-height: 72px !important;
+        padding: 9px 11px !important;
+      }
+
+      .programs-page .programs-quick-icon {
+        width: 42px !important;
+        height: 42px !important;
+      }
+
+      .programs-page .programs-quick-card > span:nth-child(2) {
+        font-size: 12px !important;
+      }
+
+      .programs-page .programs-quick-arrow {
+        width: 32px !important;
+        height: 32px !important;
+      }
+    }
+
+    /* =========================================================
+       TABLET / NARROW DESKTOP
+       ========================================================= */
+
+    @media (min-width: 901px) and (max-width: 1180px) {
+      .programs-page .program-insights-panel {
+        margin-inline: 16px !important;
+      }
+
+      .programs-page .program-insights-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 14px !important;
+      }
+
+      .programs-page .program-insight-card {
+        height: 350px !important;
+        min-height: 350px !important;
+        max-height: 350px !important;
+      }
+
+      .programs-page .programs-quick-access {
+        display: block !important;
+        margin-inline: 16px !important;
+      }
+
+      .programs-page .programs-quick-access-header {
+        margin-bottom: 14px !important;
+      }
+
+      .programs-page .programs-quick-access-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+      }
+    }
+
+    @media (min-width: 621px) and (max-width: 900px) {
+      .programs-page .program-insights-panel {
+        margin-inline: 14px !important;
+        padding: 15px !important;
+      }
+
+      .programs-page .program-insights-panel .programs-panel-icon {
+        width: 60px !important;
+        height: 60px !important;
+        flex-basis: 60px !important;
+      }
+
+      .programs-page .program-insights-panel
+        .programs-panel-title-group h2 {
+        font-size: 22px !important;
+      }
+
+      .programs-page .program-insights-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 12px !important;
+      }
+
+      .programs-page .program-insight-card {
+        height: 340px !important;
+        min-height: 340px !important;
+        max-height: 340px !important;
+      }
+
+      .programs-page .programs-quick-access {
+        display: block !important;
+        margin-inline: 14px !important;
+      }
+
+      .programs-page .programs-quick-access-header {
+        margin-bottom: 14px !important;
+      }
+
+      .programs-page .programs-quick-access-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        grid-template-rows: auto !important;
+      }
+    }
+
+    /* =========================================================
+       MOBILE
+       ========================================================= */
+
+    @media (max-width: 620px) {
+      .programs-page .program-insights-panel {
+        margin: 14px 10px 0 !important;
+        padding: 13px !important;
+        border-radius: 18px !important;
+      }
+
+      .programs-page .program-insights-panel .programs-panel-header {
+        margin-bottom: 12px !important;
+      }
+
+      .programs-page .program-insights-panel .programs-panel-title-group {
+        align-items: center !important;
+        gap: 11px !important;
+      }
+
+      .programs-page .program-insights-panel .programs-panel-icon {
+        width: 52px !important;
+        height: 52px !important;
+        flex-basis: 52px !important;
+        border-radius: 15px !important;
+      }
+
+      .programs-page .program-insights-panel .programs-panel-icon svg {
+        width: 27px !important;
+        height: 27px !important;
+      }
+
+      .programs-page .program-insights-panel
+        .programs-panel-title-group h2 {
+        font-size: 18px !important;
+      }
+
+      .programs-page .program-insights-panel
+        .programs-panel-title-group p {
+        font-size: 11px !important;
+      }
+
+      .programs-page .program-insights-grid {
+        grid-template-columns: minmax(0, 1fr) !important;
+        gap: 10px !important;
+      }
+
+      .programs-page .program-insight-card {
+        grid-template-columns: 38% minmax(0, 1fr) !important;
+        grid-template-rows: minmax(0, 1fr) !important;
+
+        height: 170px !important;
+        min-height: 170px !important;
+        max-height: 170px !important;
+      }
+
+      .programs-page .program-insight-media {
+        height: 100% !important;
+        min-height: 170px !important;
+        border-radius: 15px 0 0 15px !important;
+      }
+
+      .programs-page .program-insight-body {
+        justify-content: center !important;
+        padding: 12px !important;
+      }
+
+      .programs-page .program-insight-heading {
+        grid-template-columns: 36px minmax(0, 1fr) !important;
+        gap: 8px !important;
+      }
+
+      .programs-page .program-insight-icon {
+        width: 36px !important;
+        height: 36px !important;
+        border-radius: 10px !important;
+      }
+
+      .programs-page .program-insight-icon svg {
+        width: 19px !important;
+        height: 19px !important;
+      }
+
+      .programs-page .program-insight-heading h3 {
+        margin-top: 2px !important;
+        font-size: 12.5px !important;
+      }
+
+      .programs-page .program-insight-body > p {
+        margin-top: 7px !important;
+        font-size: 10px !important;
+      }
+
+      .programs-page .program-insight-cta {
+        width: 110px !important;
+        min-height: 36px !important;
+        padding-inline: 13px !important;
+        font-size: 10px !important;
+      }
+
+      .programs-page .programs-quick-access {
+        display: block !important;
+        margin: 14px 10px 18px !important;
+        padding: 14px !important;
+        border-radius: 18px !important;
+      }
+
+      .programs-page .programs-quick-access-header {
+        margin-bottom: 12px !important;
+      }
+
+      .programs-page .programs-quick-access-title-group {
+        grid-template-columns: 52px minmax(0, 1fr) !important;
+        gap: 11px !important;
+      }
+
+      .programs-page .programs-quick-bolt {
+        width: 52px !important;
+        height: 52px !important;
+        border-radius: 15px !important;
+        font-size: 27px !important;
+      }
+
+      .programs-page .programs-quick-access-title-group h2 {
+        font-size: 18px !important;
+      }
+
+      .programs-page .programs-quick-access-title-group p {
+        font-size: 11px !important;
+      }
+
+      .programs-page .programs-quick-access-grid {
+        grid-template-columns: minmax(0, 1fr) !important;
+        grid-template-rows: auto !important;
+        gap: 8px !important;
+      }
+
+      .programs-page .programs-quick-card {
+        grid-template-columns: 42px minmax(0, 1fr) 32px !important;
+        min-height: 66px !important;
+        padding: 9px 11px !important;
+      }
+
+      .programs-page .programs-quick-icon {
+        width: 42px !important;
+        height: 42px !important;
+        border-radius: 10px !important;
+      }
+
+      .programs-page .programs-quick-card > span:nth-child(2) {
+        font-size: 12.5px !important;
+      }
+
+      .programs-page .programs-quick-arrow {
+        width: 32px !important;
+        height: 32px !important;
+        font-size: 16px !important;
+      }
+    }
+
+    /* ---------------------------------------------------------
+       Reduced motion
+       --------------------------------------------------------- */
+
+    @media (prefers-reduced-motion: reduce) {
+      .programs-page .program-insight-card,
+      .programs-page .program-insight-media img,
+      .programs-page .program-insight-cta,
+      .programs-page .programs-quick-card,
+      .programs-page .programs-quick-icon,
+      .programs-page .programs-quick-arrow {
+        transition: none !important;
+      }
+
+      .programs-page .program-insight-card:hover,
+      .programs-page .program-insight-card:hover
+        .program-insight-media img,
+      .programs-page .program-insight-cta:hover,
+      .programs-page .programs-quick-card:hover,
+      .programs-page .programs-quick-card:hover
+        .programs-quick-icon,
+      .programs-page .programs-quick-card:hover
+        .programs-quick-arrow {
+        transform: none !important;
+      }
+    }
+
+
+
+    /* =========================================================
+       H4 PROGRAMS — TOP CARDS COMPACT REFRESH V2
+       Goal: make Programs Dashboard / Innovation Playbook /
+       Toolkit & Repository more compact by removing the left
+       icon tiles and removing the white card fill.
+    ========================================================== */
+
+    .programs-entry-section {
+      padding: 6px 20px 10px;
+      background: transparent;
+    }
+
+    .programs-entry-grid {
+      gap: 10px;
+    }
+
+    .program-entry-card {
+      min-height: 126px;
+      border-radius: 11px;
+      background:
+        linear-gradient(180deg,
+          color-mix(in srgb, var(--program-accent) 5%, rgb(255 255 255 / 0%)) 0%,
+          color-mix(in srgb, var(--program-accent) 8%, rgb(255 255 255 / 0%)) 100%);
+      box-shadow: none;
+    }
+
+    .program-entry-card.is-playbook {
+      background:
+        linear-gradient(180deg,
+          rgb(160 39 239 / 4%) 0%,
+          rgb(160 39 239 / 7%) 100%);
+    }
+
+    .program-entry-card.is-toolkit {
+      background:
+        linear-gradient(180deg,
+          rgb(23 156 160 / 4%) 0%,
+          rgb(23 156 160 / 7%) 100%);
+    }
+
+    .program-entry-main {
+      grid-template-columns: minmax(0, 1fr) minmax(180px, 44%) 38px;
+      gap: 10px;
+      min-height: 126px;
+      padding: 12px 12px 10px;
+      align-items: stretch;
+    }
+
+    .program-entry-icon {
+      display: none !important;
+    }
+
+    .program-entry-copy {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      min-width: 0;
+      padding-top: 2px;
+    }
+
+    .program-entry-copy h2 {
+      color: #103DAF;
+      font-size: .82rem;
+      line-height: 1.02;
+    }
+
+    .program-entry-copy p {
+      max-width: none;
+      margin: 5px 0 0;
+      font-size: .58rem;
+      line-height: 1.24;
+    }
+
+    .program-entry-visual {
+      min-height: 100px;
+      border-radius: 0 0 0 56px;
+      background: color-mix(in srgb, var(--program-accent) 7%, white);
+    }
+
+    .program-entry-visual::before {
+      background: linear-gradient(90deg, rgb(255 255 255 / 54%), transparent 34%);
+    }
+
+    .program-entry-arrow {
+      width: 36px;
+      height: 36px;
+      align-self: end;
+      margin-top: 0;
+      margin-bottom: 8px;
+      color: color-mix(in srgb, var(--program-accent) 80%, #274172);
+      background: rgb(255 255 255 / 28%);
+      box-shadow: none;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+    }
+
+    .program-entry-arrow:hover {
+      box-shadow: none;
+    }
+
+    @media (max-width: 1020px) {
+      .program-entry-main {
+        grid-template-columns: minmax(0, 1fr) minmax(150px, 40%) 38px;
+      }
+    }
+
+    @media (max-width: 767px) {
+      .programs-entry-section {
+        padding: 10px 14px 14px;
+      }
+
+      .program-entry-card {
+        min-height: 138px;
+      }
+
+      .program-entry-main {
+        grid-template-columns: minmax(0, 1fr) 40px;
+        min-height: 138px;
+        padding: 12px 12px 10px;
+      }
+
+      .program-entry-visual {
+        position: absolute;
+        inset: 0 0 auto auto;
+        width: 43%;
+        height: 100%;
+        min-height: 0;
+        opacity: .42;
+        border-radius: 0;
+      }
+
+      .program-entry-copy {
+        position: relative;
+        z-index: 2;
+        padding-right: 8px;
+      }
+
+      .program-entry-copy p {
+        max-width: 72%;
+      }
+
+      .program-entry-arrow {
+        z-index: 3;
+        align-self: end;
+        margin-bottom: 4px;
+      }
+    }
+
+
+
+    /* =========================================================
+       H4 PROGRAMS — TOP RESOURCE CARDS BEAUTIFIED V3
+       Matches the approved visual reference:
+       - 3 premium cards
+       - compact height
+       - small accent icon tile
+       - title + description on left
+       - integrated full-height image on right
+       - curved image/content transition
+       - colored circular arrow
+       - no solid white card background
+       ========================================================= */
+
+    @media (min-width: 1200px) {
+
+      .programs-page .programs-entry-section {
+        /* Restore the shared hero-overlap contract used across Nexus.
+           Desktop/tablet first content overlaps the hero by 82px. */
+        position: relative !important;
+        z-index: 5 !important;
+        margin-top: -82px !important;
+        padding: 14px 20px 16px !important;
+        background: transparent !important;
+      }
+
+      .programs-page .programs-entry-grid {
+        display: grid !important;
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        gap: 16px !important;
+        align-items: stretch !important;
+      }
+
+      .programs-page .program-entry-card {
+        --program-accent: #2F78FF;
+        --program-deep: #1557E7;
+        --program-soft: #EAF3FF;
+        --program-tint: rgb(230 241 255 / 78%);
+
+        position: relative !important;
+        display: block !important;
+
+        width: 100% !important;
+        min-width: 0 !important;
+        height: 248px !important;
+        min-height: 248px !important;
+        max-height: 248px !important;
+
+        overflow: hidden !important;
+
+        border: 1px solid
+          color-mix(
+            in srgb,
+            var(--program-accent) 28%,
+            #D9E7F5
+          ) !important;
+        border-radius: 20px !important;
+
+        background:
+          linear-gradient(
+            145deg,
+            color-mix(in srgb, var(--program-soft) 78%, transparent) 0%,
+            color-mix(in srgb, var(--program-soft) 42%, transparent) 100%
+          ) !important;
+
+        box-shadow:
+          0 14px 28px rgb(3 49 113 / 7%),
+          inset 0 1px 0 rgb(255 255 255 / 34%) !important;
+
+        isolation: isolate !important;
+
+        transition:
+          transform 180ms ease,
+          border-color 180ms ease,
+          box-shadow 180ms ease !important;
+      }
+
+      .programs-page .program-entry-card.is-playbook {
+        --program-accent: #9A35F2;
+        --program-deep: #7620DC;
+        --program-soft: #F3EAFE;
+        --program-tint: rgb(245 235 255 / 78%);
+      }
+
+      .programs-page .program-entry-card.is-toolkit {
+        --program-accent: #13A9AE;
+        --program-deep: #078A91;
+        --program-soft: #E7FAFA;
+        --program-tint: rgb(230 249 249 / 80%);
+        grid-column: auto !important;
+      }
+
+      /* subtle bottom wave */
+      .programs-page .program-entry-card::after {
+        content: "" !important;
+        position: absolute !important;
+        z-index: 0 !important;
+
+        left: -8% !important;
+        right: -8% !important;
+        bottom: -79px !important;
+
+        height: 120px !important;
+        border-radius: 50% !important;
+
+        background:
+          color-mix(
+            in srgb,
+            var(--program-accent) 8%,
+            transparent
+          ) !important;
+
+        transform: rotate(2deg) !important;
+        pointer-events: none !important;
+      }
+
+      .programs-page .program-entry-main {
+        position: relative !important;
+        z-index: 2 !important;
+
+        display: block !important;
+
+        width: 100% !important;
+        height: 100% !important;
+        min-height: 0 !important;
+
+        padding: 22px 48% 18px 24px !important;
+        box-sizing: border-box !important;
+      }
+
+      /* ---------- small accent icon tile ---------- */
+
+      .programs-page .program-entry-icon {
+        position: relative !important;
+        z-index: 5 !important;
+
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+
+        width: 50px !important;
+        height: 50px !important;
+        min-width: 50px !important;
+        min-height: 50px !important;
+
+        margin: 0 0 12px !important;
+
+        border: 1px solid
+          color-mix(
+            in srgb,
+            var(--program-accent) 14%,
+            transparent
+          ) !important;
+        border-radius: 14px !important;
+
+        color: var(--program-accent) !important;
+
+        background:
+          linear-gradient(
+            145deg,
+            color-mix(in srgb, var(--program-accent) 11%, white),
+            color-mix(in srgb, var(--program-accent) 6%, white)
+          ) !important;
+
+        box-shadow:
+          0 8px 16px rgb(3 49 113 / 7%),
+          inset 0 1px 0 rgb(255 255 255 / 78%) !important;
+      }
+
+      .programs-page .program-entry-icon svg {
+        width: 26px !important;
+        height: 26px !important;
+        stroke-width: 1.9 !important;
+      }
+
+      /* ---------- copy ---------- */
+
+      .programs-page .program-entry-copy {
+        position: relative !important;
+        z-index: 5 !important;
+
+        display: block !important;
+
+        width: 100% !important;
+        max-width: 250px !important;
+
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+
+      .programs-page .program-entry-copy h2 {
+        margin: 0 !important;
+
+        color: #071F63 !important;
+        font-size: 1.18rem !important;
+        font-weight: 900 !important;
+        line-height: 1.03 !important;
+        letter-spacing: -.025em !important;
+
+        white-space: normal !important;
+        word-break: normal !important;
+        overflow-wrap: normal !important;
+        hyphens: none !important;
+      }
+
+      .programs-page .program-entry-copy p {
+        max-width: 230px !important;
+        margin: 9px 0 0 !important;
+
+        color: #526C92 !important;
+        font-size: .74rem !important;
+        font-weight: 540 !important;
+        line-height: 1.34 !important;
+
+        white-space: normal !important;
+        word-break: normal !important;
+        overflow-wrap: normal !important;
+      }
+
+      /* ---------- integrated right image ---------- */
+
+      .programs-page .program-entry-visual {
+        position: absolute !important;
+        z-index: 1 !important;
+
+        top: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        left: auto !important;
+
+        width: 52% !important;
+        height: 100% !important;
+        min-height: 0 !important;
+
+        margin: 0 !important;
+        overflow: hidden !important;
+
+        border: 0 !important;
+        border-radius: 44% 20px 20px 44% !important;
+
+        background: var(--program-soft) !important;
+      }
+
+      .programs-page .program-entry-visual img,
+      .programs-page .program-entry-fallback {
+        position: absolute !important;
+        inset: 0 !important;
+
+        width: 100% !important;
+        height: 100% !important;
+
+        border: 0 !important;
+        border-radius: inherit !important;
+      }
+
+      .programs-page .program-entry-visual img {
+        display: block !important;
+
+        object-fit: cover !important;
+        object-position: center !important;
+
+        transform: scale(1.015) !important;
+
+        transition:
+          transform 320ms cubic-bezier(.2,.75,.2,1),
+          filter 220ms ease !important;
+      }
+
+      /*
+       * Tint fade instead of a white overlay.
+       * This preserves the user's request to avoid a solid white card.
+       */
+      .programs-page .program-entry-visual::before {
+        content: "" !important;
+        position: absolute !important;
+        z-index: 3 !important;
+        inset: 0 !important;
+
+        pointer-events: none !important;
+
+        background:
+          linear-gradient(
+            90deg,
+            var(--program-tint) 0%,
+            rgb(255 255 255 / 26%) 20%,
+            transparent 52%
+          ) !important;
+      }
+
+      .programs-page .program-entry-visual::after {
+        content: "" !important;
+        position: absolute !important;
+        z-index: 3 !important;
+
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+
+        height: 30% !important;
+
+        pointer-events: none !important;
+
+        background:
+          linear-gradient(
+            180deg,
+            transparent,
+            color-mix(in srgb, var(--program-accent) 8%, transparent)
+          ) !important;
+      }
+
+      /* ---------- accent arrow ---------- */
+
+      .programs-page .program-entry-arrow {
+        position: absolute !important;
+        z-index: 6 !important;
+
+        left: 24px !important;
+        right: auto !important;
+        top: auto !important;
+        bottom: 18px !important;
+
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+
+        width: 44px !important;
+        height: 44px !important;
+        min-width: 44px !important;
+        min-height: 44px !important;
+
+        margin: 0 !important;
+        padding: 0 !important;
+
+        border: 0 !important;
+        border-radius: 50% !important;
+
+        color: #FFFFFF !important;
+
+        background:
+          linear-gradient(
+            145deg,
+            color-mix(in srgb, var(--program-accent) 86%, #69AAFF),
+            var(--program-deep)
+          ) !important;
+
+        box-shadow:
+          0 8px 18px
+          color-mix(
+            in srgb,
+            var(--program-accent) 23%,
+            transparent
+          ),
+          inset 0 1px 0 rgb(255 255 255 / 25%) !important;
+
+        font-size: 1.22rem !important;
+        line-height: 1 !important;
+
+        transition:
+          transform 170ms ease,
+          box-shadow 170ms ease !important;
+      }
+
+      @media (hover: hover) and (pointer: fine) {
+        .programs-page .program-entry-card:hover {
+          transform: translateY(-3px) !important;
+
+          border-color:
+            color-mix(
+              in srgb,
+              var(--program-accent) 42%,
+              #D9E7F5
+            ) !important;
+
+          box-shadow:
+            0 18px 34px rgb(3 49 113 / 10%),
+            inset 0 1px 0 rgb(255 255 255 / 38%) !important;
+        }
+
+        .programs-page .program-entry-card:hover
+          .program-entry-visual img {
+          transform: scale(1.045) !important;
+          filter: saturate(1.04) contrast(1.02) !important;
+        }
+
+        .programs-page .program-entry-card:hover
+          .program-entry-arrow {
+          transform: translateX(2px) !important;
+
+          box-shadow:
+            0 10px 22px
+            color-mix(
+              in srgb,
+              var(--program-accent) 30%,
+              transparent
+            ) !important;
+        }
+      }
+    }
+
+    /* =========================================================
+       Medium desktop / tablet
+       ========================================================= */
+
+    @media (min-width: 768px) and (max-width: 1199px) {
+
+      .programs-page .programs-entry-section {
+        padding: 14px 18px 16px !important;
+        background: transparent !important;
+      }
+
+      .programs-page .programs-entry-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 14px !important;
+      }
+
+      .programs-page .program-entry-card {
+        height: 230px !important;
+        min-height: 230px !important;
+        max-height: 230px !important;
+      }
+
+      .programs-page .program-entry-card.is-toolkit {
+        grid-column: 1 / -1 !important;
+      }
+
+      .programs-page .program-entry-main {
+        display: block !important;
+        padding: 18px 46% 16px 20px !important;
+      }
+
+      .programs-page .program-entry-icon {
+        display: inline-flex !important;
+        width: 46px !important;
+        height: 46px !important;
+        min-width: 46px !important;
+        min-height: 46px !important;
+        margin-bottom: 10px !important;
+      }
+
+      .programs-page .program-entry-icon svg {
+        width: 24px !important;
+        height: 24px !important;
+      }
+
+      .programs-page .program-entry-copy h2 {
+        font-size: 1.05rem !important;
+      }
+
+      .programs-page .program-entry-copy p {
+        margin-top: 7px !important;
+        font-size: .68rem !important;
+      }
+
+      .programs-page .program-entry-visual {
+        width: 50% !important;
+        border-radius: 44% 18px 18px 44% !important;
+      }
+
+      .programs-page .program-entry-arrow {
+        left: 20px !important;
+        bottom: 15px !important;
+        width: 40px !important;
+        height: 40px !important;
+        min-width: 40px !important;
+        min-height: 40px !important;
+      }
+    }
+
+    /* =========================================================
+       Mobile
+       ========================================================= */
+
+    @media (max-width: 767px) {
+
+      .programs-page .programs-entry-section {
+        position: relative !important;
+        z-index: 5 !important;
+        margin-top: 0 !important;
+        padding: 12px 12px 14px !important;
+        background: transparent !important;
+      }
+
+      .programs-page .programs-entry-grid {
+        grid-template-columns: 1fr !important;
+        gap: 11px !important;
+      }
+
+      .programs-page .program-entry-card,
+      .programs-page .program-entry-card.is-toolkit {
+        grid-column: auto !important;
+
+        height: 195px !important;
+        min-height: 195px !important;
+        max-height: 195px !important;
+
+        border-radius: 17px !important;
+      }
+
+      .programs-page .program-entry-main {
+        display: block !important;
+        padding: 15px 40% 13px 15px !important;
+      }
+
+      .programs-page .program-entry-icon {
+        display: inline-flex !important;
+        width: 42px !important;
+        height: 42px !important;
+        min-width: 42px !important;
+        min-height: 42px !important;
+
+        margin-bottom: 8px !important;
+
+        border-radius: 12px !important;
+      }
+
+      .programs-page .program-entry-icon svg {
+        width: 22px !important;
+        height: 22px !important;
+      }
+
+      .programs-page .program-entry-copy h2 {
+        font-size: .92rem !important;
+      }
+
+      .programs-page .program-entry-copy p {
+        max-width: 205px !important;
+        margin-top: 6px !important;
+        font-size: .61rem !important;
+      }
+
+      .programs-page .program-entry-visual {
+        width: 43% !important;
+        opacity: 1 !important;
+        border-radius: 46% 17px 17px 46% !important;
+      }
+
+      .programs-page .program-entry-arrow {
+        left: 15px !important;
+        bottom: 13px !important;
+
+        width: 36px !important;
+        height: 36px !important;
+        min-width: 36px !important;
+        min-height: 36px !important;
+
+        font-size: 1rem !important;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .programs-page .program-entry-card,
+      .programs-page .program-entry-visual img,
+      .programs-page .program-entry-arrow {
+        transition: none !important;
+      }
+
+      .programs-page .program-entry-card:hover,
+      .programs-page .program-entry-card:hover
+        .program-entry-visual img,
+      .programs-page .program-entry-card:hover
+        .program-entry-arrow {
+        transform: none !important;
+      }
+    }
+
 
 </style>

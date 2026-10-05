@@ -850,6 +850,16 @@
       fileId: "1rP3N3F_oUhNpsSGnGzkFg0Nd5Ri2X04J",
       viewerUrl: "https://drive.google.com/file/d/1rP3N3F_oUhNpsSGnGzkFg0Nd5Ri2X04J/view?usp=drive_link",
       phase: 2
+    },
+    "delivery-methodologies-header-visual": {
+      fileId: "14IaCZjn34UNw-71bFw0Xx4p71I2o3C-k",
+      viewerUrl: "https://drive.google.com/file/d/14IaCZjn34UNw-71bFw0Xx4p71I2o3C-k/view?usp=drive_link",
+      phase: 3
+    },
+    "delivery-case-studies-header-visual": {
+      fileId: "17mDC77D8fWMzYhvomfNdGTbPQDXuPM8x",
+      viewerUrl: "https://drive.google.com/file/d/17mDC77D8fWMzYhvomfNdGTbPQDXuPM8x/view?usp=drive_link",
+      phase: 3
     }
   };
 
@@ -882,7 +892,7 @@
       { id: "standards-guidelines", label: "Standards & Guidelines", icon: "shield", themeClass: "" },
       { id: "training-enablement", label: "Training & Enablement", icon: "training", themeClass: "" },
       { id: "delivery-community", label: "Delivery Community", icon: "contacts", themeClass: "" },
-      { id: "ask-nosca", label: "Ask Nosca", icon: "spark", themeClass: "is-purple" }
+      { id: "ask-nosca", label: "Ask NOSCA", icon: "spark", themeClass: "is-purple" }
     ]
   };
 
@@ -951,10 +961,11 @@
 
     grid.innerHTML = items.map(function (item) {
       const labelLines = Array.isArray(item.labelLines) ? item.labelLines : [item.label || ""];
-      return '<button class="delivery-resource-card ' + (purple ? 'is-purple' : '') + '" type="button" data-delivery-action="' + escapeDeliveryHtml(item.id) + '">' +
+      const readableLabel = labelLines.join(" ");
+      return '<button class="delivery-resource-card ' + (purple ? 'is-purple' : '') + '" type="button" data-delivery-action="' + escapeDeliveryHtml(item.id) + '" aria-label="Open ' + escapeDeliveryHtml(readableLabel) + '">' +
         '<span class="delivery-resource-icon" aria-hidden="true">' + deliveryIconSvg(item.icon, 27) + '</span>' +
         '<span class="delivery-resource-label">' + labelLines.map(escapeDeliveryHtml).join("<br>") + '</span>' +
-        '<span class="delivery-resource-arrow" aria-hidden="true">→</span>' +
+        '<span class="delivery-resource-arrow" aria-hidden="true">›</span>' +
       '</button>';
     }).join("");
   }
@@ -973,10 +984,11 @@
     if (!grid || !Array.isArray(items)) return;
 
     grid.innerHTML = items.map(function (item) {
-      return '<button class="delivery-quick-card ' + escapeDeliveryHtml(item.themeClass || "") + '" type="button" data-delivery-action="' + escapeDeliveryHtml(item.id) + '">' +
+      const label = escapeDeliveryHtml(item.label);
+      return '<button class="delivery-quick-card ' + escapeDeliveryHtml(item.themeClass || "") + '" type="button" data-delivery-action="' + escapeDeliveryHtml(item.id) + '" aria-label="Open ' + label + '">' +
         '<span class="delivery-quick-icon" aria-hidden="true">' + deliveryIconSvg(item.icon, 25) + '</span>' +
-        '<span>' + escapeDeliveryHtml(item.label) + '</span>' +
-        '<span class="delivery-quick-arrow" aria-hidden="true">→</span>' +
+        '<span>' + label + '</span>' +
+        '<span class="delivery-quick-arrow" aria-hidden="true">›</span>' +
       '</button>';
     }).join("");
   }
@@ -994,6 +1006,18 @@
       pageRoot.querySelector("#delivery-closing-image"),
       pageRoot.querySelector("#delivery-closing-fallback"),
       2200
+    );
+
+    bindDeliveryAsset(
+      pageRoot.querySelector("#delivery-methodologies-header-visual-image"),
+      pageRoot.querySelector("#delivery-methodologies-header-visual-fallback"),
+      1600
+    );
+
+    bindDeliveryAsset(
+      pageRoot.querySelector("#delivery-case-studies-header-visual-image"),
+      pageRoot.querySelector("#delivery-case-studies-header-visual-fallback"),
+      1600
     );
   }
 

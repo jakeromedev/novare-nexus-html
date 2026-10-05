@@ -1094,4 +1094,1182 @@
         animation-iteration-count: 1 !important;
       }
     }
+
+
+    /* =========================================================
+       H5 DELIVERY — BEAUTIFIED RESOURCE ROWS V3
+       Approved visual direction:
+       - Methodologies = its own full-width row
+       - Case Studies = its own full-width row
+       - Quick Access = 2 rows x 3 cards on desktop
+       - no Explore All footer bars
+       - no large header arrow controls
+       - softer blue / violet visual hierarchy
+       ========================================================= */
+
+    /* ---------- Knowledge section ---------- */
+
+    .delivery-page .delivery-knowledge-section {
+      position: relative !important;
+      z-index: 5 !important;
+      padding: 18px 20px 10px !important;
+      background: transparent !important;
+    }
+
+    .delivery-page .delivery-knowledge-grid {
+      display: grid !important;
+      grid-template-columns: minmax(0, 1fr) !important;
+      gap: 18px !important;
+      align-items: stretch !important;
+    }
+
+    .delivery-page .delivery-panel {
+      position: relative !important;
+      min-width: 0 !important;
+      overflow: hidden !important;
+
+      border-radius: 22px !important;
+      box-shadow:
+        0 14px 30px rgb(3 49 113 / 6%),
+        inset 0 1px 0 rgb(255 255 255 / 76%) !important;
+      isolation: isolate !important;
+    }
+
+    .delivery-page .methodologies-panel {
+      border: 1px solid #CFE4FA !important;
+      background:
+        radial-gradient(circle at 91% 10%, rgb(54 144 255 / 8%), transparent 25%),
+        linear-gradient(145deg, #FBFDFF 0%, #EFF7FF 100%) !important;
+    }
+
+    .delivery-page .case-studies-panel {
+      border: 1px solid #DDD3F8 !important;
+      background:
+        radial-gradient(circle at 91% 12%, rgb(137 55 239 / 8%), transparent 25%),
+        linear-gradient(145deg, #FEFCFF 0%, #F5EFFF 100%) !important;
+    }
+
+    /* Decorative curved background sweep. */
+    .delivery-page .delivery-panel::before {
+      content: "" !important;
+      position: absolute !important;
+      z-index: 0 !important;
+      top: -90px !important;
+      right: -90px !important;
+      width: 44% !important;
+      height: 210px !important;
+      border-radius: 48% !important;
+      pointer-events: none !important;
+      transform: rotate(-8deg) !important;
+      background:
+        color-mix(in srgb, var(--panel-sweep, #3D8DFF) 7%, transparent) !important;
+    }
+
+    .delivery-page .methodologies-panel {
+      --panel-sweep: #2F82FF;
+    }
+
+    .delivery-page .case-studies-panel {
+      --panel-sweep: #8C3AF0;
+    }
+
+    .delivery-page .delivery-panel > * {
+      position: relative !important;
+      z-index: 2 !important;
+    }
+
+    /* ---------- Panel header ---------- */
+
+    .delivery-page .delivery-panel-header {
+      display: grid !important;
+      grid-template-columns: 50px 64px minmax(0, 1fr) !important;
+      grid-template-rows: auto auto !important;
+      align-items: center !important;
+      column-gap: 16px !important;
+      row-gap: 2px !important;
+
+      min-height: 104px !important;
+      padding: 20px 24px 12px !important;
+    }
+
+    .delivery-page .delivery-panel-number {
+      grid-column: 1 !important;
+      grid-row: 1 / 3 !important;
+
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+
+      height: 52px !important;
+      padding-right: 14px !important;
+      border-right: 1px solid
+        color-mix(in srgb, currentColor 24%, transparent) !important;
+
+      color: #1754D7 !important;
+      font-size: 1.40rem !important;
+      font-weight: 900 !important;
+      line-height: 1 !important;
+    }
+
+    .delivery-page .case-studies-panel .delivery-panel-number {
+      color: #7428DF !important;
+    }
+
+    .delivery-page .delivery-panel-icon {
+      grid-column: 2 !important;
+      grid-row: 1 / 3 !important;
+
+      width: 60px !important;
+      height: 60px !important;
+
+      border-radius: 15px !important;
+
+      box-shadow:
+        0 11px 22px rgb(0 44 115 / 15%),
+        inset 0 1px 0 rgb(255 255 255 / 24%) !important;
+    }
+
+    .delivery-page .delivery-panel-icon svg {
+      width: 32px !important;
+      height: 32px !important;
+    }
+
+    .delivery-page .delivery-panel-heading {
+      grid-column: 3 !important;
+      grid-row: 1 !important;
+      align-self: end !important;
+      min-width: 0 !important;
+    }
+
+    .delivery-page .delivery-panel-heading h2 {
+      margin: 0 !important;
+
+      color: #071F63 !important;
+      font-size: 1.60rem !important;
+      font-weight: 900 !important;
+      line-height: 1 !important;
+      letter-spacing: -.025em !important;
+    }
+
+    .delivery-page .case-studies-panel .delivery-panel-heading h2 {
+      color: #071F63 !important;
+    }
+
+    .delivery-page .delivery-panel-heading p {
+      margin: 4px 0 0 !important;
+
+      color: #305FAE !important;
+      font-size: .86rem !important;
+      font-weight: 760 !important;
+      line-height: 1.1 !important;
+    }
+
+    .delivery-page .case-studies-panel .delivery-panel-heading p {
+      color: #6546B9 !important;
+    }
+
+    .delivery-page .delivery-panel-description {
+      grid-column: 3 !important;
+      grid-row: 2 !important;
+      align-self: start !important;
+
+      max-width: 740px !important;
+      margin: 5px 0 0 !important;
+      padding: 0 !important;
+
+      color: #52709B !important;
+      font-size: .76rem !important;
+      font-weight: 540 !important;
+      line-height: 1.35 !important;
+
+      overflow-wrap: normal !important;
+      word-break: normal !important;
+      hyphens: none !important;
+    }
+
+    .delivery-page .case-studies-panel .delivery-panel-description {
+      color: #665B91 !important;
+    }
+
+    /* Buttons were removed from Page_Delivery markup. */
+    .delivery-page .delivery-panel-arrow,
+    .delivery-page .delivery-panel-footer-action {
+      all: unset;
+    }
+
+    /* ---------- Methodology / Case Study cards ---------- */
+
+    .delivery-page .delivery-resource-grid {
+      display: grid !important;
+      gap: 12px !important;
+      padding: 2px 22px 22px !important;
+    }
+
+    .delivery-page .methodologies-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    }
+
+    .delivery-page .case-studies-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    }
+
+    .delivery-page .delivery-resource-card {
+      --resource-accent: #216CF3;
+      --resource-deep: #1453D3;
+      --resource-soft: #EAF4FF;
+
+      display: grid !important;
+      grid-template-columns: 48px minmax(0, 1fr) 24px !important;
+      align-items: center !important;
+      gap: 12px !important;
+
+      min-width: 0 !important;
+      min-height: 92px !important;
+
+      padding: 13px 15px !important;
+
+      border: 1px solid
+        color-mix(
+          in srgb,
+          var(--resource-accent) 16%,
+          #D9E8F5
+        ) !important;
+      border-radius: 15px !important;
+
+      color: #071F63 !important;
+      background:
+        linear-gradient(
+          145deg,
+          rgb(255 255 255 / 94%) 0%,
+          color-mix(in srgb, var(--resource-soft) 45%, white) 100%
+        ) !important;
+
+      box-shadow:
+        0 7px 16px rgb(3 49 113 / 5%),
+        inset 0 1px 0 rgb(255 255 255 / 88%) !important;
+
+      transition:
+        transform 170ms ease,
+        border-color 170ms ease,
+        box-shadow 170ms ease !important;
+    }
+
+    .delivery-page .delivery-resource-card.is-purple {
+      --resource-accent: #8036E8;
+      --resource-deep: #6526CF;
+      --resource-soft: #F1E9FF;
+      color: #071F63 !important;
+    }
+
+    .delivery-page .delivery-resource-icon {
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+
+      width: 48px !important;
+      height: 48px !important;
+
+      border-radius: 12px !important;
+
+      color: var(--resource-deep) !important;
+      background:
+        color-mix(
+          in srgb,
+          var(--resource-accent) 9%,
+          white
+        ) !important;
+
+      box-shadow:
+        inset 0 0 0 1px
+        color-mix(
+          in srgb,
+          var(--resource-accent) 10%,
+          #E3EDF7
+        ) !important;
+    }
+
+    .delivery-page .delivery-resource-icon svg {
+      width: 26px !important;
+      height: 26px !important;
+    }
+
+    .delivery-page .delivery-resource-label {
+      min-width: 0 !important;
+
+      color: #071F63 !important;
+      font-size: .84rem !important;
+      font-weight: 840 !important;
+      line-height: 1.12 !important;
+
+      overflow-wrap: normal !important;
+      word-break: normal !important;
+      hyphens: none !important;
+    }
+
+    .delivery-page .delivery-resource-arrow {
+      justify-self: end !important;
+
+      color: var(--resource-accent) !important;
+      font-size: 1.55rem !important;
+      font-weight: 500 !important;
+      line-height: 1 !important;
+
+      transition: transform 170ms ease !important;
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      .delivery-page .delivery-resource-card:hover {
+        transform: translateY(-2px) !important;
+        border-color:
+          color-mix(
+            in srgb,
+            var(--resource-accent) 38%,
+            #D9E8F5
+          ) !important;
+        box-shadow:
+          0 11px 22px rgb(3 49 113 / 8%),
+          inset 0 1px 0 rgb(255 255 255 / 90%) !important;
+      }
+
+      .delivery-page .delivery-resource-card:hover
+        .delivery-resource-arrow {
+        transform: translateX(2px) !important;
+      }
+    }
+
+    /* =========================================================
+       QUICK ACCESS — 2 ROWS x 3 CARDS
+       ========================================================= */
+
+    .delivery-page .delivery-quick-access {
+      position: relative !important;
+      overflow: hidden !important;
+
+      margin: 18px 20px 14px !important;
+      padding: 16px 20px 18px !important;
+
+      border: 1px solid #D5E7F6 !important;
+      border-radius: 21px !important;
+
+      background:
+        radial-gradient(circle at 90% 12%, rgb(48 138 255 / 5%), transparent 28%),
+        linear-gradient(145deg, #FFFFFF 0%, #F5FAFF 100%) !important;
+
+      box-shadow:
+        0 12px 28px rgb(3 49 113 / 6%),
+        inset 0 1px 0 rgb(255 255 255 / 90%) !important;
+    }
+
+    .delivery-page .delivery-quick-access::before {
+      content: "" !important;
+      position: absolute !important;
+      z-index: 0 !important;
+
+      left: 38% !important;
+      right: -8% !important;
+      bottom: -84px !important;
+
+      height: 120px !important;
+      border-radius: 50% !important;
+
+      pointer-events: none !important;
+
+      background: rgb(48 138 255 / 5%) !important;
+      transform: rotate(-2deg) !important;
+    }
+
+    .delivery-page .delivery-quick-access > * {
+      position: relative !important;
+      z-index: 2 !important;
+    }
+
+    .delivery-page .delivery-quick-access-header {
+      margin: 0 0 14px !important;
+    }
+
+    .delivery-page .delivery-quick-access-title-group {
+      display: grid !important;
+      grid-template-columns: 56px minmax(0, 1fr) !important;
+      grid-template-rows: auto auto !important;
+      align-items: center !important;
+      column-gap: 14px !important;
+      row-gap: 2px !important;
+    }
+
+    .delivery-page .delivery-quick-bolt {
+      grid-column: 1 !important;
+      grid-row: 1 / 3 !important;
+
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+
+      width: 56px !important;
+      height: 56px !important;
+
+      border-radius: 14px !important;
+
+      color: #FFFFFF !important;
+      background:
+        linear-gradient(
+          145deg,
+          #2C80FF 0%,
+          #155BE9 72%,
+          #1148CB 100%
+        ) !important;
+
+      box-shadow:
+        0 9px 18px rgb(26 94 230 / 18%),
+        inset 0 1px 0 rgb(255 255 255 / 24%) !important;
+
+      font-size: 1.8rem !important;
+      transform: none !important;
+    }
+
+    .delivery-page .delivery-quick-access-title-group h2 {
+      grid-column: 2 !important;
+      grid-row: 1 !important;
+      align-self: end !important;
+
+      margin: 0 !important;
+
+      color: #071F63 !important;
+      font-size: 1.38rem !important;
+      font-weight: 900 !important;
+      line-height: 1 !important;
+      letter-spacing: -.02em !important;
+    }
+
+    .delivery-page .delivery-quick-access-title-group p {
+      grid-column: 2 !important;
+      grid-row: 2 !important;
+      align-self: start !important;
+
+      width: auto !important;
+      margin: 4px 0 0 !important;
+
+      color: #58739A !important;
+      font-size: .75rem !important;
+      font-weight: 540 !important;
+      line-height: 1.2 !important;
+    }
+
+    .delivery-page .delivery-quick-access-grid {
+      display: grid !important;
+      grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+      grid-template-rows: repeat(2, minmax(68px, auto)) !important;
+      gap: 10px 12px !important;
+    }
+
+    .delivery-page .delivery-quick-card {
+      --quick-accent: #216CF3;
+      --quick-deep: #1552CF;
+      --quick-tint: #EAF4FF;
+
+      display: grid !important;
+      grid-template-columns: 44px minmax(0, 1fr) 24px !important;
+      align-items: center !important;
+      gap: 11px !important;
+
+      min-width: 0 !important;
+      min-height: 68px !important;
+
+      padding: 10px 13px !important;
+
+      border: 1px solid
+        color-mix(
+          in srgb,
+          var(--quick-accent) 15%,
+          #D9E8F5
+        ) !important;
+      border-radius: 13px !important;
+
+      color: #071F63 !important;
+      background:
+        linear-gradient(
+          145deg,
+          rgb(255 255 255 / 96%),
+          color-mix(in srgb, var(--quick-tint) 42%, white)
+        ) !important;
+
+      font-size: .80rem !important;
+      font-weight: 820 !important;
+      line-height: 1.12 !important;
+
+      box-shadow:
+        0 5px 13px rgb(3 49 113 / 4%),
+        inset 0 1px 0 rgb(255 255 255 / 88%) !important;
+    }
+
+    .delivery-page .delivery-quick-card.is-purple {
+      --quick-accent: #7C3DEA;
+      --quick-deep: #6126D0;
+      --quick-tint: #F2EAFF;
+    }
+
+    .delivery-page .delivery-quick-icon {
+      width: 44px !important;
+      height: 44px !important;
+
+      border-radius: 11px !important;
+
+      color: var(--quick-deep) !important;
+      background:
+        color-mix(
+          in srgb,
+          var(--quick-accent) 9%,
+          white
+        ) !important;
+    }
+
+    .delivery-page .delivery-quick-icon svg {
+      width: 23px !important;
+      height: 23px !important;
+    }
+
+    .delivery-page .delivery-quick-card > span:nth-child(2) {
+      min-width: 0 !important;
+
+      overflow-wrap: normal !important;
+      word-break: normal !important;
+      hyphens: none !important;
+    }
+
+    .delivery-page .delivery-quick-arrow {
+      justify-self: end !important;
+
+      color: var(--quick-accent) !important;
+      font-size: 1.48rem !important;
+      font-weight: 500 !important;
+      line-height: 1 !important;
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      .delivery-page .delivery-quick-card:hover {
+        transform: translateY(-2px) !important;
+        border-color:
+          color-mix(
+            in srgb,
+            var(--quick-accent) 36%,
+            #D9E8F5
+          ) !important;
+        box-shadow:
+          0 9px 19px rgb(3 49 113 / 7%),
+          inset 0 1px 0 rgb(255 255 255 / 90%) !important;
+      }
+    }
+
+    /* =========================================================
+       RESPONSIVE
+       ========================================================= */
+
+    @media (min-width: 768px) and (max-width: 1180px) {
+      .delivery-page .delivery-knowledge-section {
+        padding-inline: 16px !important;
+      }
+
+      .delivery-page .delivery-panel-header {
+        grid-template-columns: 46px 58px minmax(0, 1fr) !important;
+        padding: 18px 20px 12px !important;
+      }
+
+      .delivery-page .delivery-panel-icon {
+        width: 54px !important;
+        height: 54px !important;
+      }
+
+      .delivery-page .delivery-panel-heading h2 {
+        font-size: 1.42rem !important;
+      }
+
+      .delivery-page .methodologies-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      }
+
+      .delivery-page .case-studies-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      }
+
+      .delivery-page .delivery-quick-access {
+        margin-inline: 16px !important;
+      }
+
+      .delivery-page .delivery-quick-access-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        grid-template-rows: auto !important;
+      }
+    }
+
+    @media (max-width: 767px) {
+      .delivery-page .delivery-knowledge-section {
+        margin-top: 0 !important;
+        padding: 14px 12px 8px !important;
+      }
+
+      .delivery-page .delivery-knowledge-grid {
+        gap: 12px !important;
+      }
+
+      .delivery-page .delivery-panel {
+        border-radius: 18px !important;
+      }
+
+      .delivery-page .delivery-panel-header {
+        grid-template-columns: 42px 50px minmax(0, 1fr) !important;
+        grid-template-rows: auto auto !important;
+        column-gap: 10px !important;
+
+        min-height: auto !important;
+        padding: 15px 14px 10px !important;
+      }
+
+      .delivery-page .delivery-panel-number {
+        height: 44px !important;
+        padding-right: 9px !important;
+        font-size: 1.08rem !important;
+      }
+
+      .delivery-page .delivery-panel-icon {
+        width: 46px !important;
+        height: 46px !important;
+        border-radius: 12px !important;
+      }
+
+      .delivery-page .delivery-panel-icon svg {
+        width: 25px !important;
+        height: 25px !important;
+      }
+
+      .delivery-page .delivery-panel-heading h2 {
+        font-size: 1.18rem !important;
+      }
+
+      .delivery-page .delivery-panel-heading p {
+        font-size: .72rem !important;
+      }
+
+      .delivery-page .delivery-panel-description {
+        max-width: none !important;
+        margin-top: 4px !important;
+        font-size: .66rem !important;
+      }
+
+      .delivery-page .delivery-resource-grid {
+        grid-template-columns: minmax(0, 1fr) !important;
+        gap: 8px !important;
+        padding: 2px 12px 14px !important;
+      }
+
+      .delivery-page .delivery-resource-card {
+        grid-template-columns: 42px minmax(0, 1fr) 22px !important;
+        min-height: 72px !important;
+        padding: 10px 11px !important;
+        border-radius: 12px !important;
+      }
+
+      .delivery-page .delivery-resource-icon {
+        width: 42px !important;
+        height: 42px !important;
+        border-radius: 10px !important;
+      }
+
+      .delivery-page .delivery-resource-label {
+        font-size: .76rem !important;
+      }
+
+      .delivery-page .delivery-quick-access {
+        margin: 14px 12px 12px !important;
+        padding: 14px !important;
+        border-radius: 18px !important;
+      }
+
+      .delivery-page .delivery-quick-access-title-group {
+        grid-template-columns: 50px minmax(0, 1fr) !important;
+        flex-wrap: nowrap !important;
+      }
+
+      .delivery-page .delivery-quick-bolt {
+        width: 50px !important;
+        height: 50px !important;
+        border-radius: 13px !important;
+      }
+
+      .delivery-page .delivery-quick-access-title-group h2 {
+        font-size: 1.18rem !important;
+      }
+
+      .delivery-page .delivery-quick-access-title-group p {
+        width: auto !important;
+        margin: 4px 0 0 !important;
+        font-size: .67rem !important;
+      }
+
+      .delivery-page .delivery-quick-access-grid {
+        grid-template-columns: minmax(0, 1fr) !important;
+        grid-template-rows: auto !important;
+        gap: 8px !important;
+      }
+
+      .delivery-page .delivery-quick-card {
+        grid-template-columns: 42px minmax(0, 1fr) 22px !important;
+        min-height: 64px !important;
+        padding: 9px 11px !important;
+      }
+
+      .delivery-page .delivery-quick-icon {
+        width: 42px !important;
+        height: 42px !important;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .delivery-page .delivery-resource-card,
+      .delivery-page .delivery-resource-arrow,
+      .delivery-page .delivery-quick-card,
+      .delivery-page .delivery-quick-arrow {
+        transition: none !important;
+      }
+
+      .delivery-page .delivery-resource-card:hover,
+      .delivery-page .delivery-resource-card:hover
+        .delivery-resource-arrow,
+      .delivery-page .delivery-quick-card:hover,
+      .delivery-page .delivery-quick-card:hover
+        .delivery-quick-arrow {
+        transform: none !important;
+      }
+    }
+
+
+
+
+    /* =========================================================
+       H5 DELIVERY — IMAGE-LED PANEL HEADERS V4
+       Methodologies + Case Studies
+       ========================================================= */
+
+    @media (min-width: 1200px) {
+      .delivery-page .delivery-panel-header--visual {
+        display: grid !important;
+        grid-template-columns:
+          52px
+          68px
+          minmax(330px, .82fr)
+          minmax(500px, 1.18fr) !important;
+        grid-template-rows: 1fr !important;
+        align-items: center !important;
+        column-gap: 16px !important;
+
+        min-height: 180px !important;
+        padding: 16px 22px 14px !important;
+        overflow: hidden !important;
+      }
+
+      .delivery-page .delivery-panel-header--visual
+        .delivery-panel-number {
+        grid-column: 1 !important;
+        grid-row: 1 !important;
+
+        height: 58px !important;
+        padding-right: 14px !important;
+
+        font-size: 1.45rem !important;
+      }
+
+      .delivery-page .delivery-panel-header--visual
+        .delivery-panel-icon {
+        grid-column: 2 !important;
+        grid-row: 1 !important;
+
+        width: 64px !important;
+        height: 64px !important;
+
+        border-radius: 16px !important;
+      }
+
+      .delivery-page .delivery-panel-header--visual
+        .delivery-panel-icon svg {
+        width: 34px !important;
+        height: 34px !important;
+      }
+
+      .delivery-page .delivery-panel-header-copy {
+        position: relative !important;
+        z-index: 4 !important;
+
+        grid-column: 3 !important;
+        grid-row: 1 !important;
+
+        min-width: 0 !important;
+        align-self: center !important;
+      }
+
+      .delivery-page .delivery-panel-eyebrow {
+        margin: 0 0 5px !important;
+
+        color: #377EE9 !important;
+        font-size: .62rem !important;
+        font-weight: 850 !important;
+        line-height: 1 !important;
+        letter-spacing: .22em !important;
+      }
+
+      .delivery-page .case-studies-panel
+        .delivery-panel-eyebrow {
+        color: #8C42E6 !important;
+      }
+
+      .delivery-page .delivery-panel-header--visual
+        .delivery-panel-heading {
+        display: block !important;
+        min-width: 0 !important;
+      }
+
+      .delivery-page .delivery-panel-header--visual
+        .delivery-panel-heading h2 {
+        margin: 0 !important;
+
+        font-size: 1.72rem !important;
+        line-height: .98 !important;
+      }
+
+      .delivery-page .delivery-panel-header--visual
+        .delivery-panel-heading p {
+        margin: 5px 0 0 !important;
+
+        font-size: .94rem !important;
+        line-height: 1.05 !important;
+      }
+
+      .delivery-page .delivery-panel-accent-rule {
+        display: block !important;
+
+        width: 72px !important;
+        height: 4px !important;
+        margin: 10px 0 8px !important;
+
+        border-radius: 999px !important;
+
+        background:
+          linear-gradient(
+            90deg,
+            #1767F3 0%,
+            #1C9AFF 56%,
+            #10CAD7 100%
+          ) !important;
+      }
+
+      .delivery-page .case-studies-panel
+        .delivery-panel-accent-rule {
+        background:
+          linear-gradient(
+            90deg,
+            #6F27E2 0%,
+            #9D43EF 58%,
+            #C28BFF 100%
+          ) !important;
+      }
+
+      .delivery-page .delivery-panel-header--visual
+        .delivery-panel-description {
+        display: block !important;
+
+        max-width: 410px !important;
+        margin: 0 !important;
+        padding: 0 !important;
+
+        font-size: .75rem !important;
+        line-height: 1.34 !important;
+      }
+
+      /* ---------- right-side asset ---------- */
+
+      .delivery-page .delivery-panel-header-visual {
+        position: relative !important;
+        z-index: 2 !important;
+
+        grid-column: 4 !important;
+        grid-row: 1 !important;
+
+        align-self: stretch !important;
+        justify-self: stretch !important;
+
+        min-width: 0 !important;
+        min-height: 148px !important;
+        height: 148px !important;
+
+        margin: 0 -6px 0 6px !important;
+
+        overflow: hidden !important;
+        border-radius: 20px !important;
+      }
+
+      .delivery-page .delivery-panel-header-visual::before {
+        content: "" !important;
+        position: absolute !important;
+        z-index: 3 !important;
+        inset: 0 !important;
+        pointer-events: none !important;
+
+        background:
+          linear-gradient(
+            90deg,
+            color-mix(
+              in srgb,
+              var(--delivery-header-fade, #F5FAFF) 96%,
+              transparent
+            ) 0%,
+            color-mix(
+              in srgb,
+              var(--delivery-header-fade, #F5FAFF) 50%,
+              transparent
+            ) 12%,
+            transparent 37%
+          ) !important;
+      }
+
+      .delivery-page .methodologies-panel {
+        --delivery-header-fade: #F1F8FF;
+      }
+
+      .delivery-page .case-studies-panel {
+        --delivery-header-fade: #F8F1FF;
+      }
+
+      .delivery-page .delivery-panel-header-visual-image,
+      .delivery-page .delivery-panel-header-visual-fallback {
+        position: absolute !important;
+        inset: 0 !important;
+
+        width: 100% !important;
+        height: 100% !important;
+
+        border: 0 !important;
+        border-radius: inherit !important;
+      }
+
+      .delivery-page .delivery-panel-header-visual-image {
+        display: block !important;
+
+        object-fit: contain !important;
+        object-position: right center !important;
+
+        filter:
+          drop-shadow(0 13px 24px rgb(5 54 126 / 8%)) !important;
+
+        transform: scale(1.03) !important;
+      }
+
+      .delivery-page .delivery-panel-header-visual-fallback {
+        background:
+          radial-gradient(
+            circle at 70% 45%,
+            color-mix(
+              in srgb,
+              var(--panel-sweep, #3D8DFF) 16%,
+              transparent
+            ),
+            transparent 55%
+          ) !important;
+      }
+
+      /* Lift the resource cards closer to the image-led header. */
+      .delivery-page .delivery-resource-grid {
+        padding-top: 4px !important;
+      }
+    }
+
+    /* =========================================================
+       Medium widths — keep the asset, but give copy priority
+       ========================================================= */
+
+    @media (min-width: 768px) and (max-width: 1199px) {
+      .delivery-page .delivery-panel-header--visual {
+        display: grid !important;
+        grid-template-columns:
+          46px
+          56px
+          minmax(290px, 1fr)
+          minmax(260px, .75fr) !important;
+        grid-template-rows: 1fr !important;
+        align-items: center !important;
+
+        column-gap: 12px !important;
+        min-height: 158px !important;
+        padding: 14px 18px 12px !important;
+      }
+
+      .delivery-page .delivery-panel-header--visual
+        .delivery-panel-number {
+        grid-column: 1 !important;
+        grid-row: 1 !important;
+      }
+
+      .delivery-page .delivery-panel-header--visual
+        .delivery-panel-icon {
+        grid-column: 2 !important;
+        grid-row: 1 !important;
+      }
+
+      .delivery-page .delivery-panel-header-copy {
+        grid-column: 3 !important;
+        grid-row: 1 !important;
+        min-width: 0 !important;
+      }
+
+      .delivery-page .delivery-panel-eyebrow {
+        margin: 0 0 4px !important;
+        color: #377EE9 !important;
+        font-size: .56rem !important;
+        font-weight: 850 !important;
+        letter-spacing: .18em !important;
+      }
+
+      .delivery-page .case-studies-panel
+        .delivery-panel-eyebrow {
+        color: #8C42E6 !important;
+      }
+
+      .delivery-page .delivery-panel-header--visual
+        .delivery-panel-heading {
+        display: block !important;
+      }
+
+      .delivery-page .delivery-panel-header--visual
+        .delivery-panel-heading h2 {
+        font-size: 1.36rem !important;
+      }
+
+      .delivery-page .delivery-panel-header--visual
+        .delivery-panel-heading p {
+        margin-top: 4px !important;
+        font-size: .80rem !important;
+      }
+
+      .delivery-page .delivery-panel-accent-rule {
+        display: block !important;
+        width: 58px !important;
+        height: 3px !important;
+        margin: 8px 0 7px !important;
+        border-radius: 999px !important;
+        background: linear-gradient(90deg, #1767F3, #10CAD7) !important;
+      }
+
+      .delivery-page .case-studies-panel
+        .delivery-panel-accent-rule {
+        background: linear-gradient(90deg, #7027E2, #B56EFF) !important;
+      }
+
+      .delivery-page .delivery-panel-header--visual
+        .delivery-panel-description {
+        display: block !important;
+        max-width: 350px !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        font-size: .66rem !important;
+      }
+
+      .delivery-page .delivery-panel-header-visual {
+        position: relative !important;
+        grid-column: 4 !important;
+        grid-row: 1 !important;
+
+        height: 126px !important;
+        min-height: 126px !important;
+
+        overflow: hidden !important;
+        border-radius: 18px !important;
+      }
+
+      .delivery-page .delivery-panel-header-visual-image,
+      .delivery-page .delivery-panel-header-visual-fallback {
+        position: absolute !important;
+        inset: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        border-radius: inherit !important;
+      }
+
+      .delivery-page .delivery-panel-header-visual-image {
+        object-fit: contain !important;
+        object-position: right center !important;
+      }
+    }
+
+    /* =========================================================
+       Mobile — retain hierarchy; hide decorative asset
+       ========================================================= */
+
+    @media (max-width: 767px) {
+      .delivery-page .delivery-panel-header--visual {
+        display: grid !important;
+        grid-template-columns: 42px 50px minmax(0, 1fr) !important;
+        grid-template-rows: auto !important;
+        min-height: auto !important;
+      }
+
+      .delivery-page .delivery-panel-header-copy {
+        grid-column: 3 !important;
+        min-width: 0 !important;
+      }
+
+      .delivery-page .delivery-panel-eyebrow {
+        margin: 0 0 3px !important;
+        color: #377EE9 !important;
+        font-size: .49rem !important;
+        font-weight: 850 !important;
+        letter-spacing: .14em !important;
+      }
+
+      .delivery-page .case-studies-panel
+        .delivery-panel-eyebrow {
+        color: #8C42E6 !important;
+      }
+
+      .delivery-page .delivery-panel-header--visual
+        .delivery-panel-heading {
+        display: block !important;
+      }
+
+      .delivery-page .delivery-panel-header--visual
+        .delivery-panel-heading h2 {
+        font-size: 1.12rem !important;
+      }
+
+      .delivery-page .delivery-panel-header--visual
+        .delivery-panel-heading p {
+        margin-top: 3px !important;
+        font-size: .70rem !important;
+      }
+
+      .delivery-page .delivery-panel-accent-rule {
+        display: block !important;
+        width: 46px !important;
+        height: 3px !important;
+        margin: 7px 0 6px !important;
+        border-radius: 999px !important;
+        background: linear-gradient(90deg, #1767F3, #10CAD7) !important;
+      }
+
+      .delivery-page .case-studies-panel
+        .delivery-panel-accent-rule {
+        background: linear-gradient(90deg, #7027E2, #B56EFF) !important;
+      }
+
+      .delivery-page .delivery-panel-header--visual
+        .delivery-panel-description {
+        display: block !important;
+        max-width: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        font-size: .62rem !important;
+        line-height: 1.3 !important;
+      }
+
+      .delivery-page .delivery-panel-header-visual {
+        display: none !important;
+      }
+    }
+
+
 </style>

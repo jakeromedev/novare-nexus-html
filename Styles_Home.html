@@ -716,4 +716,52 @@
       .featured-card-body { min-height: 142px; }
       .home-utility-header { padding-inline: 10px; }
     }
+
+
+    /* =========================================================
+       HOME — STICKY RIGHT UTILITY RAIL
+       Desktop only.
+       Keeps both "What's New" and "Need Help?" visible together
+       while the main Home content continues scrolling.
+       ========================================================= */
+
+    @media (min-width: 1200px) {
+      .home-page .home-right-rail {
+        position: sticky;
+        top: 112px;
+        z-index: 8;
+
+        align-self: start;
+        align-content: start;
+
+        max-height: calc(100vh - 128px);
+        overflow-y: auto;
+        overscroll-behavior: contain;
+
+        scrollbar-width: thin;
+      }
+
+      .home-page .home-whats-new,
+      .home-page .home-help {
+        position: relative;
+        top: auto;
+        z-index: auto;
+        align-self: auto;
+
+        background: rgb(255 255 255 / 98%);
+        box-shadow:
+          0 8px 22px rgb(7 85 232 / 8%),
+          0 2px 8px rgb(7 85 232 / 4%);
+
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+      }
+
+      .home-page .home-whats-new .whats-new-list {
+        max-height: none;
+        overflow: visible;
+      }
+    }
+
+
 </style>

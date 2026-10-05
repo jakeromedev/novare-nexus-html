@@ -219,6 +219,7 @@
     options: [
       {
         id: "ask-nosca",
+        eyebrow: "AI ASSISTANT",
         title: "Ask Nosca",
         description: "Get instant answers with our AI-powered assistant.",
         icon: "chat",
@@ -226,6 +227,7 @@
       },
       {
         id: "contact-support",
+        eyebrow: "SUPPORT",
         title: "Contact Support",
         description: "Reach our support team for further assistance.",
         icon: "people",
@@ -233,6 +235,7 @@
       },
       {
         id: "guides-resources",
+        eyebrow: "SELF-SERVICE",
         title: "Guides & Resources",
         description: "Explore user guides, FAQs and how-to resources.",
         icon: "book",
@@ -240,6 +243,7 @@
       },
       {
         id: "service-status",
+        eyebrow: "SYSTEM HEALTH",
         title: "Service Status",
         description: "Check the status of our key systems and applications.",
         icon: "shield",
@@ -319,13 +323,21 @@
     if (!grid || !Array.isArray(items)) return;
 
     grid.innerHTML = items.map(function (item) {
-      return '<button class="support-option-card ' + escapeSupportHtml(item.themeClass || "") + '" type="button" data-support-action="' + escapeSupportHtml(item.id) + '">' +
+      const eyebrowById = {
+        "ask-nosca": "AI ASSISTANT",
+        "contact-support": "SUPPORT",
+        "guides-resources": "SELF-SERVICE",
+        "service-status": "SYSTEM HEALTH"
+      };
+      const eyebrow = item.eyebrow || eyebrowById[item.id] || "SUPPORT";
+      return '<button class="support-option-card ' + escapeSupportHtml(item.themeClass || "") + '" type="button" data-support-action="' + escapeSupportHtml(item.id) + '" aria-label="' + escapeSupportHtml(item.title) + ': ' + escapeSupportHtml(item.description) + '">' +
         '<span class="support-option-icon" aria-hidden="true">' + supportIconSvg(item.icon, 44) + '</span>' +
         '<span class="support-option-copy">' +
+          '<span class="support-option-eyebrow">' + escapeSupportHtml(eyebrow) + '</span>' +
           '<strong>' + escapeSupportHtml(item.title) + '</strong>' +
-          '<span>' + escapeSupportHtml(item.description) + '</span>' +
+          '<span class="support-option-description">' + escapeSupportHtml(item.description) + '</span>' +
         '</span>' +
-        '<span class="support-option-arrow" aria-hidden="true">→</span>' +
+        '<span class="support-option-arrow" aria-hidden="true">›</span>' +
       '</button>';
     }).join("");
   }
@@ -497,10 +509,11 @@
 
     grid.innerHTML = items.map(function (item) {
       const labelLines = Array.isArray(item.labelLines) ? item.labelLines : [item.label || ""];
-      return '<button class="tools-template-card ' + escapeToolsHtml(item.themeClass || "") + '" type="button" data-tools-action="' + escapeToolsHtml(item.id) + '">' +
+      const readableLabel = labelLines.join(" ");
+      return '<button class="tools-template-card ' + escapeToolsHtml(item.themeClass || "") + '" type="button" data-tools-action="' + escapeToolsHtml(item.id) + '" aria-label="Open ' + escapeToolsHtml(readableLabel) + '">' +
         '<span class="tools-template-icon" aria-hidden="true">' + toolsIconSvg(item.icon, 34) + '</span>' +
         '<span class="tools-template-label">' + labelLines.map(escapeToolsHtml).join("<br>") + '</span>' +
-        '<span class="tools-template-arrow" aria-hidden="true">→</span>' +
+        '<span class="tools-template-arrow" aria-hidden="true">›</span>' +
       '</button>';
     }).join("");
   }

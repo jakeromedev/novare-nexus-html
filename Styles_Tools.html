@@ -1168,4 +1168,695 @@
         animation-iteration-count: 1 !important;
       }
     }
+
+
+    /* =========================================================
+       TOOLS & TEMPLATES — SOLUTIONING TOOLKIT BEAUTIFICATION V3
+       Approved direction:
+       - premium presales enablement header
+       - 4 cards x 2 rows on desktop
+       - horizontal compact cards
+       - numbered journey steps
+       - small directional chevrons
+       - soft workflow connector cues
+       ========================================================= */
+
+    .tools-page .tools-toolkit {
+      position: relative !important;
+      overflow: hidden !important;
+
+      margin: 12px 20px 16px !important;
+      padding: 18px 18px 20px !important;
+
+      border: 1px solid #CFE3F5 !important;
+      border-radius: 22px !important;
+
+      background:
+        radial-gradient(circle at 88% 4%, rgb(45 137 255 / 9%), transparent 26%),
+        linear-gradient(145deg, #FFFFFF 0%, #F3F9FF 100%) !important;
+
+      box-shadow:
+        0 14px 30px rgb(3 49 113 / 6%),
+        inset 0 1px 0 rgb(255 255 255 / 92%) !important;
+
+      isolation: isolate !important;
+    }
+
+    .tools-page .tools-toolkit::before {
+      content: "" !important;
+
+      position: absolute !important;
+      z-index: 0 !important;
+
+      top: -72px !important;
+      right: -5% !important;
+
+      width: 48% !important;
+      height: 230px !important;
+
+      border-radius: 50% !important;
+
+      background:
+        radial-gradient(
+          circle at 72% 58%,
+          rgb(39 130 255 / 9%),
+          transparent 54%
+        ) !important;
+
+      transform: rotate(-7deg) !important;
+      pointer-events: none !important;
+    }
+
+    .tools-page .tools-toolkit::after {
+      content: "" !important;
+
+      position: absolute !important;
+      z-index: 0 !important;
+
+      top: 36px !important;
+      right: 5% !important;
+
+      width: 31% !important;
+      height: 115px !important;
+
+      opacity: .45 !important;
+      pointer-events: none !important;
+
+      background:
+        repeating-linear-gradient(
+          -12deg,
+          transparent 0 8px,
+          rgb(39 128 242 / 14%) 8px 9px
+        ) !important;
+
+      -webkit-mask-image:
+        linear-gradient(90deg, transparent 0%, #000 28%, #000 100%) !important;
+      mask-image:
+        linear-gradient(90deg, transparent 0%, #000 28%, #000 100%) !important;
+    }
+
+    .tools-page .tools-toolkit > * {
+      position: relative !important;
+      z-index: 2 !important;
+    }
+
+    /* ---------- premium toolkit header ---------- */
+
+    .tools-page .tools-toolkit .tools-panel-header {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: flex-start !important;
+
+      min-height: 112px !important;
+      margin: 0 !important;
+      padding: 0 18px 17px 4px !important;
+
+      border: 0 !important;
+      background: transparent !important;
+    }
+
+    .tools-page .tools-toolkit .tools-panel-title-group {
+      display: grid !important;
+      grid-template-columns: 88px minmax(0, 1fr) !important;
+      align-items: center !important;
+
+      gap: 20px !important;
+      width: 100% !important;
+      min-width: 0 !important;
+    }
+
+    .tools-page .tools-toolkit .tools-panel-icon {
+      width: 84px !important;
+      height: 84px !important;
+
+      border-radius: 18px !important;
+
+      color: #FFFFFF !important;
+
+      background:
+        linear-gradient(
+          145deg,
+          #268CFF 0%,
+          #1763F1 52%,
+          #103EBB 100%
+        ) !important;
+
+      box-shadow:
+        0 13px 25px rgb(17 83 215 / 22%),
+        inset 0 1px 0 rgb(255 255 255 / 26%) !important;
+    }
+
+    .tools-page .tools-toolkit .tools-panel-icon svg {
+      width: 42px !important;
+      height: 42px !important;
+      stroke-width: 1.8 !important;
+    }
+
+    .tools-page .tools-toolkit-heading-copy {
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: center !important;
+
+      min-width: 0 !important;
+    }
+
+    .tools-page .tools-toolkit-eyebrow {
+      margin: 0 0 7px !important;
+
+      color: #4F7FCB !important;
+      font-size: .62rem !important;
+      font-weight: 880 !important;
+      line-height: 1 !important;
+      letter-spacing: .22em !important;
+    }
+
+    .tools-page .tools-toolkit
+      .tools-toolkit-heading-copy h2 {
+      margin: 0 !important;
+
+      color: #071F63 !important;
+      font-size: 1.78rem !important;
+      font-weight: 920 !important;
+      line-height: .98 !important;
+      letter-spacing: -.035em !important;
+    }
+
+    .tools-page .tools-toolkit-description {
+      max-width: 760px !important;
+      margin: 8px 0 0 !important;
+
+      color: #4C6794 !important;
+      font-size: .77rem !important;
+      font-weight: 560 !important;
+      line-height: 1.28 !important;
+    }
+
+    .tools-page .tools-toolkit-accent-rule {
+      display: block !important;
+
+      width: 74px !important;
+      height: 4px !important;
+
+      margin: 11px 0 0 !important;
+
+      border-radius: 999px !important;
+
+      background:
+        linear-gradient(
+          90deg,
+          #1768F4 0%,
+          #239BFF 55%,
+          #11C9D5 100%
+        ) !important;
+    }
+
+    /* ---------- 4 x 2 presales journey ---------- */
+
+    .tools-page .tools-toolkit-grid {
+      counter-reset: toolkit-step !important;
+
+      display: grid !important;
+      grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+      grid-template-rows: repeat(2, minmax(132px, auto)) !important;
+
+      gap: 14px 18px !important;
+      align-items: stretch !important;
+
+      padding: 0 4px 2px !important;
+      overflow: visible !important;
+    }
+
+    .tools-page .tools-template-card {
+      --template-accent: #1766F4;
+      --template-deep: #1050D0;
+      --template-soft: #EAF4FF;
+
+      counter-increment: toolkit-step !important;
+
+      position: relative !important;
+
+      display: grid !important;
+      grid-template-columns: 68px minmax(0, 1fr) 38px !important;
+      grid-template-rows: minmax(0, 1fr) !important;
+      align-items: center !important;
+      justify-items: stretch !important;
+      gap: 14px !important;
+
+      min-width: 0 !important;
+      min-height: 132px !important;
+
+      padding: 27px 14px 13px 16px !important;
+
+      overflow: visible !important;
+
+      border: 1px solid
+        color-mix(
+          in srgb,
+          var(--template-accent) 24%,
+          #D8E7F4
+        ) !important;
+      border-radius: 17px !important;
+
+      color: #0E43BB !important;
+
+      background:
+        radial-gradient(
+          circle at 88% 12%,
+          color-mix(
+            in srgb,
+            var(--template-accent) 8%,
+            transparent
+          ),
+          transparent 34%
+        ),
+        linear-gradient(
+          145deg,
+          #FFFFFF 0%,
+          color-mix(
+            in srgb,
+            var(--template-soft) 55%,
+            white
+          ) 100%
+        ) !important;
+
+      text-align: left !important;
+
+      box-shadow:
+        0 7px 16px rgb(3 49 113 / 5%),
+        inset 0 1px 0 rgb(255 255 255 / 92%) !important;
+
+      transition:
+        transform 170ms ease,
+        border-color 170ms ease,
+        box-shadow 170ms ease !important;
+    }
+
+    /* Step pill */
+    .tools-page .tools-template-card::before {
+      content: counter(toolkit-step, decimal-leading-zero) !important;
+
+      position: absolute !important;
+      z-index: 4 !important;
+
+      top: 11px !important;
+      left: 13px !important;
+
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+
+      min-width: 30px !important;
+      height: 24px !important;
+      padding: 0 7px !important;
+
+      border-radius: 999px !important;
+
+      color: var(--template-deep) !important;
+      background:
+        color-mix(
+          in srgb,
+          var(--template-accent) 10%,
+          white
+        ) !important;
+
+      box-shadow:
+        inset 0 0 0 1px
+        color-mix(
+          in srgb,
+          var(--template-accent) 10%,
+          #DDEAF4
+        ) !important;
+
+      font-size: .60rem !important;
+      font-weight: 900 !important;
+      line-height: 1 !important;
+      letter-spacing: .01em !important;
+    }
+
+    /* Workflow connector between cards 1–4 and 5–8. */
+    .tools-page .tools-template-card:not(:nth-child(4n))::after {
+      content: "›" !important;
+
+      position: absolute !important;
+      z-index: 6 !important;
+
+      top: 50% !important;
+      right: -14px !important;
+
+      color: #54A1F8 !important;
+
+      font-size: 1.55rem !important;
+      font-weight: 540 !important;
+      line-height: 1 !important;
+
+      transform: translateY(-50%) !important;
+
+      pointer-events: none !important;
+    }
+
+    .tools-page .tools-template-icon {
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+
+      width: 68px !important;
+      height: 68px !important;
+
+      border-radius: 15px !important;
+
+      color: var(--template-deep) !important;
+
+      background:
+        color-mix(
+          in srgb,
+          var(--template-accent) 9%,
+          white
+        ) !important;
+
+      box-shadow:
+        inset 0 0 0 1px
+        color-mix(
+          in srgb,
+          var(--template-accent) 7%,
+          #DFEAF4
+        ),
+        0 5px 12px rgb(3 49 113 / 4%) !important;
+    }
+
+    .tools-page .tools-template-icon svg {
+      width: 34px !important;
+      height: 34px !important;
+      stroke-width: 1.85 !important;
+    }
+
+    .tools-page .tools-template-label {
+      align-self: center !important;
+
+      min-width: 0 !important;
+
+      color: #071F63 !important;
+
+      font-size: .88rem !important;
+      font-weight: 870 !important;
+      line-height: 1.06 !important;
+
+      overflow-wrap: normal !important;
+      word-break: normal !important;
+      hyphens: none !important;
+    }
+
+    .tools-page .tools-template-arrow {
+      align-self: end !important;
+      justify-self: end !important;
+
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+
+      width: 34px !important;
+      height: 34px !important;
+
+      margin-bottom: 1px !important;
+
+      border: 1px solid
+        color-mix(
+          in srgb,
+          var(--template-accent) 15%,
+          #D7E5F1
+        ) !important;
+      border-radius: 50% !important;
+
+      color: var(--template-deep) !important;
+      background: rgb(255 255 255 / 80%) !important;
+
+      box-shadow:
+        0 4px 10px rgb(3 49 113 / 5%) !important;
+
+      font-size: 1.25rem !important;
+      font-weight: 540 !important;
+      line-height: 1 !important;
+
+      transition:
+        transform 170ms ease,
+        border-color 170ms ease,
+        background 170ms ease,
+        box-shadow 170ms ease !important;
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      .tools-page .tools-template-card:hover {
+        transform: translateY(-3px) !important;
+
+        border-color:
+          color-mix(
+            in srgb,
+            var(--template-accent) 44%,
+            #D8E7F4
+          ) !important;
+
+        box-shadow:
+          0 12px 24px rgb(3 49 113 / 8%),
+          inset 0 1px 0 rgb(255 255 255 / 94%) !important;
+      }
+
+      .tools-page .tools-template-card:hover
+        .tools-template-arrow {
+        transform: translateX(2px) !important;
+
+        border-color:
+          color-mix(
+            in srgb,
+            var(--template-accent) 35%,
+            #D7E5F1
+          ) !important;
+
+        background:
+          color-mix(
+            in srgb,
+            var(--template-accent) 5%,
+            white
+          ) !important;
+
+        box-shadow:
+          0 7px 14px rgb(3 49 113 / 8%) !important;
+      }
+    }
+
+    /* =========================================================
+       Responsive toolkit layout
+       ========================================================= */
+
+    @media (min-width: 768px) and (max-width: 1179px) {
+      .tools-page .tools-toolkit {
+        margin-inline: 16px !important;
+        padding: 16px !important;
+      }
+
+      .tools-page .tools-toolkit .tools-panel-header {
+        min-height: 102px !important;
+        padding-inline: 2px 10px !important;
+      }
+
+      .tools-page .tools-toolkit .tools-panel-title-group {
+        grid-template-columns: 72px minmax(0, 1fr) !important;
+        gap: 15px !important;
+      }
+
+      .tools-page .tools-toolkit .tools-panel-icon {
+        width: 70px !important;
+        height: 70px !important;
+        border-radius: 16px !important;
+      }
+
+      .tools-page .tools-toolkit
+        .tools-toolkit-heading-copy h2 {
+        font-size: 1.52rem !important;
+      }
+
+      .tools-page .tools-toolkit-description {
+        max-width: 610px !important;
+        font-size: .71rem !important;
+      }
+
+      .tools-page .tools-toolkit-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        grid-template-rows: auto !important;
+        gap: 12px !important;
+      }
+
+      .tools-page .tools-template-card {
+        min-height: 120px !important;
+      }
+
+      .tools-page .tools-template-card::after {
+        display: none !important;
+      }
+    }
+
+    @media (max-width: 767px) {
+      .tools-page .tools-toolkit {
+        margin: 12px 12px 15px !important;
+        padding: 14px !important;
+        border-radius: 18px !important;
+      }
+
+      .tools-page .tools-toolkit::after {
+        display: none !important;
+      }
+
+      .tools-page .tools-toolkit .tools-panel-header {
+        display: block !important;
+
+        min-height: 0 !important;
+        padding: 0 0 13px !important;
+      }
+
+      .tools-page .tools-toolkit .tools-panel-title-group {
+        grid-template-columns: 58px minmax(0, 1fr) !important;
+        gap: 12px !important;
+      }
+
+      .tools-page .tools-toolkit .tools-panel-icon {
+        width: 56px !important;
+        height: 56px !important;
+        border-radius: 14px !important;
+      }
+
+      .tools-page .tools-toolkit .tools-panel-icon svg {
+        width: 29px !important;
+        height: 29px !important;
+      }
+
+      .tools-page .tools-toolkit-eyebrow {
+        margin-bottom: 5px !important;
+        font-size: .51rem !important;
+        letter-spacing: .15em !important;
+      }
+
+      .tools-page .tools-toolkit
+        .tools-toolkit-heading-copy h2 {
+        font-size: 1.18rem !important;
+      }
+
+      .tools-page .tools-toolkit-description {
+        margin-top: 5px !important;
+        font-size: .64rem !important;
+      }
+
+      .tools-page .tools-toolkit-accent-rule {
+        width: 52px !important;
+        height: 3px !important;
+        margin-top: 8px !important;
+      }
+
+      .tools-page .tools-toolkit-grid {
+        grid-template-columns: minmax(0, 1fr) !important;
+        grid-template-rows: auto !important;
+
+        gap: 9px !important;
+        padding-inline: 0 !important;
+      }
+
+      .tools-page .tools-template-card {
+        grid-template-columns: 56px minmax(0, 1fr) 34px !important;
+        grid-template-rows: minmax(84px, auto) !important;
+
+        min-height: 92px !important;
+
+        gap: 11px !important;
+
+        padding: 23px 10px 9px 12px !important;
+
+        border-radius: 14px !important;
+      }
+
+      .tools-page .tools-template-card::before {
+        top: 8px !important;
+        left: 10px !important;
+
+        min-width: 27px !important;
+        height: 21px !important;
+
+        padding-inline: 6px !important;
+
+        font-size: .54rem !important;
+      }
+
+      .tools-page .tools-template-card::after {
+        display: none !important;
+      }
+
+      .tools-page .tools-template-icon {
+        width: 54px !important;
+        height: 54px !important;
+        border-radius: 12px !important;
+      }
+
+      .tools-page .tools-template-icon svg {
+        width: 28px !important;
+        height: 28px !important;
+      }
+
+      .tools-page .tools-template-label {
+        font-size: .78rem !important;
+        line-height: 1.06 !important;
+      }
+
+      .tools-page .tools-template-arrow {
+        width: 30px !important;
+        height: 30px !important;
+        font-size: 1.10rem !important;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .tools-page .tools-template-card,
+      .tools-page .tools-template-arrow {
+        transition: none !important;
+      }
+
+      .tools-page .tools-template-card:hover,
+      .tools-page .tools-template-card:hover
+        .tools-template-arrow {
+        transform: none !important;
+      }
+    }
+
+
+
+
+    /* =========================================================
+       TOOLS & TEMPLATES — STANDARD HERO OVERLAP RESTORATION
+       Restores the shared Nexus hero geometry used by the
+       other main pages:
+       - standard desktop hero height
+       - first content panel overlaps the hero
+       - no visible strip between hero and content
+       ========================================================= */
+
+    @media (min-width: 768px) {
+      .tools-page .tools-hero.page-hero[data-page-hero] {
+        min-height: 282px !important;
+        padding-bottom: 18px !important;
+      }
+
+      .tools-page .tools-toolkit {
+        position: relative !important;
+        z-index: 5 !important;
+
+        /* Standard Nexus first-section overlap. */
+        margin-top: -82px !important;
+
+        /* The toolkit card itself provides the visible surface. */
+        isolation: isolate !important;
+      }
+    }
+
+    @media (max-width: 767px) {
+      .tools-page .tools-toolkit {
+        margin-top: 12px !important;
+      }
+    }
+
+
 </style>

@@ -1109,4 +1109,703 @@
         animation-iteration-count: 1 !important;
       }
     }
+
+
+    /* =========================================================
+       HELP & SUPPORT — BEAUTIFIED PRIMARY SUPPORT OPTIONS V3
+       - 2 columns x 2 rows on desktop
+       - compact landscape cards
+       - stronger Support Center hierarchy
+       - smaller icon tiles and chevrons
+       - natural text wrapping
+       ========================================================= */
+
+    .support-page .support-options {
+      position: relative !important;
+      overflow: hidden !important;
+
+      margin: 0 !important;
+      padding: 18px 20px 20px !important;
+
+      background:
+        radial-gradient(circle at 88% 6%, rgb(36 131 255 / 6%), transparent 25%),
+        linear-gradient(180deg, #F8FCFF 0%, #F5FAFF 100%) !important;
+
+      isolation: isolate !important;
+    }
+
+    .support-page .support-options::before {
+      content: "" !important;
+
+      position: absolute !important;
+      z-index: 0 !important;
+
+      right: -7% !important;
+      bottom: -90px !important;
+
+      width: 52% !important;
+      height: 160px !important;
+
+      border-radius: 50% !important;
+
+      background:
+        linear-gradient(
+          90deg,
+          rgb(29 118 255 / 4%),
+          rgb(18 204 216 / 8%)
+        ) !important;
+
+      transform: rotate(-3deg) !important;
+      pointer-events: none !important;
+    }
+
+    .support-page .support-options > * {
+      position: relative !important;
+      z-index: 2 !important;
+    }
+
+    /* ---------- section header ---------- */
+
+    .support-page .support-options-header {
+      display: flex !important;
+      align-items: flex-end !important;
+      justify-content: space-between !important;
+
+      max-width: 1700px !important;
+
+      margin: 0 auto 14px !important;
+      padding: 0 4px !important;
+    }
+
+    .support-page .support-options-header-copy {
+      min-width: 0 !important;
+    }
+
+    .support-page .support-options-eyebrow {
+      margin: 0 0 6px !important;
+
+      color: #3D73D3 !important;
+      font-size: .61rem !important;
+      font-weight: 880 !important;
+      line-height: 1 !important;
+      letter-spacing: .22em !important;
+    }
+
+    .support-page .support-options-header h2 {
+      margin: 0 !important;
+
+      color: #071F63 !important;
+      font-size: 1.58rem !important;
+      font-weight: 920 !important;
+      line-height: 1 !important;
+      letter-spacing: -.03em !important;
+    }
+
+    .support-page .support-options-description {
+      margin: 7px 0 0 !important;
+
+      color: #5B7397 !important;
+      font-size: .72rem !important;
+      font-weight: 560 !important;
+      line-height: 1.3 !important;
+    }
+
+    .support-page .support-options-accent-rule {
+      display: block !important;
+
+      width: 70px !important;
+      height: 4px !important;
+
+      margin-top: 10px !important;
+
+      border-radius: 999px !important;
+
+      background:
+        linear-gradient(
+          90deg,
+          #1767F3 0%,
+          #269CFF 54%,
+          #11CBD7 100%
+        ) !important;
+    }
+
+    /* ---------- 2 x 2 support grid ---------- */
+
+    .support-page .support-options-grid {
+      display: grid !important;
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      grid-template-rows: repeat(2, minmax(148px, auto)) !important;
+
+      max-width: 1700px !important;
+
+      gap: 14px !important;
+
+      margin: 0 auto !important;
+      padding: 0 !important;
+
+      border: 0 !important;
+      border-radius: 0 !important;
+
+      background: transparent !important;
+      box-shadow: none !important;
+    }
+
+    /* ---------- landscape support cards ---------- */
+
+    .support-page .support-option-card {
+      --option-accent: #1766F4;
+      --option-deep: #0A47D2;
+      --option-soft: #EAF4FF;
+      --option-bg: #F1F7FF;
+
+      position: relative !important;
+
+      display: grid !important;
+      grid-template-columns: 72px minmax(0, 1fr) 34px !important;
+      grid-template-rows: minmax(0, 1fr) !important;
+      align-items: center !important;
+
+      gap: 16px !important;
+
+      min-width: 0 !important;
+      min-height: 148px !important;
+
+      padding: 17px 16px 16px 18px !important;
+
+      overflow: hidden !important;
+
+      border: 1px solid
+        color-mix(
+          in srgb,
+          var(--option-accent) 20%,
+          #D9E7F3
+        ) !important;
+      border-radius: 18px !important;
+
+      color: var(--option-deep) !important;
+
+      background:
+        radial-gradient(
+          circle at 12% 50%,
+          color-mix(
+            in srgb,
+            var(--option-accent) 10%,
+            transparent
+          ),
+          transparent 27%
+        ),
+        linear-gradient(
+          145deg,
+          color-mix(
+            in srgb,
+            var(--option-bg) 76%,
+            white
+          ) 0%,
+          #FFFFFF 100%
+        ) !important;
+
+      text-align: left !important;
+
+      box-shadow:
+        0 8px 18px rgb(0 48 114 / 5%),
+        inset 0 1px 0 rgb(255 255 255 / 90%) !important;
+
+      transition:
+        transform 170ms ease,
+        border-color 170ms ease,
+        box-shadow 170ms ease !important;
+    }
+
+    .support-page .support-option-card::before {
+      content: "" !important;
+
+      position: absolute !important;
+      z-index: 1 !important;
+
+      top: 14px !important;
+      bottom: 14px !important;
+      left: 0 !important;
+
+      width: 4px !important;
+
+      border-radius: 0 999px 999px 0 !important;
+
+      background:
+        linear-gradient(
+          180deg,
+          var(--option-accent),
+          color-mix(
+            in srgb,
+            var(--option-accent) 54%,
+            #8DE3E8
+          )
+        ) !important;
+
+      opacity: .88 !important;
+      pointer-events: none !important;
+    }
+
+    .support-page .support-option-card::after {
+      content: "" !important;
+
+      position: absolute !important;
+      z-index: 0 !important;
+
+      right: -55px !important;
+      bottom: -70px !important;
+
+      width: 190px !important;
+      height: 120px !important;
+
+      border-radius: 50% !important;
+
+      background:
+        color-mix(
+          in srgb,
+          var(--option-accent) 6%,
+          transparent
+        ) !important;
+
+      pointer-events: none !important;
+    }
+
+    .support-page .support-option-card > * {
+      position: relative !important;
+      z-index: 3 !important;
+    }
+
+    /* ---------- smaller, cleaner icon treatment ---------- */
+
+    .support-page .support-option-icon {
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+
+      justify-self: center !important;
+
+      width: 68px !important;
+      height: 68px !important;
+
+      border: 7px solid
+        color-mix(
+          in srgb,
+          var(--option-accent) 12%,
+          white
+        ) !important;
+      border-radius: 50% !important;
+
+      color: #FFFFFF !important;
+
+      background:
+        linear-gradient(
+          145deg,
+          var(--option-accent),
+          var(--option-deep)
+        ) !important;
+
+      box-shadow:
+        0 9px 18px
+          color-mix(
+            in srgb,
+            var(--option-accent) 18%,
+            transparent
+          ),
+        inset 0 1px 0 rgb(255 255 255 / 24%) !important;
+    }
+
+    .support-page .support-option-icon::after {
+      inset: -7px !important;
+
+      border-color:
+        color-mix(
+          in srgb,
+          var(--option-accent) 13%,
+          transparent
+        ) !important;
+    }
+
+    .support-page .support-option-icon svg {
+      width: 34px !important;
+      height: 34px !important;
+    }
+
+    /* ---------- copy hierarchy ---------- */
+
+    .support-page .support-option-copy {
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: center !important;
+
+      min-width: 0 !important;
+
+      gap: 0 !important;
+    }
+
+    .support-page .support-option-eyebrow {
+      margin: 0 0 5px !important;
+
+      color: var(--option-deep) !important;
+
+      font-size: .53rem !important;
+      font-weight: 880 !important;
+      line-height: 1 !important;
+      letter-spacing: .14em !important;
+
+      opacity: .78 !important;
+    }
+
+    .support-page .support-option-copy strong {
+      margin: 0 !important;
+
+      color: #071F63 !important;
+
+      font-size: 1.16rem !important;
+      font-weight: 910 !important;
+      line-height: 1.02 !important;
+      letter-spacing: -.025em !important;
+
+      white-space: normal !important;
+      overflow-wrap: normal !important;
+      word-break: normal !important;
+      hyphens: none !important;
+    }
+
+    .support-page .support-option-copy > span:not(.support-option-eyebrow),
+    .support-page .support-option-description {
+      max-width: 520px !important;
+
+      margin-top: 8px !important;
+
+      color: #4F6790 !important;
+
+      font-size: .70rem !important;
+      font-weight: 560 !important;
+      line-height: 1.30 !important;
+
+      white-space: normal !important;
+      overflow-wrap: normal !important;
+      word-break: normal !important;
+    }
+
+    .support-page .support-option-copy br {
+      display: none !important;
+    }
+
+    /* ---------- compact chevron ---------- */
+
+    .support-page .support-option-arrow {
+      align-self: center !important;
+      justify-self: end !important;
+
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+
+      width: 32px !important;
+      height: 32px !important;
+
+      margin: 0 !important;
+
+      border: 1px solid
+        color-mix(
+          in srgb,
+          var(--option-accent) 17%,
+          #D8E5F0
+        ) !important;
+      border-radius: 50% !important;
+
+      color: var(--option-deep) !important;
+
+      background:
+        color-mix(
+          in srgb,
+          var(--option-accent) 5%,
+          white
+        ) !important;
+
+      box-shadow:
+        0 4px 9px rgb(0 48 114 / 4%) !important;
+
+      font-size: 1.15rem !important;
+      font-weight: 540 !important;
+      line-height: 1 !important;
+
+      transition:
+        transform 170ms ease,
+        border-color 170ms ease,
+        background 170ms ease,
+        box-shadow 170ms ease !important;
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      .support-page .support-option-card:hover {
+        transform: translateY(-2px) !important;
+
+        border-color:
+          color-mix(
+            in srgb,
+            var(--option-accent) 38%,
+            #D9E7F3
+          ) !important;
+
+        box-shadow:
+          0 13px 25px
+            color-mix(
+              in srgb,
+              var(--option-accent) 8%,
+              rgb(0 48 114 / 9%)
+            ),
+          inset 0 1px 0 rgb(255 255 255 / 94%) !important;
+      }
+
+      .support-page .support-option-card:hover
+        .support-option-arrow {
+        transform: translateX(2px) !important;
+
+        border-color:
+          color-mix(
+            in srgb,
+            var(--option-accent) 34%,
+            #D8E5F0
+          ) !important;
+
+        background:
+          color-mix(
+            in srgb,
+            var(--option-accent) 8%,
+            white
+          ) !important;
+
+        box-shadow:
+          0 6px 12px rgb(0 48 114 / 7%) !important;
+      }
+    }
+
+    /* =========================================================
+       Responsive support options
+       ========================================================= */
+
+    @media (min-width: 768px) and (max-width: 1080px) {
+      .support-page .support-options {
+        padding-inline: 16px !important;
+      }
+
+      .support-page .support-options-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 12px !important;
+      }
+
+      .support-page .support-option-card {
+        grid-template-columns: 64px minmax(0, 1fr) 32px !important;
+
+        min-height: 138px !important;
+
+        gap: 13px !important;
+
+        padding: 14px !important;
+      }
+
+      .support-page .support-option-icon {
+        width: 62px !important;
+        height: 62px !important;
+        border-width: 6px !important;
+      }
+
+      .support-page .support-option-icon::after {
+        inset: -6px !important;
+      }
+
+      .support-page .support-option-icon svg {
+        width: 31px !important;
+        height: 31px !important;
+      }
+
+      .support-page .support-option-copy strong {
+        font-size: 1.03rem !important;
+      }
+
+      .support-page .support-option-copy > span:not(.support-option-eyebrow),
+      .support-page .support-option-description {
+        font-size: .66rem !important;
+      }
+    }
+
+    @media (max-width: 767px) {
+      .support-page .support-options {
+        padding: 14px 12px 16px !important;
+      }
+
+      .support-page .support-options-header {
+        margin-bottom: 11px !important;
+        padding-inline: 2px !important;
+      }
+
+      .support-page .support-options-eyebrow {
+        margin-bottom: 5px !important;
+        font-size: .54rem !important;
+      }
+
+      .support-page .support-options-header h2 {
+        font-size: 1.30rem !important;
+      }
+
+      .support-page .support-options-description {
+        margin-top: 6px !important;
+        font-size: .65rem !important;
+      }
+
+      .support-page .support-options-accent-rule {
+        width: 54px !important;
+        height: 3px !important;
+        margin-top: 8px !important;
+      }
+
+      .support-page .support-options-grid {
+        grid-template-columns: minmax(0, 1fr) !important;
+        grid-template-rows: auto !important;
+
+        gap: 9px !important;
+      }
+
+      .support-page .support-option-card {
+        grid-template-columns: 58px minmax(0, 1fr) 30px !important;
+
+        min-height: 112px !important;
+
+        gap: 11px !important;
+
+        padding: 12px !important;
+
+        border-radius: 15px !important;
+      }
+
+      .support-page .support-option-icon {
+        width: 56px !important;
+        height: 56px !important;
+        border-width: 5px !important;
+      }
+
+      .support-page .support-option-icon::after {
+        inset: -5px !important;
+      }
+
+      .support-page .support-option-icon svg {
+        width: 28px !important;
+        height: 28px !important;
+      }
+
+      .support-page .support-option-eyebrow {
+        margin-bottom: 4px !important;
+        font-size: .48rem !important;
+      }
+
+      .support-page .support-option-copy strong {
+        font-size: .94rem !important;
+      }
+
+      .support-page .support-option-copy > span:not(.support-option-eyebrow),
+      .support-page .support-option-description {
+        margin-top: 6px !important;
+        font-size: .62rem !important;
+      }
+
+      .support-page .support-option-arrow {
+        width: 28px !important;
+        height: 28px !important;
+        font-size: 1.02rem !important;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .support-page .support-option-card,
+      .support-page .support-option-arrow {
+        transition: none !important;
+      }
+
+      .support-page .support-option-card:hover,
+      .support-page .support-option-card:hover
+        .support-option-arrow {
+        transform: none !important;
+      }
+    }
+
+
+
+
+    /* =========================================================
+       HELP & SUPPORT — SHARED NEXUS HERO HEIGHT + OVERLAP RESTORE
+       Restores the same hero geometry used across the primary
+       Nexus pages, using Home as the reference:
+       - Desktop: 468px
+       - 1200px–1350px: 440px
+       - Below 1200px: 320px
+       - Compact phones: 305px
+       - First content section overlaps hero by 82px on >= 768px
+       ========================================================= */
+
+    .support-page .support-hero.page-hero[data-page-hero] {
+      box-sizing: border-box !important;
+      height: 468px !important;
+      min-height: 468px !important;
+      max-height: 468px !important;
+      overflow: hidden !important;
+    }
+
+    .support-page .support-hero-content {
+      min-height: 0 !important;
+    }
+
+    @media (min-width: 1200px) and (max-width: 1350px) {
+      .support-page .support-hero.page-hero[data-page-hero] {
+        height: 440px !important;
+        min-height: 440px !important;
+        max-height: 440px !important;
+      }
+    }
+
+    @media (max-width: 1199px) {
+      .support-page .support-hero.page-hero[data-page-hero] {
+        height: 320px !important;
+        min-height: 320px !important;
+        max-height: 320px !important;
+      }
+
+      .support-page .support-hero-content {
+        min-height: 0 !important;
+        height: auto !important;
+      }
+    }
+
+    @media (max-width: 420px) {
+      .support-page .support-hero.page-hero[data-page-hero] {
+        height: 305px !important;
+        min-height: 305px !important;
+        max-height: 305px !important;
+      }
+    }
+
+    /* Restore the standard first-section overlap. */
+    @media (min-width: 768px) {
+      .support-page .support-options {
+        position: relative !important;
+        z-index: 5 !important;
+        margin-top: -82px !important;
+
+        /*
+         * Keep the overlap visually clean. The cards/header provide
+         * their own surfaces; the section itself should not create
+         * a horizontal strip across the hero.
+         */
+        background: transparent !important;
+      }
+    }
+
+    /* Match Home behavior on mobile: no first-section overlap. */
+    @media (max-width: 767px) {
+      .support-page .support-options {
+        margin-top: 0 !important;
+      }
+    }
+
+
 </style>

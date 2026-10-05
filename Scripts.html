@@ -6682,13 +6682,13 @@
       userEmail.classList.toggle("user-admin-badge", isAdmin);
 
       if (isAdmin) {
-        userEmail.textContent = "NEXUS Admin";
+        userEmail.textContent = "NEXUS ADMIN";
         userEmail.title = email || "NEXUS Administrator";
         userEmail.setAttribute(
           "aria-label",
           email
-            ? ("NEXUS Admin, " + email)
-            : "NEXUS Admin"
+            ? ("NEXUS ADMIN, " + email)
+            : "NEXUS ADMIN"
         );
       } else {
         userEmail.textContent = email || "Email unavailable";
@@ -6721,8 +6721,8 @@
         isAdmin
           ? (
               email
-                ? (displayName + ", NEXUS Admin, " + email)
-                : (displayName + ", NEXUS Admin")
+                ? (displayName + ", NEXUS ADMIN, " + email)
+                : (displayName + ", NEXUS ADMIN")
             )
           : (
               email

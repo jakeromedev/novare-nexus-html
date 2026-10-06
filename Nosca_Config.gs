@@ -11,6 +11,10 @@ const NOSCA_CONFIG = Object.freeze({
   dataSpreadsheetId:
     '1lJetYhn8loCBmcMtiZZSVCH1OLMOIGBq8GGWoWH20Gw',
 
+  // Exact NOSCA_Index tab from the configured workbook.
+  // Source URL gid=644286122.
+  indexSheetId: 644286122,
+
   sheets: Object.freeze({
     index: 'NOSCA_Index',
     logs: 'NOSCA_Logs',
@@ -23,22 +27,33 @@ const NOSCA_CONFIG = Object.freeze({
     startRow: 2
   }),
 
+  // Hierarchy-aware NOSCA_Index schema. Keep this order synchronized with
+  // Nosca_Sheet.gs and noscaIndexRecordToRow_() in Nosca_Index.gs.
   indexHeaders: Object.freeze([
-    'File ID',
-    'File Name',
+    'Item ID',
+    'Item Type',
+    'Item Name',
     'Folder Path',
+    'Hierarchy Context',
     'Document Type',
     'File Format',
     'MIME Type',
     'Modified At',
     'Drive URL',
-    'Keywords',
+    'Generated Keywords',
+    'Manual Keywords',
     'Indexed At',
     'Status',
     'Error / Notes'
   ]),
 
+  itemTypes: Object.freeze({
+    file: 'File',
+    folder: 'Folder'
+  }),
+
   documentTypes: Object.freeze({
+    folder: 'Folder',
     ee: 'EE',
     proposal: 'Proposal',
     presentation: 'Presentation',
@@ -50,6 +65,7 @@ const NOSCA_CONFIG = Object.freeze({
   }),
 
   fileFormats: Object.freeze({
+    folder: 'Folder',
     googleDoc: 'Google Doc',
     googleSheet: 'Google Sheet',
     googleSlides: 'Google Slides',

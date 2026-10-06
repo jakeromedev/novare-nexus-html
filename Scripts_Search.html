@@ -337,6 +337,21 @@
     const siteResults =
       searchSiteIndex(routeState.query);
 
+    console.log(
+      "[NEXUS SEARCH DEBUG] runSearch",
+      {
+        requestId: requestId,
+        query: routeState.query,
+        filter: routeState.filter,
+        siteResultCount: siteResults.length,
+        hasGoogleRuntime: Boolean(
+          window.google &&
+          google.script &&
+          google.script.run
+        )
+      }
+    );
+
     clearResults(dom);
     showLoading(dom, routeState);
 
@@ -383,6 +398,23 @@
           return;
         }
 
+        console.log(
+          "[NEXUS SEARCH DEBUG] searchNexus success",
+          {
+            requestId: requestId,
+            ok: Boolean(response && response.ok),
+            query: response && response.query,
+            filter: response && response.filter,
+            totalMatches: response && response.totalMatches,
+            returned: response && response.returned,
+            counts: response && response.counts,
+            elapsedMs: response && response.elapsedMs,
+            sample: response && Array.isArray(response.results)
+              ? response.results.slice(0, 3)
+              : []
+          }
+        );
+
         handleDriveSearchSuccess(
           dom,
           routeState,
@@ -396,8 +428,16 @@
         }
 
         console.error(
-          "[ONESCA Search] Search request failed",
-          error
+          "[NEXUS SEARCH DEBUG] searchNexus failure",
+          {
+            requestId: requestId,
+            query: routeState.query,
+            filter: routeState.filter,
+            error: error,
+            message: error && error.message
+              ? error.message
+              : String(error || "Unknown error")
+          }
         );
 
         if (

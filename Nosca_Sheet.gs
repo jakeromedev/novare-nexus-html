@@ -12,12 +12,21 @@ function testNoscaDataSheetAccess() {
   const sheet = getNoscaIndexSheet_();
   assertNoscaIndexHeaders_(sheet);
 
+  const parent = sheet.getParent();
+
   const result = {
     ok: true,
-    spreadsheetId: NOSCA_CONFIG.dataSpreadsheetId,
+    spreadsheetId: parent.getId(),
+    spreadsheetName: parent.getName(),
+    configuredSpreadsheetId: NOSCA_CONFIG.dataSpreadsheetId,
     sheetName: sheet.getName(),
+    sheetId: sheet.getSheetId(),
+    configuredSheetId: Number(NOSCA_CONFIG.indexSheetId || 0) || null,
     lastRow: sheet.getLastRow(),
-    lastColumn: sheet.getLastColumn()
+    lastColumn: sheet.getLastColumn(),
+    headers: sheet
+      .getRange(1, 1, 1, NOSCA_CONFIG.indexHeaders.length)
+      .getDisplayValues()[0]
   };
 
   console.log('[Ask NOSCA] NOSCA_Index sheet access OK:', result);
@@ -123,6 +132,20 @@ function getNoscaIndexSheet_() {
       'Required sheet "' +
       NOSCA_CONFIG.sheets.index +
       '" was not found in the Ask NOSCA data spreadsheet.'
+    );
+  }
+
+  const expectedSheetId = Number(NOSCA_CONFIG.indexSheetId || 0);
+
+  if (expectedSheetId && sheet.getSheetId() !== expectedSheetId) {
+    throw new Error(
+      'NOSCA_Index tab mismatch. Expected sheet gid ' +
+      expectedSheetId +
+      ', but "' +
+      sheet.getName() +
+      '" has gid ' +
+      sheet.getSheetId() +
+      '. Confirm NOSCA_CONFIG.dataSpreadsheetId and indexSheetId.'
     );
   }
 

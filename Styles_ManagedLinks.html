@@ -466,4 +466,541 @@
     opacity: 1 !important;
   }
 
+
+  /* =========================================================
+     NEXUS ADMIN — MANAGE MANAGED LINK DIALOG
+     ========================================================= */
+
+  .managed-admin-link-dialog {
+    width: min(560px, calc(100vw - 28px));
+    max-width: 560px;
+    max-height: min(760px, calc(100dvh - 28px));
+    margin: auto;
+    padding: 0;
+    border: 0;
+    border-radius: 24px;
+    background: transparent;
+    color: #081A3A;
+    overflow: visible;
+  }
+
+  .managed-admin-link-dialog::backdrop {
+    background:
+      radial-gradient(circle at 50% 18%, rgb(64 153 255 / 16%), transparent 36%),
+      rgb(5 20 48 / 54%);
+    backdrop-filter: blur(7px);
+    -webkit-backdrop-filter: blur(7px);
+  }
+
+  .managed-admin-link-card {
+    position: relative;
+    display: grid;
+    gap: 18px;
+    padding: 24px;
+    border: 1px solid rgb(190 220 249 / 82%);
+    border-radius: 24px;
+    background:
+      radial-gradient(circle at 92% 2%, rgb(49 146 255 / 12%), transparent 30%),
+      linear-gradient(180deg, #FFFFFF 0%, #F9FCFF 100%);
+    box-shadow:
+      0 30px 80px rgb(2 36 86 / 25%),
+      0 8px 22px rgb(20 105 218 / 10%),
+      inset 0 1px 0 rgb(255 255 255 / 92%);
+    overflow: hidden;
+  }
+
+  .managed-admin-link-card::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+    height: 4px;
+    background: linear-gradient(90deg, #0068F5 0%, #11B8F2 58%, #79D8FF 100%);
+  }
+
+  .managed-admin-link-topline {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr) 34px;
+    align-items: start;
+    gap: 12px;
+  }
+
+  .managed-admin-link-icon {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: 1px solid #B7D9FF;
+    border-radius: 14px;
+    background: linear-gradient(145deg, #E8F4FF, #FFFFFF);
+    color: #0868E9;
+    box-shadow: 0 8px 18px rgb(0 104 245 / 10%);
+  }
+
+  .managed-admin-link-icon svg,
+  .managed-admin-link-input-wrap > svg {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.9;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .managed-admin-link-heading {
+    min-width: 0;
+  }
+
+  .managed-admin-link-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    min-height: 20px;
+    padding: 0 8px;
+    border: 1px solid #B9D8FF;
+    border-radius: 999px;
+    background: #EFF7FF;
+    color: #075DD9;
+    font-size: .62rem;
+    font-weight: 850;
+    line-height: 1;
+    letter-spacing: .075em;
+  }
+
+  .managed-admin-link-heading h2 {
+    margin: 8px 0 5px;
+    color: #071B4B;
+    font-size: clamp(1.24rem, 2.8vw, 1.52rem);
+    font-weight: 820;
+    line-height: 1.12;
+    letter-spacing: -.025em;
+  }
+
+  .managed-admin-link-heading p {
+    margin: 0;
+    max-width: 430px;
+    color: #60738C;
+    font-size: .82rem;
+    line-height: 1.48;
+  }
+
+  .managed-admin-link-close {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border: 1px solid #D9E5F0;
+    border-radius: 10px;
+    background: rgb(255 255 255 / 78%);
+    color: #60738C;
+    cursor: pointer;
+    transition: border-color 150ms ease, color 150ms ease, background 150ms ease, transform 150ms ease;
+  }
+
+  .managed-admin-link-close:hover {
+    border-color: #BFD4E8;
+    background: #F7FBFF;
+    color: #174A86;
+    transform: translateY(-1px);
+  }
+
+  .managed-admin-link-close svg {
+    width: 17px;
+    height: 17px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.9;
+    stroke-linecap: round;
+  }
+
+  .managed-admin-link-resource {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 16px;
+    align-items: center;
+    padding: 14px 15px;
+    border: 1px solid #E0ECF6;
+    border-radius: 16px;
+    background: rgb(245 250 255 / 82%);
+  }
+
+  .managed-admin-link-resource > div {
+    display: grid;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  .managed-admin-link-meta-label {
+    color: #7890A8;
+    font-size: .58rem;
+    font-weight: 800;
+    letter-spacing: .085em;
+  }
+
+  .managed-admin-link-resource strong {
+    overflow: hidden;
+    color: #15355E;
+    font-size: .82rem;
+    font-weight: 760;
+    line-height: 1.32;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .managed-admin-link-key-wrap {
+    justify-items: end;
+  }
+
+  .managed-admin-link-key-wrap code {
+    display: inline-flex;
+    align-items: center;
+    min-height: 25px;
+    max-width: 190px;
+    padding: 0 9px;
+    border: 1px solid #CFE1F4;
+    border-radius: 8px;
+    background: #FFFFFF;
+    color: #1C5EAA;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: .7rem;
+    font-weight: 700;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .managed-admin-link-field {
+    display: grid;
+    gap: 8px;
+    color: #18385F;
+    font-size: .76rem;
+    font-weight: 760;
+  }
+
+  .managed-admin-link-input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 48px;
+    padding: 0 13px;
+    border: 1px solid #C9DBEC;
+    border-radius: 13px;
+    background: #FFFFFF;
+    color: #4E75A1;
+    box-shadow: inset 0 1px 2px rgb(4 46 96 / 3%);
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+  }
+
+  .managed-admin-link-input-wrap:focus-within {
+    border-color: #5AA6F8;
+    box-shadow: 0 0 0 4px rgb(31 132 247 / 11%);
+  }
+
+  .managed-admin-link-input-wrap > svg {
+    flex: 0 0 auto;
+    width: 18px;
+    height: 18px;
+  }
+
+  .managed-admin-link-input-wrap input {
+    width: 100%;
+    min-width: 0;
+    padding: 12px 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: #0F2A4D;
+    font: inherit;
+    font-size: .84rem;
+    font-weight: 570;
+  }
+
+  .managed-admin-link-input-wrap input::placeholder {
+    color: #9AAABD;
+  }
+
+  .managed-admin-link-hint {
+    margin: -5px 0 0;
+    color: #7A8DA2;
+    font-size: .69rem;
+    line-height: 1.4;
+  }
+
+  .managed-admin-link-hint strong {
+    color: #4F6E91;
+    font-weight: 760;
+  }
+
+  .managed-admin-link-status {
+    margin: -3px 0 0;
+    padding: 10px 12px;
+    border-radius: 11px;
+    font-size: .72rem;
+    font-weight: 680;
+    line-height: 1.4;
+  }
+
+  .managed-admin-link-status[hidden] {
+    display: none;
+  }
+
+  .managed-admin-link-status[data-status-type="error"] {
+    border: 1px solid #F4C8C8;
+    background: #FFF5F5;
+    color: #A62D2D;
+  }
+
+  .managed-admin-link-status[data-status-type="success"] {
+    border: 1px solid #BDE7D2;
+    background: #F1FBF6;
+    color: #157347;
+  }
+
+  .managed-admin-link-status[data-status-type="warning"] {
+    border: 1px solid #F1D39B;
+    background: #FFF9EC;
+    color: #8A5A00;
+  }
+
+  .managed-admin-link-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding-top: 2px;
+  }
+
+  .managed-admin-link-actions-left,
+  .managed-admin-link-actions-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .managed-admin-link-actions-right {
+    justify-content: flex-end;
+    flex-wrap: wrap;
+  }
+
+  .managed-admin-link-secondary,
+  .managed-admin-link-primary,
+  .managed-admin-link-danger {
+    min-height: 40px;
+    padding: 0 16px;
+    border-radius: 11px;
+    font-family: inherit;
+    font-size: .69rem;
+    font-weight: 820;
+    letter-spacing: .045em;
+    cursor: pointer;
+    transition: transform 150ms ease, box-shadow 150ms ease, border-color 150ms ease, background 150ms ease, color 150ms ease;
+  }
+
+  .managed-admin-link-secondary {
+    border: 1px solid #CFDDEA;
+    background: #FFFFFF;
+    color: #506B89;
+  }
+
+  .managed-admin-link-secondary:hover:not(:disabled) {
+    border-color: #B9CDDF;
+    background: #F8FBFE;
+    transform: translateY(-1px);
+  }
+
+  .managed-admin-link-visit[hidden],
+  .managed-admin-link-danger[hidden] {
+    display: none !important;
+  }
+
+  .managed-admin-link-visit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    color: #155AA7;
+    border-color: #BCD6F0;
+    background: #F6FBFF;
+  }
+
+  .managed-admin-link-visit svg {
+    width: 14px;
+    height: 14px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.9;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .managed-admin-link-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-width: 118px;
+    border: 1px solid #0764E7;
+    background: linear-gradient(135deg, #075FE0 0%, #168BFF 100%);
+    color: #FFFFFF;
+    box-shadow: 0 9px 20px rgb(0 104 245 / 21%);
+  }
+
+  .managed-admin-link-primary:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 11px 24px rgb(0 104 245 / 26%);
+  }
+
+  .managed-admin-link-danger {
+    border: 1px solid #F1C3C6;
+    background: #FFF7F7;
+    color: #B33A43;
+  }
+
+  .managed-admin-link-danger:hover:not(:disabled) {
+    border-color: #E9A9AE;
+    background: #FFF0F1;
+    color: #9E2731;
+    transform: translateY(-1px);
+  }
+
+  .managed-admin-link-danger.is-confirming {
+    border-color: #DB6B74;
+    background: #C73D48;
+    color: #FFFFFF;
+    box-shadow: 0 8px 18px rgb(183 47 58 / 18%);
+  }
+
+  .managed-admin-link-secondary:disabled,
+  .managed-admin-link-primary:disabled,
+  .managed-admin-link-danger:disabled,
+  .managed-admin-link-close:disabled {
+    cursor: wait;
+    opacity: .68;
+  }
+
+  .managed-admin-link-spinner {
+    display: none;
+    width: 13px;
+    height: 13px;
+    border: 2px solid rgb(255 255 255 / 38%);
+    border-top-color: #FFFFFF;
+    border-radius: 50%;
+    animation: managedAdminLinkSpin 700ms linear infinite;
+  }
+
+  .managed-admin-link-dialog.is-saving .managed-admin-link-spinner {
+    display: inline-block;
+  }
+
+  @keyframes managedAdminLinkSpin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* NEXUS Admins may interact with empty managed links, but link availability
+     — not user role — controls the visual state. Keep the same gray/muted
+     missing-link palette for admins and regular users. */
+  #nexus-app[data-current-user-role="admin"] [data-managed-link-missing="true"] {
+    pointer-events: auto !important;
+    cursor: pointer !important;
+  }
+
+  #nexus-app[data-current-user-role="admin"] [data-managed-link-missing="true"] * {
+    pointer-events: auto;
+  }
+
+  #nexus-app[data-current-user-role="admin"] [data-managed-admin-editable="true"] {
+    cursor: pointer !important;
+  }
+
+  @media (max-width: 560px) {
+    .managed-admin-link-dialog {
+      width: min(100% - 18px, 560px);
+      max-height: calc(100dvh - 18px);
+    }
+
+    .managed-admin-link-card {
+      gap: 16px;
+      padding: 20px 17px 18px;
+      border-radius: 20px;
+    }
+
+    .managed-admin-link-topline {
+      grid-template-columns: 40px minmax(0, 1fr) 32px;
+      gap: 10px;
+    }
+
+    .managed-admin-link-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+    }
+
+    .managed-admin-link-resource {
+      grid-template-columns: 1fr;
+    }
+
+    .managed-admin-link-key-wrap {
+      justify-items: start;
+    }
+
+    .managed-admin-link-actions {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .managed-admin-link-actions-left,
+    .managed-admin-link-actions-right {
+      width: 100%;
+    }
+
+    .managed-admin-link-actions-right {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .managed-admin-link-danger {
+      width: 100%;
+    }
+
+    .managed-admin-link-primary {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .managed-admin-link-close,
+    .managed-admin-link-secondary,
+    .managed-admin-link-primary,
+    .managed-admin-link-danger,
+    .managed-admin-link-spinner {
+      animation: none !important;
+      transition: none !important;
+    }
+  }
+
+</style>
+
+<style>
+  /* =========================================================
+     NEXUS ADMIN — HARD INTERACTIVITY OVERRIDE
+     ---------------------------------------------------------
+     Legacy route styles may gray or disable an inner affordance while the
+     managed-link key lives on its parent. Admins must always be able to open
+     the link manager for an empty destination.
+     ========================================================= */
+  #nexus-app[data-current-user-role="admin"] [data-managed-link-missing="true"],
+  #nexus-app[data-current-user-role="admin"] [data-managed-link-missing="true"] button,
+  #nexus-app[data-current-user-role="admin"] [data-managed-link-missing="true"] a,
+  #nexus-app[data-current-user-role="admin"] [data-managed-link-missing="true"] [role="button"],
+  #nexus-app[data-current-user-role="admin"] [data-managed-link-missing="true"] [aria-disabled="true"],
+  #nexus-app[data-current-user-role="admin"] [data-managed-link-missing="true"] [disabled] {
+    pointer-events: auto !important;
+    cursor: pointer !important;
+  }
+
+  #nexus-app[data-current-user-role="admin"] [data-managed-link-missing="true"].nexus-control-loading,
+  #nexus-app[data-current-user-role="admin"] [data-managed-link-missing="true"] .nexus-control-loading {
+    pointer-events: auto !important;
+    cursor: pointer !important;
+  }
 </style>

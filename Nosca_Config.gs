@@ -20,9 +20,7 @@ const NOSCA_CONFIG = Object.freeze({
 
   admins: Object.freeze({
     emailColumn: 1,
-    startRow: 2,
-    cacheSeconds: 300,
-    cacheKey: 'NEXUS_ADMIN_EMAILS_V1'
+    startRow: 2
   }),
 
   indexHeaders: Object.freeze([

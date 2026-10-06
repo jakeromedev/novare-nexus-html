@@ -6659,6 +6659,8 @@
   }
 
   function renderCurrentUser(user) {
+    console.log("[NEXUS ADMIN DEBUG] renderCurrentUser() received:", user);
+
     const fallback = NexusAPI.getCurrentUserFallback();
     const resolved = user && typeof user === "object" ? user : fallback;
     const displayName = String(resolved.name || resolved.email || fallback.name).trim() || fallback.name;
@@ -6671,6 +6673,15 @@
     const userEmail = document.getElementById("user-email");
     const userAvatar = document.getElementById("user-avatar");
     const userProfile = document.querySelector("[data-user-profile]");
+
+    console.log("[NEXUS ADMIN DEBUG] User role resolved:", {
+      rawIsAdmin: resolved.isAdmin,
+      derivedIsAdmin: isAdmin,
+      role: role,
+      email: email,
+      appFound: Boolean(dom.app),
+      profileFound: Boolean(userProfile)
+    });
 
     if (userName) {
       userName.textContent = displayName;
@@ -6744,6 +6755,13 @@
     if (dom.app) {
       dom.app.dataset.currentUserRole = role;
     }
+
+    console.log("[NEXUS ADMIN DEBUG] Role datasets after render:", {
+      appRole: dom.app ? String(dom.app.dataset.currentUserRole || "") : "<app not found>",
+      profileRole: userProfile ? String(userProfile.dataset.userRole || "") : "<profile not found>",
+      profileHasAdminClass: Boolean(userProfile && userProfile.classList.contains("is-admin")),
+      badgeText: userEmail ? String(userEmail.textContent || "").trim() : "<badge/email element not found>"
+    });
   }
 
   function initializeUser() {
@@ -6754,6 +6772,7 @@
 
     NexusAPI.getCurrentUser(
       function (user) {
+        console.log("[NEXUS ADMIN DEBUG] getCurrentUser() success:", user);
         renderCurrentUser(user);
       },
       function () {

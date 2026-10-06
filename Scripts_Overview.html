@@ -14,6 +14,22 @@
    * placeholder/internal action behavior.
    */
 
+  const OVERVIEW_ADMIN_DEBUG = true;
+
+  function overviewAdminDebug(message, details) {
+    if (!OVERVIEW_ADMIN_DEBUG) return;
+    if (arguments.length > 1) {
+      console.log("[NEXUS ADMIN DEBUG][Overview] " + message, details);
+    } else {
+      console.log("[NEXUS ADMIN DEBUG][Overview] " + message);
+    }
+  }
+
+  overviewAdminDebug("Scripts_Overview loaded.", {
+    managedLinksAvailable: Boolean(window.NexusManagedLinks),
+    url: window.location.href
+  });
+
   const OVERVIEW_LINK_KEYS = Object.freeze({
     "about-novare": "ov-an-open",
     "corporate-overview": "ov-co",
@@ -320,11 +336,19 @@
       if (url) {
         element.dataset.managedLinkReady = "true";
         element.removeAttribute("data-managed-link-missing");
+        delete element.dataset.managedAdminEditable;
       } else {
         delete element.dataset.managedLinkReady;
         element.dataset.managedLinkMissing = "true";
       }
     });
+
+    if (
+      window.NexusManagedLinks &&
+      typeof window.NexusManagedLinks.refreshAdminInteractivity === "function"
+    ) {
+      window.NexusManagedLinks.refreshAdminInteractivity(pageRoot);
+    }
   }
 
   function getUrl(linkKey) {
@@ -420,6 +444,12 @@
   }
 
   function showComingSoonDialog() {
+    overviewAdminDebug("OVERVIEW Coming Soon modal opened.", {
+      managedLinksAvailable: Boolean(window.NexusManagedLinks),
+      snapshot: window.NexusManagedLinks && typeof window.NexusManagedLinks.getAdminDebugSnapshot === "function"
+        ? window.NexusManagedLinks.getAdminDebugSnapshot()
+        : null
+    });
     const dialog = ensureComingSoonDialog();
 
     if (typeof dialog.showModal === "function") {
@@ -620,22 +650,95 @@
 
     const linkKey = String(trigger.dataset.linkKey || "").trim();
     const url = getUrl(linkKey);
+    const managedLinks = window.NexusManagedLinks;
+    const isAdmin = Boolean(
+      managedLinks &&
+      typeof managedLinks.isCurrentUserAdmin === "function" &&
+      managedLinks.isCurrentUserAdmin()
+    );
+
+    function applySaved(result) {
+      if (!result || result.ok !== true || !result.url) return;
+
+      state.links[linkKey] = String(result.url).trim();
+      state.missing = state.missing.filter(function (key) { return key !== linkKey; });
+      state.invalid = state.invalid.filter(function (key) { return key !== linkKey; });
+      applyResolvedState(pageRoot);
+
+      if (managedLinks && typeof managedLinks.hideUnavailableTooltip === "function") {
+        managedLinks.hideUnavailableTooltip(trigger);
+      }
+    }
+
+    function applyDeleted(result) {
+      if (!result || result.ok !== true || result.deleted !== true) return;
+
+      delete state.links[linkKey];
+      if (state.missing.indexOf(linkKey) === -1) state.missing.push(linkKey);
+      state.invalid = state.invalid.filter(function (key) { return key !== linkKey; });
+      applyResolvedState(pageRoot);
+
+      if (managedLinks && typeof managedLinks.hideUnavailableTooltip === "function") {
+        managedLinks.hideUnavailableTooltip(trigger);
+      }
+    }
 
     if (!url) {
-      // Only treat it as "coming soon" after the Sheet request has
-      // completed successfully enough to establish the managed-link state.
-      // If fetching failed, keep the existing Overview fallback behavior.
       if (state.loaded) {
         event.preventDefault();
         event.stopPropagation();
-        showComingSoonDialog(trigger);
-      }
 
+        overviewAdminDebug("Missing Overview link clicked.", {
+          linkKey: linkKey,
+          label: getTriggerLabel(trigger),
+          managedLinksAvailable: Boolean(managedLinks),
+          isAdmin: isAdmin,
+          trigger: trigger
+        });
+
+        if (
+          isAdmin &&
+          managedLinks &&
+          typeof managedLinks.showAdminLinkEditor === "function"
+        ) {
+          managedLinks.showAdminLinkEditor({
+            key: linkKey,
+            label: getTriggerLabel(trigger),
+            trigger: trigger,
+            url: "",
+            onSaved: applySaved,
+            onDeleted: applyDeleted
+          });
+        } else {
+          showComingSoonDialog(trigger);
+        }
+      }
       return;
     }
 
     event.preventDefault();
     event.stopPropagation();
+
+    if (
+      isAdmin &&
+      managedLinks &&
+      typeof managedLinks.showAdminLinkEditor === "function"
+    ) {
+      overviewAdminDebug("Existing Overview link clicked by admin; opening manager.", {
+        linkKey: linkKey,
+        url: url
+      });
+
+      managedLinks.showAdminLinkEditor({
+        key: linkKey,
+        label: getTriggerLabel(trigger),
+        trigger: trigger,
+        url: url,
+        onSaved: applySaved,
+        onDeleted: applyDeleted
+      });
+      return;
+    }
 
     if (isOverviewVideoKey(linkKey)) {
       openOverviewVideo(url, trigger);

@@ -20,6 +20,34 @@
    */
 
   const instances = new WeakMap();
+  const NEXUS_ADMIN_DEBUG = true;
+
+  function adminDebugLog(message, details) {
+    if (!NEXUS_ADMIN_DEBUG) return;
+    if (arguments.length > 1) {
+      console.log("[NEXUS ADMIN DEBUG] " + message, details);
+    } else {
+      console.log("[NEXUS ADMIN DEBUG] " + message);
+    }
+  }
+
+  function getAdminDebugSnapshot() {
+    const app = document.getElementById("nexus-app");
+    const profile = document.querySelector("[data-user-profile]");
+    const badge = document.getElementById("user-email");
+    return {
+      appFound: Boolean(app),
+      appRole: app ? String(app.dataset.currentUserRole || "") : "",
+      profileFound: Boolean(profile),
+      profileRole: profile ? String(profile.dataset.userRole || "") : "",
+      profileHasAdminClass: Boolean(profile && profile.classList.contains("is-admin")),
+      badgeText: badge ? String(badge.textContent || "").trim() : "",
+      managedLinksLoaded: true,
+      url: window.location.href
+    };
+  }
+
+  adminDebugLog("Scripts_ManagedLinks loaded.", getAdminDebugSnapshot());
 
   function normalizeLinkDefinition(value) {
     if (typeof value === "string") {
@@ -367,6 +395,79 @@
     setManagedControlsLoading(pageRoot, false);
   }
 
+  function unlockAdminInteractiveNode(node) {
+    if (!node || node.nodeType !== 1) return;
+
+    // A native disabled form control does not reliably emit a click event,
+    // so simply making the managed parent clickable is not enough. Remove
+    // disabled states from the entire actionable subtree for NEXUS Admins.
+    if ("disabled" in node && node.disabled) {
+      node.disabled = false;
+    }
+
+    node.removeAttribute("disabled");
+
+    if (node.getAttribute("aria-disabled") === "true") {
+      node.setAttribute("aria-disabled", "false");
+    }
+
+    // A stale loading class can also keep a missing-link control inert.
+    node.classList.remove("nexus-control-loading");
+    node.removeAttribute("aria-busy");
+
+    // Inline !important wins over legacy page rules that use
+    // pointer-events:none!important on unavailable affordances.
+    try {
+      node.style.setProperty("pointer-events", "auto", "important");
+    } catch (error) {
+      // Non-critical; continue with the remaining unlock steps.
+    }
+  }
+
+  function makeManagedElementAdminInteractive(element) {
+    if (!element) return;
+
+    element.dataset.managedAdminEditable = "true";
+
+    unlockAdminInteractiveNode(element);
+
+    // Some managed controls are cards with nested native buttons/anchors.
+    // Unlock all likely interactive descendants so a disabled child cannot
+    // swallow the pointer before the delegated managed-link handler receives it.
+    element
+      .querySelectorAll(
+        'button, a, input, [role="button"], [aria-disabled="true"], [disabled], .nexus-control-loading'
+      )
+      .forEach(unlockAdminInteractiveNode);
+
+    if (
+      !/^(A|BUTTON|INPUT|SELECT|TEXTAREA)$/i.test(element.tagName || "") &&
+      !element.hasAttribute("tabindex")
+    ) {
+      element.setAttribute("tabindex", "0");
+    }
+
+    adminDebugLog("Admin interactivity unlocked for managed link.", {
+      key: String(element.dataset.linkKey || ""),
+      tag: element.tagName,
+      disabled: "disabled" in element ? Boolean(element.disabled) : null,
+      ariaDisabled: element.getAttribute("aria-disabled"),
+      pointerEvents: window.getComputedStyle(element).pointerEvents
+    });
+  }
+
+  function refreshAdminInteractivity(root) {
+    const scope = root && root.querySelectorAll ? root : document;
+
+    if (!isCurrentUserAdmin()) {
+      return;
+    }
+
+    scope
+      .querySelectorAll('[data-managed-link-missing="true"]')
+      .forEach(makeManagedElementAdminInteractive);
+  }
+
   function applyResolvedState(
     pageRoot,
     state
@@ -374,6 +475,8 @@
     if (!pageRoot) {
       return;
     }
+
+    const admin = isCurrentUserAdmin();
 
     pageRoot
       .querySelectorAll(
@@ -399,6 +502,7 @@
           element.removeAttribute(
             "data-managed-tooltip"
           );
+          delete element.dataset.managedAdminEditable;
         } else {
           delete element.dataset
             .managedLinkReady;
@@ -407,7 +511,13 @@
             .managedLinkMissing =
               "true";
           element.dataset.managedTooltip =
-            "Coming soon";
+            admin
+              ? "NEXUS ADMIN — manage destination"
+              : "Coming soon";
+
+          if (admin) {
+            makeManagedElementAdminInteractive(element);
+          }
         }
       });
   }
@@ -536,6 +646,7 @@
   }
 
   function showComingSoon() {
+    adminDebugLog("SHARED Coming Soon modal opened.", getAdminDebugSnapshot());
     const dialog =
       ensureComingSoonDialog();
 
@@ -566,6 +677,569 @@
     );
   }
 
+
+  /* =========================================================
+     NEXUS ADMIN — MANAGED LINK EDITOR
+     ---------------------------------------------------------
+     Missing managed links keep the normal Coming Soon behavior
+     for regular users. A server-resolved NEXUS Admin instead gets
+     a small editor that writes the destination to 06_Assets.
+     ========================================================= */
+
+  let adminLinkDialog = null;
+  let adminLinkDialogContext = null;
+
+  function isCurrentUserAdmin() {
+    const snapshot = getAdminDebugSnapshot();
+    const appRole = String(snapshot.appRole || "").toLowerCase();
+    const profileRole = String(snapshot.profileRole || "").toLowerCase();
+    const result = appRole === "admin" || profileRole === "admin";
+
+    adminDebugLog("isCurrentUserAdmin()", {
+      result: result,
+      appRole: snapshot.appRole,
+      profileRole: snapshot.profileRole,
+      profileHasAdminClass: snapshot.profileHasAdminClass,
+      badgeText: snapshot.badgeText
+    });
+    return result;
+  }
+
+  function isAppsScriptAvailable() {
+    return Boolean(
+      typeof google !== "undefined" &&
+      google &&
+      google.script &&
+      google.script.run
+    );
+  }
+
+  function getAppsScriptErrorMessage(error) {
+    if (!error) {
+      return "Unable to save the link. Please try again.";
+    }
+
+    const message = String(
+      error.message ||
+      error.toString && error.toString() ||
+      error ||
+      ""
+    ).trim();
+
+    return message ||
+      "Unable to save the link. Please try again.";
+  }
+
+  function setAdminLinkDialogMessage(
+    dialog,
+    message,
+    type
+  ) {
+    if (!dialog) return;
+
+    const status =
+      dialog.querySelector(
+        "[data-managed-admin-status]"
+      );
+
+    if (!status) return;
+
+    const text =
+      String(message || "").trim();
+
+    status.textContent = text;
+    status.hidden = !text;
+    status.dataset.statusType =
+      String(type || "info");
+  }
+
+  function setAdminLinkDialogBusy(
+    dialog,
+    isBusy,
+    busyAction
+  ) {
+    if (!dialog) return;
+
+    const form = dialog.querySelector("[data-managed-admin-form]");
+    const input = dialog.querySelector("[data-managed-admin-url]");
+    const saveButton = dialog.querySelector("[data-managed-admin-save]");
+    const cancelButtons = dialog.querySelectorAll("[data-managed-admin-cancel]");
+    const visitButton = dialog.querySelector("[data-managed-admin-visit]");
+    const deleteButton = dialog.querySelector("[data-managed-admin-delete]");
+
+    dialog.classList.toggle("is-saving", Boolean(isBusy));
+    dialog.dataset.busyAction = isBusy ? String(busyAction || "save") : "";
+
+    if (form) {
+      form.setAttribute("aria-busy", isBusy ? "true" : "false");
+    }
+
+    if (input) {
+      input.disabled = Boolean(isBusy);
+    }
+
+    if (saveButton) {
+      saveButton.disabled = Boolean(isBusy);
+
+      const label = saveButton.querySelector("[data-managed-admin-save-label]");
+      if (label) {
+        const hasExisting = Boolean(
+          adminLinkDialogContext && adminLinkDialogContext.currentUrl
+        );
+        label.textContent =
+          isBusy && busyAction === "save"
+            ? (hasExisting ? "UPDATING..." : "SAVING...")
+            : (hasExisting ? "UPDATE LINK" : "SAVE LINK");
+      }
+    }
+
+    cancelButtons.forEach(function (button) {
+      button.disabled = Boolean(isBusy);
+    });
+
+    if (visitButton) {
+      visitButton.disabled = Boolean(isBusy);
+    }
+
+    if (deleteButton) {
+      deleteButton.disabled = Boolean(isBusy);
+      const deleteLabel = deleteButton.querySelector("[data-managed-admin-delete-label]");
+      if (deleteLabel && isBusy && busyAction === "delete") {
+        deleteLabel.textContent = "DELETING...";
+      }
+    }
+  }
+
+  function closeAdminLinkDialog() {
+    if (!adminLinkDialog) return;
+
+    const context =
+      adminLinkDialogContext;
+
+    if (adminLinkDialog.open) {
+      adminLinkDialog.close();
+    } else {
+      adminLinkDialog.removeAttribute(
+        "open"
+      );
+    }
+
+    adminLinkDialogContext = null;
+
+    if (
+      context &&
+      context.trigger &&
+      typeof context.trigger.focus ===
+        "function"
+    ) {
+      window.setTimeout(
+        function () {
+          try {
+            context.trigger.focus({
+              preventScroll: true
+            });
+          } catch (error) {
+            context.trigger.focus();
+          }
+        },
+        0
+      );
+    }
+  }
+
+  function ensureAdminLinkDialog() {
+    if (adminLinkDialog) {
+      return adminLinkDialog;
+    }
+
+    let dialog = document.getElementById("managed-link-admin-editor");
+
+    if (!dialog) {
+      dialog = document.createElement("dialog");
+      dialog.id = "managed-link-admin-editor";
+      dialog.className = "managed-admin-link-dialog";
+      dialog.setAttribute("aria-labelledby", "managed-admin-link-title");
+      dialog.setAttribute("aria-describedby", "managed-admin-link-description");
+
+      dialog.innerHTML =
+        '<form class="managed-admin-link-card" data-managed-admin-form>' +
+          '<div class="managed-admin-link-topline">' +
+            '<div class="managed-admin-link-icon" aria-hidden="true">' +
+              '<svg viewBox="0 0 24 24">' +
+                '<path d="M10.2 13.8a4.2 4.2 0 0 0 5.94 0l2.86-2.86a4.2 4.2 0 0 0-5.94-5.94l-1.64 1.64"></path>' +
+                '<path d="M13.8 10.2a4.2 4.2 0 0 0-5.94 0L5 13.06A4.2 4.2 0 1 0 10.94 19l1.64-1.64"></path>' +
+              '</svg>' +
+            '</div>' +
+            '<div class="managed-admin-link-heading">' +
+              '<span class="managed-admin-link-eyebrow">NEXUS ADMIN</span>' +
+              '<h2 id="managed-admin-link-title">Manage resource link</h2>' +
+              '<p id="managed-admin-link-description">Visit, update, or remove the destination for this Nexus resource.</p>' +
+            '</div>' +
+            '<button class="managed-admin-link-close" type="button" data-managed-admin-cancel aria-label="Close">' +
+              '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg>' +
+            '</button>' +
+          '</div>' +
+
+          '<div class="managed-admin-link-resource">' +
+            '<div>' +
+              '<span class="managed-admin-link-meta-label">RESOURCE</span>' +
+              '<strong data-managed-admin-resource>This resource</strong>' +
+            '</div>' +
+            '<div class="managed-admin-link-key-wrap">' +
+              '<span class="managed-admin-link-meta-label">LINK KEY</span>' +
+              '<code data-managed-admin-key></code>' +
+            '</div>' +
+          '</div>' +
+
+          '<label class="managed-admin-link-field">' +
+            '<span>Destination URL</span>' +
+            '<div class="managed-admin-link-input-wrap">' +
+              '<svg viewBox="0 0 24 24" aria-hidden="true">' +
+                '<path d="M10.2 13.8a4.2 4.2 0 0 0 5.94 0l2.86-2.86a4.2 4.2 0 0 0-5.94-5.94l-1.64 1.64"></path>' +
+                '<path d="M13.8 10.2a4.2 4.2 0 0 0-5.94 0L5 13.06A4.2 4.2 0 1 0 10.94 19l1.64-1.64"></path>' +
+              '</svg>' +
+              '<input type="url" inputmode="url" autocomplete="url" spellcheck="false" placeholder="https://..." data-managed-admin-url required>' +
+            '</div>' +
+          '</label>' +
+
+          '<p class="managed-admin-link-hint" data-managed-admin-hint>This writes to <strong>06_Assets</strong>. Changes take effect immediately in the current page.</p>' +
+          '<p class="managed-admin-link-status" data-managed-admin-status role="status" aria-live="polite" hidden></p>' +
+
+          '<div class="managed-admin-link-actions">' +
+            '<div class="managed-admin-link-actions-left">' +
+              '<button class="managed-admin-link-danger" type="button" data-managed-admin-delete hidden>' +
+                '<span data-managed-admin-delete-label>DELETE LINK</span>' +
+              '</button>' +
+            '</div>' +
+            '<div class="managed-admin-link-actions-right">' +
+              '<button class="managed-admin-link-secondary" type="button" data-managed-admin-cancel>CANCEL</button>' +
+              '<button class="managed-admin-link-secondary managed-admin-link-visit" type="button" data-managed-admin-visit hidden>' +
+                '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 5h5v5"></path><path d="M10 14 19 5"></path><path d="M19 13v6H5V5h6"></path></svg>' +
+                '<span>VISIT LINK</span>' +
+              '</button>' +
+              '<button class="managed-admin-link-primary" type="submit" data-managed-admin-save>' +
+                '<span class="managed-admin-link-spinner" aria-hidden="true"></span>' +
+                '<span data-managed-admin-save-label>UPDATE LINK</span>' +
+              '</button>' +
+            '</div>' +
+          '</div>' +
+        '</form>';
+
+      document.body.appendChild(dialog);
+    }
+
+    adminLinkDialog = dialog;
+
+    dialog.querySelectorAll("[data-managed-admin-cancel]").forEach(function (button) {
+      button.addEventListener("click", function () {
+        if (!dialog.classList.contains("is-saving")) {
+          closeAdminLinkDialog();
+        }
+      });
+    });
+
+    dialog.addEventListener("cancel", function (event) {
+      if (dialog.classList.contains("is-saving")) {
+        event.preventDefault();
+        return;
+      }
+      event.preventDefault();
+      closeAdminLinkDialog();
+    });
+
+    dialog.addEventListener("click", function (event) {
+      if (event.target === dialog && !dialog.classList.contains("is-saving")) {
+        closeAdminLinkDialog();
+      }
+    });
+
+    const visitButton = dialog.querySelector("[data-managed-admin-visit]");
+    if (visitButton) {
+      visitButton.addEventListener("click", function () {
+        if (!adminLinkDialogContext || dialog.classList.contains("is-saving")) return;
+        const currentUrl = String(adminLinkDialogContext.currentUrl || "").trim();
+        if (/^https?:\/\/\S+$/i.test(currentUrl)) {
+          openResolvedUrl(currentUrl);
+        }
+      });
+    }
+
+    const deleteButton = dialog.querySelector("[data-managed-admin-delete]");
+    if (deleteButton) {
+      deleteButton.addEventListener("click", function () {
+        if (!adminLinkDialogContext || dialog.classList.contains("is-saving") || !adminLinkDialogContext.currentUrl) return;
+
+        const deleteLabel = deleteButton.querySelector("[data-managed-admin-delete-label]");
+
+        if (deleteButton.dataset.confirmDelete !== "true") {
+          deleteButton.dataset.confirmDelete = "true";
+          deleteButton.classList.add("is-confirming");
+          if (deleteLabel) deleteLabel.textContent = "CONFIRM DELETE";
+          setAdminLinkDialogMessage(
+            dialog,
+            "Click CONFIRM DELETE again to remove this destination. The registry key will remain available for a new link.",
+            "warning"
+          );
+          return;
+        }
+
+        if (!isAppsScriptAvailable()) {
+          setAdminLinkDialogMessage(dialog, "Apps Script is unavailable in this preview, so the link cannot be deleted here.", "error");
+          return;
+        }
+
+        const context = adminLinkDialogContext;
+        setAdminLinkDialogMessage(dialog, "", "info");
+        setAdminLinkDialogBusy(dialog, true, "delete");
+
+        google.script.run
+          .withSuccessHandler(function (response) {
+            const source = response && typeof response === "object" ? response : {};
+            if (source.ok !== true || source.deleted !== true) {
+              setAdminLinkDialogBusy(dialog, false);
+              setAdminLinkDialogMessage(dialog, "The server returned an unexpected response while deleting the link.", "error");
+              return;
+            }
+
+            const result = {
+              ok: true,
+              deleted: true,
+              key: String(source.key || context.key || "").trim(),
+              row: Number(source.row || 0),
+              message: String(source.message || "Link deleted successfully.")
+            };
+
+            context.currentUrl = "";
+            if (typeof context.onDeleted === "function") context.onDeleted(result);
+
+            setAdminLinkDialogBusy(dialog, false);
+            setAdminLinkDialogMessage(dialog, "Link deleted. This resource is now available for an admin to configure again.", "success");
+            if (deleteLabel) deleteLabel.textContent = "DELETED ✓";
+
+            window.setTimeout(function () { closeAdminLinkDialog(); }, 850);
+          })
+          .withFailureHandler(function (error) {
+            setAdminLinkDialogBusy(dialog, false);
+            deleteButton.dataset.confirmDelete = "true";
+            deleteButton.classList.add("is-confirming");
+            if (deleteLabel) deleteLabel.textContent = "CONFIRM DELETE";
+            setAdminLinkDialogMessage(dialog, getAppsScriptErrorMessage(error), "error");
+          })
+          .deleteManagedLink(context.key);
+      });
+    }
+
+    const form = dialog.querySelector("[data-managed-admin-form]");
+    if (form) {
+      form.addEventListener("submit", function (event) {
+        event.preventDefault();
+        if (!adminLinkDialogContext || dialog.classList.contains("is-saving")) return;
+
+        const input = dialog.querySelector("[data-managed-admin-url]");
+        const url = String(input ? input.value : "").trim();
+
+        if (!/^https?:\/\/\S+$/i.test(url)) {
+          setAdminLinkDialogMessage(dialog, "Enter a complete http:// or https:// URL.", "error");
+          if (input) { input.focus(); input.select(); }
+          return;
+        }
+
+        if (!isAppsScriptAvailable()) {
+          setAdminLinkDialogMessage(dialog, "Apps Script is unavailable in this preview, so the link cannot be saved here.", "error");
+          return;
+        }
+
+        setAdminLinkDialogMessage(dialog, "", "info");
+        setAdminLinkDialogBusy(dialog, true, "save");
+        const context = adminLinkDialogContext;
+
+        google.script.run
+          .withSuccessHandler(function (response) {
+            const source = response && typeof response === "object" ? response : {};
+            const savedKey = String(source.key || context.key || "").trim();
+            const savedUrl = String(source.url || url).trim();
+
+            if (source.ok !== true || !savedKey || !/^https?:\/\/\S+$/i.test(savedUrl)) {
+              setAdminLinkDialogBusy(dialog, false);
+              setAdminLinkDialogMessage(dialog, "The server returned an unexpected response. Please try again.", "error");
+              return;
+            }
+
+            const result = {
+              ok: true,
+              key: savedKey,
+              url: savedUrl,
+              row: Number(source.row || 0),
+              created: source.created === true,
+              message: String(source.message || "Link saved successfully.")
+            };
+
+            context.currentUrl = savedUrl;
+            if (typeof context.onSaved === "function") context.onSaved(result);
+
+            setAdminLinkDialogBusy(dialog, false);
+            setAdminLinkDialogMessage(dialog, result.created ? "Link added. This resource is now active." : "Link updated successfully.", "success");
+
+            const saveLabel = dialog.querySelector("[data-managed-admin-save-label]");
+            if (saveLabel) saveLabel.textContent = "SAVED ✓";
+            window.setTimeout(function () { closeAdminLinkDialog(); }, 850);
+          })
+          .withFailureHandler(function (error) {
+            setAdminLinkDialogBusy(dialog, false);
+            setAdminLinkDialogMessage(dialog, getAppsScriptErrorMessage(error), "error");
+          })
+          .saveManagedLink(context.key, url);
+      });
+    }
+
+    return dialog;
+  }
+
+  function showAdminLinkEditor(options) {
+    adminDebugLog("showAdminLinkEditor() called.", {
+      options: options,
+      roleSnapshot: getAdminDebugSnapshot()
+    });
+
+    const source = options && typeof options === "object" ? options : {};
+    const key = String(source.key || "").trim();
+
+    if (!key) return false;
+
+    if (!isCurrentUserAdmin()) {
+      console.warn("[NEXUS ADMIN DEBUG] Admin link editor BLOCKED; user is not resolving as admin.", getAdminDebugSnapshot());
+      return false;
+    }
+
+    const currentUrl = String(source.url || "").trim();
+    const hasExisting = /^https?:\/\/\S+$/i.test(currentUrl);
+    const dialog = ensureAdminLinkDialog();
+
+    const resource = dialog.querySelector("[data-managed-admin-resource]");
+    const keyElement = dialog.querySelector("[data-managed-admin-key]");
+    const input = dialog.querySelector("[data-managed-admin-url]");
+    const title = dialog.querySelector("#managed-admin-link-title");
+    const description = dialog.querySelector("#managed-admin-link-description");
+    const hint = dialog.querySelector("[data-managed-admin-hint]");
+    const visitButton = dialog.querySelector("[data-managed-admin-visit]");
+    const deleteButton = dialog.querySelector("[data-managed-admin-delete]");
+
+    if (resource) resource.textContent = String(source.label || "This resource").trim() || "This resource";
+    if (keyElement) keyElement.textContent = key;
+    if (input) input.value = hasExisting ? currentUrl : "";
+    if (title) title.textContent = hasExisting ? "Manage resource link" : "Add resource link";
+    if (description) {
+      description.textContent = hasExisting
+        ? "Visit the current destination, update it, or remove it from this Nexus resource."
+        : "Add the destination for this Nexus resource. Saving activates the button immediately.";
+    }
+    if (hint) {
+      hint.innerHTML = hasExisting
+        ? 'Updates write directly to <strong>06_Assets</strong>. Deleting clears the URL but keeps the registry key.'
+        : 'This writes to <strong>06_Assets</strong>. Existing keys are updated; a missing key is created automatically.';
+    }
+    if (visitButton) visitButton.hidden = !hasExisting;
+    if (deleteButton) {
+      deleteButton.hidden = !hasExisting;
+      deleteButton.dataset.confirmDelete = "false";
+      deleteButton.classList.remove("is-confirming");
+      const deleteLabel = deleteButton.querySelector("[data-managed-admin-delete-label]");
+      if (deleteLabel) deleteLabel.textContent = "DELETE LINK";
+    }
+
+    adminLinkDialogContext = {
+      key: key,
+      trigger: source.trigger || null,
+      currentUrl: hasExisting ? currentUrl : "",
+      onSaved: typeof source.onSaved === "function" ? source.onSaved : null,
+      onDeleted: typeof source.onDeleted === "function" ? source.onDeleted : null
+    };
+
+    setAdminLinkDialogBusy(dialog, false);
+    setAdminLinkDialogMessage(dialog, "", "info");
+
+    const saveLabel = dialog.querySelector("[data-managed-admin-save-label]");
+    if (saveLabel) saveLabel.textContent = hasExisting ? "UPDATE LINK" : "SAVE LINK";
+
+    if (typeof dialog.showModal === "function") {
+      if (!dialog.open) dialog.showModal();
+    } else {
+      dialog.setAttribute("open", "");
+    }
+
+    window.setTimeout(function () {
+      if (input) input.focus();
+    }, 0);
+
+    return true;
+  }
+
+  function applySavedLinkToState(
+    pageRoot,
+    state,
+    result
+  ) {
+    if (
+      !state ||
+      !result ||
+      result.ok !== true
+    ) {
+      return;
+    }
+
+    const key =
+      String(result.key || "").trim();
+    const url =
+      String(result.url || "").trim();
+
+    if (
+      !key ||
+      !/^https?:\/\/\S+$/i.test(url)
+    ) {
+      return;
+    }
+
+    state.links[key] = url;
+    state.missing =
+      state.missing.filter(
+        function (item) {
+          return item !== key;
+        }
+      );
+    state.invalid =
+      state.invalid.filter(
+        function (item) {
+          return item !== key;
+        }
+      );
+
+    applyResolvedState(
+      pageRoot,
+      state
+    );
+
+    hideManagedTooltip();
+  }
+
+
+  function applyDeletedLinkToState(
+    pageRoot,
+    state,
+    result
+  ) {
+    if (!state || !result || result.ok !== true || result.deleted !== true) return;
+
+    const key = String(result.key || "").trim();
+    if (!key) return;
+
+    delete state.links[key];
+    if (state.missing.indexOf(key) === -1) state.missing.push(key);
+    state.invalid = state.invalid.filter(function (item) { return item !== key; });
+
+    applyResolvedState(pageRoot, state);
+    refreshAdminInteractivity(pageRoot);
+    hideManagedTooltip();
+  }
 
 
   let managedTooltip = null;
@@ -616,6 +1290,10 @@
   }
 
   function getUnavailableTooltip() {
+    if (isCurrentUserAdmin()) {
+      return "🔗 NEXUS ADMIN — add destination link";
+    }
+
     return "✨ Coming soon — something great is near!";
   }
 
@@ -765,17 +1443,9 @@
     pageRoot,
     state
   ) {
-    const trigger =
-      event.target.closest(
-        "[data-link-key]"
-      );
+    const trigger = event.target.closest("[data-link-key]");
 
-    if (
-      !trigger ||
-      !pageRoot.contains(trigger)
-    ) {
-      return;
-    }
+    if (!trigger || !pageRoot.contains(trigger)) return;
 
     if (state.loading) {
       event.preventDefault();
@@ -783,29 +1453,142 @@
       return;
     }
 
-    const key =
-      String(
-        trigger.dataset.linkKey ||
-        ""
-      ).trim();
-
-    const url =
-      state.links[key] || "";
+    const key = String(trigger.dataset.linkKey || "").trim();
+    const url = state.links[key] || "";
+    const adminDetected = isCurrentUserAdmin();
 
     if (!url) {
       if (state.loaded) {
         event.preventDefault();
         event.stopPropagation();
-        showComingSoon(trigger);
-      }
+        hideManagedTooltip(trigger);
 
+        console.log("[NEXUS ADMIN DEBUG] Missing managed-link button clicked:", {
+          page: state.config.pageLabel,
+          namespace: state.config.namespace,
+          key: key,
+          label: getTriggerLabel(trigger),
+          adminDetected: adminDetected,
+          roleSnapshot: getAdminDebugSnapshot(),
+          trigger: trigger
+        });
+
+        if (adminDetected) {
+          showAdminLinkEditor({
+            key: key,
+            label: getTriggerLabel(trigger),
+            trigger: trigger,
+            url: "",
+            onSaved: function (result) {
+              applySavedLinkToState(pageRoot, state, result);
+            },
+            onDeleted: function (result) {
+              applyDeletedLinkToState(pageRoot, state, result);
+            }
+          });
+        } else {
+          showComingSoon(trigger);
+        }
+      }
       return;
     }
 
     event.preventDefault();
     event.stopPropagation();
 
+    if (adminDetected) {
+      console.log("[NEXUS ADMIN DEBUG] Existing managed-link clicked by admin; opening manager:", {
+        key: key,
+        url: url,
+        label: getTriggerLabel(trigger)
+      });
+
+      showAdminLinkEditor({
+        key: key,
+        label: getTriggerLabel(trigger),
+        trigger: trigger,
+        url: url,
+        onSaved: function (result) {
+          applySavedLinkToState(pageRoot, state, result);
+        },
+        onDeleted: function (result) {
+          applyDeletedLinkToState(pageRoot, state, result);
+        }
+      });
+      return;
+    }
+
     openResolvedUrl(url);
+  }
+
+  function getManagedTriggerFromEvent(event, pageRoot) {
+    if (!event || !pageRoot) return null;
+
+    const path =
+      typeof event.composedPath === "function"
+        ? event.composedPath()
+        : [];
+
+    for (let index = 0; index < path.length; index += 1) {
+      const node = path[index];
+      if (!node || node === pageRoot) break;
+      if (
+        node.nodeType === 1 &&
+        node.matches &&
+        node.matches("[data-link-key]") &&
+        pageRoot.contains(node)
+      ) {
+        return node;
+      }
+    }
+
+    const target = event.target && event.target.closest
+      ? event.target.closest("[data-link-key]")
+      : null;
+
+    return target && pageRoot.contains(target) ? target : null;
+  }
+
+  function handleAdminMissingPointerDown(event, pageRoot, state) {
+    if (!isCurrentUserAdmin() || state.loading || !state.loaded) return;
+
+    const trigger = getManagedTriggerFromEvent(event, pageRoot);
+    if (!trigger || trigger.dataset.managedLinkMissing !== "true") return;
+
+    const key = String(trigger.dataset.linkKey || "").trim();
+    if (!key || state.links[key]) return;
+
+    // Mark this gesture so the subsequent click (when one is emitted) does not
+    // open a second modal. pointerdown is used because disabled native buttons
+    // can suppress click altogether in some Chromium/WebView paths.
+    const now = Date.now();
+    const previous = Number(trigger.dataset.nexusAdminPointerHandledAt || 0);
+    if (now - previous < 450) return;
+    trigger.dataset.nexusAdminPointerHandledAt = String(now);
+
+    event.preventDefault();
+    event.stopPropagation();
+    hideManagedTooltip(trigger);
+
+    adminDebugLog("Admin missing-link pointerdown fallback fired.", {
+      key: key,
+      label: getTriggerLabel(trigger),
+      targetTag: event.target && event.target.tagName,
+      triggerTag: trigger.tagName
+    });
+
+    showAdminLinkEditor({
+      key: key,
+      label: getTriggerLabel(trigger),
+      trigger: trigger,
+      url: "",
+      onSaved: function (result) {
+        applySavedLinkToState(pageRoot, state, result);
+      },
+      onDeleted: function (result) {
+        applyDeletedLinkToState(pageRoot, state, result);
+      }
+    });
   }
 
   function bindManagedClicks(
@@ -817,8 +1600,36 @@
     }
 
     pageRoot.addEventListener(
+      "pointerdown",
+      function (event) {
+        handleAdminMissingPointerDown(
+          event,
+          pageRoot,
+          state
+        );
+      },
+      true
+    );
+
+    pageRoot.addEventListener(
       "click",
       function (event) {
+        const trigger = getManagedTriggerFromEvent(event, pageRoot);
+        const handledAt = trigger
+          ? Number(trigger.dataset.nexusAdminPointerHandledAt || 0)
+          : 0;
+
+        if (
+          trigger &&
+          isCurrentUserAdmin() &&
+          trigger.dataset.managedLinkMissing === "true" &&
+          Date.now() - handledAt < 650
+        ) {
+          event.preventDefault();
+          event.stopPropagation();
+          return;
+        }
+
         handleManagedClick(
           event,
           pageRoot,
@@ -877,6 +1688,12 @@
     google.script.run
       .withSuccessHandler(
         function (response) {
+          adminDebugLog("getManagedLinks() success for " + state.config.pageLabel + ".", {
+            requestedKeys: requestedKeys,
+            response: response,
+            roleSnapshot: getAdminDebugSnapshot()
+          });
+
           const normalized =
             normalizeServerResponse(
               response
@@ -1076,6 +1893,81 @@
     );
   }
 
+  let adminRoleObserver = null;
+  let adminDomObserver = null;
+  let adminRefreshQueued = false;
+
+  function queueAdminInteractivityRefresh() {
+    if (adminRefreshQueued || !isCurrentUserAdmin()) return;
+    adminRefreshQueued = true;
+
+    window.requestAnimationFrame(function () {
+      adminRefreshQueued = false;
+      refreshAdminInteractivity(document);
+    });
+  }
+
+  function bindAdminRoleObserver() {
+    const app = document.getElementById("nexus-app");
+    if (!app || adminRoleObserver) return;
+
+    adminRoleObserver = new MutationObserver(function (mutations) {
+      const roleChanged = mutations.some(function (mutation) {
+        return mutation.type === "attributes" && mutation.attributeName === "data-current-user-role";
+      });
+
+      if (roleChanged && isCurrentUserAdmin()) {
+        adminDebugLog("Admin role became available; refreshing empty-link interactivity.", getAdminDebugSnapshot());
+        queueAdminInteractivityRefresh();
+      }
+    });
+
+    adminRoleObserver.observe(app, {
+      attributes: true,
+      attributeFilter: ["data-current-user-role"]
+    });
+
+    // Pages are mounted dynamically and some page scripts can alter disabled/
+    // loading attributes after the initial link resolution. Keep admin-only
+    // missing controls unlocked when those late changes occur.
+    adminDomObserver = new MutationObserver(function (mutations) {
+      if (!isCurrentUserAdmin()) return;
+
+      const relevant = mutations.some(function (mutation) {
+        if (mutation.type === "childList") return true;
+        if (mutation.type !== "attributes") return false;
+        return [
+          "disabled",
+          "aria-disabled",
+          "class",
+          "data-managed-link-missing"
+        ].indexOf(mutation.attributeName) !== -1;
+      });
+
+      if (relevant) queueAdminInteractivityRefresh();
+    });
+
+    adminDomObserver.observe(app, {
+      subtree: true,
+      childList: true,
+      attributes: true,
+      attributeFilter: [
+        "disabled",
+        "aria-disabled",
+        "class",
+        "data-managed-link-missing"
+      ]
+    });
+
+    if (isCurrentUserAdmin()) queueAdminInteractivityRefresh();
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", bindAdminRoleObserver, { once: true });
+  } else {
+    bindAdminRoleObserver();
+  }
+
   window.NexusManagedLinks =
     Object.freeze({
       initialize: initialize,
@@ -1085,7 +1977,15 @@
       showUnavailableTooltip:
         showManagedTooltip,
       hideUnavailableTooltip:
-        hideManagedTooltip
+        hideManagedTooltip,
+      isCurrentUserAdmin:
+        isCurrentUserAdmin,
+      getAdminDebugSnapshot:
+        getAdminDebugSnapshot,
+      showAdminLinkEditor:
+        showAdminLinkEditor,
+      refreshAdminInteractivity:
+        refreshAdminInteractivity
     });
 }());
 </script>

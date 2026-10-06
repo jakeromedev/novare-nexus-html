@@ -478,3 +478,355 @@ function normalizeManagedLinkKeys_(linkKeys) {
 function isSafeManagedLinkUrl_(url) {
   return /^https?:\/\/\S+$/i.test(String(url || '').trim());
 }
+
+/**
+ * Resolves and authorizes the current NEXUS Admin for managed-link writes.
+ *
+ * This deliberately performs authorization on the Apps Script server. It does
+ * not trust the role stored in the browser DOM. Newer admin modules expose
+ * assertNoscaAdmin_(); older project snapshots may only expose
+ * getNexusCurrentUser(). Supporting both keeps the link editor compatible with
+ * the current Nexus admin implementation while preserving server-side checks.
+ *
+ * @return {string} normalized signed-in administrator email
+ */
+function resolveManagedLinkAdminEmail_() {
+  console.log('[ONESCA Links] Resolving server-side NEXUS Admin authorization.');
+
+  if (typeof assertNoscaAdmin_ === 'function') {
+    const email = String(assertNoscaAdmin_() || '').trim().toLowerCase();
+
+    console.log(
+      '[ONESCA Links] Admin authorization resolved through assertNoscaAdmin_: %s',
+      email || '(no email)'
+    );
+
+    if (!email) {
+      throw new Error(
+        'NEXUS Admin authorization succeeded but no signed-in email was available.'
+      );
+    }
+
+    return email;
+  }
+
+  console.warn(
+    '[ONESCA Links] assertNoscaAdmin_() is unavailable. Falling back to getNexusCurrentUser().'
+  );
+
+  if (typeof getNexusCurrentUser === 'function') {
+    const user = getNexusCurrentUser() || {};
+    const email = String(user.email || '').trim().toLowerCase();
+    const isAdmin = user.isAdmin === true || String(user.role || '').toLowerCase() === 'admin';
+
+    console.log(
+      '[ONESCA Links] getNexusCurrentUser() authorization result: %s',
+      JSON.stringify({
+        email: email,
+        isAdmin: isAdmin,
+        role: user.role || ''
+      })
+    );
+
+    if (isAdmin && email) {
+      return email;
+    }
+
+    throw new Error(
+      'You are not authorized to perform this NEXUS Admin action.'
+    );
+  }
+
+  // Compatibility fallback for projects that expose the lower-level admin
+  // helpers but not getNexusCurrentUser().
+  if (
+    typeof getNexusSignedInEmail_ === 'function' &&
+    typeof isNoscaAdminEmail_ === 'function'
+  ) {
+    const email = String(getNexusSignedInEmail_() || '').trim().toLowerCase();
+    const isAdmin = !!email && isNoscaAdminEmail_(email) === true;
+
+    console.log(
+      '[ONESCA Links] Low-level admin authorization result: %s',
+      JSON.stringify({
+        email: email,
+        isAdmin: isAdmin
+      })
+    );
+
+    if (isAdmin) {
+      return email;
+    }
+
+    throw new Error(
+      'You are not authorized to perform this NEXUS Admin action.'
+    );
+  }
+
+  throw new Error(
+    'NEXUS Admin authorization helpers are unavailable. Ensure Nexus_Admins.gs is included in the Apps Script project.'
+  );
+}
+
+
+/**
+ * Creates or updates a managed-link destination in the central 06_Assets
+ * registry. This endpoint is intentionally NEXUS Admin-only.
+ *
+ * Security notes:
+ * - The browser-provided role is never trusted.
+ * - resolveManagedLinkAdminEmail_() resolves the signed-in admin server-side.
+ * - Only normal http/https destinations are accepted.
+ * - Duplicate registry keys are rejected so the write target is unambiguous.
+ *
+ * @param {*} linkKey Stable managed-link key from the Nexus page config.
+ * @param {*} url Destination URL to save.
+ * @return {{ok:boolean,key:string,url:string,row:number,created:boolean,updatedBy:string,message:string}}
+ */
+function saveManagedLink(linkKey, url) {
+  const adminEmail = resolveManagedLinkAdminEmail_();
+  const key = normalizeManagedLinkKeyForWrite_(linkKey);
+  const destination = String(url || '').trim();
+
+  if (!isSafeManagedLinkUrl_(destination)) {
+    throw new Error(
+      'Please enter a valid http:// or https:// destination URL.'
+    );
+  }
+
+  const lock = LockService.getScriptLock();
+
+  if (!lock.tryLock(10000)) {
+    throw new Error(
+      'The managed-link registry is busy. Please try saving again in a moment.'
+    );
+  }
+
+  try {
+    const spreadsheet = SpreadsheetApp.openById(
+      NEXUS_LINK_REGISTRY.spreadsheetId
+    );
+
+    const sheet = spreadsheet.getSheetByName(
+      NEXUS_LINK_REGISTRY.sheetName
+    );
+
+    if (!sheet) {
+      throw new Error(
+        'ONESCA link registry sheet "' +
+        NEXUS_LINK_REGISTRY.sheetName +
+        '" was not found.'
+      );
+    }
+
+    const lastRow = sheet.getLastRow();
+    const matchingRows = [];
+
+    // Row 1 is treated as the registry header. Existing projects that have
+    // data starting at row 2 continue to work unchanged.
+    if (lastRow >= 2) {
+      const keyValues = sheet
+        .getRange(
+          2,
+          NEXUS_LINK_REGISTRY.keyColumn,
+          lastRow - 1,
+          1
+        )
+        .getDisplayValues();
+
+      keyValues.forEach(function (row, index) {
+        const existingKey = String(
+          row && row.length ? row[0] : ''
+        ).trim();
+
+        if (existingKey === key) {
+          matchingRows.push(index + 2);
+        }
+      });
+    }
+
+    if (matchingRows.length > 1) {
+      throw new Error(
+        'The link key "' + key +
+        '" appears more than once in 06_Assets. Resolve the duplicate rows before saving.'
+      );
+    }
+
+    let targetRow;
+    let created = false;
+
+    if (matchingRows.length === 1) {
+      targetRow = matchingRows[0];
+    } else {
+      targetRow = Math.max(lastRow + 1, 2);
+      sheet
+        .getRange(
+          targetRow,
+          NEXUS_LINK_REGISTRY.keyColumn
+        )
+        .setValue(key);
+      created = true;
+    }
+
+    sheet
+      .getRange(
+        targetRow,
+        NEXUS_LINK_REGISTRY.urlColumn
+      )
+      .setValue(destination);
+
+    SpreadsheetApp.flush();
+
+    console.log(
+      '[ONESCA Links] NEXUS Admin %s saved managed link %s at row %s (created=%s).',
+      adminEmail,
+      key,
+      targetRow,
+      created
+    );
+
+    return {
+      ok: true,
+      key: key,
+      url: destination,
+      row: targetRow,
+      created: created,
+      updatedBy: adminEmail,
+      message: created
+        ? 'Resource link created successfully.'
+        : 'Resource link updated successfully.'
+    };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+
+/**
+ * Clears the destination URL for a managed-link key while keeping the
+ * registry row/key intact. This endpoint is NEXUS Admin-only.
+ *
+ * @param {*} linkKey Stable managed-link key from the Nexus page config.
+ * @return {{ok:boolean,key:string,row:number,deleted:boolean,updatedBy:string,message:string}}
+ */
+function deleteManagedLink(linkKey) {
+  const adminEmail = resolveManagedLinkAdminEmail_();
+  const key = normalizeManagedLinkKeyForWrite_(linkKey);
+  const lock = LockService.getScriptLock();
+
+  if (!lock.tryLock(10000)) {
+    throw new Error(
+      'The managed-link registry is busy. Please try deleting again in a moment.'
+    );
+  }
+
+  try {
+    const spreadsheet = SpreadsheetApp.openById(
+      NEXUS_LINK_REGISTRY.spreadsheetId
+    );
+
+    const sheet = spreadsheet.getSheetByName(
+      NEXUS_LINK_REGISTRY.sheetName
+    );
+
+    if (!sheet) {
+      throw new Error(
+        'ONESCA link registry sheet "' +
+        NEXUS_LINK_REGISTRY.sheetName +
+        '" was not found.'
+      );
+    }
+
+    const lastRow = sheet.getLastRow();
+    const matchingRows = [];
+
+    if (lastRow >= 2) {
+      const keyValues = sheet
+        .getRange(
+          2,
+          NEXUS_LINK_REGISTRY.keyColumn,
+          lastRow - 1,
+          1
+        )
+        .getDisplayValues();
+
+      keyValues.forEach(function (row, index) {
+        const existingKey = String(
+          row && row.length ? row[0] : ''
+        ).trim();
+
+        if (existingKey === key) {
+          matchingRows.push(index + 2);
+        }
+      });
+    }
+
+    if (matchingRows.length > 1) {
+      throw new Error(
+        'The link key "' + key +
+        '" appears more than once in 06_Assets. Resolve the duplicate rows before deleting.'
+      );
+    }
+
+    if (!matchingRows.length) {
+      throw new Error(
+        'The link key "' + key + '" was not found in 06_Assets.'
+      );
+    }
+
+    const targetRow = matchingRows[0];
+
+    sheet
+      .getRange(
+        targetRow,
+        NEXUS_LINK_REGISTRY.urlColumn
+      )
+      .clearContent();
+
+    SpreadsheetApp.flush();
+
+    console.log(
+      '[ONESCA Links] NEXUS Admin %s deleted managed link destination %s at row %s.',
+      adminEmail,
+      key,
+      targetRow
+    );
+
+    return {
+      ok: true,
+      key: key,
+      row: targetRow,
+      deleted: true,
+      updatedBy: adminEmail,
+      message: 'Resource link deleted successfully.'
+    };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+/**
+ * Normalizes and bounds a managed-link key received by an admin write.
+ *
+ * @param {*} value
+ * @return {string}
+ */
+function normalizeManagedLinkKeyForWrite_(value) {
+  const key = String(value || '').trim();
+
+  if (!key) {
+    throw new Error('Managed-link key is required.');
+  }
+
+  if (key.length > 120) {
+    throw new Error('Managed-link key is too long.');
+  }
+
+  // Existing Nexus keys use letters, numbers, periods, underscores,
+  // colons and hyphens. Keep writes bounded to that safe identifier form.
+  if (!/^[A-Za-z0-9][A-Za-z0-9._:-]*$/.test(key)) {
+    throw new Error('Managed-link key contains unsupported characters.');
+  }
+
+  return key;
+}

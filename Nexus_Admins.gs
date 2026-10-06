@@ -43,22 +43,7 @@ function getNexusAdminSettings_() {
       Math.max(
         Number(admins.emailColumn || 1),
         1
-      ),
-
-    cacheSeconds:
-      Math.min(
-        Math.max(
-          Number(admins.cacheSeconds || 300),
-          30
-        ),
-        21600
-      ),
-
-    cacheKey:
-      String(
-        admins.cacheKey ||
-        'NEXUS_ADMIN_EMAILS_V1'
-      ).trim()
+      )
   };
 }
 
@@ -77,7 +62,11 @@ function normalizeNoscaEmail_(value) {
 
 
 /**
- * Reads and caches NOSCA_Admins!A2:A.
+ * Reads NOSCA_Admins!A2:A directly from the spreadsheet.
+ *
+ * NEXUS Admin authorization is intentionally NOT cached. This ensures that
+ * adding or removing an administrator in the source sheet takes effect on
+ * the next role check or privileged action.
  *
  * Blank rows are ignored and duplicate emails are removed.
  *
@@ -85,28 +74,6 @@ function normalizeNoscaEmail_(value) {
  */
 function getNoscaAdminEmails_() {
   const settings = getNexusAdminSettings_();
-  const cache = CacheService.getScriptCache();
-
-  const cached = cache.get(settings.cacheKey);
-
-  if (cached) {
-    try {
-      const parsed = JSON.parse(cached);
-
-      if (Array.isArray(parsed)) {
-        return parsed
-          .map(normalizeNoscaEmail_)
-          .filter(Boolean);
-      }
-    } catch (error) {
-      console.warn(
-        '[NEXUS Admin] Cached admin list was invalid. Reloading from sheet.',
-        error
-      );
-
-      cache.remove(settings.cacheKey);
-    }
-  }
 
   if (!settings.spreadsheetId) {
     throw new Error(
@@ -135,12 +102,6 @@ function getNoscaAdminEmails_() {
   const lastRow = sheet.getLastRow();
 
   if (lastRow < settings.startRow) {
-    cache.put(
-      settings.cacheKey,
-      '[]',
-      settings.cacheSeconds
-    );
-
     return [];
   }
 
@@ -176,10 +137,12 @@ function getNoscaAdminEmails_() {
     emails.push(email);
   });
 
-  cache.put(
-    settings.cacheKey,
-    JSON.stringify(emails),
-    settings.cacheSeconds
+  console.log(
+    '[NEXUS Admin] Loaded admin list directly from NOSCA_Admins.',
+    {
+      adminCount: emails.length,
+      sheetName: settings.sheetName
+    }
   );
 
   return emails;
@@ -189,7 +152,7 @@ function getNoscaAdminEmails_() {
 /**
  * Fail-closed admin check.
  *
- * Any spreadsheet/cache/access problem returns false instead of granting
+ * Any spreadsheet/access problem returns false instead of granting
  * elevated access.
  *
  * @param {*} email
@@ -429,9 +392,11 @@ function assertNoscaAdmin_() {
 
 
 /**
- * Optional admin utility to invalidate the five-minute admin cache.
+ * Legacy compatibility endpoint.
  *
- * This is deliberately protected by the same server-side admin assertion.
+ * NEXUS Admin authorization is no longer cached, so there is nothing to
+ * invalidate. The function is retained only so older admin tooling does not
+ * fail if it still calls clearNoscaAdminCache().
  *
  * @return {Object}
  */
@@ -439,21 +404,12 @@ function clearNoscaAdminCache() {
   const adminEmail =
     assertNoscaAdmin_();
 
-  const settings =
-    getNexusAdminSettings_();
-
-  CacheService
-    .getScriptCache()
-    .remove(
-      settings.cacheKey
-    );
-
   return {
     ok: true,
     clearedBy: adminEmail,
-    cacheKey: settings.cacheKey,
+    cacheEnabled: false,
     message:
-      'NEXUS Admin cache cleared.'
+      'NEXUS Admin caching is disabled. Admin roles are read directly from NOSCA_Admins.'
   };
 }
 

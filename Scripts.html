@@ -29,208 +29,8 @@
   // 3. CURRENT USER FALLBACK
   // Production identity is loaded from Code.gs -> getCurrentUser().
   const currentUser = { name: "Novare User", email: "", isAdmin: false, role: "user" };
-
-  // 3A. NEXUS ADMIN VIEW MODE
-  // An actual admin can preview Nexus as a standard user without changing
-  // server-side authorization. The preference is kept only for this browser tab.
-  const ADMIN_VIEW_MODE_STORAGE_KEY = "NEXUS_ADMIN_VIEW_MODE_V1";
-  const adminViewState = {
-    actualIsAdmin: false,
-    mode: "user",
-    controlsBound: false
-  };
-
-  function readStoredAdminViewMode() {
-    try {
-      return window.sessionStorage.getItem(ADMIN_VIEW_MODE_STORAGE_KEY) === "user"
-        ? "user"
-        : "admin";
-    } catch (error) {
-      return "admin";
-    }
-  }
-
-  function writeStoredAdminViewMode(mode) {
-    try {
-      window.sessionStorage.setItem(
-        ADMIN_VIEW_MODE_STORAGE_KEY,
-        mode === "user" ? "user" : "admin"
-      );
-    } catch (error) {
-      // Storage can be unavailable in hardened/private browser contexts.
-    }
-  }
-
-  function clearStoredAdminViewMode() {
-    try {
-      window.sessionStorage.removeItem(ADMIN_VIEW_MODE_STORAGE_KEY);
-    } catch (error) {
-      // No action needed.
-    }
-  }
-
-  function getEffectiveUserViewRole() {
-    if (!adminViewState.actualIsAdmin) return "user";
-    return adminViewState.mode === "user" ? "user" : "admin";
-  }
-
-  function setUserViewMenuOpen(open) {
-    const profile = document.querySelector("[data-user-profile]");
-    const menu = document.getElementById("nexus-user-view-menu");
-    const canOpen = adminViewState.actualIsAdmin === true;
-    const shouldOpen = Boolean(open && canOpen);
-
-    if (menu) menu.hidden = !shouldOpen;
-    if (profile) profile.setAttribute("aria-expanded", String(shouldOpen));
-  }
-
-  function applyUserViewMode(options) {
-    const settings = options && typeof options === "object" ? options : {};
-    const effectiveRole = getEffectiveUserViewRole();
-    const profile = document.querySelector("[data-user-profile]");
-    const indicator = document.getElementById("nexus-view-as-indicator");
-    const isPreviewingUser = adminViewState.actualIsAdmin && effectiveRole === "user";
-
-    if (dom.app) {
-      dom.app.dataset.currentUserViewRole = effectiveRole;
-      dom.app.classList.toggle("is-viewing-as-user", isPreviewingUser);
-    }
-
-    if (profile) {
-      profile.dataset.userViewRole = effectiveRole;
-      profile.classList.toggle("is-viewing-user", isPreviewingUser);
-
-      if (adminViewState.actualIsAdmin) {
-        profile.setAttribute("role", "button");
-        profile.setAttribute("tabindex", "0");
-        profile.setAttribute("aria-haspopup", "menu");
-      } else {
-        profile.removeAttribute("role");
-        profile.removeAttribute("tabindex");
-        profile.removeAttribute("aria-haspopup");
-        profile.setAttribute("aria-expanded", "false");
-      }
-    }
-
-    if (indicator) {
-      indicator.hidden = !isPreviewingUser;
-      indicator.setAttribute(
-        "aria-label",
-        isPreviewingUser ? "Viewing Nexus as a standard user" : ""
-      );
-    }
-
-    document.querySelectorAll("[data-view-as]").forEach(function (option) {
-      const selected = String(option.dataset.viewAs || "") === effectiveRole;
-      option.setAttribute("aria-checked", String(selected));
-    });
-
-    console.log("[NEXUS ADMIN VIEW] Applied view mode:", {
-      actualIsAdmin: adminViewState.actualIsAdmin,
-      mode: adminViewState.mode,
-      effectiveRole: effectiveRole,
-      previewingUser: isPreviewingUser
-    });
-
-    if (settings.dispatch !== false) {
-      window.dispatchEvent(
-        new CustomEvent("nexus:viewmodechange", {
-          detail: {
-            actualIsAdmin: adminViewState.actualIsAdmin,
-            mode: adminViewState.mode,
-            effectiveRole: effectiveRole,
-            previewingUser: isPreviewingUser
-          }
-        })
-      );
-    }
-  }
-
-  function setAdminViewMode(mode) {
-    if (!adminViewState.actualIsAdmin) return false;
-
-    adminViewState.mode = mode === "user" ? "user" : "admin";
-    writeStoredAdminViewMode(adminViewState.mode);
-    setUserViewMenuOpen(false);
-    applyUserViewMode();
-    return true;
-  }
-
-  function initializeAdminViewMode(actualIsAdmin) {
-    adminViewState.actualIsAdmin = actualIsAdmin === true;
-
-    if (adminViewState.actualIsAdmin) {
-      adminViewState.mode = readStoredAdminViewMode();
-    } else {
-      adminViewState.mode = "user";
-      clearStoredAdminViewMode();
-      setUserViewMenuOpen(false);
-    }
-
-    applyUserViewMode();
-  }
-
-  function bindAdminViewControls() {
-    if (adminViewState.controlsBound) return;
-
-    const control = document.querySelector("[data-user-view-control]");
-    const profile = document.querySelector("[data-user-profile]");
-    const menu = document.getElementById("nexus-user-view-menu");
-
-    if (!control || !profile || !menu) return;
-    adminViewState.controlsBound = true;
-
-    profile.addEventListener("click", function (event) {
-      if (!adminViewState.actualIsAdmin) return;
-      event.preventDefault();
-      event.stopPropagation();
-      setUserViewMenuOpen(menu.hidden);
-    });
-
-    profile.addEventListener("keydown", function (event) {
-      if (!adminViewState.actualIsAdmin) return;
-      if (["Enter", " ", "ArrowDown"].indexOf(event.key) === -1) return;
-      event.preventDefault();
-      setUserViewMenuOpen(true);
-      const selected = menu.querySelector('[data-view-as][aria-checked="true"]');
-      const first = menu.querySelector("[data-view-as]");
-      (selected || first || menu).focus();
-    });
-
-    menu.addEventListener("click", function (event) {
-      const option = event.target.closest("[data-view-as]");
-      if (!option) return;
-      event.preventDefault();
-      event.stopPropagation();
-      setAdminViewMode(option.dataset.viewAs);
-      profile.focus();
-    });
-
-    document.addEventListener("click", function (event) {
-      if (menu.hidden || control.contains(event.target)) return;
-      setUserViewMenuOpen(false);
-    });
-
-    document.addEventListener("keydown", function (event) {
-      if (event.key !== "Escape" || menu.hidden) return;
-      setUserViewMenuOpen(false);
-      profile.focus();
-    });
-  }
-
-  window.NexusViewMode = Object.freeze({
-    isActualAdmin: function () {
-      return adminViewState.actualIsAdmin === true;
-    },
-    isAdminView: function () {
-      return adminViewState.actualIsAdmin === true && getEffectiveUserViewRole() === "admin";
-    },
-    isUserPreview: function () {
-      return adminViewState.actualIsAdmin === true && getEffectiveUserViewRole() === "user";
-    },
-    getRole: getEffectiveUserViewRole,
-    setMode: setAdminViewMode
-  });
+  const ADMIN_VIEW_MODE_STORAGE_KEY = "nexus.adminViewMode";
+  const adminViewState = { actualIsAdmin: false, actualRole: "user", viewMode: "user" };
 
   // 4. GLOBAL SHELL DOM REFERENCES
   const dom = {
@@ -254,7 +54,13 @@
     launcher: document.getElementById("nosca-launcher"),
     dialog: document.getElementById("nosca-dialog"),
     dialogClose: document.getElementById("nosca-close"),
-    skipLink: document.querySelector(".skip-link")
+    skipLink: document.querySelector(".skip-link"),
+    userProfile: document.querySelector("[data-user-profile]"),
+    userViewToggle: document.getElementById("user-view-toggle"),
+    adminViewMenu: document.getElementById("admin-view-menu"),
+    adminViewOptions: Array.from(document.querySelectorAll("[data-admin-view-mode]")),
+    userPreviewChip: document.getElementById("viewing-as-chip"),
+    exitUserPreview: document.getElementById("exit-user-preview")
   };
 
   const noscaLauncherHome = dom.launcher
@@ -263,6 +69,193 @@
         nextSibling: dom.launcher.nextSibling
       }
     : null;
+
+  function readStoredAdminViewMode() {
+    try {
+      const stored = window.sessionStorage.getItem(ADMIN_VIEW_MODE_STORAGE_KEY);
+      return stored === "user" ? "user" : "admin";
+    } catch (error) {
+      return "admin";
+    }
+  }
+
+  function writeStoredAdminViewMode(mode) {
+    try {
+      window.sessionStorage.setItem(
+        ADMIN_VIEW_MODE_STORAGE_KEY,
+        mode === "user" ? "user" : "admin"
+      );
+    } catch (error) {
+      // no-op
+    }
+  }
+
+  function clearStoredAdminViewMode() {
+    try {
+      window.sessionStorage.removeItem(ADMIN_VIEW_MODE_STORAGE_KEY);
+    } catch (error) {
+      // no-op
+    }
+  }
+
+  function getEffectiveUserRole() {
+    if (adminViewState.actualIsAdmin && adminViewState.viewMode === "user") {
+      return "user";
+    }
+
+    return adminViewState.actualRole === "admin"
+      ? "admin"
+      : "user";
+  }
+
+  function isPreviewingAsUser() {
+    return adminViewState.actualIsAdmin && adminViewState.viewMode === "user";
+  }
+
+  function closeAdminViewMenu() {
+    if (dom.adminViewMenu) {
+      dom.adminViewMenu.hidden = true;
+    }
+
+    if (dom.userViewToggle) {
+      dom.userViewToggle.setAttribute("aria-expanded", "false");
+    }
+  }
+
+  function syncAdminViewModeUI() {
+    const effectiveRole = getEffectiveUserRole();
+    const previewingAsUser = isPreviewingAsUser();
+
+    if (dom.userPreviewChip) {
+      dom.userPreviewChip.hidden = !previewingAsUser;
+    }
+
+    dom.adminViewOptions.forEach(function (option) {
+      const selected = option.dataset.adminViewMode === adminViewState.viewMode;
+      option.classList.toggle("is-selected", selected);
+      option.setAttribute("aria-checked", String(selected));
+    });
+
+    if (dom.app) {
+      dom.app.dataset.currentUserRole = effectiveRole;
+      dom.app.dataset.currentUserActualRole = adminViewState.actualRole;
+      dom.app.dataset.currentUserViewMode = adminViewState.viewMode;
+      dom.app.dataset.currentUserEffectiveRole = effectiveRole;
+      dom.app.dataset.previewingAsUser = String(previewingAsUser);
+    }
+
+    if (dom.navHeader) {
+      dom.navHeader.dataset.currentUserViewMode = adminViewState.viewMode;
+      dom.navHeader.dataset.currentUserEffectiveRole = effectiveRole;
+      dom.navHeader.dataset.previewingAsUser = String(previewingAsUser);
+    }
+
+    document.dispatchEvent(
+      new CustomEvent("nexus:viewmodechange", {
+        detail: {
+          actualRole: adminViewState.actualRole,
+          viewMode: adminViewState.viewMode,
+          effectiveRole: effectiveRole,
+          previewingAsUser: previewingAsUser
+        }
+      })
+    );
+  }
+
+  function setAdminViewMode(nextMode, options) {
+    const settings = options && typeof options === "object" ? options : {};
+    const resolvedMode = nextMode === "user" ? "user" : "admin";
+
+    if (!adminViewState.actualIsAdmin) {
+      adminViewState.viewMode = "user";
+      clearStoredAdminViewMode();
+      syncAdminViewModeUI();
+      return;
+    }
+
+    adminViewState.viewMode = resolvedMode;
+
+    if (settings.persist !== false) {
+      writeStoredAdminViewMode(resolvedMode);
+    }
+
+    syncAdminViewModeUI();
+  }
+
+  function toggleAdminViewMenu(force) {
+    if (!adminViewState.actualIsAdmin || !dom.adminViewMenu || !dom.userViewToggle) {
+      return;
+    }
+
+    const nextOpen = typeof force === "boolean"
+      ? force
+      : dom.adminViewMenu.hidden;
+
+    dom.adminViewMenu.hidden = !nextOpen;
+    dom.userViewToggle.setAttribute("aria-expanded", String(nextOpen));
+  }
+
+  function bindAdminViewControls() {
+    if (dom.userProfile) {
+      dom.userProfile.addEventListener("click", function (event) {
+        if (!adminViewState.actualIsAdmin) return;
+        if (dom.userViewToggle && dom.userViewToggle.contains(event.target)) return;
+        if (dom.adminViewMenu && dom.adminViewMenu.contains(event.target)) return;
+        toggleAdminViewMenu();
+      });
+
+      dom.userProfile.addEventListener("keydown", function (event) {
+        if (!adminViewState.actualIsAdmin) return;
+        if (event.key !== "Enter" && event.key !== " ") return;
+        event.preventDefault();
+        toggleAdminViewMenu();
+      });
+    }
+
+    if (dom.userViewToggle) {
+      dom.userViewToggle.addEventListener("click", function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        toggleAdminViewMenu();
+      });
+    }
+
+    dom.adminViewOptions.forEach(function (option) {
+      option.addEventListener("click", function (event) {
+        event.preventDefault();
+        const mode = option.dataset.adminViewMode === "user" ? "user" : "admin";
+        setAdminViewMode(mode);
+        closeAdminViewMenu();
+      });
+    });
+
+    if (dom.exitUserPreview) {
+      dom.exitUserPreview.addEventListener("click", function (event) {
+        event.preventDefault();
+        setAdminViewMode("admin");
+      });
+    }
+
+    document.addEventListener("click", function (event) {
+      if (!dom.userProfile || !dom.adminViewMenu || dom.adminViewMenu.hidden) return;
+      if (dom.userProfile.contains(event.target)) return;
+      closeAdminViewMenu();
+    });
+
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape") {
+        closeAdminViewMenu();
+      }
+    });
+  }
+
+  window.NexusAdminView = {
+    getActualRole: function () { return adminViewState.actualRole; },
+    getViewMode: function () { return adminViewState.viewMode; },
+    getEffectiveRole: getEffectiveUserRole,
+    isPreviewingAsUser: isPreviewingAsUser,
+    setViewMode: setAdminViewMode
+  };
 
   function placeNoscaLauncherForViewport() {
     if (!dom.launcher || !noscaLauncherHome) return;
@@ -6861,8 +6854,6 @@
   }
 
   function renderCurrentUser(user) {
-    console.log("[NEXUS ADMIN DEBUG] renderCurrentUser() received:", user);
-
     const fallback = NexusAPI.getCurrentUserFallback();
     const resolved = user && typeof user === "object" ? user : fallback;
     const displayName = String(resolved.name || resolved.email || fallback.name).trim() || fallback.name;
@@ -6874,16 +6865,10 @@
     const userName = document.getElementById("user-name");
     const userEmail = document.getElementById("user-email");
     const userAvatar = document.getElementById("user-avatar");
-    const userProfile = document.querySelector("[data-user-profile]");
+    const userProfile = dom.userProfile || document.querySelector("[data-user-profile]");
 
-    console.log("[NEXUS ADMIN DEBUG] User role resolved:", {
-      rawIsAdmin: resolved.isAdmin,
-      derivedIsAdmin: isAdmin,
-      role: role,
-      email: email,
-      appFound: Boolean(dom.app),
-      profileFound: Boolean(userProfile)
-    });
+    adminViewState.actualIsAdmin = isAdmin;
+    adminViewState.actualRole = role;
 
     if (userName) {
       userName.textContent = displayName;
@@ -6928,6 +6913,8 @@
     if (userProfile) {
       userProfile.classList.toggle("is-admin", isAdmin);
       userProfile.dataset.userRole = role;
+      userProfile.classList.toggle("is-clickable", isAdmin);
+      userProfile.tabIndex = isAdmin ? 0 : -1;
 
       userProfile.setAttribute(
         "aria-label",
@@ -6944,33 +6931,23 @@
             )
       );
 
-      userProfile.classList.remove(
-        "is-loading"
-      );
-
-      userProfile.setAttribute(
-        "aria-busy",
-        "false"
-      );
+      userProfile.classList.remove("is-loading");
+      userProfile.setAttribute("aria-busy", "false");
     }
 
-    if (dom.app) {
-      // currentUserRole always reflects the real server-resolved role.
-      dom.app.dataset.currentUserRole = role;
+    if (dom.userViewToggle) {
+      dom.userViewToggle.hidden = !isAdmin;
     }
 
-    // The view role is separate from real authorization. An actual admin may
-    // choose to preview Nexus exactly as a standard user.
-    initializeAdminViewMode(isAdmin);
+    if (!isAdmin) {
+      closeAdminViewMenu();
+      clearStoredAdminViewMode();
+    }
 
-    console.log("[NEXUS ADMIN DEBUG] Role datasets after render:", {
-      appRole: dom.app ? String(dom.app.dataset.currentUserRole || "") : "<app not found>",
-      appViewRole: dom.app ? String(dom.app.dataset.currentUserViewRole || "") : "<app not found>",
-      profileRole: userProfile ? String(userProfile.dataset.userRole || "") : "<profile not found>",
-      profileViewRole: userProfile ? String(userProfile.dataset.userViewRole || "") : "<profile not found>",
-      profileHasAdminClass: Boolean(userProfile && userProfile.classList.contains("is-admin")),
-      badgeText: userEmail ? String(userEmail.textContent || "").trim() : "<badge/email element not found>"
-    });
+    setAdminViewMode(
+      isAdmin ? readStoredAdminViewMode() : "user",
+      { persist: false }
+    );
   }
 
   function initializeUser() {
@@ -6981,7 +6958,6 @@
 
     NexusAPI.getCurrentUser(
       function (user) {
-        console.log("[NEXUS ADMIN DEBUG] getCurrentUser() success:", user);
         renderCurrentUser(user);
       },
       function () {

@@ -38,8 +38,10 @@
     return {
       appFound: Boolean(app),
       appRole: app ? String(app.dataset.currentUserRole || "") : "",
+      appViewRole: app ? String(app.dataset.currentUserViewRole || "") : "",
       profileFound: Boolean(profile),
       profileRole: profile ? String(profile.dataset.userRole || "") : "",
+      profileViewRole: profile ? String(profile.dataset.userViewRole || "") : "",
       profileHasAdminClass: Boolean(profile && profile.classList.contains("is-admin")),
       badgeText: badge ? String(badge.textContent || "").trim() : "",
       managedLinksLoaded: true,
@@ -468,6 +470,30 @@
       .forEach(makeManagedElementAdminInteractive);
   }
 
+  function refreshViewModeInteractivity(root) {
+    const scope = root && root.querySelectorAll ? root : document;
+    const adminView = isCurrentUserAdmin();
+
+    scope
+      .querySelectorAll('[data-managed-link-missing="true"]')
+      .forEach(function (element) {
+        element.dataset.managedTooltip = adminView
+          ? "NEXUS ADMIN — manage destination"
+          : "Coming soon";
+
+        if (adminView) {
+          makeManagedElementAdminInteractive(element);
+        } else {
+          delete element.dataset.managedAdminEditable;
+        }
+      });
+
+    adminDebugLog("View-mode interactivity refreshed.", {
+      adminView: adminView,
+      snapshot: getAdminDebugSnapshot()
+    });
+  }
+
   function applyResolvedState(
     pageRoot,
     state
@@ -693,12 +719,33 @@
     const snapshot = getAdminDebugSnapshot();
     const appRole = String(snapshot.appRole || "").toLowerCase();
     const profileRole = String(snapshot.profileRole || "").toLowerCase();
-    const result = appRole === "admin" || profileRole === "admin";
+    const actualAdmin = appRole === "admin" || profileRole === "admin";
+
+    // currentUserViewRole is intentionally separate from actual authorization.
+    // When an actual admin chooses "Show as User", managed links must behave
+    // exactly like the standard-user experience even though server privileges
+    // remain unchanged.
+    const appViewRole = String(snapshot.appViewRole || "").toLowerCase();
+    const profileViewRole = String(snapshot.profileViewRole || "").toLowerCase();
+    let effectiveRole = appViewRole || profileViewRole;
+
+    if (
+      window.NexusViewMode &&
+      typeof window.NexusViewMode.getRole === "function"
+    ) {
+      effectiveRole = String(window.NexusViewMode.getRole() || effectiveRole).toLowerCase();
+    }
+
+    const result = actualAdmin && effectiveRole !== "user";
 
     adminDebugLog("isCurrentUserAdmin()", {
       result: result,
+      actualAdmin: actualAdmin,
+      effectiveRole: effectiveRole || "<not set>",
       appRole: snapshot.appRole,
+      appViewRole: snapshot.appViewRole,
       profileRole: snapshot.profileRole,
+      profileViewRole: snapshot.profileViewRole,
       profileHasAdminClass: snapshot.profileHasAdminClass,
       badgeText: snapshot.badgeText
     });
@@ -1913,18 +1960,24 @@
 
     adminRoleObserver = new MutationObserver(function (mutations) {
       const roleChanged = mutations.some(function (mutation) {
-        return mutation.type === "attributes" && mutation.attributeName === "data-current-user-role";
+        return mutation.type === "attributes" && [
+          "data-current-user-role",
+          "data-current-user-view-role"
+        ].indexOf(mutation.attributeName) !== -1;
       });
 
-      if (roleChanged && isCurrentUserAdmin()) {
-        adminDebugLog("Admin role became available; refreshing empty-link interactivity.", getAdminDebugSnapshot());
-        queueAdminInteractivityRefresh();
+      if (roleChanged) {
+        adminDebugLog("User/admin view role changed; refreshing managed-link behavior.", getAdminDebugSnapshot());
+        refreshViewModeInteractivity(document);
       }
     });
 
     adminRoleObserver.observe(app, {
       attributes: true,
-      attributeFilter: ["data-current-user-role"]
+      attributeFilter: [
+        "data-current-user-role",
+        "data-current-user-view-role"
+      ]
     });
 
     // Pages are mounted dynamically and some page scripts can alter disabled/
@@ -1962,6 +2015,10 @@
     if (isCurrentUserAdmin()) queueAdminInteractivityRefresh();
   }
 
+  window.addEventListener("nexus:viewmodechange", function () {
+    refreshViewModeInteractivity(document);
+  });
+
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", bindAdminRoleObserver, { once: true });
   } else {
@@ -1985,7 +2042,9 @@
       showAdminLinkEditor:
         showAdminLinkEditor,
       refreshAdminInteractivity:
-        refreshAdminInteractivity
+        refreshAdminInteractivity,
+      refreshViewModeInteractivity:
+        refreshViewModeInteractivity
     });
 }());
 </script>

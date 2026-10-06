@@ -3,7 +3,7 @@
  *
  * Source of truth:
  *   Spreadsheet: NOSCA_CONFIG.dataSpreadsheetId
- *   Sheet:       NOSCA_Admins
+ *   Sheet:       NEXUS_Admins
  *   Emails:      A2:A
  *
  * Admin authorization is always evaluated server-side from the signed-in
@@ -30,7 +30,7 @@ function getNexusAdminSettings_() {
     sheetName:
       String(
         sheets.admins ||
-        'NOSCA_Admins'
+        'NEXUS_Admins'
       ).trim(),
 
     startRow:
@@ -62,7 +62,7 @@ function normalizeNoscaEmail_(value) {
 
 
 /**
- * Reads NOSCA_Admins!A2:A directly from the spreadsheet.
+ * Reads NEXUS_Admins!A2:A directly from the spreadsheet.
  *
  * NEXUS Admin authorization is intentionally NOT cached. This ensures that
  * adding or removing an administrator in the source sheet takes effect on
@@ -138,7 +138,7 @@ function getNoscaAdminEmails_() {
   });
 
   console.log(
-    '[NEXUS Admin] Loaded admin list directly from NOSCA_Admins.',
+    '[NEXUS Admin] Loaded admin list directly from NEXUS_Admins.',
     {
       adminCount: emails.length,
       sheetName: settings.sheetName
@@ -409,7 +409,7 @@ function clearNoscaAdminCache() {
     clearedBy: adminEmail,
     cacheEnabled: false,
     message:
-      'NEXUS Admin caching is disabled. Admin roles are read directly from NOSCA_Admins.'
+      'NEXUS Admin caching is disabled. Admin roles are read directly from NEXUS_Admins.'
   };
 }
 

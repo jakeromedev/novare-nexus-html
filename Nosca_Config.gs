@@ -19,7 +19,7 @@ const NOSCA_CONFIG = Object.freeze({
     index: 'NOSCA_Index',
     logs: 'NOSCA_Logs',
     feedback: 'NOSCA_Feedback',
-    admins: 'NOSCA_Admins'
+    admins: 'NEXUS_Admins'
   }),
 
   admins: Object.freeze({

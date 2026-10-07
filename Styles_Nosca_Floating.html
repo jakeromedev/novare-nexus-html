@@ -11,7 +11,7 @@
         auto
         auto
         22px
-        calc(var(--sidebar-width) + 18px);
+        calc(var(--nosca-sidebar-width, 235px) + 18px);
       z-index: 120;
       width: min(410px, calc(100vw - 32px));
       height: min(640px, calc(100dvh - 44px));
@@ -28,6 +28,10 @@
         0 22px 60px rgb(4 20 50 / 24%),
         0 4px 16px rgb(4 20 50 / 12%);
       transform-origin: bottom left;
+      will-change: left;
+      transition:
+        left 220ms cubic-bezier(.2, .8, .2, 1),
+        width 220ms cubic-bezier(.2, .8, .2, 1);
       animation:
         nosca-panel-in
         320ms
@@ -552,14 +556,14 @@
 
     @media (max-width: 900px) {
       .nosca-dialog.nosca-chat-panel {
-        left: calc(var(--sidebar-width) + 12px);
+        left: calc(var(--nosca-sidebar-width, 76px) + 12px);
         right: auto;
         bottom: 14px;
         width: min(
           400px,
           calc(
             100vw -
-            var(--sidebar-width) -
+            var(--nosca-sidebar-width, 76px) -
             26px
           )
         );

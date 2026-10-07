@@ -392,19 +392,17 @@
       border: 0;
       border-radius: 14px;
       color: #49617F;
-      background: rgb(255 255 255 / 42%);
-      box-shadow: inset 0 1px 0 rgb(255 255 255 / 42%);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
+      background: transparent;
+      box-shadow: none;
       cursor: pointer;
-      transition: color .16s ease, background .16s ease, box-shadow .16s ease;
+      transition: color .16s ease, background .16s ease;
     }
     .notification-trigger:hover,
     .notification-trigger[aria-expanded="true"] {
       color: #0A63E8;
       border-color: transparent;
-      background: rgb(255 255 255 / 62%);
-      box-shadow: inset 0 1px 0 rgb(255 255 255 / 58%);
+      background: rgb(255 255 255 / 24%);
+      box-shadow: none;
     }
     .notification-trigger:focus-visible {
       outline: 2px solid rgb(0 104 245 / 26%);
@@ -495,6 +493,22 @@
       overflow-y: auto;
       padding: 6px;
     }
+
+    .notification-empty-state {
+      display: grid;
+      place-items: center;
+      min-height: 118px;
+      padding: 26px 18px;
+      color: #71849D;
+      font-size: .78rem;
+      font-weight: 650;
+      text-align: center;
+    }
+
+    .notification-panel--empty .notification-panel__header {
+      border-bottom: 1px solid rgb(218 230 242 / 78%);
+    }
+
     .notification-item {
       position: relative;
       display: grid;
@@ -572,31 +586,6 @@
       font-size: .56rem;
       font-weight: 620;
       text-align: center;
-    }
-
-    .notification-empty-state {
-      display: grid;
-      justify-items: center;
-      gap: 10px;
-      padding: 34px 20px 36px;
-      color: #71849D;
-      text-align: center;
-    }
-    .notification-empty-state__icon {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 46px;
-      height: 46px;
-      border-radius: 14px;
-      color: #66809E;
-      background: #F3F7FB;
-      border: 1px solid #E1EAF3;
-    }
-    .notification-empty-state strong {
-      color: #526985;
-      font-size: .76rem;
-      font-weight: 720;
     }
 
     .viewing-as-chip {
@@ -961,10 +950,8 @@
         border: 0;
         border-radius: 9px;
         color: #607997;
-        background: rgb(255 255 255 / 42%);
-        box-shadow: inset 0 1px 0 rgb(255 255 255 / 42%);
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
+        background: transparent;
+        box-shadow: none;
       }
 
       #nexus-nav-header .user-view-toggle:hover,
@@ -1033,8 +1020,8 @@
 
       #nexus-nav-header .notification-trigger:hover,
       #nexus-nav-header .notification-trigger[aria-expanded="true"] {
-        background: rgb(255 255 255 / 62%);
-        box-shadow: inset 0 1px 0 rgb(255 255 255 / 58%);
+        background: rgb(255 255 255 / 22%);
+        box-shadow: none;
       }
 
       #nexus-nav-header .notification-trigger svg {

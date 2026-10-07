@@ -32,7 +32,6 @@
   const currentUser = { name: "Novare User", email: "", isAdmin: false, role: "user" };
   const ADMIN_VIEW_MODE_STORAGE_KEY = "nexus.adminViewMode";
   const adminViewState = { actualIsAdmin: false, actualRole: "user", viewMode: "user" };
-  const NEXUS_NOTIFICATION_READ_STORAGE_KEY = "nexus.notificationReadIds";
 
   // 4. GLOBAL SHELL DOM REFERENCES
   const dom = {
@@ -42,6 +41,7 @@
     navHeader: document.getElementById("nexus-nav-header"),
     overlay: document.getElementById("sidebar-overlay"),
     toggle: document.getElementById("sidebar-toggle"),
+    desktopToggle: document.getElementById("desktop-sidebar-toggle"),
     sidebarClose: document.getElementById("sidebar-close"),
     content: document.getElementById("nexus-content"),
     pageMount: document.getElementById("page-mount"),
@@ -264,107 +264,6 @@
     setViewMode: setAdminViewMode
   };
 
-  function getHeaderNotifications() {
-    if (typeof homePageData !== "undefined" && homePageData && Array.isArray(homePageData.whatsNew)) {
-      return homePageData.whatsNew.slice(0, 6);
-    }
-
-    return [];
-  }
-
-  function readNotificationReadIds() {
-    try {
-      const raw = window.sessionStorage.getItem(NEXUS_NOTIFICATION_READ_STORAGE_KEY);
-      const parsed = raw ? JSON.parse(raw) : [];
-      return Array.isArray(parsed) ? parsed.filter(Boolean) : [];
-    } catch (error) {
-      return [];
-    }
-  }
-
-  function writeNotificationReadIds(ids) {
-    try {
-      window.sessionStorage.setItem(
-        NEXUS_NOTIFICATION_READ_STORAGE_KEY,
-        JSON.stringify(Array.from(new Set(ids || [])))
-      );
-    } catch (error) {
-      // no-op
-    }
-  }
-
-  function getNotificationIconSvg(type) {
-    const normalized = String(type || "").toUpperCase();
-
-    if (normalized === "TOOL") {
-      return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 6 18 2l4 4-4 4"/><path d="M10 18l-4 4-4-4 4-4"/><path d="m8 16 8-8"/></svg>';
-    }
-
-    if (normalized === "PLAYBOOK") {
-      return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h6c2 0 3 1 3 3v11c0-2-1-3-3-3H4z"/><path d="M20 5h-6c-2 0-3 1-3 3v11c0-2 1-3 3-3h6z"/></svg>';
-    }
-
-    return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h9l3 3v15H6z"/><path d="M14 3v4h4M9 12h6M9 16h6"/></svg>';
-  }
-
-  function getNotificationThemeClass(item) {
-    const theme = String(item && item.theme || "").toLowerCase();
-    if (theme === "orange") return "is-orange";
-    if (theme === "purple") return "is-purple";
-    return "";
-  }
-
-  function updateNotificationBadge() {
-    if (!dom.notificationBadge) return;
-
-    const items = getHeaderNotifications();
-    const readIds = new Set(readNotificationReadIds());
-    const unreadCount = items.filter(function (item) {
-      return item && item.id && !readIds.has(item.id);
-    }).length;
-
-    dom.notificationBadge.textContent = unreadCount > 9 ? "9+" : String(unreadCount);
-    dom.notificationBadge.hidden = unreadCount < 1;
-    dom.notificationBadge.setAttribute(
-      "aria-label",
-      unreadCount + (unreadCount === 1 ? " unread notification" : " unread notifications")
-    );
-  }
-
-  function renderNotificationPanel() {
-    if (!dom.notificationList) return;
-
-    const items = getHeaderNotifications();
-    const readIds = new Set(readNotificationReadIds());
-
-    if (!items.length) {
-      dom.notificationList.innerHTML = '<div style="padding:22px 16px;text-align:center;color:#71849D;font-size:.72rem;">No notifications yet.</div>';
-      updateNotificationBadge();
-      return;
-    }
-
-    dom.notificationList.innerHTML = items.map(function (item) {
-      const id = String(item.id || "");
-      const unread = id && !readIds.has(id);
-      const safeType = escapeSupportHtml(item.type || "UPDATE");
-      const safeTitle = escapeSupportHtml(item.title || "Nexus update");
-      const safeDate = escapeSupportHtml(item.date || "");
-      const themeClass = getNotificationThemeClass(item);
-
-      return '<button class="notification-item' + (unread ? ' is-unread' : '') + '" type="button" data-notification-id="' + escapeSupportHtml(id) + '">' +
-        '<span class="notification-item__icon ' + themeClass + '" aria-hidden="true">' + getNotificationIconSvg(item.type) + '</span>' +
-        '<span class="notification-item__copy">' +
-          '<span class="notification-item__type">' + safeType + '</span>' +
-          '<span class="notification-item__title">' + safeTitle + '</span>' +
-          '<span class="notification-item__date">' + safeDate + '</span>' +
-        '</span>' +
-        '<span class="notification-item__dot" aria-hidden="true"></span>' +
-      '</button>';
-    }).join("");
-
-    updateNotificationBadge();
-  }
-
   function closeNotificationPanel() {
     if (dom.notificationPanel) {
       dom.notificationPanel.hidden = true;
@@ -373,6 +272,11 @@
     if (dom.notificationTrigger) {
       dom.notificationTrigger.setAttribute("aria-expanded", "false");
     }
+  }
+
+  function renderNotificationPanel() {
+    if (!dom.notificationList) return;
+    dom.notificationList.innerHTML = '<div class="notification-empty-state">No notifications yet.</div>';
   }
 
   function toggleNotificationPanel(force) {
@@ -391,28 +295,6 @@
     dom.notificationTrigger.setAttribute("aria-expanded", String(nextOpen));
   }
 
-  function markNotificationRead(id) {
-    const cleanId = String(id || "").trim();
-    if (!cleanId) return;
-
-    const readIds = readNotificationReadIds();
-    if (readIds.indexOf(cleanId) === -1) {
-      readIds.push(cleanId);
-      writeNotificationReadIds(readIds);
-    }
-
-    renderNotificationPanel();
-  }
-
-  function markAllNotificationsRead() {
-    const ids = getHeaderNotifications()
-      .map(function (item) { return item && item.id ? String(item.id) : ""; })
-      .filter(Boolean);
-
-    writeNotificationReadIds(ids);
-    renderNotificationPanel();
-  }
-
   function bindNotificationControls() {
     renderNotificationPanel();
 
@@ -421,21 +303,6 @@
         event.preventDefault();
         event.stopPropagation();
         toggleNotificationPanel();
-      });
-    }
-
-    if (dom.notificationList) {
-      dom.notificationList.addEventListener("click", function (event) {
-        const item = event.target.closest("[data-notification-id]");
-        if (!item) return;
-        markNotificationRead(item.dataset.notificationId);
-      });
-    }
-
-    if (dom.notificationMarkAll) {
-      dom.notificationMarkAll.addEventListener("click", function (event) {
-        event.preventDefault();
-        markAllNotificationsRead();
       });
     }
 
@@ -1257,8 +1124,8 @@
   // H5 DELIVERY — Phase 1–2 asset registry.
   const deliveryAssetRegistry = {
     "delivery-hero": {
-      fileId: "18w6Vg7e40zZ5tAs-ACtejvt-ZNWToDL4",
-      viewerUrl: "https://drive.google.com/file/d/18w6Vg7e40zZ5tAs-ACtejvt-ZNWToDL4/view?usp=drive_link",
+      fileId: "17xUUrIOtdNaaZfuzaMka-Lfhg4GVmYUF",
+      viewerUrl: "https://drive.google.com/file/d/17xUUrIOtdNaaZfuzaMka-Lfhg4GVmYUF/view?usp=drive_link",
       phase: 1
     },
     "delivery-closing-banner": {
@@ -6043,6 +5910,23 @@
     }
   }
 
+  // Keep floating UI that lives outside #nexus-app synchronized with
+  // the app-local sidebar width. The Ask NOSCA dialog is mounted after
+  // #nexus-app, so it cannot inherit #nexus-app's --sidebar-width directly.
+  function syncFloatingSidebarWidth() {
+    if (!dom.app) return;
+
+    const appStyles = window.getComputedStyle(dom.app);
+    const resolvedSidebarWidth = String(
+      appStyles.getPropertyValue("--sidebar-width") || ""
+    ).trim();
+
+    document.documentElement.style.setProperty(
+      "--nosca-sidebar-width",
+      resolvedSidebarWidth || "235px"
+    );
+  }
+
   // 7. SIDEBAR
   function updateSidebar() {
     const mobile = mobileQuery.matches;
@@ -6055,6 +5939,10 @@
     dom.app.classList.toggle("tablet-expanded", tablet && state.tabletExpanded);
     dom.app.classList.toggle("desktop-collapsed", desktopCollapsed);
     document.body.classList.toggle("sidebar-open", open);
+
+    // Synchronize the floating Ask NOSCA panel with the target sidebar width.
+    // CSS transitions on the panel then animate it alongside the sidebar.
+    syncFloatingSidebarWidth();
 
     if (dom.app) {
       dom.app.dataset.sidebarMode = mobile
@@ -6079,13 +5967,13 @@
       }
     }
 
-    if (dom.toggle) {
-      const expanded = mobile
-        ? open
-        : tablet
-          ? state.tabletExpanded
-          : !desktopCollapsed;
+    const expanded = mobile
+      ? open
+      : tablet
+        ? state.tabletExpanded
+        : !desktopCollapsed;
 
+    if (dom.toggle) {
       dom.toggle.setAttribute("aria-expanded", String(expanded));
       dom.toggle.setAttribute(
         "aria-label",
@@ -6096,6 +5984,15 @@
       dom.toggle.title = mobile
         ? (open ? "Close navigation" : "Open navigation")
         : (expanded ? "Collapse sidebar" : "Expand sidebar");
+    }
+
+    if (dom.desktopToggle) {
+      dom.desktopToggle.setAttribute("aria-expanded", String(!desktopCollapsed));
+      dom.desktopToggle.setAttribute(
+        "aria-label",
+        desktopCollapsed ? "Expand navigation" : "Collapse navigation"
+      );
+      dom.desktopToggle.title = desktopCollapsed ? "Expand sidebar" : "Collapse sidebar";
     }
   }
 
@@ -7217,13 +7114,25 @@
     initializeUser();
 
     dom.navItems.forEach(function (item) {
-      item.addEventListener("click", function () {
+      item.addEventListener("click", function (event) {
         const route = item.dataset.route;
         if (window.location.hash === "#" + route) {
           if (state.mobileOpen) setMobileSidebar(false, false);
           focusPageTitle();
         } else {
           window.location.hash = route;
+        }
+
+        /* Mouse clicks should not leave the collapsed-sidebar tooltip pinned.
+           Keyboard navigation retains focus for accessibility. */
+        if (
+          event.detail > 0 &&
+          desktopSidebarQuery.matches &&
+          state.desktopCollapsed
+        ) {
+          window.setTimeout(function () {
+            item.blur();
+          }, 0);
         }
       });
     });
@@ -7274,6 +7183,7 @@
     }
 
     if (dom.toggle) dom.toggle.addEventListener("click", toggleSidebar);
+    if (dom.desktopToggle) dom.desktopToggle.addEventListener("click", toggleSidebar);
     if (dom.sidebarClose) dom.sidebarClose.addEventListener("click", function () { setMobileSidebar(false, true); });
     if (dom.overlay) dom.overlay.addEventListener("click", function () { setMobileSidebar(false, true); });
 

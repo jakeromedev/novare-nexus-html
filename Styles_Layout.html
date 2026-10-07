@@ -149,6 +149,9 @@
 
     /* 12. RESPONSIVE */
     .sidebar-toggle, .sidebar-close { display: none; }
+    .desktop-sidebar-toggle { display: none; }
+    .sidebar-toggle-mobile-icon { display: block; }
+    .sidebar-toggle-desktop-icon { display: none; }
     .sidebar-overlay { position: fixed; inset: 0; z-index: 20; background: rgb(0 17 38 / 55%); }
     body.sidebar-open { overflow: hidden; }
     @media (min-width: 768px) and (max-width: 1199px) {
@@ -177,13 +180,78 @@
       .topbar-controls { margin-left: auto; }
     }
     @media (min-width: 1200px) {
-      /* Desktop sidebar collapse: use the existing navbar toggle as the control. */
+      /* Desktop sidebar collapse: dedicated edge control lives inside the sidebar. */
       #nexus-app {
         transition: grid-template-columns 220ms cubic-bezier(.2, .8, .2, 1);
       }
 
+      /* Keep the header hamburger reserved for mobile/tablet. */
       #nexus-nav-header > .sidebar-toggle {
+        display: none !important;
+      }
+
+      #nexus-sidebar > .desktop-sidebar-toggle {
+        position: absolute;
+        top: 56px;
+        right: -18px;
+        z-index: 260;
         display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        min-width: 36px;
+        min-height: 36px;
+        padding: 0;
+        margin: 0;
+        border: 1px solid rgb(116 225 255 / 92%);
+        border-radius: 999px;
+        color: #FFFFFF;
+        background: linear-gradient(145deg, #0A63FF 0%, #0A93FF 52%, #00C8F4 100%);
+        box-shadow:
+          0 8px 18px rgb(0 66 180 / 34%),
+          0 0 0 3px rgb(56 196 255 / 18%),
+          inset 0 1px 0 rgb(255 255 255 / 36%);
+        cursor: pointer;
+        overflow: visible;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        transition:
+          background .16s ease,
+          border-color .16s ease,
+          box-shadow .16s ease,
+          transform .16s ease;
+      }
+
+      #nexus-sidebar > .desktop-sidebar-toggle:hover {
+        border-color: rgb(187 241 255 / 100%);
+        background: linear-gradient(145deg, #1678FF 0%, #0BA6FF 52%, #09D5F7 100%);
+        box-shadow:
+          0 9px 20px rgb(0 73 190 / 38%),
+          0 0 0 4px rgb(70 205 255 / 20%),
+          inset 0 1px 0 rgb(255 255 255 / 42%);
+        transform: scale(1.05);
+      }
+
+      #nexus-sidebar > .desktop-sidebar-toggle:active {
+        transform: scale(.96);
+      }
+
+      #nexus-sidebar > .desktop-sidebar-toggle:focus-visible {
+        outline: 2px solid rgb(116 225 255 / 82%);
+        outline-offset: 3px;
+      }
+
+      #nexus-sidebar > .desktop-sidebar-toggle .desktop-sidebar-toggle-icon {
+        width: 14px;
+        height: 14px;
+        flex: 0 0 14px;
+        stroke-width: 2.5;
+        transition: transform 220ms cubic-bezier(.2, .8, .2, 1);
+      }
+
+      #nexus-app.desktop-collapsed #nexus-sidebar > .desktop-sidebar-toggle .desktop-sidebar-toggle-icon {
+        transform: rotate(180deg);
       }
 
       #nexus-app.desktop-collapsed {

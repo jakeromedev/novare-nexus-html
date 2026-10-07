@@ -1,0 +1,130 @@
+<style>
+/* =========================================================
+   NEXUS — COLLAPSED DESKTOP NAV HOVER DETAILS
+   ---------------------------------------------------------
+   Futuristic glass hover cards for the compact desktop rail.
+   This stylesheet intentionally does not alter sidebar sizing,
+   collapse state, toggle position, or mobile/tablet behavior.
+   ========================================================= */
+
+.collapsed-nav-tooltip {
+  display: none;
+}
+
+@media (min-width: 1200px) and (hover: hover) and (pointer: fine) {
+  /* Allow hover cards to leave the 76px rail without being clipped. */
+  #nexus-app.desktop-collapsed #nexus-sidebar,
+  #nexus-app.desktop-collapsed #nexus-sidebar .sidebar-scroll,
+  #nexus-app.desktop-collapsed #nexus-sidebar .sidebar-nav {
+    overflow: visible !important;
+  }
+
+  #nexus-app.desktop-collapsed #nexus-sidebar .nav-row {
+    isolation: isolate;
+  }
+
+  #nexus-app.desktop-collapsed #nexus-sidebar .nav-row > .collapsed-nav-tooltip {
+    position: absolute;
+    left: calc(100% + 12px);
+    top: 50%;
+    z-index: 520;
+    display: grid !important;
+    gap: 3px;
+    min-width: 182px;
+    max-width: 245px;
+    padding: 11px 14px 10px 15px;
+    border: 1px solid rgb(74 231 255 / 64%);
+    border-radius: 16px;
+    color: #FFFFFF;
+    background:
+      radial-gradient(circle at 14% 10%, rgb(110 235 255 / 24%), transparent 34%),
+      linear-gradient(135deg, rgb(29 91 255 / 84%) 0%, rgb(39 117 255 / 88%) 52%, rgb(37 93 244 / 84%) 100%);
+    box-shadow:
+      0 14px 32px rgb(0 22 72 / 32%),
+      0 0 0 1px rgb(255 255 255 / 10%) inset,
+      0 0 0 2px rgb(66 210 255 / 12%),
+      0 0 22px rgb(56 219 255 / 24%);
+    backdrop-filter: blur(18px) saturate(150%);
+    -webkit-backdrop-filter: blur(18px) saturate(150%);
+    text-align: left;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transform: translate(7px, -50%) scale(.975);
+    transform-origin: left center;
+    transition:
+      opacity 150ms ease,
+      visibility 150ms ease,
+      transform 180ms cubic-bezier(.2, .8, .2, 1),
+      border-color 150ms ease,
+      box-shadow 150ms ease;
+  }
+
+  /* Futuristic cyan accent rail. */
+  #nexus-app.desktop-collapsed #nexus-sidebar .nav-row > .collapsed-nav-tooltip::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 11px;
+    bottom: 11px;
+    width: 2px;
+    border-radius: 999px;
+    background: linear-gradient(180deg, #76F3FF 0%, #29D4FF 42%, #1B89FF 100%);
+    box-shadow: 0 0 14px rgb(70 226 255 / 82%);
+  }
+
+  #nexus-app.desktop-collapsed #nexus-sidebar .nav-row > .collapsed-nav-tooltip strong {
+    display: block;
+    overflow: hidden;
+    color: #F7FBFF;
+    font-size: .84rem;
+    font-weight: 750;
+    line-height: 1.2;
+    letter-spacing: .005em;
+    text-overflow: ellipsis;
+  }
+
+  #nexus-app.desktop-collapsed #nexus-sidebar .nav-row > .collapsed-nav-tooltip small {
+    display: block;
+    color: rgb(227 245 255 / 82%);
+    font-size: .67rem;
+    font-weight: 650;
+    line-height: 1.25;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+
+  #nexus-app.desktop-collapsed #nexus-sidebar .nav-row:hover > .collapsed-nav-tooltip,
+  #nexus-app.desktop-collapsed #nexus-sidebar .nav-row:focus-visible > .collapsed-nav-tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(0, -50%) scale(1);
+    border-color: rgb(104 241 255 / 82%);
+    box-shadow:
+      0 18px 42px rgb(0 20 66 / 36%),
+      0 0 0 1px rgb(255 255 255 / 11%) inset,
+      0 0 0 2px rgb(87 226 255 / 18%),
+      0 0 28px rgb(67 223 255 / 30%);
+  }
+
+  #nexus-app.desktop-collapsed #nexus-sidebar .nav-row:not(:hover):not(:focus-visible) > .collapsed-nav-tooltip {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    transform: translate(7px, -50%) scale(.975) !important;
+  }
+
+  /* Give the active route a slightly brighter card identity. */
+  #nexus-app.desktop-collapsed #nexus-sidebar .nav-row.is-active > .collapsed-nav-tooltip,
+  #nexus-app.desktop-collapsed #nexus-sidebar .nav-row[aria-current="page"] > .collapsed-nav-tooltip {
+    background:
+      radial-gradient(circle at 14% 8%, rgb(124 244 255 / 28%), transparent 36%),
+      linear-gradient(135deg, rgb(31 98 255 / 90%) 0%, rgb(41 126 255 / 92%) 55%, rgb(36 103 248 / 90%) 100%);
+  }
+
+  /* Do not let the hidden normal label consume compact-rail layout space. */
+  #nexus-app.desktop-collapsed #nexus-sidebar .nav-row > span:not(.collapsed-nav-tooltip) {
+    display: none !important;
+  }
+}
+</style>

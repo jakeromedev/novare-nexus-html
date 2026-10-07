@@ -5,7 +5,6 @@
      Phase 1 visual redesign:
      - uses the existing ONESCA sidebar and global navbar
      - exposes data-page-hero so the existing header can stay transparent
-     - uses the approved Search Hero Drive asset
      - does NOT add a second search input
      - keeps only search result filters inside the hero
      - prepares dedicated presentation zones for Phase 2
@@ -73,106 +72,14 @@
           data-page-title
           tabindex="-1"
         >
-          Search <strong>NEXUS</strong>
+          Search <strong>ONESCA</strong>
         </h1>
 
         <p class="search-hero-description">
-          Find information across NEXUS pages, sections, folders,
+          Find information across ONESCA pages, sections, folders,
           documents, templates and presentations — all in one place.
         </p>
-
-        <div
-          id="search-page-filters"
-          class="search-hero-filters"
-          role="group"
-          aria-label="Search result filters"
-        >
-          <button
-            type="button"
-            class="search-page-filter"
-            data-search-page-filter="all"
-            aria-pressed="true"
-          >
-            All
-          </button>
-
-          <button
-            type="button"
-            class="search-page-filter"
-            data-search-page-filter="pages"
-            aria-pressed="false"
-          >
-            Pages
-          </button>
-
-          <button
-            type="button"
-            class="search-page-filter"
-            data-search-page-filter="drive"
-            aria-pressed="false"
-          >
-            Drive
-          </button>
-
-          <button
-            type="button"
-            class="search-page-filter"
-            data-search-page-filter="folders"
-            aria-pressed="false"
-          >
-            Folders
-          </button>
-
-          <button
-            type="button"
-            class="search-page-filter"
-            data-search-page-filter="docs"
-            aria-pressed="false"
-          >
-            Docs
-          </button>
-
-          <button
-            type="button"
-            class="search-page-filter"
-            data-search-page-filter="sheets"
-            aria-pressed="false"
-          >
-            Sheets
-          </button>
-
-          <button
-            type="button"
-            class="search-page-filter"
-            data-search-page-filter="slides"
-            aria-pressed="false"
-          >
-            Slides
-          </button>
-
-          <button
-            type="button"
-            class="search-page-filter"
-            data-search-page-filter="pdf"
-            aria-pressed="false"
-          >
-            PDF
-          </button>
-        </div>
-      </div>
-
-      <!--
-        Kept as HTML instead of a baked image so the line remains responsive
-        and accessible to future styling changes. It is decorative only.
-      -->
-      <div
-        class="search-hero-message"
-        aria-hidden="true"
-      >
-        <span>Knowledge today.</span>
-        <strong>Greater possibilities tomorrow.</strong>
-        <span class="search-hero-message-rule"></span>
-      </div>
+</div>
     </div>
   </section>
 

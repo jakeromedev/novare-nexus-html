@@ -176,6 +176,108 @@
       #nexus-app.tablet-expanded .nosca-launcher { right: -28px; bottom: 16px; }
       .topbar-controls { margin-left: auto; }
     }
+    @media (min-width: 1200px) {
+      /* Desktop sidebar collapse: use the existing navbar toggle as the control. */
+      #nexus-app {
+        transition: grid-template-columns 220ms cubic-bezier(.2, .8, .2, 1);
+      }
+
+      #nexus-nav-header > .sidebar-toggle {
+        display: inline-flex;
+      }
+
+      #nexus-app.desktop-collapsed {
+        --sidebar-width: 76px;
+      }
+
+      #nexus-app.desktop-collapsed #nexus-sidebar {
+        padding-inline: 12px;
+        gap: 12px;
+      }
+
+      #nexus-app.desktop-collapsed #nexus-sidebar .sidebar-scroll {
+        padding-inline: 0;
+        margin-inline: 0;
+        overflow-x: visible;
+      }
+
+      #nexus-app.desktop-collapsed #nexus-sidebar .nav-row {
+        position: relative;
+        justify-content: center;
+        width: 52px;
+        min-height: 44px;
+        margin-inline: auto;
+        padding-inline: 0;
+      }
+
+      #nexus-app.desktop-collapsed #nexus-sidebar .nav-row > span,
+      #nexus-app.desktop-collapsed #nexus-sidebar .sidebar-label {
+        display: none;
+      }
+
+      #nexus-app.desktop-collapsed #nexus-sidebar .sidebar-nav .divider {
+        width: 34px;
+        margin: 7px auto 8px;
+      }
+
+      /* Crop the full Nexus logo down to its compact brand mark, matching tablet rail behavior. */
+      #nexus-app.desktop-collapsed #nexus-sidebar .sidebar-brand {
+        position: sticky;
+        top: 0;
+        min-height: 64px;
+        margin: 0 0 4px;
+        padding: 0;
+        overflow: hidden;
+      }
+
+      #nexus-app.desktop-collapsed #nexus-sidebar .sidebar-logo {
+        position: absolute;
+        left: -5px;
+        top: -10px;
+        width: 300px;
+        max-width: none;
+        height: 100px;
+        max-height: none;
+        object-fit: contain;
+        object-position: left center;
+      }
+
+      #nexus-app.desktop-collapsed #nexus-sidebar .sidebar-logo-fallback {
+        gap: 0;
+      }
+
+      #nexus-app.desktop-collapsed #nexus-sidebar .sidebar-logo-fallback-brand,
+      #nexus-app.desktop-collapsed #nexus-sidebar .sidebar-logo-fallback-divider {
+        display: none;
+      }
+
+      #nexus-app.desktop-collapsed #nexus-sidebar .sidebar-logo-fallback-name {
+        font-size: .75rem;
+        letter-spacing: .04em;
+      }
+
+      /* Native title/aria-label on each icon remains available in compact mode. */
+      #nexus-app.desktop-collapsed #nexus-sidebar .nav-row svg {
+        width: 19px;
+        height: 19px;
+      }
+
+      /* Keep the desktop NOSCA robot usable without forcing the rail back open. */
+      #nexus-app.desktop-collapsed #nexus-sidebar .nosca-launcher:not(.has-desktop-robot) {
+        position: static;
+        align-self: center;
+        width: 44px;
+        min-width: 44px;
+        min-height: 44px;
+        margin-top: auto;
+        padding: 10px;
+      }
+
+      #nexus-app.desktop-collapsed #nexus-sidebar .nosca-launcher:not(.has-desktop-robot) > span {
+        display: none;
+      }
+    }
+
     @media (max-width: 767px) {
       :root { --content-padding: 20px; }
       #nexus-app { grid-template-columns: minmax(0, 1fr); }

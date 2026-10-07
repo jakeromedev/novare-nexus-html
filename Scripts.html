@@ -7,7 +7,8 @@
   const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
   const mobileQuery = window.matchMedia("(max-width: 767px)");
   const tabletQuery = window.matchMedia("(min-width: 768px) and (max-width: 1199px)");
-  const state = { route: null, filter: "all", mobileOpen: false, tabletExpanded: false };
+  const desktopQuery = window.matchMedia("(min-width: 1200px)");
+  const state = { route: null, filter: "all", mobileOpen: false, tabletExpanded: false, desktopCollapsed: false };
   const pageCache = new Map();
 
   // 2. ROUTES
@@ -31,6 +32,7 @@
   const currentUser = { name: "Novare User", email: "", isAdmin: false, role: "user" };
   const ADMIN_VIEW_MODE_STORAGE_KEY = "nexus.adminViewMode";
   const adminViewState = { actualIsAdmin: false, actualRole: "user", viewMode: "user" };
+  const NEXUS_NOTIFICATION_READ_STORAGE_KEY = "nexus.notificationReadIds";
 
   // 4. GLOBAL SHELL DOM REFERENCES
   const dom = {
@@ -62,7 +64,10 @@
     userPreviewChip: document.getElementById("viewing-as-chip"),
     exitUserPreview: document.getElementById("exit-user-preview"),
     notificationTrigger: document.getElementById("notification-trigger"),
-    notificationPanel: document.getElementById("notification-panel")
+    notificationPanel: document.getElementById("notification-panel"),
+    notificationBadge: document.getElementById("notification-badge"),
+    notificationList: document.getElementById("notification-list"),
+    notificationMarkAll: document.getElementById("notification-mark-all")
   };
 
   const noscaLauncherHome = dom.launcher
@@ -259,6 +264,107 @@
     setViewMode: setAdminViewMode
   };
 
+  function getHeaderNotifications() {
+    if (typeof homePageData !== "undefined" && homePageData && Array.isArray(homePageData.whatsNew)) {
+      return homePageData.whatsNew.slice(0, 6);
+    }
+
+    return [];
+  }
+
+  function readNotificationReadIds() {
+    try {
+      const raw = window.sessionStorage.getItem(NEXUS_NOTIFICATION_READ_STORAGE_KEY);
+      const parsed = raw ? JSON.parse(raw) : [];
+      return Array.isArray(parsed) ? parsed.filter(Boolean) : [];
+    } catch (error) {
+      return [];
+    }
+  }
+
+  function writeNotificationReadIds(ids) {
+    try {
+      window.sessionStorage.setItem(
+        NEXUS_NOTIFICATION_READ_STORAGE_KEY,
+        JSON.stringify(Array.from(new Set(ids || [])))
+      );
+    } catch (error) {
+      // no-op
+    }
+  }
+
+  function getNotificationIconSvg(type) {
+    const normalized = String(type || "").toUpperCase();
+
+    if (normalized === "TOOL") {
+      return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 6 18 2l4 4-4 4"/><path d="M10 18l-4 4-4-4 4-4"/><path d="m8 16 8-8"/></svg>';
+    }
+
+    if (normalized === "PLAYBOOK") {
+      return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h6c2 0 3 1 3 3v11c0-2-1-3-3-3H4z"/><path d="M20 5h-6c-2 0-3 1-3 3v11c0-2 1-3 3-3h6z"/></svg>';
+    }
+
+    return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h9l3 3v15H6z"/><path d="M14 3v4h4M9 12h6M9 16h6"/></svg>';
+  }
+
+  function getNotificationThemeClass(item) {
+    const theme = String(item && item.theme || "").toLowerCase();
+    if (theme === "orange") return "is-orange";
+    if (theme === "purple") return "is-purple";
+    return "";
+  }
+
+  function updateNotificationBadge() {
+    if (!dom.notificationBadge) return;
+
+    const items = getHeaderNotifications();
+    const readIds = new Set(readNotificationReadIds());
+    const unreadCount = items.filter(function (item) {
+      return item && item.id && !readIds.has(item.id);
+    }).length;
+
+    dom.notificationBadge.textContent = unreadCount > 9 ? "9+" : String(unreadCount);
+    dom.notificationBadge.hidden = unreadCount < 1;
+    dom.notificationBadge.setAttribute(
+      "aria-label",
+      unreadCount + (unreadCount === 1 ? " unread notification" : " unread notifications")
+    );
+  }
+
+  function renderNotificationPanel() {
+    if (!dom.notificationList) return;
+
+    const items = getHeaderNotifications();
+    const readIds = new Set(readNotificationReadIds());
+
+    if (!items.length) {
+      dom.notificationList.innerHTML = '<div style="padding:22px 16px;text-align:center;color:#71849D;font-size:.72rem;">No notifications yet.</div>';
+      updateNotificationBadge();
+      return;
+    }
+
+    dom.notificationList.innerHTML = items.map(function (item) {
+      const id = String(item.id || "");
+      const unread = id && !readIds.has(id);
+      const safeType = escapeSupportHtml(item.type || "UPDATE");
+      const safeTitle = escapeSupportHtml(item.title || "Nexus update");
+      const safeDate = escapeSupportHtml(item.date || "");
+      const themeClass = getNotificationThemeClass(item);
+
+      return '<button class="notification-item' + (unread ? ' is-unread' : '') + '" type="button" data-notification-id="' + escapeSupportHtml(id) + '">' +
+        '<span class="notification-item__icon ' + themeClass + '" aria-hidden="true">' + getNotificationIconSvg(item.type) + '</span>' +
+        '<span class="notification-item__copy">' +
+          '<span class="notification-item__type">' + safeType + '</span>' +
+          '<span class="notification-item__title">' + safeTitle + '</span>' +
+          '<span class="notification-item__date">' + safeDate + '</span>' +
+        '</span>' +
+        '<span class="notification-item__dot" aria-hidden="true"></span>' +
+      '</button>';
+    }).join("");
+
+    updateNotificationBadge();
+  }
+
   function closeNotificationPanel() {
     if (dom.notificationPanel) {
       dom.notificationPanel.hidden = true;
@@ -278,18 +384,58 @@
 
     if (nextOpen) {
       closeAdminViewMenu();
+      renderNotificationPanel();
     }
 
     dom.notificationPanel.hidden = !nextOpen;
     dom.notificationTrigger.setAttribute("aria-expanded", String(nextOpen));
   }
 
+  function markNotificationRead(id) {
+    const cleanId = String(id || "").trim();
+    if (!cleanId) return;
+
+    const readIds = readNotificationReadIds();
+    if (readIds.indexOf(cleanId) === -1) {
+      readIds.push(cleanId);
+      writeNotificationReadIds(readIds);
+    }
+
+    renderNotificationPanel();
+  }
+
+  function markAllNotificationsRead() {
+    const ids = getHeaderNotifications()
+      .map(function (item) { return item && item.id ? String(item.id) : ""; })
+      .filter(Boolean);
+
+    writeNotificationReadIds(ids);
+    renderNotificationPanel();
+  }
+
   function bindNotificationControls() {
+    renderNotificationPanel();
+
     if (dom.notificationTrigger) {
       dom.notificationTrigger.addEventListener("click", function (event) {
         event.preventDefault();
         event.stopPropagation();
         toggleNotificationPanel();
+      });
+    }
+
+    if (dom.notificationList) {
+      dom.notificationList.addEventListener("click", function (event) {
+        const item = event.target.closest("[data-notification-id]");
+        if (!item) return;
+        markNotificationRead(item.dataset.notificationId);
+      });
+    }
+
+    if (dom.notificationMarkAll) {
+      dom.notificationMarkAll.addEventListener("click", function (event) {
+        event.preventDefault();
+        markAllNotificationsRead();
       });
     }
 
@@ -1111,8 +1257,8 @@
   // H5 DELIVERY — Phase 1–2 asset registry.
   const deliveryAssetRegistry = {
     "delivery-hero": {
-      fileId: "17xUUrIOtdNaaZfuzaMka-Lfhg4GVmYUF",
-      viewerUrl: "https://drive.google.com/file/d/17xUUrIOtdNaaZfuzaMka-Lfhg4GVmYUF/view?usp=drive_link",
+      fileId: "18w6Vg7e40zZ5tAs-ACtejvt-ZNWToDL4",
+      viewerUrl: "https://drive.google.com/file/d/18w6Vg7e40zZ5tAs-ACtejvt-ZNWToDL4/view?usp=drive_link",
       phase: 1
     },
     "delivery-closing-banner": {
@@ -5876,14 +6022,47 @@
     if (focusContent && (changed || drawerWasOpen)) focusPageTitle();
   }
 
+  const DESKTOP_SIDEBAR_STORAGE_KEY = "nexus.desktopSidebarCollapsed";
+
+  function readDesktopSidebarCollapsed() {
+    try {
+      return window.localStorage.getItem(DESKTOP_SIDEBAR_STORAGE_KEY) === "true";
+    } catch (error) {
+      return false;
+    }
+  }
+
+  function writeDesktopSidebarCollapsed(collapsed) {
+    try {
+      window.localStorage.setItem(
+        DESKTOP_SIDEBAR_STORAGE_KEY,
+        collapsed ? "true" : "false"
+      );
+    } catch (error) {
+      // Storage can be unavailable in restricted/private browser contexts.
+    }
+  }
+
   // 7. SIDEBAR
   function updateSidebar() {
     const mobile = mobileQuery.matches;
+    const tablet = tabletQuery.matches;
+    const desktop = desktopQuery.matches;
     const open = mobile && state.mobileOpen;
+    const desktopCollapsed = desktop && state.desktopCollapsed;
 
     dom.app.classList.toggle("mobile-open", open);
-    dom.app.classList.toggle("tablet-expanded", tabletQuery.matches && state.tabletExpanded);
+    dom.app.classList.toggle("tablet-expanded", tablet && state.tabletExpanded);
+    dom.app.classList.toggle("desktop-collapsed", desktopCollapsed);
     document.body.classList.toggle("sidebar-open", open);
+
+    if (dom.app) {
+      dom.app.dataset.sidebarMode = mobile
+        ? (open ? "mobile-open" : "mobile-closed")
+        : tablet
+          ? (state.tabletExpanded ? "tablet-expanded" : "tablet-collapsed")
+          : (desktopCollapsed ? "desktop-collapsed" : "desktop-expanded");
+    }
 
     if (dom.overlay) dom.overlay.hidden = !open;
     if (dom.workspace) dom.workspace.inert = open;
@@ -5901,7 +6080,12 @@
     }
 
     if (dom.toggle) {
-      const expanded = mobile ? open : (!tabletQuery.matches || state.tabletExpanded);
+      const expanded = mobile
+        ? open
+        : tablet
+          ? state.tabletExpanded
+          : !desktopCollapsed;
+
       dom.toggle.setAttribute("aria-expanded", String(expanded));
       dom.toggle.setAttribute(
         "aria-label",
@@ -5909,6 +6093,9 @@
           ? (open ? "Close navigation" : "Open navigation")
           : (expanded ? "Collapse navigation" : "Expand navigation")
       );
+      dom.toggle.title = mobile
+        ? (open ? "Close navigation" : "Open navigation")
+        : (expanded ? "Collapse sidebar" : "Expand sidebar");
     }
   }
 
@@ -5924,6 +6111,10 @@
       setMobileSidebar(!state.mobileOpen, true);
     } else if (tabletQuery.matches) {
       state.tabletExpanded = !state.tabletExpanded;
+      updateSidebar();
+    } else if (desktopQuery.matches) {
+      state.desktopCollapsed = !state.desktopCollapsed;
+      writeDesktopSidebarCollapsed(state.desktopCollapsed);
       updateSidebar();
     }
   }
@@ -7020,6 +7211,7 @@
     if (!dom.app || dom.app.dataset.initialized === "true") return;
 
     dom.app.dataset.appsScriptAvailable = String(NexusAPI.isAppsScriptAvailable());
+    state.desktopCollapsed = readDesktopSidebarCollapsed();
     bindAdminViewControls();
     bindNotificationControls();
     initializeUser();
@@ -7104,6 +7296,7 @@
     document.addEventListener("keydown", handleKeyboard);
     mobileQuery.addEventListener("change", handleViewportChange);
     tabletQuery.addEventListener("change", handleViewportChange);
+    desktopQuery.addEventListener("change", handleViewportChange);
 
     placeNoscaLauncherForViewport();
     updateSidebar();

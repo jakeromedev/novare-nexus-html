@@ -1,0 +1,506 @@
+<style>
+/* =========================================================
+   NEXUS HERO TYPOGRAPHY STANDARD
+   ---------------------------------------------------------
+   Overview is the exact visual reference for every Nexus
+   banner, including Home.
+
+   Loaded after page-specific/responsive styles so these rules
+   act as the final typography contract for hero left-copy.
+   ========================================================= */
+
+/* ---------- Shared left-copy geometry ---------- */
+.offerings-hero-content {
+  /* Right-side Offerings hero content was removed. */
+  display: block !important;
+}
+
+#nexus-app.home-route .home-hero-copy,
+.overview-hero-copy,
+.offerings-hero-copy,
+.opportunities-hero-copy,
+.programs-hero-copy,
+.delivery-hero-copy,
+.governance-hero-copy,
+.tools-hero-copy,
+.support-hero-copy,
+.search-page--visual-redesign .search-hero-copy {
+  width: min(48%, 690px) !important;
+  min-width: 0 !important;
+  max-width: 690px !important;
+  padding-top: 0 !important;
+}
+
+/* ---------- Page labels / Home welcome ---------- */
+#nexus-app.home-route .home-welcome,
+.overview-eyebrow,
+.offerings-eyebrow,
+.opportunities-eyebrow,
+.programs-eyebrow,
+.delivery-eyebrow,
+.governance-eyebrow,
+.tools-eyebrow,
+.support-eyebrow,
+.search-page--visual-redesign .search-hero-eyebrow {
+  margin: 0 0 7px !important;
+  font-size: .86rem !important;
+  font-weight: 800 !important;
+  line-height: 1.1 !important;
+  letter-spacing: .28em !important;
+}
+
+.overview-eyebrow,
+.offerings-eyebrow,
+.opportunities-eyebrow,
+.programs-eyebrow,
+.delivery-eyebrow,
+.governance-eyebrow,
+.tools-eyebrow,
+.support-eyebrow,
+.search-page--visual-redesign .search-hero-eyebrow {
+  text-transform: uppercase !important;
+}
+
+/* Preserve the Home wording exactly as “Welcome to”. */
+#nexus-app.home-route .home-welcome {
+  text-transform: none !important;
+}
+
+/* ---------- Main hero headlines ---------- */
+#nexus-app.home-route .home-hero h1,
+.overview-title,
+.offerings-hero-copy h1,
+.opportunities-hero-copy h1,
+.programs-hero-copy h1,
+.delivery-hero-copy h1,
+.governance-hero-copy h1,
+.tools-hero-copy h1,
+.support-hero-copy h1,
+.search-page--visual-redesign .search-hero-title {
+  margin: 0 !important;
+  max-width: 680px !important;
+  font-size: clamp(3.05rem, 4.25vw, 4.55rem) !important;
+  font-weight: 800 !important;
+  line-height: .92 !important;
+  letter-spacing: -.055em !important;
+  white-space: normal !important;
+  text-wrap: balance;
+}
+
+#nexus-app.home-route .home-title-nexus,
+#nexus-app.home-route .home-title-accent {
+  font-size: inherit !important;
+  font-weight: inherit !important;
+  line-height: inherit !important;
+  letter-spacing: inherit !important;
+}
+
+/* Page-specific markup uses STRONG for its blue accent line.
+   Keep the accent color, but normalize typography itself. */
+.offerings-hero-copy h1 strong,
+.opportunities-hero-copy h1 strong,
+.programs-hero-copy h1 strong,
+.delivery-hero-copy h1 strong,
+.governance-hero-copy h1 strong,
+.tools-hero-copy h1 strong,
+.support-hero-copy h1 strong,
+.search-page--visual-redesign .search-hero-title strong {
+  font-weight: 800 !important;
+}
+
+/* ---------- Descriptions ---------- */
+#nexus-app.home-route .home-description,
+.overview-description,
+.offerings-hero-description,
+.opportunities-hero-description,
+.programs-hero-description,
+.delivery-hero-description,
+.governance-hero-description,
+.tools-hero-description,
+.support-hero-description,
+.search-page--visual-redesign .search-hero-description {
+  max-width: 680px !important;
+  margin: 10px 0 0 !important;
+  font-size: clamp(.98rem, 1.25vw, 1.18rem) !important;
+  font-weight: 600 !important;
+  line-height: 1.35 !important;
+  letter-spacing: normal !important;
+}
+
+/* ---------- Overview compact-desktop reference ---------- */
+@media (min-width: 1200px) and (max-width: 1399px) {
+  #nexus-app.home-route .home-hero-copy,
+  .overview-hero-copy,
+  .offerings-hero-copy,
+  .opportunities-hero-copy,
+  .programs-hero-copy,
+  .delivery-hero-copy,
+  .governance-hero-copy,
+  .tools-hero-copy,
+  .support-hero-copy,
+  .search-page--visual-redesign .search-hero-copy {
+    width: min(50%, 620px) !important;
+    max-width: 620px !important;
+  }
+
+  #nexus-app.home-route .home-hero h1,
+  .overview-title,
+  .offerings-hero-copy h1,
+  .opportunities-hero-copy h1,
+  .programs-hero-copy h1,
+  .delivery-hero-copy h1,
+  .governance-hero-copy h1,
+  .tools-hero-copy h1,
+  .support-hero-copy h1,
+  .search-page--visual-redesign .search-hero-title {
+    max-width: 620px !important;
+    font-size: clamp(2.85rem, 4.35vw, 3.8rem) !important;
+  }
+
+  #nexus-app.home-route .home-description,
+  .overview-description,
+  .offerings-hero-description,
+  .opportunities-hero-description,
+  .programs-hero-description,
+  .delivery-hero-description,
+  .governance-hero-description,
+  .tools-hero-description,
+  .support-hero-description,
+  .search-page--visual-redesign .search-hero-description {
+    max-width: 620px !important;
+  }
+}
+
+/* ---------- Overview tablet / compact reference ---------- */
+@media (max-width: 1199px) {
+  #nexus-app.home-route .home-hero-copy,
+  .overview-hero-copy,
+  .offerings-hero-copy,
+  .opportunities-hero-copy,
+  .programs-hero-copy,
+  .delivery-hero-copy,
+  .governance-hero-copy,
+  .tools-hero-copy,
+  .support-hero-copy,
+  .search-page--visual-redesign .search-hero-copy {
+    width: 58% !important;
+    min-width: 0 !important;
+    max-width: 690px !important;
+  }
+
+  #nexus-app.home-route .home-hero h1,
+  .overview-title,
+  .offerings-hero-copy h1,
+  .opportunities-hero-copy h1,
+  .programs-hero-copy h1,
+  .delivery-hero-copy h1,
+  .governance-hero-copy h1,
+  .tools-hero-copy h1,
+  .support-hero-copy h1,
+  .search-page--visual-redesign .search-hero-title {
+    font-size: clamp(2.65rem, 5.4vw, 3.7rem) !important;
+  }
+
+  #nexus-app.home-route .home-description,
+  .overview-description,
+  .offerings-hero-description,
+  .opportunities-hero-description,
+  .programs-hero-description,
+  .delivery-hero-description,
+  .governance-hero-description,
+  .tools-hero-description,
+  .support-hero-description,
+  .search-page--visual-redesign .search-hero-description {
+    font-size: .94rem !important;
+  }
+}
+
+/* ---------- Overview mobile reference ---------- */
+@media (max-width: 767px) {
+  #nexus-app.home-route .home-hero-copy,
+  .overview-hero-copy,
+  .offerings-hero-copy,
+  .opportunities-hero-copy,
+  .programs-hero-copy,
+  .delivery-hero-copy,
+  .governance-hero-copy,
+  .tools-hero-copy,
+  .support-hero-copy,
+  .search-page--visual-redesign .search-hero-copy {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 560px !important;
+  }
+
+  #nexus-app.home-route .home-welcome,
+  .overview-eyebrow,
+  .offerings-eyebrow,
+  .opportunities-eyebrow,
+  .programs-eyebrow,
+  .delivery-eyebrow,
+  .governance-eyebrow,
+  .tools-eyebrow,
+  .support-eyebrow,
+  .search-page--visual-redesign .search-hero-eyebrow {
+    margin-bottom: 8px !important;
+    font-size: .7rem !important;
+    letter-spacing: .2em !important;
+  }
+
+  #nexus-app.home-route .home-hero h1,
+  .overview-title,
+  .offerings-hero-copy h1,
+  .opportunities-hero-copy h1,
+  .programs-hero-copy h1,
+  .delivery-hero-copy h1,
+  .governance-hero-copy h1,
+  .tools-hero-copy h1,
+  .support-hero-copy h1,
+  .search-page--visual-redesign .search-hero-title {
+    max-width: 430px !important;
+    font-size: clamp(2.4rem, 11.5vw, 3.35rem) !important;
+    line-height: .95 !important;
+  }
+
+  #nexus-app.home-route .home-description,
+  .overview-description,
+  .offerings-hero-description,
+  .opportunities-hero-description,
+  .programs-hero-description,
+  .delivery-hero-description,
+  .governance-hero-description,
+  .tools-hero-description,
+  .support-hero-description,
+  .search-page--visual-redesign .search-hero-description {
+    max-width: 360px !important;
+    margin-top: 12px !important;
+    font-size: .84rem !important;
+  }
+
+  #nexus-app.home-route .home-description br,
+  .overview-description br,
+  .offerings-hero-description br,
+  .opportunities-hero-description br,
+  .programs-hero-description br,
+  .delivery-hero-description br,
+  .governance-hero-description br,
+  .tools-hero-description br,
+  .support-hero-description br,
+  .search-page--visual-redesign .search-hero-description br {
+    display: none !important;
+  }
+}
+
+@media (max-width: 440px) {
+  #nexus-app.home-route .home-hero h1,
+  .overview-title,
+  .offerings-hero-copy h1,
+  .opportunities-hero-copy h1,
+  .programs-hero-copy h1,
+  .delivery-hero-copy h1,
+  .governance-hero-copy h1,
+  .tools-hero-copy h1,
+  .support-hero-copy h1,
+  .search-page--visual-redesign .search-hero-title {
+    font-size: clamp(2.15rem, 11vw, 2.8rem) !important;
+  }
+}
+
+
+/* =========================================================
+   NEXUS HERO GEOMETRY STANDARD
+   ---------------------------------------------------------
+   Overview is the visual/layout reference for every non-Home
+   banner. This replaces the former absolute 10%/5% positioning,
+   which caused shorter page heroes to squeeze the shared type.
+
+   Home keeps its own composition and positioning.
+   ========================================================= */
+
+/* Desktop: copy Overview's actual hero box model. */
+@media (min-width: 1200px) {
+  .offerings-hero.page-hero[data-page-hero],
+  .opportunities-hero.page-hero[data-page-hero],
+  .programs-hero.page-hero[data-page-hero],
+  .delivery-hero.page-hero[data-page-hero],
+  .governance-hero.page-hero[data-page-hero],
+  .tools-hero.page-hero[data-page-hero],
+  .support-hero.page-hero[data-page-hero],
+  .search-page--visual-redesign .search-hero.page-hero[data-page-hero] {
+    display: flex !important;
+    align-items: flex-start !important;
+    width: 100% !important;
+    min-height: 365px !important;
+    padding: calc(var(--topbar-height) + 26px) 46px 38px !important;
+  }
+
+  .offerings-hero-content,
+  .opportunities-hero-content,
+  .programs-hero-content,
+  .delivery-hero-content,
+  .governance-hero-content,
+  .tools-hero-content,
+  .support-hero-content,
+  .search-page--visual-redesign .search-hero-content {
+    position: relative !important;
+    inset: auto !important;
+    z-index: 2 !important;
+    display: block !important;
+    width: 100% !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .offerings-hero-copy,
+  .opportunities-hero-copy,
+  .programs-hero-copy,
+  .delivery-hero-copy,
+  .governance-hero-copy,
+  .tools-hero-copy,
+  .support-hero-copy,
+  .search-page--visual-redesign .search-hero-copy {
+    position: relative !important;
+    inset: auto !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    width: min(48%, 690px) !important;
+    min-width: 0 !important;
+    max-width: 690px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+}
+
+/* Match Overview's compact-desktop breakpoint exactly. */
+@media (min-width: 1200px) and (max-width: 1399px) {
+  .offerings-hero.page-hero[data-page-hero],
+  .opportunities-hero.page-hero[data-page-hero],
+  .programs-hero.page-hero[data-page-hero],
+  .delivery-hero.page-hero[data-page-hero],
+  .governance-hero.page-hero[data-page-hero],
+  .tools-hero.page-hero[data-page-hero],
+  .support-hero.page-hero[data-page-hero],
+  .search-page--visual-redesign .search-hero.page-hero[data-page-hero] {
+    min-height: 350px !important;
+    padding-inline: 36px !important;
+  }
+
+  .offerings-hero-copy,
+  .opportunities-hero-copy,
+  .programs-hero-copy,
+  .delivery-hero-copy,
+  .governance-hero-copy,
+  .tools-hero-copy,
+  .support-hero-copy,
+  .search-page--visual-redesign .search-hero-copy {
+    width: min(50%, 620px) !important;
+    max-width: 620px !important;
+  }
+}
+
+/* Tablet: use Overview's responsive hero geometry. */
+@media (min-width: 768px) and (max-width: 1199px) {
+  .offerings-hero.page-hero[data-page-hero],
+  .opportunities-hero.page-hero[data-page-hero],
+  .programs-hero.page-hero[data-page-hero],
+  .delivery-hero.page-hero[data-page-hero],
+  .governance-hero.page-hero[data-page-hero],
+  .tools-hero.page-hero[data-page-hero],
+  .support-hero.page-hero[data-page-hero],
+  .search-page--visual-redesign .search-hero.page-hero[data-page-hero] {
+    display: flex !important;
+    align-items: flex-start !important;
+    min-height: 330px !important;
+    padding: calc(var(--topbar-height) + 22px) 28px 30px !important;
+  }
+
+  .offerings-hero-content,
+  .opportunities-hero-content,
+  .programs-hero-content,
+  .delivery-hero-content,
+  .governance-hero-content,
+  .tools-hero-content,
+  .support-hero-content,
+  .search-page--visual-redesign .search-hero-content {
+    position: relative !important;
+    inset: auto !important;
+    display: block !important;
+    width: 100% !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .offerings-hero-copy,
+  .opportunities-hero-copy,
+  .programs-hero-copy,
+  .delivery-hero-copy,
+  .governance-hero-copy,
+  .tools-hero-copy,
+  .support-hero-copy,
+  .search-page--visual-redesign .search-hero-copy {
+    position: relative !important;
+    inset: auto !important;
+    width: 58% !important;
+    min-width: 0 !important;
+    max-width: 690px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+}
+
+/* Mobile: preserve Overview's readable stacked treatment. */
+@media (max-width: 767px) {
+  .offerings-hero.page-hero[data-page-hero],
+  .opportunities-hero.page-hero[data-page-hero],
+  .programs-hero.page-hero[data-page-hero],
+  .delivery-hero.page-hero[data-page-hero],
+  .governance-hero.page-hero[data-page-hero],
+  .tools-hero.page-hero[data-page-hero],
+  .support-hero.page-hero[data-page-hero],
+  .search-page--visual-redesign .search-hero.page-hero[data-page-hero] {
+    display: flex !important;
+    align-items: flex-start !important;
+    min-height: 500px !important;
+    padding: 28px 20px 0 !important;
+  }
+
+  .offerings-hero-content,
+  .opportunities-hero-content,
+  .programs-hero-content,
+  .delivery-hero-content,
+  .governance-hero-content,
+  .tools-hero-content,
+  .support-hero-content,
+  .search-page--visual-redesign .search-hero-content {
+    position: relative !important;
+    inset: auto !important;
+    display: block !important;
+    width: 100% !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .offerings-hero-copy,
+  .opportunities-hero-copy,
+  .programs-hero-copy,
+  .delivery-hero-copy,
+  .governance-hero-copy,
+  .tools-hero-copy,
+  .support-hero-copy,
+  .search-page--visual-redesign .search-hero-copy {
+    position: relative !important;
+    inset: auto !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 560px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+}
+
+</style>

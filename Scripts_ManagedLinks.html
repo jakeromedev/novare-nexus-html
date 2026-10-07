@@ -35,14 +35,23 @@
     const app = document.getElementById("nexus-app");
     const profile = document.querySelector("[data-user-profile]");
     const badge = document.getElementById("user-email");
+    const navHeader = document.getElementById("nexus-nav-header");
+
     return {
       appFound: Boolean(app),
       appRole: app ? String(app.dataset.currentUserRole || "") : "",
-      appViewRole: app ? String(app.dataset.currentUserViewRole || "") : "",
+      appActualRole: app ? String(app.dataset.currentUserActualRole || "") : "",
+      appViewMode: app ? String(app.dataset.currentUserViewMode || "") : "",
+      appEffectiveRole: app ? String(app.dataset.currentUserEffectiveRole || "") : "",
+      appPreviewingAsUser: app ? String(app.dataset.previewingAsUser || "") : "",
+      legacyAppViewRole: app ? String(app.dataset.currentUserViewRole || "") : "",
       profileFound: Boolean(profile),
       profileRole: profile ? String(profile.dataset.userRole || "") : "",
-      profileViewRole: profile ? String(profile.dataset.userViewRole || "") : "",
+      legacyProfileViewRole: profile ? String(profile.dataset.userViewRole || "") : "",
       profileHasAdminClass: Boolean(profile && profile.classList.contains("is-admin")),
+      navViewMode: navHeader ? String(navHeader.dataset.currentUserViewMode || "") : "",
+      navEffectiveRole: navHeader ? String(navHeader.dataset.currentUserEffectiveRole || "") : "",
+      navPreviewingAsUser: navHeader ? String(navHeader.dataset.previewingAsUser || "") : "",
       badgeText: badge ? String(badge.textContent || "").trim() : "",
       managedLinksLoaded: true,
       url: window.location.href
@@ -717,38 +726,79 @@
 
   function isCurrentUserAdmin() {
     const snapshot = getAdminDebugSnapshot();
-    const appRole = String(snapshot.appRole || "").toLowerCase();
-    const profileRole = String(snapshot.profileRole || "").toLowerCase();
-    const actualAdmin = appRole === "admin" || profileRole === "admin";
 
-    // currentUserViewRole is intentionally separate from actual authorization.
-    // When an actual admin chooses "Show as User", managed links must behave
-    // exactly like the standard-user experience even though server privileges
-    // remain unchanged.
-    const appViewRole = String(snapshot.appViewRole || "").toLowerCase();
-    const profileViewRole = String(snapshot.profileViewRole || "").toLowerCase();
-    let effectiveRole = appViewRole || profileViewRole;
+    // Real authorization remains separate from preview mode. Prefer the
+    // explicitly published actual role, then fall back to the profile role.
+    const actualRole = String(
+      snapshot.appActualRole ||
+      snapshot.profileRole ||
+      snapshot.appRole ||
+      ""
+    ).toLowerCase();
+
+    const actualAdmin =
+      actualRole === "admin" ||
+      snapshot.profileHasAdminClass === true;
+
+    // The managed-link UI must follow the effective role. The current header
+    // publishes this through NexusAdminView and data-current-user-effective-role.
+    let effectiveRole = "";
 
     if (
+      window.NexusAdminView &&
+      typeof window.NexusAdminView.getEffectiveRole === "function"
+    ) {
+      effectiveRole = String(
+        window.NexusAdminView.getEffectiveRole() || ""
+      ).toLowerCase();
+    }
+
+    if (!effectiveRole) {
+      effectiveRole = String(
+        snapshot.appEffectiveRole ||
+        snapshot.navEffectiveRole ||
+        snapshot.appRole ||
+        ""
+      ).toLowerCase();
+    }
+
+    // Backward compatibility with the earlier View As implementation.
+    if (
+      !effectiveRole &&
       window.NexusViewMode &&
       typeof window.NexusViewMode.getRole === "function"
     ) {
-      effectiveRole = String(window.NexusViewMode.getRole() || effectiveRole).toLowerCase();
+      effectiveRole = String(
+        window.NexusViewMode.getRole() || ""
+      ).toLowerCase();
     }
 
-    const result = actualAdmin && effectiveRole !== "user";
+    if (!effectiveRole) {
+      effectiveRole = String(
+        snapshot.legacyAppViewRole ||
+        snapshot.legacyProfileViewRole ||
+        actualRole
+      ).toLowerCase();
+    }
+
+    const result = actualAdmin && effectiveRole === "admin";
 
     adminDebugLog("isCurrentUserAdmin()", {
       result: result,
       actualAdmin: actualAdmin,
+      actualRole: actualRole || "<not set>",
       effectiveRole: effectiveRole || "<not set>",
       appRole: snapshot.appRole,
-      appViewRole: snapshot.appViewRole,
+      appActualRole: snapshot.appActualRole,
+      appViewMode: snapshot.appViewMode,
+      appEffectiveRole: snapshot.appEffectiveRole,
+      appPreviewingAsUser: snapshot.appPreviewingAsUser,
       profileRole: snapshot.profileRole,
-      profileViewRole: snapshot.profileViewRole,
-      profileHasAdminClass: snapshot.profileHasAdminClass,
+      navViewMode: snapshot.navViewMode,
+      navEffectiveRole: snapshot.navEffectiveRole,
       badgeText: snapshot.badgeText
     });
+
     return result;
   }
 
@@ -1962,6 +2012,10 @@
       const roleChanged = mutations.some(function (mutation) {
         return mutation.type === "attributes" && [
           "data-current-user-role",
+          "data-current-user-actual-role",
+          "data-current-user-view-mode",
+          "data-current-user-effective-role",
+          "data-previewing-as-user",
           "data-current-user-view-role"
         ].indexOf(mutation.attributeName) !== -1;
       });
@@ -1976,6 +2030,10 @@
       attributes: true,
       attributeFilter: [
         "data-current-user-role",
+        "data-current-user-actual-role",
+        "data-current-user-view-mode",
+        "data-current-user-effective-role",
+        "data-previewing-as-user",
         "data-current-user-view-role"
       ]
     });
@@ -2015,9 +2073,13 @@
     if (isCurrentUserAdmin()) queueAdminInteractivityRefresh();
   }
 
-  window.addEventListener("nexus:viewmodechange", function () {
+  function handleViewModeChange() {
+    adminDebugLog("View As mode changed; refreshing managed-link behavior.", getAdminDebugSnapshot());
     refreshViewModeInteractivity(document);
-  });
+  }
+
+  document.addEventListener("nexus:viewmodechange", handleViewModeChange);
+  window.addEventListener("nexus:viewmodechange", handleViewModeChange);
 
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", bindAdminRoleObserver, { once: true });

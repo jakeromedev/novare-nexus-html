@@ -60,7 +60,9 @@
     adminViewMenu: document.getElementById("admin-view-menu"),
     adminViewOptions: Array.from(document.querySelectorAll("[data-admin-view-mode]")),
     userPreviewChip: document.getElementById("viewing-as-chip"),
-    exitUserPreview: document.getElementById("exit-user-preview")
+    exitUserPreview: document.getElementById("exit-user-preview"),
+    notificationTrigger: document.getElementById("notification-trigger"),
+    notificationPanel: document.getElementById("notification-panel")
   };
 
   const noscaLauncherHome = dom.launcher
@@ -256,6 +258,54 @@
     isPreviewingAsUser: isPreviewingAsUser,
     setViewMode: setAdminViewMode
   };
+
+  function closeNotificationPanel() {
+    if (dom.notificationPanel) {
+      dom.notificationPanel.hidden = true;
+    }
+
+    if (dom.notificationTrigger) {
+      dom.notificationTrigger.setAttribute("aria-expanded", "false");
+    }
+  }
+
+  function toggleNotificationPanel(force) {
+    if (!dom.notificationPanel || !dom.notificationTrigger) return;
+
+    const nextOpen = typeof force === "boolean"
+      ? force
+      : dom.notificationPanel.hidden;
+
+    if (nextOpen) {
+      closeAdminViewMenu();
+    }
+
+    dom.notificationPanel.hidden = !nextOpen;
+    dom.notificationTrigger.setAttribute("aria-expanded", String(nextOpen));
+  }
+
+  function bindNotificationControls() {
+    if (dom.notificationTrigger) {
+      dom.notificationTrigger.addEventListener("click", function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        toggleNotificationPanel();
+      });
+    }
+
+    document.addEventListener("click", function (event) {
+      if (!dom.notificationPanel || dom.notificationPanel.hidden) return;
+      const control = dom.notificationTrigger && dom.notificationTrigger.parentElement;
+      if (control && control.contains(event.target)) return;
+      closeNotificationPanel();
+    });
+
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape") {
+        closeNotificationPanel();
+      }
+    });
+  }
 
   function placeNoscaLauncherForViewport() {
     if (!dom.launcher || !noscaLauncherHome) return;
@@ -6971,6 +7021,7 @@
 
     dom.app.dataset.appsScriptAvailable = String(NexusAPI.isAppsScriptAvailable());
     bindAdminViewControls();
+    bindNotificationControls();
     initializeUser();
 
     dom.navItems.forEach(function (item) {

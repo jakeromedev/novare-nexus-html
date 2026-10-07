@@ -376,8 +376,231 @@
     }
     .admin-view-option.is-selected .admin-view-option__check { opacity: 1; transform: scale(1); }
 
-    .viewing-as-chip {
+    .notification-control {
+      position: relative;
       order: 3;
+      flex: 0 0 auto;
+    }
+    .notification-trigger {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 50px;
+      padding: 0;
+      border: 0;
+      border-radius: 14px;
+      color: #49617F;
+      background: rgb(255 255 255 / 42%);
+      box-shadow: inset 0 1px 0 rgb(255 255 255 / 42%);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      cursor: pointer;
+      transition: color .16s ease, background .16s ease, box-shadow .16s ease;
+    }
+    .notification-trigger:hover,
+    .notification-trigger[aria-expanded="true"] {
+      color: #0A63E8;
+      border-color: transparent;
+      background: rgb(255 255 255 / 62%);
+      box-shadow: inset 0 1px 0 rgb(255 255 255 / 58%);
+    }
+    .notification-trigger:focus-visible {
+      outline: 2px solid rgb(0 104 245 / 26%);
+      outline-offset: 2px;
+    }
+    .notification-badge {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 18px;
+      height: 18px;
+      padding: 0 5px;
+      border: 2px solid #FFFFFF;
+      border-radius: 999px;
+      color: #FFFFFF;
+      background: #F04444;
+      box-shadow: 0 3px 8px rgb(170 28 28 / 22%);
+      font-size: .58rem;
+      font-weight: 850;
+      line-height: 1;
+    }
+    .notification-panel {
+      position: absolute;
+      top: calc(100% + 10px);
+      right: 0;
+      z-index: 60;
+      width: min(356px, calc(100vw - 28px));
+      overflow: hidden;
+      border: 1px solid rgb(202 220 238 / 94%);
+      border-radius: 18px;
+      background: rgb(255 255 255 / 98%);
+      box-shadow: 0 24px 60px rgb(10 43 91 / 18%), 0 6px 18px rgb(10 43 91 / 8%);
+      backdrop-filter: blur(20px) saturate(1.08);
+      -webkit-backdrop-filter: blur(20px) saturate(1.08);
+      animation: nexus-notification-panel-in .14s ease-out;
+    }
+    .notification-panel::before {
+      content: "";
+      position: absolute;
+      top: -6px;
+      right: 17px;
+      width: 11px;
+      height: 11px;
+      border-left: 1px solid rgb(202 220 238 / 94%);
+      border-top: 1px solid rgb(202 220 238 / 94%);
+      background: #FFFFFF;
+      transform: rotate(45deg);
+    }
+    .notification-panel__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 16px 16px 12px;
+      border-bottom: 1px solid #EAF1F8;
+    }
+    .notification-panel__eyebrow {
+      display: block;
+      margin-bottom: 2px;
+      color: #1680F5;
+      font-size: .55rem;
+      font-weight: 850;
+      letter-spacing: .12em;
+    }
+    .notification-panel__header h2 {
+      margin: 0;
+      color: #0C2D61;
+      font-size: .92rem;
+      font-weight: 820;
+      letter-spacing: -.01em;
+    }
+    .notification-mark-all {
+      border: 0;
+      padding: 5px 7px;
+      border-radius: 8px;
+      color: #1769D7;
+      background: transparent;
+      font-size: .63rem;
+      font-weight: 760;
+      cursor: pointer;
+    }
+    .notification-mark-all:hover { background: #EEF6FF; }
+    .notification-list {
+      max-height: 340px;
+      overflow-y: auto;
+      padding: 6px;
+    }
+    .notification-item {
+      position: relative;
+      display: grid;
+      grid-template-columns: 34px minmax(0, 1fr) 8px;
+      gap: 10px;
+      align-items: center;
+      width: 100%;
+      min-height: 64px;
+      padding: 9px 10px;
+      border: 1px solid transparent;
+      border-radius: 13px;
+      color: inherit;
+      background: transparent;
+      text-align: left;
+      cursor: pointer;
+    }
+    .notification-item:hover {
+      border-color: #E1ECF7;
+      background: #F7FBFF;
+    }
+    .notification-item.is-unread {
+      background: linear-gradient(135deg, #F6FAFF 0%, #EFF7FF 100%);
+    }
+    .notification-item__icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 11px;
+      color: #0B6DF4;
+      background: #EAF4FF;
+    }
+    .notification-item__icon.is-orange { color: #DB6B00; background: #FFF2E4; }
+    .notification-item__icon.is-purple { color: #7544DE; background: #F2ECFF; }
+    .notification-item__copy {
+      display: grid;
+      gap: 2px;
+      min-width: 0;
+    }
+    .notification-item__type {
+      color: #1680F5;
+      font-size: .52rem;
+      font-weight: 850;
+      letter-spacing: .08em;
+    }
+    .notification-item__title {
+      overflow: hidden;
+      color: #12356A;
+      font-size: .69rem;
+      font-weight: 760;
+      line-height: 1.3;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .notification-item__date {
+      color: #7C8EA5;
+      font-size: .56rem;
+      font-weight: 560;
+    }
+    .notification-item__dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: #1975F4;
+      box-shadow: 0 0 0 3px rgb(25 117 244 / 10%);
+      opacity: 0;
+    }
+    .notification-item.is-unread .notification-item__dot { opacity: 1; }
+    .notification-item:not(.is-unread) { opacity: .72; }
+    .notification-panel__footer {
+      padding: 9px 16px 11px;
+      border-top: 1px solid #EAF1F8;
+      color: #8191A7;
+      font-size: .56rem;
+      font-weight: 620;
+      text-align: center;
+    }
+
+    .notification-empty-state {
+      display: grid;
+      justify-items: center;
+      gap: 10px;
+      padding: 34px 20px 36px;
+      color: #71849D;
+      text-align: center;
+    }
+    .notification-empty-state__icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
+      color: #66809E;
+      background: #F3F7FB;
+      border: 1px solid #E1EAF3;
+    }
+    .notification-empty-state strong {
+      color: #526985;
+      font-size: .76rem;
+      font-weight: 720;
+    }
+
+    .viewing-as-chip {
+      order: 4;
       display: inline-flex;
       align-items: center;
       gap: 12px;
@@ -738,8 +961,10 @@
         border: 0;
         border-radius: 9px;
         color: #607997;
-        background: transparent;
-        box-shadow: none;
+        background: rgb(255 255 255 / 42%);
+        box-shadow: inset 0 1px 0 rgb(255 255 255 / 42%);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
       }
 
       #nexus-nav-header .user-view-toggle:hover,
@@ -791,6 +1016,44 @@
       #nexus-nav-header .filter-chip svg {
         width: 12px;
         height: 12px;
+      }
+
+      #nexus-nav-header > .notification-control {
+        flex: 0 0 auto;
+      }
+
+      #nexus-nav-header .notification-trigger {
+        width: 40px;
+        height: 50px;
+        border: 0;
+        border-radius: 12px;
+        background: transparent;
+        box-shadow: none;
+      }
+
+      #nexus-nav-header .notification-trigger:hover,
+      #nexus-nav-header .notification-trigger[aria-expanded="true"] {
+        background: rgb(255 255 255 / 62%);
+        box-shadow: inset 0 1px 0 rgb(255 255 255 / 58%);
+      }
+
+      #nexus-nav-header .notification-trigger svg {
+        width: 18px;
+        height: 18px;
+      }
+
+      #nexus-nav-header .notification-badge {
+        top: -4px;
+        right: -4px;
+        min-width: 16px;
+        height: 16px;
+        padding-inline: 4px;
+        font-size: .52rem;
+      }
+
+      #nexus-nav-header .notification-panel {
+        top: calc(100% + 9px);
+        width: min(338px, calc(100vw - 28px));
       }
 
       #nexus-nav-header > .viewing-as-chip {
@@ -961,6 +1224,27 @@
         font-size: .64rem;
         font-weight: 900;
       }
+    }
+
+    @media (max-width: 767px) {
+      #nexus-nav-header > .notification-control {
+        order: 3;
+        margin-left: auto;
+      }
+
+      #nexus-nav-header .notification-panel {
+        position: fixed;
+        top: 76px;
+        right: 14px;
+        left: 14px;
+        width: auto;
+        max-height: calc(100vh - 96px);
+      }
+    }
+
+    @keyframes nexus-notification-panel-in {
+      from { opacity: 0; transform: translateY(-4px) scale(.985); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
     }
 
     @keyframes nexus-admin-view-menu-in {

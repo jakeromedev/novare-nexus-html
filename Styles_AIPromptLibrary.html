@@ -1092,4 +1092,1033 @@
   }
 }
 
+
+/* =========================================================
+   ADMIN FORM — SIMPLIFIED SCHEMA
+========================================================= */
+
+.ai-prompt-form-label {
+  display: block;
+  margin-bottom: 7px;
+  color: #153B82;
+  font-size: .82rem;
+  font-weight: 800;
+}
+
+.ai-prompt-form-label b {
+  color: #E14A5A;
+}
+
+.ai-prompt-icon-picker {
+  display: grid;
+  gap: 10px;
+}
+
+.ai-prompt-icon-select-wrap {
+  display: block;
+}
+
+.ai-prompt-icon-select-wrap select {
+  width: 100%;
+}
+
+.ai-prompt-icon-preview {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 58px;
+  padding: 10px 12px;
+  border: 1px solid #DCE9F7;
+  border-radius: 14px;
+  background: #F8FBFF;
+  color: #56709D;
+}
+
+.ai-prompt-icon-preview.has-selection {
+  border-color: rgb(64 135 255 / 42%);
+  background:
+    linear-gradient(
+      135deg,
+      rgb(231 242 255 / 95%),
+      rgb(244 250 255 / 98%)
+    );
+  box-shadow: 0 8px 20px rgb(34 104 210 / 7%);
+}
+
+.ai-prompt-icon-preview-symbol {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 38px;
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  color: #FFFFFF;
+  background:
+    linear-gradient(135deg, #1E63F2, #25B7E5);
+  box-shadow: 0 7px 15px rgb(26 105 227 / 20%);
+}
+
+.ai-prompt-icon-preview-symbol svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.ai-prompt-icon-preview > span:last-child {
+  display: grid;
+  gap: 2px;
+}
+
+.ai-prompt-icon-preview strong {
+  color: #123979;
+  font-size: .82rem;
+}
+
+.ai-prompt-icon-preview small {
+  color: #6480A9;
+  font-size: .72rem;
+  line-height: 1.35;
+}
+
+#ai-prompt-add-new-category-field[hidden] {
+  display: none !important;
+}
+
+#ai-prompt-add-category-sort[readonly] {
+  background: #F3F7FB;
+  color: #6A7F9F;
+  cursor: default;
+}
+
+@media (max-width: 767px) {
+  .ai-prompt-icon-preview {
+    align-items: flex-start;
+  }
+}
+
+
+/* =========================================================
+   ADD PROMPT MODAL — ORGANIZED ADMIN FORM
+========================================================= */
+
+.ai-prompt-add-dialog {
+  width: min(980px, calc(100vw - 42px));
+  max-height: min(92vh, 940px);
+  border-radius: 22px;
+}
+
+.ai-prompt-add-dialog .ai-prompt-dialog-shell {
+  min-height: min(84vh, 760px);
+  border: 1px solid rgb(210 226 243 / 72%);
+  border-radius: inherit;
+  overflow: hidden;
+  background: linear-gradient(180deg, #FFFFFF 0%, #FBFDFF 100%);
+}
+
+.ai-prompt-add-dialog .ai-prompt-dialog-header {
+  position: relative;
+  flex: 0 0 auto;
+  padding: 24px 28px 20px;
+  border-bottom: 1px solid #E3ECF6;
+  background:
+    radial-gradient(circle at 94% 8%, rgb(38 144 255 / 9%), transparent 27%),
+    linear-gradient(180deg, #FFFFFF 0%, #FAFCFF 100%);
+}
+
+.ai-prompt-add-dialog .ai-prompt-dialog-header::after {
+  content: "";
+  position: absolute;
+  left: 28px;
+  bottom: -1px;
+  width: 64px;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #1768F2, #20C3E4);
+}
+
+.ai-prompt-add-dialog .ai-prompt-dialog-header h2 {
+  margin-top: 2px;
+  font-size: 1.46rem;
+  letter-spacing: -.025em;
+}
+
+.ai-prompt-add-dialog .ai-prompt-dialog-header > div > p:last-child {
+  max-width: 650px;
+  margin-top: 6px;
+  font-size: .84rem;
+}
+
+.ai-prompt-add-dialog .ai-prompt-dialog-close {
+  width: 40px;
+  height: 40px;
+  flex-basis: 40px;
+  border-radius: 12px;
+  font-size: 1.45rem;
+  transition: background .18s ease, border-color .18s ease, color .18s ease, transform .18s ease;
+}
+
+.ai-prompt-add-dialog .ai-prompt-dialog-close:hover {
+  transform: translateY(-1px);
+  color: #1B61D8;
+  border-color: #BFD7F5;
+  background: #F4F9FF;
+}
+
+.ai-prompt-add-form {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.ai-prompt-add-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 22px 28px 26px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+.ai-prompt-form-section {
+  padding: 18px;
+  border: 1px solid #E0EAF5;
+  border-radius: 16px;
+  background: linear-gradient(145deg, #FFFFFF 0%, #FBFDFF 100%);
+  box-shadow: 0 7px 22px rgb(22 67 124 / 4%), inset 0 1px 0 rgb(255 255 255 / 84%);
+}
+
+.ai-prompt-form-section + .ai-prompt-form-section {
+  margin-top: 16px;
+}
+
+.ai-prompt-form-section--compact {
+  background:
+    radial-gradient(circle at 96% 0%, rgb(66 166 255 / 6%), transparent 32%),
+    linear-gradient(145deg, #FFFFFF 0%, #F9FCFF 100%);
+}
+
+.ai-prompt-form-section-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  margin-bottom: 16px;
+}
+
+.ai-prompt-form-step {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 28px;
+  width: 28px;
+  height: 28px;
+  border-radius: 9px;
+  color: #FFFFFF;
+  background: linear-gradient(135deg, #1866F1, #22BDE2);
+  box-shadow: 0 6px 14px rgb(20 102 230 / 18%);
+  font-size: .72rem;
+  font-weight: 900;
+}
+
+.ai-prompt-form-section-heading h3 {
+  margin: 1px 0 2px;
+  color: #123574;
+  font-size: .9rem;
+  line-height: 1.25;
+}
+
+.ai-prompt-form-section-heading p {
+  margin: 0;
+  color: #7286A6;
+  font-size: .73rem;
+  line-height: 1.42;
+}
+
+.ai-prompt-form-grid {
+  gap: 13px;
+}
+
+.ai-prompt-form-grid--classification {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+}
+
+.ai-prompt-form-grid--publishing {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.ai-prompt-form-field {
+  gap: 7px;
+}
+
+.ai-prompt-form-field > span,
+.ai-prompt-form-label {
+  margin: 0;
+  color: #36547E;
+  font-size: .76rem;
+  font-weight: 850;
+  letter-spacing: .005em;
+}
+
+.ai-prompt-form-field > span b,
+.ai-prompt-form-label b {
+  color: #1768F2;
+}
+
+.ai-prompt-form-field input,
+.ai-prompt-form-field select,
+.ai-prompt-form-field textarea {
+  width: 100%;
+  border: 1px solid #CDDEF0;
+  border-radius: 11px;
+  color: #13356F;
+  background: #FFFFFF;
+  box-shadow: inset 0 1px 1px rgb(15 54 104 / 2%);
+  transition: border-color .16s ease, box-shadow .16s ease, background .16s ease;
+}
+
+.ai-prompt-form-field input,
+.ai-prompt-form-field select {
+  min-height: 44px;
+  padding: 0 12px;
+}
+
+.ai-prompt-form-field textarea {
+  padding: 11px 12px;
+  line-height: 1.55;
+}
+
+.ai-prompt-form-field input:focus,
+.ai-prompt-form-field select:focus,
+.ai-prompt-form-field textarea:focus {
+  outline: 0;
+  border-color: #72A8F7;
+  box-shadow: 0 0 0 3px rgb(46 123 242 / 11%);
+}
+
+.ai-prompt-form-field input::placeholder,
+.ai-prompt-form-field textarea::placeholder {
+  color: #9AAAC0;
+}
+
+.ai-prompt-form-field small,
+.ai-prompt-field-hint {
+  margin: 0;
+  color: #8395AE;
+  font-size: .66rem;
+  font-weight: 550;
+  line-height: 1.35;
+}
+
+.ai-prompt-icon-picker {
+  gap: 9px;
+}
+
+.ai-prompt-icon-preview {
+  min-height: 62px;
+  padding: 10px 12px;
+  border-radius: 12px;
+}
+
+.ai-prompt-icon-preview.has-selection {
+  border-color: #87B4F8;
+  background: linear-gradient(135deg, #F0F7FF 0%, #F8FCFF 100%);
+}
+
+.ai-prompt-icon-preview-symbol {
+  flex-basis: 40px;
+  width: 40px;
+  height: 40px;
+}
+
+.ai-prompt-icon-preview strong {
+  font-size: .8rem;
+}
+
+.ai-prompt-icon-preview small {
+  font-size: .67rem;
+}
+
+.ai-prompt-new-category-field {
+  padding: 12px;
+  border: 1px dashed #A8C8F0;
+  border-radius: 12px;
+  background: #F6FAFF;
+}
+
+#ai-prompt-add-category-sort[readonly] {
+  border-color: #D9E4EF;
+  color: #6E819D;
+  background: #F4F7FA;
+}
+
+.ai-prompt-system-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 14px;
+  padding: 11px 12px;
+  border: 1px solid #D9E8F7;
+  border-radius: 12px;
+  background: #F5FAFF;
+}
+
+.ai-prompt-system-note-icon {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 25px;
+  width: 25px;
+  height: 25px;
+  border-radius: 999px;
+  color: #FFFFFF;
+  background: #2B86E8;
+  font-size: .7rem;
+  font-weight: 900;
+}
+
+.ai-prompt-system-note strong {
+  display: block;
+  color: #315B8F;
+  font-size: .72rem;
+}
+
+.ai-prompt-system-note p {
+  margin: 2px 0 0;
+  color: #7890AE;
+  font-size: .66rem;
+  line-height: 1.4;
+}
+
+.ai-prompt-add-error {
+  margin: 14px 0 0;
+}
+
+.ai-prompt-add-footer {
+  position: relative;
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 15px 28px 18px;
+  border-top: 1px solid #DFE9F4;
+  background: linear-gradient(180deg, rgb(255 255 255 / 96%), #FBFDFF);
+  box-shadow: 0 -8px 24px rgb(23 63 112 / 4%);
+}
+
+.ai-prompt-add-footer .ai-prompt-primary-button {
+  min-width: 118px;
+  box-shadow: 0 8px 18px rgb(30 102 225 / 18%);
+}
+
+.ai-prompt-card-footer {
+  justify-content: flex-end;
+}
+
+.ai-prompt-detail-meta {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (max-width: 767px) {
+  .ai-prompt-add-dialog {
+    width: calc(100vw - 14px);
+    max-height: 94vh;
+    border-radius: 16px;
+  }
+
+  .ai-prompt-add-dialog .ai-prompt-dialog-header {
+    padding: 18px 16px 16px;
+  }
+
+  .ai-prompt-add-dialog .ai-prompt-dialog-header::after {
+    left: 16px;
+  }
+
+  .ai-prompt-add-scroll {
+    padding: 15px 14px 18px;
+  }
+
+  .ai-prompt-form-section {
+    padding: 14px;
+    border-radius: 14px;
+  }
+
+  .ai-prompt-form-grid--classification,
+  .ai-prompt-form-grid--publishing {
+    grid-template-columns: 1fr;
+  }
+
+  .ai-prompt-add-footer {
+    padding: 12px 14px 14px;
+  }
+
+  .ai-prompt-add-footer button {
+    flex: 1 1 0;
+  }
+}
+
+
+/* =========================================================
+   ADD PROMPT MODAL — LAYOUT CORRECTION
+   ---------------------------------------------------------
+   Fixes:
+   - footer no longer renders as a right-side column
+   - Cancel/Add Prompt stay horizontal at the bottom
+   - form uses full modal width
+   - content scrolls independently from actions
+   - classification section is more compact
+   - conditional New Category field stays visually tied to Category
+========================================================= */
+
+.ai-prompt-add-dialog {
+  width: min(940px, calc(100vw - 40px));
+  max-height: 90vh;
+}
+
+.ai-prompt-add-dialog .ai-prompt-dialog-shell {
+  width: 100%;
+  height: min(86vh, 820px);
+  min-height: 0;
+  max-height: 90vh;
+}
+
+/* Critical fix: the form must stack body + footer vertically. */
+.ai-prompt-add-form {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  flex: 1 1 auto;
+  padding: 0;
+  overflow: hidden;
+}
+
+.ai-prompt-add-scroll {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  flex: 1 1 auto;
+  padding: 18px 22px 20px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+/* Header is tighter and visually connected to the body. */
+.ai-prompt-add-dialog .ai-prompt-dialog-header {
+  padding: 21px 24px 18px;
+}
+
+.ai-prompt-add-dialog .ai-prompt-dialog-header::after {
+  left: 24px;
+}
+
+.ai-prompt-add-dialog .ai-prompt-dialog-header h2 {
+  font-size: 1.38rem;
+}
+
+.ai-prompt-add-dialog .ai-prompt-dialog-header > div > p:last-child {
+  margin-top: 5px;
+}
+
+/* More compact section rhythm. */
+.ai-prompt-form-section {
+  padding: 15px;
+  border-radius: 14px;
+}
+
+.ai-prompt-form-section + .ai-prompt-form-section {
+  margin-top: 12px;
+}
+
+.ai-prompt-form-section-heading {
+  gap: 9px;
+  margin-bottom: 12px;
+}
+
+.ai-prompt-form-step {
+  flex-basis: 26px;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+}
+
+.ai-prompt-form-section-heading h3 {
+  font-size: .86rem;
+}
+
+.ai-prompt-form-section-heading p {
+  font-size: .7rem;
+}
+
+/* Classification should not consume half the modal. */
+.ai-prompt-form-grid--classification {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 11px 14px;
+  align-items: start;
+}
+
+.ai-prompt-icon-picker {
+  gap: 7px;
+}
+
+.ai-prompt-icon-preview {
+  min-height: 52px;
+  padding: 8px 10px;
+  border-radius: 11px;
+}
+
+.ai-prompt-icon-preview-symbol {
+  flex: 0 0 34px;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+}
+
+.ai-prompt-icon-preview-symbol svg {
+  width: 17px;
+  height: 17px;
+}
+
+.ai-prompt-icon-preview strong {
+  font-size: .76rem;
+}
+
+.ai-prompt-icon-preview small {
+  font-size: .64rem;
+  line-height: 1.3;
+}
+
+/* Keep "Add New Category" beneath the Category column, not full-width. */
+.ai-prompt-form-grid--classification .ai-prompt-new-category-field {
+  grid-column: 2;
+  padding: 9px 10px;
+  border-radius: 11px;
+}
+
+.ai-prompt-form-grid--classification .ai-prompt-new-category-field input {
+  min-height: 42px;
+}
+
+/* Normalize control proportions. */
+.ai-prompt-form-field input,
+.ai-prompt-form-field select {
+  min-height: 42px;
+}
+
+.ai-prompt-form-field textarea {
+  resize: vertical;
+}
+
+.ai-prompt-form-field > span,
+.ai-prompt-form-label {
+  font-size: .74rem;
+}
+
+.ai-prompt-field-hint,
+.ai-prompt-form-field small {
+  font-size: .64rem;
+}
+
+/* Prompt content receives most of the visual attention. */
+.ai-prompt-form-section:nth-of-type(2) {
+  padding-bottom: 16px;
+}
+
+.ai-prompt-form-section:nth-of-type(2) textarea[name="shortDescription"] {
+  min-height: 82px;
+}
+
+.ai-prompt-form-section:nth-of-type(2) textarea[name="prompt"] {
+  min-height: 180px;
+}
+
+/* Publishing row stays compact. */
+.ai-prompt-form-grid--publishing {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.ai-prompt-system-note {
+  margin-top: 11px;
+  padding: 9px 11px;
+}
+
+/* Critical footer fix: a real bottom action bar. */
+.ai-prompt-add-footer {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+  flex: 0 0 auto;
+  margin: 0 !important;
+  padding: 13px 22px 15px;
+  border-top: 1px solid #DFE9F4;
+  background: rgb(252 253 255 / 98%);
+  box-shadow: 0 -8px 22px rgb(23 63 112 / 4%);
+}
+
+.ai-prompt-add-footer .ai-prompt-secondary-button,
+.ai-prompt-add-footer .ai-prompt-primary-button {
+  flex: 0 0 auto !important;
+  width: auto !important;
+  height: 40px !important;
+  min-height: 40px;
+  padding: 0 16px;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+
+.ai-prompt-add-footer .ai-prompt-secondary-button {
+  min-width: 88px;
+}
+
+.ai-prompt-add-footer .ai-prompt-primary-button {
+  min-width: 126px;
+}
+
+/* Ensure no legacy rule can turn footer actions into tall columns. */
+.ai-prompt-add-footer button {
+  align-self: center;
+  max-height: 40px;
+}
+
+/* Tablet */
+@media (max-width: 900px) {
+  .ai-prompt-add-dialog {
+    width: calc(100vw - 24px);
+  }
+
+  .ai-prompt-add-dialog .ai-prompt-dialog-shell {
+    height: min(90vh, 820px);
+  }
+
+  .ai-prompt-add-scroll {
+    padding: 16px 18px 18px;
+  }
+
+  .ai-prompt-add-footer {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 767px) {
+  .ai-prompt-add-dialog {
+    width: calc(100vw - 12px);
+    max-height: 94vh;
+  }
+
+  .ai-prompt-add-dialog .ai-prompt-dialog-shell {
+    height: 92vh;
+    max-height: 92vh;
+  }
+
+  .ai-prompt-add-dialog .ai-prompt-dialog-header {
+    padding: 17px 15px 14px;
+  }
+
+  .ai-prompt-add-dialog .ai-prompt-dialog-header::after {
+    left: 15px;
+  }
+
+  .ai-prompt-add-scroll {
+    padding: 13px 12px 15px;
+  }
+
+  .ai-prompt-form-section {
+    padding: 13px;
+  }
+
+  .ai-prompt-form-grid--classification,
+  .ai-prompt-form-grid--publishing {
+    grid-template-columns: 1fr;
+  }
+
+  .ai-prompt-form-grid--classification .ai-prompt-new-category-field {
+    grid-column: 1;
+  }
+
+  .ai-prompt-add-footer {
+    justify-content: stretch;
+    padding: 11px 12px 12px;
+  }
+
+  .ai-prompt-add-footer .ai-prompt-secondary-button,
+  .ai-prompt-add-footer .ai-prompt-primary-button {
+    flex: 1 1 0 !important;
+    min-width: 0;
+  }
+}
+
+
+/* =========================================================
+   ADD PROMPT — UX SIMPLIFICATION
+   ---------------------------------------------------------
+   - visual icon picker
+   - separate New Category action
+   - automatic ordering (no sort fields)
+   - lighter section separators
+   - compact publish row
+========================================================= */
+
+.ai-prompt-add-dialog .ai-prompt-dialog-header {
+  padding-top: 18px;
+  padding-bottom: 15px;
+}
+
+.ai-prompt-add-dialog .ai-prompt-dialog-header h2 {
+  font-size: 1.32rem;
+}
+
+.ai-prompt-add-dialog .ai-prompt-dialog-header > div > p:last-child {
+  font-size: .78rem;
+}
+
+/* Reduce the nested-card feeling. */
+.ai-prompt-form-section {
+  padding: 16px 2px 18px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.ai-prompt-form-section + .ai-prompt-form-section {
+  margin-top: 0;
+  border-top: 1px solid #E2EBF5;
+}
+
+.ai-prompt-form-section-heading {
+  margin-bottom: 14px;
+}
+
+.ai-prompt-form-section-heading p {
+  max-width: 620px;
+}
+
+/* Classification */
+.ai-prompt-classification-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(260px, .65fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.ai-prompt-icon-field,
+.ai-prompt-category-field {
+  min-width: 0;
+}
+
+.ai-prompt-icon-options {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(72px, 1fr));
+  gap: 8px;
+}
+
+.ai-prompt-icon-option {
+  display: grid;
+  place-items: center;
+  gap: 6px;
+  min-height: 74px;
+  padding: 9px 6px;
+  border: 1px solid #D9E6F3;
+  border-radius: 12px;
+  color: #48658E;
+  background: #FFFFFF;
+  cursor: pointer;
+  font: inherit;
+  transition:
+    transform .14s ease,
+    border-color .14s ease,
+    background .14s ease,
+    box-shadow .14s ease,
+    color .14s ease;
+}
+
+.ai-prompt-icon-option:hover {
+  transform: translateY(-1px);
+  border-color: #A8C8F1;
+  background: #F7FBFF;
+}
+
+.ai-prompt-icon-option.is-selected {
+  border-color: #4B91F7;
+  color: #1557C8;
+  background:
+    linear-gradient(145deg, #ECF5FF 0%, #F7FBFF 100%);
+  box-shadow: 0 0 0 2px rgb(58 131 242 / 10%);
+}
+
+.ai-prompt-icon-option-visual {
+  display: inline-grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  color: #FFFFFF;
+  background: linear-gradient(135deg, #216AF0, #21B9E3);
+  box-shadow: 0 6px 13px rgb(25 105 226 / 16%);
+}
+
+.ai-prompt-icon-option-visual svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.ai-prompt-icon-option > span:last-child {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: inherit;
+  font-size: .66rem;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+.ai-prompt-new-category-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  align-self: flex-start;
+  margin-top: 2px;
+  padding: 4px 2px;
+  border: 0;
+  color: #1765D9;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  font-size: .7rem;
+  font-weight: 800;
+}
+
+.ai-prompt-new-category-toggle:hover {
+  color: #0E4EBA;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.ai-prompt-new-category-toggle.is-active {
+  color: #52719C;
+}
+
+.ai-prompt-new-category-inline {
+  display: grid;
+  gap: 7px;
+  margin-top: 5px;
+  padding: 10px;
+  border: 1px dashed #A9C8EC;
+  border-radius: 11px;
+  background: #F7FBFF;
+}
+
+.ai-prompt-new-category-inline[hidden] {
+  display: none !important;
+}
+
+.ai-prompt-new-category-inline > span {
+  color: #36547E;
+  font-size: .72rem;
+  font-weight: 800;
+}
+
+.ai-prompt-new-category-inline > span b {
+  color: #1768F2;
+}
+
+/* Prompt content gets the room, not configuration. */
+.ai-prompt-form-grid--content {
+  grid-template-columns: 1fr;
+}
+
+.ai-prompt-form-grid--content textarea[name="shortDescription"] {
+  min-height: 76px;
+}
+
+.ai-prompt-form-grid--content textarea[name="prompt"] {
+  min-height: 190px;
+}
+
+/* Publish */
+.ai-prompt-form-section--publish {
+  padding-bottom: 8px;
+}
+
+.ai-prompt-publish-row {
+  display: grid;
+  grid-template-columns: minmax(240px, .55fr) minmax(0, 1fr);
+  gap: 16px;
+  align-items: stretch;
+}
+
+.ai-prompt-status-field select {
+  min-height: 44px;
+}
+
+.ai-prompt-system-note {
+  margin: 0;
+  min-height: 100%;
+  align-items: center;
+  padding: 10px 12px;
+}
+
+/* Footer remains sticky / stable. */
+.ai-prompt-add-footer {
+  position: sticky;
+  bottom: 0;
+  z-index: 3;
+}
+
+/* Old sort/input rules are no longer part of this form. */
+#ai-prompt-add-category-sort,
+#ai-prompt-add-prompt-sort,
+.ai-prompt-icon-preview,
+.ai-prompt-icon-select-wrap {
+  display: none !important;
+}
+
+@media (max-width: 1040px) {
+  .ai-prompt-classification-layout {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .ai-prompt-icon-options {
+    grid-template-columns: repeat(6, minmax(68px, 1fr));
+  }
+}
+
+@media (max-width: 767px) {
+  .ai-prompt-icon-options {
+    grid-template-columns: repeat(4, minmax(62px, 1fr));
+  }
+
+  .ai-prompt-publish-row {
+    grid-template-columns: 1fr;
+  }
+
+  .ai-prompt-form-section {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .ai-prompt-icon-options {
+    grid-template-columns: repeat(3, minmax(60px, 1fr));
+  }
+}
+
 </style>

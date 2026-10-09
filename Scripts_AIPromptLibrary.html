@@ -17,10 +17,27 @@
     shield: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 20 6v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="m9 12 2 2 4-4"/></svg>'
   });
 
+
+  const ICON_LABELS = Object.freeze({
+    sparkles: "Sparkles",
+    search: "Search",
+    document: "Document",
+    chat: "Chat",
+    lightbulb: "Lightbulb",
+    layers: "Layers",
+    code: "Code",
+    target: "Target",
+    rocket: "Rocket",
+    checklist: "Checklist",
+    tools: "Tools",
+    shield: "Shield"
+  });
+
   const state = {
     root: null,
     prompts: [],
     categories: [],
+    categoryOptions: [],
     category: "all",
     query: "",
     sort: "sheet",
@@ -103,32 +120,49 @@
     refs.status = root.querySelector("#ai-prompt-library-status");
     refs.retry = root.querySelector("#ai-prompt-library-retry");
     refs.addButton = root.querySelector("#ai-prompt-library-add");
+
     refs.detailDialog = root.querySelector("#ai-prompt-detail-dialog");
     refs.detailTitle = root.querySelector("#ai-prompt-detail-title");
     refs.detailFeatured = root.querySelector("#ai-prompt-detail-featured");
     refs.detailMeta = root.querySelector("#ai-prompt-detail-meta");
     refs.detailDescription = root.querySelector("#ai-prompt-detail-description");
     refs.detailPrompt = root.querySelector("#ai-prompt-detail-prompt");
-    refs.detailVariablesWrap = root.querySelector("#ai-prompt-detail-variables-wrap");
-    refs.detailVariables = root.querySelector("#ai-prompt-detail-variables");
-    refs.detailOutputWrap = root.querySelector("#ai-prompt-detail-output-wrap");
-    refs.detailOutput = root.querySelector("#ai-prompt-detail-output");
-    refs.detailTagsWrap = root.querySelector("#ai-prompt-detail-tags-wrap");
-    refs.detailTags = root.querySelector("#ai-prompt-detail-tags");
     refs.detailCopy = root.querySelector("#ai-prompt-detail-copy");
     refs.detailCopyFooter = root.querySelector("#ai-prompt-detail-copy-footer");
-    refs.detailClose = Array.from(root.querySelectorAll("[data-ai-prompt-detail-close]"));
+    refs.detailClose = Array.from(
+      root.querySelectorAll("[data-ai-prompt-detail-close]")
+    );
+
     refs.addDialog = root.querySelector("#ai-prompt-add-dialog");
     refs.addForm = root.querySelector("#ai-prompt-add-form");
-    refs.addClose = Array.from(root.querySelectorAll("[data-ai-prompt-add-close]"));
+    refs.addClose = Array.from(
+      root.querySelectorAll("[data-ai-prompt-add-close]")
+    );
     refs.addError = root.querySelector("#ai-prompt-add-error");
     refs.addSubmit = root.querySelector("#ai-prompt-add-submit");
-    refs.categoryInput = root.querySelector("#ai-prompt-add-category");
-    refs.categoryDatalist = root.querySelector("#ai-prompt-category-options");
-    refs.categorySort = root.querySelector("#ai-prompt-add-category-sort");
-    refs.promptSort = root.querySelector("#ai-prompt-add-prompt-sort");
+
+    refs.iconInput = root.querySelector("#ai-prompt-add-icon");
+    refs.iconOptions = root.querySelector(
+      "#ai-prompt-add-icon-options"
+    );
+
+    refs.categorySelect = root.querySelector(
+      "#ai-prompt-add-category-select"
+    );
+    refs.newCategoryToggle = root.querySelector(
+      "#ai-prompt-add-new-category-toggle"
+    );
+    refs.newCategoryField = root.querySelector(
+      "#ai-prompt-add-new-category-field"
+    );
+    refs.newCategoryInput = root.querySelector(
+      "#ai-prompt-add-new-category"
+    );
+
     refs.toast = root.querySelector("#ai-prompt-library-toast");
-    refs.toastMessage = root.querySelector("#ai-prompt-library-toast-message");
+    refs.toastMessage = root.querySelector(
+      "#ai-prompt-library-toast-message"
+    );
   }
 
   function bindEvents(root) {
@@ -192,9 +226,25 @@
       refs.addForm.addEventListener("submit", submitAddPrompt);
     }
 
-    if (refs.categoryInput) {
-      refs.categoryInput.addEventListener("change", updateSortSuggestionsForCategory);
-      refs.categoryInput.addEventListener("blur", updateSortSuggestionsForCategory);
+    if (refs.iconOptions) {
+      refs.iconOptions.addEventListener(
+        "click",
+        handleIconPickerClick
+      );
+    }
+
+    if (refs.categorySelect) {
+      refs.categorySelect.addEventListener(
+        "change",
+        handleCategorySelectionChange
+      );
+    }
+
+    if (refs.newCategoryToggle) {
+      refs.newCategoryToggle.addEventListener(
+        "click",
+        toggleNewCategoryMode
+      );
     }
 
     [refs.detailDialog, refs.addDialog].forEach(function (dialog) {
@@ -238,6 +288,10 @@
             ? payload.categories
             : deriveCategories(state.prompts);
 
+          state.categoryOptions = Array.isArray(payload.categoryOptions)
+            ? payload.categoryOptions
+            : deriveCategoryOptions(state.prompts);
+
           if (
             state.category !== "all" &&
             !state.categories.some(function (category) { return category.name === state.category; })
@@ -245,7 +299,7 @@
             state.category = "all";
           }
 
-          populateCategoryDatalist();
+          populateCategorySelect();
           renderCategoryFilters();
           renderLibrary();
         })
@@ -517,17 +571,11 @@
     const footer = document.createElement("div");
     footer.className = "ai-prompt-card-footer";
 
-    const meta = document.createElement("div");
-    meta.className = "ai-prompt-card-meta";
-
-    if (prompt.useCase) meta.appendChild(createPill(prompt.useCase));
-    if (prompt.audience) meta.appendChild(createPill(prompt.audience, "is-muted"));
-
     const action = document.createElement("span");
     action.className = "ai-prompt-card-action";
     action.textContent = "View Prompt";
 
-    footer.append(meta, action);
+    footer.appendChild(action);
     button.append(top, title, description, footer);
     return button;
   }
@@ -546,10 +594,6 @@
     if (refs.detailPrompt) refs.detailPrompt.textContent = prompt.prompt || "";
 
     renderDetailMeta(prompt);
-    renderOptionalDetail(refs.detailVariablesWrap, refs.detailVariables, prompt.variables);
-    renderOptionalDetail(refs.detailOutputWrap, refs.detailOutput, prompt.outputFormat);
-    renderTags(prompt.tags);
-
     openDialog(refs.detailDialog);
   }
 
@@ -558,9 +602,7 @@
     refs.detailMeta.replaceChildren();
 
     [
-      ["Category", prompt.category],
-      ["Use Case", prompt.useCase],
-      ["Audience", prompt.audience]
+      ["Category", prompt.category]
     ].forEach(function (entry) {
       if (!entry[1]) return;
       const item = document.createElement("div");
@@ -574,22 +616,6 @@
     });
   }
 
-  function renderOptionalDetail(wrapper, target, value) {
-    if (!wrapper || !target) return;
-    const normalized = String(value || "").trim();
-    wrapper.hidden = !normalized;
-    target.textContent = normalized;
-  }
-
-  function renderTags(tags) {
-    if (!refs.detailTagsWrap || !refs.detailTags) return;
-    const items = splitList(tags);
-    refs.detailTagsWrap.hidden = !items.length;
-    refs.detailTags.replaceChildren();
-    items.forEach(function (tag) {
-      refs.detailTags.appendChild(createPill(tag));
-    });
-  }
 
   function closeDetailDialog() {
     state.activePromptId = "";
@@ -612,123 +638,335 @@
   }
 
   function openAddPromptDialog() {
-    if (getEffectiveRole() !== "admin" || !refs.addDialog || !refs.addForm) return;
+    if (
+      getEffectiveRole() !== "admin" ||
+      !refs.addDialog ||
+      !refs.addForm
+    ) {
+      return;
+    }
 
     refs.addForm.reset();
     clearAddError();
 
-    const icon = refs.addForm.elements.icon;
-    const featured = refs.addForm.elements.featured;
-    const status = refs.addForm.elements.status;
+    populateCategorySelect();
+    renderIconPicker();
+    setSelectedIcon("");
+    setNewCategoryMode(false);
 
-    if (icon) icon.value = "sparkles";
-    if (featured) featured.checked = false;
+    const status = refs.addForm.elements.status;
     if (status) status.value = "Active";
 
-    const maxCategorySort = state.categories.reduce(function (max, category) {
-      return Math.max(max, Number(category.sortOrder) || 0);
-    }, 0);
-
-    if (refs.categorySort) refs.categorySort.value = String(maxCategorySort + 1 || 1);
-    if (refs.promptSort) refs.promptSort.value = "1";
-
-    populateCategoryDatalist();
     openDialog(refs.addDialog);
 
-    const first = refs.addForm.elements.category;
-    if (first && typeof first.focus === "function") {
-      window.setTimeout(function () { first.focus(); }, 50);
+    const firstIcon = refs.iconOptions
+      ? refs.iconOptions.querySelector("[data-ai-prompt-icon]")
+      : null;
+
+    if (firstIcon && typeof firstIcon.focus === "function") {
+      window.setTimeout(function () {
+        firstIcon.focus();
+      }, 50);
     }
   }
+
 
   function closeAddPromptDialog() {
     clearAddError();
     setAddSubmitting(false);
+    setNewCategoryMode(false);
     closeDialog(refs.addDialog);
   }
 
-  function updateSortSuggestionsForCategory() {
-    if (!refs.categoryInput) return;
-    const categoryName = refs.categoryInput.value.trim();
-    if (!categoryName) return;
 
-    const prompts = state.prompts.filter(function (prompt) {
-      return String(prompt.category || "").toLowerCase() === categoryName.toLowerCase();
+  function renderIconPicker() {
+    if (!refs.iconOptions) return;
+
+    refs.iconOptions.replaceChildren();
+
+    Object.keys(ICON_LABELS).forEach(function (iconKey) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "ai-prompt-icon-option";
+      button.dataset.aiPromptIcon = iconKey;
+      button.setAttribute("role", "radio");
+      button.setAttribute("aria-checked", "false");
+      button.setAttribute(
+        "aria-label",
+        "Select " + ICON_LABELS[iconKey] + " icon"
+      );
+
+      const icon = createIconNode(
+        iconKey,
+        "ai-prompt-icon-option-visual"
+      );
+
+      const label = document.createElement("span");
+      label.textContent = ICON_LABELS[iconKey];
+
+      button.append(icon, label);
+      refs.iconOptions.appendChild(button);
     });
+  }
 
-    const existingCategory = state.categories.find(function (category) {
-      return String(category.name || "").toLowerCase() === categoryName.toLowerCase();
-    });
 
-    if (existingCategory) {
-      if (refs.categorySort) refs.categorySort.value = String(Number(existingCategory.sortOrder) || 0);
-      const maxPromptSort = prompts.reduce(function (max, prompt) {
-        return Math.max(max, Number(prompt.promptSortOrder) || 0);
-      }, 0);
-      if (refs.promptSort) refs.promptSort.value = String(maxPromptSort + 1);
-      return;
+  function handleIconPickerClick(event) {
+    const button = event.target.closest("[data-ai-prompt-icon]");
+    if (!button) return;
+
+    setSelectedIcon(button.dataset.aiPromptIcon || "");
+  }
+
+
+  function setSelectedIcon(iconKey) {
+    const value = String(iconKey || "").trim();
+
+    if (refs.iconInput) {
+      refs.iconInput.value = value;
     }
 
-    const maxCategorySort = state.categories.reduce(function (max, category) {
-      return Math.max(max, Number(category.sortOrder) || 0);
-    }, 0);
-    if (refs.categorySort) refs.categorySort.value = String(maxCategorySort + 1);
-    if (refs.promptSort) refs.promptSort.value = "1";
+    if (!refs.iconOptions) return;
+
+    refs.iconOptions
+      .querySelectorAll("[data-ai-prompt-icon]")
+      .forEach(function (button) {
+        const isSelected =
+          button.dataset.aiPromptIcon === value;
+
+        button.classList.toggle(
+          "is-selected",
+          isSelected
+        );
+
+        button.setAttribute(
+          "aria-checked",
+          isSelected ? "true" : "false"
+        );
+      });
   }
+
+
+  function populateCategorySelect() {
+    if (!refs.categorySelect) return;
+
+    const previous = refs.categorySelect.value;
+    refs.categorySelect.replaceChildren();
+
+    const placeholder = document.createElement("option");
+    placeholder.value = "";
+    placeholder.textContent = state.categoryOptions.length
+      ? "Select a category"
+      : "No categories yet";
+    refs.categorySelect.appendChild(placeholder);
+
+    state.categoryOptions.forEach(function (category) {
+      const option = document.createElement("option");
+      option.value = category.name;
+      option.textContent = category.name;
+      refs.categorySelect.appendChild(option);
+    });
+
+    const stillExists = Array.from(
+      refs.categorySelect.options
+    ).some(function (option) {
+      return option.value === previous;
+    });
+
+    refs.categorySelect.value = stillExists
+      ? previous
+      : "";
+  }
+
+
+  function handleCategorySelectionChange() {
+    if (!refs.categorySelect) return;
+
+    if (refs.categorySelect.value) {
+      setNewCategoryMode(false);
+    }
+  }
+
+
+  function toggleNewCategoryMode() {
+    const shouldEnable = refs.newCategoryField
+      ? refs.newCategoryField.hidden
+      : true;
+
+    setNewCategoryMode(shouldEnable);
+
+    if (
+      shouldEnable &&
+      refs.newCategoryInput &&
+      typeof refs.newCategoryInput.focus === "function"
+    ) {
+      window.setTimeout(function () {
+        refs.newCategoryInput.focus();
+      }, 30);
+    }
+  }
+
+
+  function setNewCategoryMode(enabled) {
+    const isEnabled = Boolean(enabled);
+
+    if (refs.newCategoryField) {
+      refs.newCategoryField.hidden = !isEnabled;
+    }
+
+    if (refs.newCategoryInput) {
+      refs.newCategoryInput.required = isEnabled;
+
+      if (!isEnabled) {
+        refs.newCategoryInput.value = "";
+      }
+    }
+
+    if (refs.categorySelect) {
+      refs.categorySelect.disabled = isEnabled;
+
+      if (isEnabled) {
+        refs.categorySelect.value = "";
+      }
+    }
+
+    if (refs.newCategoryToggle) {
+      refs.newCategoryToggle.classList.toggle(
+        "is-active",
+        isEnabled
+      );
+
+      refs.newCategoryToggle.setAttribute(
+        "aria-expanded",
+        isEnabled ? "true" : "false"
+      );
+
+      refs.newCategoryToggle.innerHTML = isEnabled
+        ? '<span aria-hidden="true">←</span> Use existing category'
+        : '<span aria-hidden="true">＋</span> New category';
+    }
+  }
+
 
   function submitAddPrompt(event) {
     event.preventDefault();
+
     if (getEffectiveRole() !== "admin") {
       setAddError("Administrator access is required.");
       return;
     }
 
-    if (!refs.addForm || !refs.addForm.reportValidity()) return;
+    if (!refs.addForm || !refs.addForm.reportValidity()) {
+      return;
+    }
+
     if (!isAppsScriptAvailable()) {
-      setAddError("Google Apps Script is unavailable in this environment.");
+      setAddError(
+        "Google Apps Script is unavailable in this environment."
+      );
       return;
     }
 
     const form = new FormData(refs.addForm);
+
+    const isNewCategory = Boolean(
+      refs.newCategoryField &&
+      !refs.newCategoryField.hidden
+    );
+
+    const category = isNewCategory
+      ? String(
+          refs.newCategoryInput
+            ? refs.newCategoryInput.value
+            : ""
+        ).trim()
+      : String(
+          refs.categorySelect
+            ? refs.categorySelect.value
+            : ""
+        ).trim();
+
+    if (!category) {
+      setAddError(
+        isNewCategory
+          ? "Please enter the new category name."
+          : "Please select a category or create a new one."
+      );
+      return;
+    }
+
+    const icon = refs.iconInput
+      ? String(refs.iconInput.value || "").trim()
+      : "";
+
+    if (!icon) {
+      setAddError("Please choose an icon.");
+      return;
+    }
+
     const payload = {
-      icon: String(form.get("icon") || "sparkles"),
-      category: String(form.get("category") || "").trim(),
-      categorySortOrder: Number(form.get("categorySortOrder")),
-      promptTitle: String(form.get("promptTitle") || "").trim(),
-      shortDescription: String(form.get("shortDescription") || "").trim(),
-      prompt: String(form.get("prompt") || "").trim(),
-      useCase: String(form.get("useCase") || "").trim(),
-      tags: String(form.get("tags") || "").trim(),
-      audience: String(form.get("audience") || "").trim(),
-      variables: String(form.get("variables") || "").trim(),
-      outputFormat: String(form.get("outputFormat") || "").trim(),
-      featured: form.get("featured") === "on",
-      promptSortOrder: Number(form.get("promptSortOrder")),
-      status: String(form.get("status") || "Active")
+      icon: icon,
+      category: category,
+      promptTitle: String(
+        form.get("promptTitle") || ""
+      ).trim(),
+      shortDescription: String(
+        form.get("shortDescription") || ""
+      ).trim(),
+      prompt: String(
+        form.get("prompt") || ""
+      ).trim(),
+      status: String(
+        form.get("status") || "Active"
+      )
     };
 
     clearAddError();
     setAddSubmitting(true);
 
-    google.script.run
-      .withSuccessHandler(function (response) {
-        setAddSubmitting(false);
-        closeAddPromptDialog();
-        showToast(
-          response && response.message
-            ? response.message
-            : "Prompt added successfully.",
-          "success"
-        );
-        loadLibrary();
-      })
-      .withFailureHandler(function (error) {
-        setAddSubmitting(false);
-        console.error("[AI Prompt Library] Failed to add prompt:", error);
-        setAddError(getErrorMessage(error, "Unable to add the prompt."));
-      })
-      .addAIPrompt(payload);
+    try {
+      google.script.run
+        .withSuccessHandler(function (response) {
+          setAddSubmitting(false);
+          closeAddPromptDialog();
+
+          showToast(
+            response && response.message
+              ? response.message
+              : "Prompt added successfully.",
+            "success"
+          );
+
+          loadLibrary();
+        })
+        .withFailureHandler(function (error) {
+          setAddSubmitting(false);
+          console.error(
+            "[AI Prompt Library] Failed to add prompt:",
+            error
+          );
+          setAddError(
+            getErrorMessage(
+              error,
+              "Unable to add the prompt."
+            )
+          );
+        })
+        .addAIPrompt(payload);
+    } catch (error) {
+      setAddSubmitting(false);
+      console.error(
+        "[AI Prompt Library] Unable to start add request:",
+        error
+      );
+      setAddError(
+        getErrorMessage(
+          error,
+          "Unable to start the Add Prompt request."
+        )
+      );
+    }
   }
+
 
   function setAddSubmitting(isSubmitting) {
     if (!refs.addSubmit) return;
@@ -749,13 +987,49 @@
     refs.addError.textContent = "";
   }
 
-  function populateCategoryDatalist() {
-    if (!refs.categoryDatalist) return;
-    refs.categoryDatalist.replaceChildren();
-    state.categories.forEach(function (category) {
-      const option = document.createElement("option");
-      option.value = category.name;
-      refs.categoryDatalist.appendChild(option);
+  function deriveCategoryOptions(prompts) {
+    const map = new Map();
+
+    prompts.forEach(function (prompt) {
+      const name = String(
+        prompt.category || ""
+      ).trim();
+
+      if (!name) return;
+
+      const key = name.toLowerCase();
+
+      if (!map.has(key)) {
+        map.set(key, {
+          name: name,
+          sortOrder: Number(prompt.categorySortOrder) || 0,
+          promptCount: 1,
+          maxPromptSort: Number(prompt.promptSortOrder) || 0
+        });
+        return;
+      }
+
+      const current = map.get(key);
+      current.promptCount += 1;
+      current.sortOrder = Math.min(
+        current.sortOrder,
+        Number(prompt.categorySortOrder) || 0
+      );
+      current.maxPromptSort = Math.max(
+        current.maxPromptSort,
+        Number(prompt.promptSortOrder) || 0
+      );
+    });
+
+    return Array.from(map.values()).sort(function (a, b) {
+      if (a.sortOrder !== b.sortOrder) {
+        return a.sortOrder - b.sortOrder;
+      }
+      return a.name.localeCompare(
+        b.name,
+        undefined,
+        { sensitivity: "base" }
+      );
     });
   }
 
@@ -784,12 +1058,7 @@
       prompt.promptTitle,
       prompt.shortDescription,
       prompt.prompt,
-      prompt.category,
-      prompt.useCase,
-      prompt.tags,
-      prompt.audience,
-      prompt.variables,
-      prompt.outputFormat
+      prompt.category
     ].map(function (value) {
       return String(value || "").toLowerCase();
     }).join(" ");
@@ -809,13 +1078,6 @@
     return pill;
   }
 
-  function splitList(value) {
-    return String(value || "")
-      .split(",")
-      .map(function (item) { return item.trim(); })
-      .filter(Boolean)
-      .slice(0, 20);
-  }
 
   function pluralizePrompt(count) {
     return count + (count === 1 ? " prompt" : " prompts");

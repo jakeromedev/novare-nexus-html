@@ -469,3 +469,15 @@ function cleanSheetText_(value) {
   const text = String(value == null ? '' : value).trim();
   return /^'[=+\-@]/.test(text) ? text.slice(1) : text;
 }
+
+
+/**
+ * Minimal smoke test for the browser-facing read endpoint.
+ * Run this from the Apps Script editor if the page shell loads
+ * but the library reports an error.
+ */
+function testAIPromptLibraryRead() {
+  var result = getAIPromptLibrary();
+  console.log("[AI PROMPT LIBRARY READ TEST] " + JSON.stringify(result, null, 2));
+  return result;
+}

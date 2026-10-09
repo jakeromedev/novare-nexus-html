@@ -3217,27 +3217,100 @@
   function initializeAIPromptLibraryPage(pageRoot) {
     if (!pageRoot) return;
 
-    if (pageRoot.dataset.pageInitialized !== "true") {
-      bindAIPromptLibraryAsset(
-        pageRoot.querySelector(
-          "#ai-prompt-library-hero-image"
-        ),
-        pageRoot.querySelector(
-          "#ai-prompt-library-hero-fallback"
-        ),
-        2400
+    /*
+     * IMPORTANT:
+     * Keep hero/media initialization and dynamic Prompt Library initialization
+     * isolated from one another. A failure in the sheet-backed library must
+     * never prevent the route shell or hero from rendering.
+     */
+    try {
+      if (pageRoot.dataset.pageInitialized !== "true") {
+        bindAIPromptLibraryAsset(
+          pageRoot.querySelector(
+            "#ai-prompt-library-hero-image"
+          ),
+          pageRoot.querySelector(
+            "#ai-prompt-library-hero-fallback"
+          ),
+          2400
+        );
+
+        pageRoot.dataset.pageInitialized = "true";
+      } else {
+        retryFailedAIPromptLibraryAssets(pageRoot);
+      }
+    } catch (error) {
+      console.error(
+        "[AI Prompt Library] Hero initialization failed. " +
+        "The page will remain visible with its CSS fallback.",
+        error
       );
 
-      pageRoot.dataset.pageInitialized = "true";
-    } else {
-      retryFailedAIPromptLibraryAssets(pageRoot);
+      const heroImage = pageRoot.querySelector(
+        "#ai-prompt-library-hero-image"
+      );
+      const heroFallback = pageRoot.querySelector(
+        "#ai-prompt-library-hero-fallback"
+      );
+
+      if (heroImage) heroImage.hidden = true;
+      if (heroFallback) heroFallback.hidden = false;
     }
 
-    if (
-      window.NexusAIPromptLibrary &&
-      typeof window.NexusAIPromptLibrary.initialize === "function"
-    ) {
-      window.NexusAIPromptLibrary.initialize(pageRoot);
+    try {
+      if (
+        window.NexusAIPromptLibrary &&
+        typeof window.NexusAIPromptLibrary.initialize === "function"
+      ) {
+        window.NexusAIPromptLibrary.initialize(pageRoot);
+      } else {
+        console.warn(
+          "[AI Prompt Library] Scripts_AIPromptLibrary is not available."
+        );
+
+        const status = pageRoot.querySelector(
+          "#ai-prompt-library-status"
+        );
+        const statusText = status
+          ? status.querySelector("[data-ai-prompt-status-text]")
+          : null;
+
+        if (status) {
+          status.hidden = false;
+          status.className =
+            "ai-prompt-library-state is-error";
+        }
+
+        if (statusText) {
+          statusText.textContent =
+            "The Prompt Library interface could not initialize. " +
+            "Please refresh the page.";
+        }
+      }
+    } catch (error) {
+      console.error(
+        "[AI Prompt Library] Dynamic library initialization failed:",
+        error
+      );
+
+      const status = pageRoot.querySelector(
+        "#ai-prompt-library-status"
+      );
+      const statusText = status
+        ? status.querySelector("[data-ai-prompt-status-text]")
+        : null;
+
+      if (status) {
+        status.hidden = false;
+        status.className =
+          "ai-prompt-library-state is-error";
+      }
+
+      if (statusText) {
+        statusText.textContent =
+          "The Prompt Library could not initialize. " +
+          "The page shell is still available.";
+      }
     }
   }
 
@@ -5828,7 +5901,24 @@
     if (route === "delivery") initializeDeliveryPage(wrapper);
     if (route === "governance") initializeGovernancePage(wrapper);
     if (route === "tools") initializeToolsPage(wrapper);
-    if (route === "ai-prompt-library") initializeAIPromptLibraryPage(wrapper);
+
+    if (route === "ai-prompt-library") {
+      /*
+       * The wrapper starts hidden. Never allow an AI Prompt Library
+       * initialization error to abort ensurePage(), because renderRoute()
+       * still needs the returned wrapper so it can make the page visible.
+       */
+      try {
+        initializeAIPromptLibraryPage(wrapper);
+      } catch (error) {
+        console.error(
+          "[AI Prompt Library] Route initialization failed:",
+          error
+        );
+        wrapper.dataset.pageInitError = "true";
+      }
+    }
+
     if (route === "support") initializeSupportPage(wrapper);
     if (
       route === "search" &&

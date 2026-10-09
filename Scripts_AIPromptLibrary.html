@@ -52,17 +52,44 @@
     if (!root) return;
 
     state.root = root;
-    cacheRefs(root);
 
-    if (root.dataset.promptLibraryInitialized !== "true") {
-      bindEvents(root);
-      root.dataset.promptLibraryInitialized = "true";
+    try {
+      cacheRefs(root);
+
+      if (root.dataset.promptLibraryInitialized !== "true") {
+        bindEvents(root);
+        root.dataset.promptLibraryInitialized = "true";
+        syncAdminUI();
+        loadLibrary();
+        return;
+      }
+
       syncAdminUI();
-      loadLibrary();
-      return;
-    }
+    } catch (error) {
+      console.error(
+        "[AI Prompt Library] Frontend initialization error:",
+        error
+      );
 
-    syncAdminUI();
+      const status = root.querySelector(
+        "#ai-prompt-library-status"
+      );
+      const statusText = status
+        ? status.querySelector("[data-ai-prompt-status-text]")
+        : null;
+
+      if (status) {
+        status.hidden = false;
+        status.className =
+          "ai-prompt-library-state is-error";
+      }
+
+      if (statusText) {
+        statusText.textContent =
+          "The Prompt Library could not initialize. " +
+          "Please refresh and try again.";
+      }
+    }
   }
 
   function cacheRefs(root) {
@@ -201,32 +228,46 @@
       return;
     }
 
-    google.script.run
-      .withSuccessHandler(function (response) {
-        state.loading = false;
-        const payload = response && typeof response === "object" ? response : {};
-        state.prompts = Array.isArray(payload.prompts) ? payload.prompts : [];
-        state.categories = Array.isArray(payload.categories)
-          ? payload.categories
-          : deriveCategories(state.prompts);
+    try {
+      google.script.run
+        .withSuccessHandler(function (response) {
+          state.loading = false;
+          const payload = response && typeof response === "object" ? response : {};
+          state.prompts = Array.isArray(payload.prompts) ? payload.prompts : [];
+          state.categories = Array.isArray(payload.categories)
+            ? payload.categories
+            : deriveCategories(state.prompts);
 
-        if (
-          state.category !== "all" &&
-          !state.categories.some(function (category) { return category.name === state.category; })
-        ) {
-          state.category = "all";
-        }
+          if (
+            state.category !== "all" &&
+            !state.categories.some(function (category) { return category.name === state.category; })
+          ) {
+            state.category = "all";
+          }
 
-        populateCategoryDatalist();
-        renderCategoryFilters();
-        renderLibrary();
-      })
-      .withFailureHandler(function (error) {
-        state.loading = false;
-        console.error("[AI Prompt Library] Failed to load prompts:", error);
-        setErrorState(getErrorMessage(error, "Unable to load the Prompt Library."));
-      })
-      .getAIPromptLibrary();
+          populateCategoryDatalist();
+          renderCategoryFilters();
+          renderLibrary();
+        })
+        .withFailureHandler(function (error) {
+          state.loading = false;
+          console.error("[AI Prompt Library] Failed to load prompts:", error);
+          setErrorState(getErrorMessage(error, "Unable to load the Prompt Library."));
+        })
+        .getAIPromptLibrary();
+    } catch (error) {
+      state.loading = false;
+      console.error(
+        "[AI Prompt Library] Unable to start the prompt-library request:",
+        error
+      );
+      setErrorState(
+        getErrorMessage(
+          error,
+          "Unable to start the Prompt Library request."
+        )
+      );
+    }
   }
 
   function setLoadingState() {

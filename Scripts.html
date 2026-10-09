@@ -3229,10 +3229,16 @@
       );
 
       pageRoot.dataset.pageInitialized = "true";
-      return;
+    } else {
+      retryFailedAIPromptLibraryAssets(pageRoot);
     }
 
-    retryFailedAIPromptLibraryAssets(pageRoot);
+    if (
+      window.NexusAIPromptLibrary &&
+      typeof window.NexusAIPromptLibrary.initialize === "function"
+    ) {
+      window.NexusAIPromptLibrary.initialize(pageRoot);
+    }
   }
 
   function retryFailedAIPromptLibraryAssets(pageRoot) {

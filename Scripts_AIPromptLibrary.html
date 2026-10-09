@@ -1,0 +1,856 @@
+<script>
+(function () {
+  "use strict";
+
+  const ICONS = Object.freeze({
+    sparkles: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 1.6 4.4L18 9l-4.4 1.6L12 15l-1.6-4.4L6 9l4.4-1.6Z"/><path d="m19 14 .8 2.2L22 17l-2.2.8L19 20l-.8-2.2L16 17l2.2-.8Z"/></svg>',
+    search: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="m16 16 4 4"/></svg>',
+    document: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v5h5M9 12h6M9 16h6"/></svg>',
+    chat: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h14v10H9l-4 4z"/><path d="M8 9h8M8 12h5"/></svg>',
+    lightbulb: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 22h4"/><path d="M8.5 15.5A7 7 0 1 1 15.5 15.5L14 18h-4z"/></svg>',
+    layers: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5z"/><path d="m3 12 9 5 9-5M3 16l9 5 9-5"/></svg>',
+    code: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 7-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/></svg>',
+    target: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M22 12h-3"/></svg>',
+    rocket: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4c3-2 5-1 6-1 0 1 1 3-1 6l-6 6-4-4z"/><path d="m9 11-4 1-2 3 5 1M13 15l-1 4-3 2-1-5M15 8l1 1"/></svg>',
+    checklist: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h10M9 12h10M9 18h10"/><path d="m3 6 1.5 1.5L7 4.5M3 12l1.5 1.5L7 10.5M3 18l1.5 1.5L7 16.5"/></svg>',
+    tools: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 6a4 4 0 0 0-5 5L3 17l4 4 6-6a4 4 0 0 0 5-5l-3 3-3-3z"/></svg>',
+    shield: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 20 6v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="m9 12 2 2 4-4"/></svg>'
+  });
+
+  const state = {
+    root: null,
+    prompts: [],
+    categories: [],
+    category: "all",
+    query: "",
+    sort: "sheet",
+    activePromptId: "",
+    loading: false
+  };
+
+  const refs = {};
+
+  function isAppsScriptAvailable() {
+    return Boolean(
+      typeof google !== "undefined" &&
+      google && google.script && google.script.run
+    );
+  }
+
+  function getEffectiveRole() {
+    const app = document.getElementById("nexus-app");
+    return app && app.dataset.currentUserEffectiveRole === "admin"
+      ? "admin"
+      : "user";
+  }
+
+  function initialize(pageRoot) {
+    const root = pageRoot && pageRoot.querySelector
+      ? pageRoot.querySelector('[data-page="ai-prompt-library"]')
+      : null;
+
+    if (!root) return;
+
+    state.root = root;
+    cacheRefs(root);
+
+    if (root.dataset.promptLibraryInitialized !== "true") {
+      bindEvents(root);
+      root.dataset.promptLibraryInitialized = "true";
+      syncAdminUI();
+      loadLibrary();
+      return;
+    }
+
+    syncAdminUI();
+  }
+
+  function cacheRefs(root) {
+    refs.surface = root.querySelector("#ai-prompt-library-surface");
+    refs.header = root.querySelector("#ai-prompt-library-header");
+    refs.count = root.querySelector("#ai-prompt-library-count");
+    refs.search = root.querySelector("#ai-prompt-library-search");
+    refs.sort = root.querySelector("#ai-prompt-library-sort");
+    refs.categories = root.querySelector("#ai-prompt-library-categories");
+    refs.results = root.querySelector("#ai-prompt-library-results");
+    refs.status = root.querySelector("#ai-prompt-library-status");
+    refs.retry = root.querySelector("#ai-prompt-library-retry");
+    refs.addButton = root.querySelector("#ai-prompt-library-add");
+    refs.detailDialog = root.querySelector("#ai-prompt-detail-dialog");
+    refs.detailTitle = root.querySelector("#ai-prompt-detail-title");
+    refs.detailFeatured = root.querySelector("#ai-prompt-detail-featured");
+    refs.detailMeta = root.querySelector("#ai-prompt-detail-meta");
+    refs.detailDescription = root.querySelector("#ai-prompt-detail-description");
+    refs.detailPrompt = root.querySelector("#ai-prompt-detail-prompt");
+    refs.detailVariablesWrap = root.querySelector("#ai-prompt-detail-variables-wrap");
+    refs.detailVariables = root.querySelector("#ai-prompt-detail-variables");
+    refs.detailOutputWrap = root.querySelector("#ai-prompt-detail-output-wrap");
+    refs.detailOutput = root.querySelector("#ai-prompt-detail-output");
+    refs.detailTagsWrap = root.querySelector("#ai-prompt-detail-tags-wrap");
+    refs.detailTags = root.querySelector("#ai-prompt-detail-tags");
+    refs.detailCopy = root.querySelector("#ai-prompt-detail-copy");
+    refs.detailCopyFooter = root.querySelector("#ai-prompt-detail-copy-footer");
+    refs.detailClose = Array.from(root.querySelectorAll("[data-ai-prompt-detail-close]"));
+    refs.addDialog = root.querySelector("#ai-prompt-add-dialog");
+    refs.addForm = root.querySelector("#ai-prompt-add-form");
+    refs.addClose = Array.from(root.querySelectorAll("[data-ai-prompt-add-close]"));
+    refs.addError = root.querySelector("#ai-prompt-add-error");
+    refs.addSubmit = root.querySelector("#ai-prompt-add-submit");
+    refs.categoryInput = root.querySelector("#ai-prompt-add-category");
+    refs.categoryDatalist = root.querySelector("#ai-prompt-category-options");
+    refs.categorySort = root.querySelector("#ai-prompt-add-category-sort");
+    refs.promptSort = root.querySelector("#ai-prompt-add-prompt-sort");
+    refs.toast = root.querySelector("#ai-prompt-library-toast");
+    refs.toastMessage = root.querySelector("#ai-prompt-library-toast-message");
+  }
+
+  function bindEvents(root) {
+    if (refs.search) {
+      refs.search.addEventListener("input", function () {
+        state.query = refs.search.value.trim().toLowerCase();
+        renderLibrary();
+      });
+    }
+
+    if (refs.sort) {
+      refs.sort.addEventListener("change", function () {
+        state.sort = refs.sort.value || "sheet";
+        renderLibrary();
+      });
+    }
+
+    if (refs.categories) {
+      refs.categories.addEventListener("click", function (event) {
+        const button = event.target.closest("[data-ai-prompt-category]");
+        if (!button) return;
+        state.category = button.dataset.aiPromptCategory || "all";
+        renderCategoryFilters();
+        renderLibrary();
+      });
+    }
+
+    if (refs.results) {
+      refs.results.addEventListener("click", function (event) {
+        const card = event.target.closest("[data-ai-prompt-id]");
+        if (!card) return;
+        openPromptDetail(card.dataset.aiPromptId || "");
+      });
+    }
+
+    if (refs.retry) {
+      refs.retry.addEventListener("click", loadLibrary);
+    }
+
+    if (refs.addButton) {
+      refs.addButton.addEventListener("click", openAddPromptDialog);
+    }
+
+    refs.detailClose.forEach(function (button) {
+      button.addEventListener("click", closeDetailDialog);
+    });
+
+    if (refs.detailCopy) {
+      refs.detailCopy.addEventListener("click", copyActivePrompt);
+    }
+
+    if (refs.detailCopyFooter) {
+      refs.detailCopyFooter.addEventListener("click", copyActivePrompt);
+    }
+
+    refs.addClose.forEach(function (button) {
+      button.addEventListener("click", closeAddPromptDialog);
+    });
+
+    if (refs.addForm) {
+      refs.addForm.addEventListener("submit", submitAddPrompt);
+    }
+
+    if (refs.categoryInput) {
+      refs.categoryInput.addEventListener("change", updateSortSuggestionsForCategory);
+      refs.categoryInput.addEventListener("blur", updateSortSuggestionsForCategory);
+    }
+
+    [refs.detailDialog, refs.addDialog].forEach(function (dialog) {
+      if (!dialog) return;
+      dialog.addEventListener("click", function (event) {
+        if (event.target === dialog) closeDialog(dialog);
+      });
+    });
+
+    root.addEventListener("keydown", function (event) {
+      if (event.key !== "Escape") return;
+      if (refs.detailDialog && refs.detailDialog.open) closeDetailDialog();
+      if (refs.addDialog && refs.addDialog.open) closeAddPromptDialog();
+    });
+  }
+
+  function syncAdminUI() {
+    const isAdmin = getEffectiveRole() === "admin";
+    if (refs.addButton) refs.addButton.hidden = !isAdmin;
+  }
+
+  function loadLibrary() {
+    if (!state.root || state.loading) return;
+
+    state.loading = true;
+    setLoadingState();
+
+    if (!isAppsScriptAvailable()) {
+      state.loading = false;
+      setErrorState("The Prompt Library is available when Nexus is running through Google Apps Script.");
+      return;
+    }
+
+    google.script.run
+      .withSuccessHandler(function (response) {
+        state.loading = false;
+        const payload = response && typeof response === "object" ? response : {};
+        state.prompts = Array.isArray(payload.prompts) ? payload.prompts : [];
+        state.categories = Array.isArray(payload.categories)
+          ? payload.categories
+          : deriveCategories(state.prompts);
+
+        if (
+          state.category !== "all" &&
+          !state.categories.some(function (category) { return category.name === state.category; })
+        ) {
+          state.category = "all";
+        }
+
+        populateCategoryDatalist();
+        renderCategoryFilters();
+        renderLibrary();
+      })
+      .withFailureHandler(function (error) {
+        state.loading = false;
+        console.error("[AI Prompt Library] Failed to load prompts:", error);
+        setErrorState(getErrorMessage(error, "Unable to load the Prompt Library."));
+      })
+      .getAIPromptLibrary();
+  }
+
+  function setLoadingState() {
+    if (refs.count) refs.count.textContent = "Loading prompts…";
+    if (refs.categories) refs.categories.replaceChildren();
+    if (refs.status) refs.status.hidden = true;
+    if (!refs.results) return;
+
+    refs.results.replaceChildren();
+    const skeleton = document.createElement("div");
+    skeleton.className = "ai-prompt-skeleton-grid";
+
+    for (let i = 0; i < 6; i += 1) {
+      const card = document.createElement("div");
+      card.className = "ai-prompt-skeleton-card";
+      card.innerHTML = '<span></span><span></span><span></span>';
+      skeleton.appendChild(card);
+    }
+
+    refs.results.appendChild(skeleton);
+  }
+
+  function setErrorState(message) {
+    if (refs.count) refs.count.textContent = "Prompt Library unavailable";
+    if (refs.results) refs.results.replaceChildren();
+    if (!refs.status) return;
+
+    refs.status.hidden = false;
+    refs.status.className = "ai-prompt-library-state is-error";
+    const text = refs.status.querySelector("[data-ai-prompt-status-text]");
+    if (text) text.textContent = message;
+    if (refs.retry) refs.retry.hidden = false;
+  }
+
+  function setEmptyState() {
+    if (!refs.status) return;
+    refs.status.hidden = false;
+    refs.status.className = "ai-prompt-library-state is-empty";
+    const text = refs.status.querySelector("[data-ai-prompt-status-text]");
+    if (text) {
+      text.textContent = state.prompts.length
+        ? "No prompts match your current search or category."
+        : "No prompts available yet.";
+    }
+    if (refs.retry) refs.retry.hidden = true;
+  }
+
+  function clearStateMessage() {
+    if (refs.status) refs.status.hidden = true;
+  }
+
+  function renderCategoryFilters() {
+    if (!refs.categories) return;
+    refs.categories.replaceChildren();
+
+    const all = createCategoryButton("all", "All", state.prompts.length);
+    refs.categories.appendChild(all);
+
+    state.categories.forEach(function (category) {
+      refs.categories.appendChild(
+        createCategoryButton(category.name, category.name, category.count)
+      );
+    });
+  }
+
+  function createCategoryButton(value, label, count) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "ai-prompt-category-chip";
+    button.dataset.aiPromptCategory = value;
+    button.classList.toggle("is-active", state.category === value);
+    button.setAttribute("aria-pressed", String(state.category === value));
+
+    const labelNode = document.createElement("span");
+    labelNode.textContent = label;
+    const countNode = document.createElement("small");
+    countNode.textContent = String(count || 0);
+
+    button.append(labelNode, countNode);
+    return button;
+  }
+
+  function renderLibrary() {
+    if (!refs.results) return;
+
+    const filtered = getVisiblePrompts();
+    refs.results.replaceChildren();
+
+    if (refs.count) {
+      refs.count.textContent = filtered.length === state.prompts.length
+        ? pluralizePrompt(filtered.length)
+        : filtered.length + " of " + pluralizePrompt(state.prompts.length);
+    }
+
+    if (!filtered.length) {
+      setEmptyState();
+      return;
+    }
+
+    clearStateMessage();
+
+    const groups = groupPrompts(filtered);
+    groups.forEach(function (group) {
+      refs.results.appendChild(createCategorySection(group));
+    });
+  }
+
+  function getVisiblePrompts() {
+    let prompts = state.prompts.slice();
+
+    if (state.category !== "all") {
+      prompts = prompts.filter(function (prompt) {
+        return prompt.category === state.category;
+      });
+    }
+
+    if (state.query) {
+      prompts = prompts.filter(function (prompt) {
+        return getSearchText(prompt).includes(state.query);
+      });
+    }
+
+    if (state.sort === "featured") {
+      prompts.sort(function (a, b) {
+        if (Boolean(a.featured) !== Boolean(b.featured)) {
+          return a.featured ? -1 : 1;
+        }
+        return compareSheetOrder(a, b);
+      });
+    } else if (state.sort === "az") {
+      prompts.sort(function (a, b) {
+        return String(a.promptTitle || "").localeCompare(
+          String(b.promptTitle || ""),
+          undefined,
+          { sensitivity: "base" }
+        );
+      });
+    } else {
+      prompts.sort(compareSheetOrder);
+    }
+
+    return prompts;
+  }
+
+  function compareSheetOrder(a, b) {
+    const categoryA = Number(a.categorySortOrder) || 0;
+    const categoryB = Number(b.categorySortOrder) || 0;
+    if (categoryA !== categoryB) return categoryA - categoryB;
+
+    const promptA = Number(a.promptSortOrder) || 0;
+    const promptB = Number(b.promptSortOrder) || 0;
+    if (promptA !== promptB) return promptA - promptB;
+
+    return String(a.promptTitle || "").localeCompare(
+      String(b.promptTitle || ""),
+      undefined,
+      { sensitivity: "base" }
+    );
+  }
+
+  function groupPrompts(prompts) {
+    const groups = [];
+    const map = new Map();
+
+    prompts.forEach(function (prompt) {
+      const name = String(prompt.category || "Uncategorized").trim() || "Uncategorized";
+      if (!map.has(name)) {
+        const group = {
+          name: name,
+          sortOrder: Number(prompt.categorySortOrder) || 0,
+          prompts: []
+        };
+        map.set(name, group);
+        groups.push(group);
+      }
+      map.get(name).prompts.push(prompt);
+    });
+
+    if (state.sort !== "az") {
+      groups.sort(function (a, b) {
+        if (a.sortOrder !== b.sortOrder) return a.sortOrder - b.sortOrder;
+        return a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
+      });
+    } else {
+      groups.sort(function (a, b) {
+        return a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
+      });
+    }
+
+    return groups;
+  }
+
+  function createCategorySection(group) {
+    const section = document.createElement("section");
+    section.className = "ai-prompt-category-section";
+
+    const heading = document.createElement("div");
+    heading.className = "ai-prompt-category-heading";
+
+    const titleWrap = document.createElement("div");
+    const title = document.createElement("h3");
+    title.textContent = group.name;
+    const count = document.createElement("span");
+    count.className = "ai-prompt-category-count";
+    count.textContent = pluralizePrompt(group.prompts.length);
+    titleWrap.append(title, count);
+    heading.appendChild(titleWrap);
+
+    const grid = document.createElement("div");
+    grid.className = "ai-prompt-card-grid";
+    group.prompts.forEach(function (prompt) {
+      grid.appendChild(createPromptCard(prompt));
+    });
+
+    section.append(heading, grid);
+    return section;
+  }
+
+  function createPromptCard(prompt) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "ai-prompt-card";
+    button.dataset.aiPromptId = String(prompt.id || "");
+    button.setAttribute("aria-label", "View prompt: " + String(prompt.promptTitle || "Prompt"));
+
+    const top = document.createElement("div");
+    top.className = "ai-prompt-card-top";
+
+    const icon = createIconNode(prompt.icon, "ai-prompt-card-icon");
+    top.appendChild(icon);
+
+    if (prompt.featured) {
+      const featured = document.createElement("span");
+      featured.className = "ai-prompt-featured-star";
+      featured.title = "Featured prompt";
+      featured.setAttribute("aria-label", "Featured prompt");
+      featured.textContent = "★";
+      top.appendChild(featured);
+    }
+
+    const title = document.createElement("h4");
+    title.textContent = String(prompt.promptTitle || "Untitled Prompt");
+
+    const description = document.createElement("p");
+    description.textContent = String(prompt.shortDescription || "");
+
+    const footer = document.createElement("div");
+    footer.className = "ai-prompt-card-footer";
+
+    const meta = document.createElement("div");
+    meta.className = "ai-prompt-card-meta";
+
+    if (prompt.useCase) meta.appendChild(createPill(prompt.useCase));
+    if (prompt.audience) meta.appendChild(createPill(prompt.audience, "is-muted"));
+
+    const action = document.createElement("span");
+    action.className = "ai-prompt-card-action";
+    action.textContent = "View Prompt";
+
+    footer.append(meta, action);
+    button.append(top, title, description, footer);
+    return button;
+  }
+
+  function openPromptDetail(promptId) {
+    const prompt = state.prompts.find(function (item) {
+      return String(item.id || "") === String(promptId || "");
+    });
+
+    if (!prompt || !refs.detailDialog) return;
+    state.activePromptId = String(prompt.id || "");
+
+    if (refs.detailTitle) refs.detailTitle.textContent = prompt.promptTitle || "Prompt";
+    if (refs.detailFeatured) refs.detailFeatured.hidden = !prompt.featured;
+    if (refs.detailDescription) refs.detailDescription.textContent = prompt.shortDescription || "";
+    if (refs.detailPrompt) refs.detailPrompt.textContent = prompt.prompt || "";
+
+    renderDetailMeta(prompt);
+    renderOptionalDetail(refs.detailVariablesWrap, refs.detailVariables, prompt.variables);
+    renderOptionalDetail(refs.detailOutputWrap, refs.detailOutput, prompt.outputFormat);
+    renderTags(prompt.tags);
+
+    openDialog(refs.detailDialog);
+  }
+
+  function renderDetailMeta(prompt) {
+    if (!refs.detailMeta) return;
+    refs.detailMeta.replaceChildren();
+
+    [
+      ["Category", prompt.category],
+      ["Use Case", prompt.useCase],
+      ["Audience", prompt.audience]
+    ].forEach(function (entry) {
+      if (!entry[1]) return;
+      const item = document.createElement("div");
+      item.className = "ai-prompt-detail-meta-item";
+      const label = document.createElement("span");
+      label.textContent = entry[0];
+      const value = document.createElement("strong");
+      value.textContent = entry[1];
+      item.append(label, value);
+      refs.detailMeta.appendChild(item);
+    });
+  }
+
+  function renderOptionalDetail(wrapper, target, value) {
+    if (!wrapper || !target) return;
+    const normalized = String(value || "").trim();
+    wrapper.hidden = !normalized;
+    target.textContent = normalized;
+  }
+
+  function renderTags(tags) {
+    if (!refs.detailTagsWrap || !refs.detailTags) return;
+    const items = splitList(tags);
+    refs.detailTagsWrap.hidden = !items.length;
+    refs.detailTags.replaceChildren();
+    items.forEach(function (tag) {
+      refs.detailTags.appendChild(createPill(tag));
+    });
+  }
+
+  function closeDetailDialog() {
+    state.activePromptId = "";
+    closeDialog(refs.detailDialog);
+  }
+
+  function copyActivePrompt() {
+    const prompt = state.prompts.find(function (item) {
+      return String(item.id || "") === state.activePromptId;
+    });
+    if (!prompt) return;
+
+    copyText(String(prompt.prompt || ""))
+      .then(function () {
+        showToast("Prompt copied to clipboard.", "success");
+      })
+      .catch(function () {
+        showToast("Unable to copy the prompt. Please select the text manually.", "error");
+      });
+  }
+
+  function openAddPromptDialog() {
+    if (getEffectiveRole() !== "admin" || !refs.addDialog || !refs.addForm) return;
+
+    refs.addForm.reset();
+    clearAddError();
+
+    const icon = refs.addForm.elements.icon;
+    const featured = refs.addForm.elements.featured;
+    const status = refs.addForm.elements.status;
+
+    if (icon) icon.value = "sparkles";
+    if (featured) featured.checked = false;
+    if (status) status.value = "Active";
+
+    const maxCategorySort = state.categories.reduce(function (max, category) {
+      return Math.max(max, Number(category.sortOrder) || 0);
+    }, 0);
+
+    if (refs.categorySort) refs.categorySort.value = String(maxCategorySort + 1 || 1);
+    if (refs.promptSort) refs.promptSort.value = "1";
+
+    populateCategoryDatalist();
+    openDialog(refs.addDialog);
+
+    const first = refs.addForm.elements.category;
+    if (first && typeof first.focus === "function") {
+      window.setTimeout(function () { first.focus(); }, 50);
+    }
+  }
+
+  function closeAddPromptDialog() {
+    clearAddError();
+    setAddSubmitting(false);
+    closeDialog(refs.addDialog);
+  }
+
+  function updateSortSuggestionsForCategory() {
+    if (!refs.categoryInput) return;
+    const categoryName = refs.categoryInput.value.trim();
+    if (!categoryName) return;
+
+    const prompts = state.prompts.filter(function (prompt) {
+      return String(prompt.category || "").toLowerCase() === categoryName.toLowerCase();
+    });
+
+    const existingCategory = state.categories.find(function (category) {
+      return String(category.name || "").toLowerCase() === categoryName.toLowerCase();
+    });
+
+    if (existingCategory) {
+      if (refs.categorySort) refs.categorySort.value = String(Number(existingCategory.sortOrder) || 0);
+      const maxPromptSort = prompts.reduce(function (max, prompt) {
+        return Math.max(max, Number(prompt.promptSortOrder) || 0);
+      }, 0);
+      if (refs.promptSort) refs.promptSort.value = String(maxPromptSort + 1);
+      return;
+    }
+
+    const maxCategorySort = state.categories.reduce(function (max, category) {
+      return Math.max(max, Number(category.sortOrder) || 0);
+    }, 0);
+    if (refs.categorySort) refs.categorySort.value = String(maxCategorySort + 1);
+    if (refs.promptSort) refs.promptSort.value = "1";
+  }
+
+  function submitAddPrompt(event) {
+    event.preventDefault();
+    if (getEffectiveRole() !== "admin") {
+      setAddError("Administrator access is required.");
+      return;
+    }
+
+    if (!refs.addForm || !refs.addForm.reportValidity()) return;
+    if (!isAppsScriptAvailable()) {
+      setAddError("Google Apps Script is unavailable in this environment.");
+      return;
+    }
+
+    const form = new FormData(refs.addForm);
+    const payload = {
+      icon: String(form.get("icon") || "sparkles"),
+      category: String(form.get("category") || "").trim(),
+      categorySortOrder: Number(form.get("categorySortOrder")),
+      promptTitle: String(form.get("promptTitle") || "").trim(),
+      shortDescription: String(form.get("shortDescription") || "").trim(),
+      prompt: String(form.get("prompt") || "").trim(),
+      useCase: String(form.get("useCase") || "").trim(),
+      tags: String(form.get("tags") || "").trim(),
+      audience: String(form.get("audience") || "").trim(),
+      variables: String(form.get("variables") || "").trim(),
+      outputFormat: String(form.get("outputFormat") || "").trim(),
+      featured: form.get("featured") === "on",
+      promptSortOrder: Number(form.get("promptSortOrder")),
+      status: String(form.get("status") || "Active")
+    };
+
+    clearAddError();
+    setAddSubmitting(true);
+
+    google.script.run
+      .withSuccessHandler(function (response) {
+        setAddSubmitting(false);
+        closeAddPromptDialog();
+        showToast(
+          response && response.message
+            ? response.message
+            : "Prompt added successfully.",
+          "success"
+        );
+        loadLibrary();
+      })
+      .withFailureHandler(function (error) {
+        setAddSubmitting(false);
+        console.error("[AI Prompt Library] Failed to add prompt:", error);
+        setAddError(getErrorMessage(error, "Unable to add the prompt."));
+      })
+      .addAIPrompt(payload);
+  }
+
+  function setAddSubmitting(isSubmitting) {
+    if (!refs.addSubmit) return;
+    refs.addSubmit.disabled = Boolean(isSubmitting);
+    refs.addSubmit.classList.toggle("is-loading", Boolean(isSubmitting));
+    refs.addSubmit.textContent = isSubmitting ? "Saving…" : "Add Prompt";
+  }
+
+  function setAddError(message) {
+    if (!refs.addError) return;
+    refs.addError.hidden = false;
+    refs.addError.textContent = message;
+  }
+
+  function clearAddError() {
+    if (!refs.addError) return;
+    refs.addError.hidden = true;
+    refs.addError.textContent = "";
+  }
+
+  function populateCategoryDatalist() {
+    if (!refs.categoryDatalist) return;
+    refs.categoryDatalist.replaceChildren();
+    state.categories.forEach(function (category) {
+      const option = document.createElement("option");
+      option.value = category.name;
+      refs.categoryDatalist.appendChild(option);
+    });
+  }
+
+  function deriveCategories(prompts) {
+    const map = new Map();
+    prompts.forEach(function (prompt) {
+      const name = String(prompt.category || "Uncategorized").trim() || "Uncategorized";
+      if (!map.has(name)) {
+        map.set(name, {
+          name: name,
+          sortOrder: Number(prompt.categorySortOrder) || 0,
+          count: 1
+        });
+      } else {
+        map.get(name).count += 1;
+      }
+    });
+    return Array.from(map.values()).sort(function (a, b) {
+      if (a.sortOrder !== b.sortOrder) return a.sortOrder - b.sortOrder;
+      return a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
+    });
+  }
+
+  function getSearchText(prompt) {
+    return [
+      prompt.promptTitle,
+      prompt.shortDescription,
+      prompt.prompt,
+      prompt.category,
+      prompt.useCase,
+      prompt.tags,
+      prompt.audience,
+      prompt.variables,
+      prompt.outputFormat
+    ].map(function (value) {
+      return String(value || "").toLowerCase();
+    }).join(" ");
+  }
+
+  function createIconNode(iconKey, className) {
+    const wrapper = document.createElement("span");
+    wrapper.className = className || "ai-prompt-icon";
+    wrapper.innerHTML = ICONS[iconKey] || ICONS.sparkles;
+    return wrapper;
+  }
+
+  function createPill(text, extraClass) {
+    const pill = document.createElement("span");
+    pill.className = "ai-prompt-pill" + (extraClass ? " " + extraClass : "");
+    pill.textContent = String(text || "");
+    return pill;
+  }
+
+  function splitList(value) {
+    return String(value || "")
+      .split(",")
+      .map(function (item) { return item.trim(); })
+      .filter(Boolean)
+      .slice(0, 20);
+  }
+
+  function pluralizePrompt(count) {
+    return count + (count === 1 ? " prompt" : " prompts");
+  }
+
+  function openDialog(dialog) {
+    if (!dialog) return;
+    if (typeof dialog.showModal === "function") {
+      if (!dialog.open) dialog.showModal();
+      return;
+    }
+    dialog.setAttribute("open", "");
+  }
+
+  function closeDialog(dialog) {
+    if (!dialog) return;
+    if (typeof dialog.close === "function" && dialog.open) {
+      dialog.close();
+      return;
+    }
+    dialog.removeAttribute("open");
+  }
+
+  function copyText(text) {
+    if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
+      return navigator.clipboard.writeText(text);
+    }
+
+    return new Promise(function (resolve, reject) {
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      textarea.setAttribute("readonly", "");
+      textarea.style.position = "fixed";
+      textarea.style.opacity = "0";
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        const copied = document.execCommand("copy");
+        textarea.remove();
+        copied ? resolve() : reject(new Error("Copy failed"));
+      } catch (error) {
+        textarea.remove();
+        reject(error);
+      }
+    });
+  }
+
+  let toastTimer = null;
+  function showToast(message, type) {
+    if (!refs.toast || !refs.toastMessage) return;
+    window.clearTimeout(toastTimer);
+    refs.toast.hidden = false;
+    refs.toast.dataset.toastType = type === "error" ? "error" : "success";
+    refs.toastMessage.textContent = message;
+    toastTimer = window.setTimeout(function () {
+      if (refs.toast) refs.toast.hidden = true;
+    }, 3200);
+  }
+
+  function getErrorMessage(error, fallback) {
+    if (!error) return fallback;
+    if (typeof error === "string") return error;
+    return String(error.message || error.details || fallback);
+  }
+
+  document.addEventListener("nexus:viewmodechange", function () {
+    syncAdminUI();
+    if (getEffectiveRole() !== "admin" && refs.addDialog && refs.addDialog.open) {
+      closeAddPromptDialog();
+    }
+  });
+
+  window.NexusAIPromptLibrary = {
+    initialize: initialize,
+    refresh: loadLibrary,
+    syncAdminUI: syncAdminUI
+  };
+})();
+</script>

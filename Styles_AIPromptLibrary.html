@@ -12,7 +12,9 @@
    - AI Prompt Library page colors
    - hero image treatment
    - hero overlay
-   - blank future-content surface
+   - sheet-backed prompt library
+   - prompt cards, filters, and modals
+   - admin Add Prompt experience
 ========================================================= */
 
 .ai-prompt-library-page {
@@ -118,8 +120,7 @@
 }
 
 /* =========================================================
-   BLANK FUTURE CONTENT AREA
-   Intentionally contains no title, buttons, or cards yet.
+   PROMPT LIBRARY CONTENT AREA
 ========================================================= */
 
 .ai-prompt-library-placeholder {
@@ -130,6 +131,7 @@
 .ai-prompt-library-placeholder-surface {
   width: 100%;
   min-height: clamp(430px, 49vh, 700px);
+  padding: 22px;
   border: 1px solid #D8E7F4;
   border-radius: 18px;
   background:
@@ -196,4 +198,898 @@
     border-radius: 14px;
   }
 }
+
+/* =========================================================
+   LIBRARY HEADER + TOOLBAR
+========================================================= */
+
+.ai-prompt-library-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 18px;
+}
+
+.ai-prompt-library-heading-copy {
+  min-width: 0;
+}
+
+.ai-prompt-library-kicker {
+  margin: 0 0 5px;
+  color: #1660D9;
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+}
+
+.ai-prompt-library-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.ai-prompt-library-title-row h2 {
+  margin: 0;
+  color: #082768;
+  font-size: clamp(1.45rem, 2vw, 2rem);
+  line-height: 1.05;
+  letter-spacing: -.03em;
+}
+
+.ai-prompt-library-heading-copy > p:last-child {
+  margin: 7px 0 0;
+  color: #58719D;
+  font-size: .92rem;
+  line-height: 1.45;
+}
+
+.ai-prompt-library-count {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 4px 9px;
+  border: 1px solid #D5E5F5;
+  border-radius: 999px;
+  color: #315A8F;
+  background: #F5FAFF;
+  font-size: .74rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.ai-prompt-library-add-button,
+.ai-prompt-primary-button,
+.ai-prompt-copy-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 0;
+  border-radius: 10px;
+  color: #FFFFFF;
+  background: linear-gradient(135deg, #0B5FEF 0%, #275DFF 62%, #784CFF 100%);
+  box-shadow: 0 8px 18px rgb(27 92 234 / 18%);
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform .18s ease, box-shadow .18s ease, opacity .18s ease;
+}
+
+.ai-prompt-library-add-button {
+  min-height: 40px;
+  padding: 0 14px;
+  font-size: .86rem;
+  white-space: nowrap;
+}
+
+.ai-prompt-library-add-button:hover,
+.ai-prompt-primary-button:hover,
+.ai-prompt-copy-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgb(27 92 234 / 24%);
+}
+
+.ai-prompt-library-toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.ai-prompt-library-search-field {
+  position: relative;
+  display: block;
+  min-width: 0;
+}
+
+.ai-prompt-library-search-icon {
+  position: absolute;
+  left: 13px;
+  top: 50%;
+  width: 18px;
+  height: 18px;
+  transform: translateY(-50%);
+  color: #6883AC;
+  pointer-events: none;
+}
+
+.ai-prompt-library-search-icon svg,
+.ai-prompt-card-icon svg,
+.ai-prompt-copy-button svg {
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.ai-prompt-library-search-field input,
+.ai-prompt-library-sort-field select,
+.ai-prompt-form-field input,
+.ai-prompt-form-field select,
+.ai-prompt-form-field textarea {
+  width: 100%;
+  border: 1px solid #D6E4F3;
+  border-radius: 10px;
+  color: #173A75;
+  background: #FFFFFF;
+  outline: none;
+  transition: border-color .18s ease, box-shadow .18s ease;
+}
+
+.ai-prompt-library-search-field input {
+  min-height: 42px;
+  padding: 0 14px 0 42px;
+  font-size: .9rem;
+}
+
+.ai-prompt-library-search-field input:focus,
+.ai-prompt-library-sort-field select:focus,
+.ai-prompt-form-field input:focus,
+.ai-prompt-form-field select:focus,
+.ai-prompt-form-field textarea:focus {
+  border-color: #69A7FF;
+  box-shadow: 0 0 0 3px rgb(54 125 255 / 11%);
+}
+
+.ai-prompt-library-sort-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #5B7297;
+  font-size: .8rem;
+  font-weight: 700;
+}
+
+.ai-prompt-library-sort-field select {
+  min-width: 145px;
+  min-height: 42px;
+  padding: 0 34px 0 11px;
+  font-size: .84rem;
+  font-weight: 700;
+}
+
+.ai-prompt-library-categories {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 2px 1px 10px;
+  scrollbar-width: thin;
+}
+
+.ai-prompt-category-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid #D7E6F5;
+  border-radius: 999px;
+  color: #365986;
+  background: #FFFFFF;
+  font-size: .78rem;
+  font-weight: 800;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.ai-prompt-category-chip small {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: 999px;
+  color: #6781A6;
+  background: #EEF5FC;
+  font-size: .67rem;
+}
+
+.ai-prompt-category-chip.is-active {
+  border-color: #8FB8FF;
+  color: #0C56D9;
+  background: #EEF5FF;
+  box-shadow: inset 0 0 0 1px rgb(91 145 255 / 12%);
+}
+
+/* =========================================================
+   CATEGORY GROUPS + PROMPT CARDS
+========================================================= */
+
+.ai-prompt-library-results {
+  display: grid;
+  gap: 22px;
+  padding-top: 4px;
+}
+
+.ai-prompt-category-section {
+  min-width: 0;
+}
+
+.ai-prompt-category-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.ai-prompt-category-heading > div {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.ai-prompt-category-heading h3 {
+  margin: 0;
+  color: #102D6D;
+  font-size: 1rem;
+  line-height: 1.2;
+}
+
+.ai-prompt-category-count {
+  color: #7A90B1;
+  font-size: .72rem;
+  font-weight: 700;
+}
+
+.ai-prompt-card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.ai-prompt-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 180px;
+  padding: 16px;
+  border: 1px solid #DCE8F4;
+  border-radius: 14px;
+  text-align: left;
+  color: #15376F;
+  background: linear-gradient(145deg, #FFFFFF 0%, #FBFDFF 100%);
+  box-shadow: 0 5px 14px rgb(12 55 110 / 4%);
+  cursor: pointer;
+  transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+
+.ai-prompt-card:hover,
+.ai-prompt-card:focus-visible {
+  transform: translateY(-2px);
+  border-color: #9BC2FF;
+  box-shadow: 0 11px 26px rgb(19 76 153 / 10%);
+  outline: none;
+}
+
+.ai-prompt-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.ai-prompt-card-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 8px;
+  border-radius: 10px;
+  color: #FFFFFF;
+  background: linear-gradient(135deg, #1B6CF3, #7657FF);
+  box-shadow: 0 6px 14px rgb(68 99 235 / 20%);
+}
+
+.ai-prompt-featured-star {
+  color: #F4A900;
+  font-size: 1.05rem;
+}
+
+.ai-prompt-card h4 {
+  margin: 0 0 7px;
+  color: #0B2869;
+  font-size: .94rem;
+  line-height: 1.28;
+}
+
+.ai-prompt-card > p {
+  display: -webkit-box;
+  overflow: hidden;
+  margin: 0;
+  color: #5A7097;
+  font-size: .81rem;
+  line-height: 1.45;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.ai-prompt-card-footer {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 14px;
+}
+
+.ai-prompt-card-meta,
+.ai-prompt-detail-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+}
+
+.ai-prompt-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 23px;
+  max-width: 100%;
+  padding: 3px 8px;
+  border-radius: 999px;
+  color: #3565A3;
+  background: #EEF5FF;
+  font-size: .66rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.ai-prompt-pill.is-muted {
+  color: #6B7791;
+  background: #F1F4F8;
+}
+
+.ai-prompt-card-action {
+  flex: 0 0 auto;
+  color: #1A61E8;
+  font-size: .72rem;
+  font-weight: 800;
+}
+
+/* =========================================================
+   LOADING / EMPTY / ERROR
+========================================================= */
+
+.ai-prompt-skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.ai-prompt-skeleton-card {
+  min-height: 170px;
+  padding: 16px;
+  border: 1px solid #E4EDF6;
+  border-radius: 14px;
+  background: #FFFFFF;
+}
+
+.ai-prompt-skeleton-card span {
+  display: block;
+  height: 12px;
+  margin-bottom: 12px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #EEF4FA 20%, #F8FBFE 45%, #EEF4FA 70%);
+  background-size: 220% 100%;
+  animation: ai-prompt-shimmer 1.3s infinite linear;
+}
+
+.ai-prompt-skeleton-card span:first-child {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+}
+
+.ai-prompt-skeleton-card span:nth-child(2) { width: 72%; }
+.ai-prompt-skeleton-card span:nth-child(3) { width: 92%; }
+
+@keyframes ai-prompt-shimmer {
+  to { background-position: -220% 0; }
+}
+
+.ai-prompt-library-state {
+  display: grid;
+  place-items: center;
+  gap: 8px;
+  min-height: 230px;
+  padding: 30px;
+  text-align: center;
+  color: #617799;
+}
+
+.ai-prompt-library-state-icon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  color: #1C67E9;
+  background: #ECF4FF;
+  font-size: 1.2rem;
+}
+
+.ai-prompt-library-state p {
+  margin: 0;
+  font-size: .9rem;
+}
+
+.ai-prompt-library-state.is-error .ai-prompt-library-state-icon {
+  color: #B42318;
+  background: #FFF0EE;
+}
+
+.ai-prompt-library-retry {
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid #C9DBF2;
+  border-radius: 9px;
+  color: #1D5FC6;
+  background: #FFFFFF;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+/* =========================================================
+   MODALS
+========================================================= */
+
+.ai-prompt-dialog {
+  width: min(760px, calc(100vw - 30px));
+  max-height: min(86vh, 860px);
+  padding: 0;
+  border: 0;
+  border-radius: 18px;
+  overflow: hidden;
+  color: #15376F;
+  background: transparent;
+  box-shadow: 0 30px 90px rgb(9 35 77 / 28%);
+}
+
+.ai-prompt-add-dialog {
+  width: min(860px, calc(100vw - 30px));
+}
+
+.ai-prompt-dialog::backdrop {
+  background: rgb(5 24 56 / 44%);
+  backdrop-filter: blur(4px);
+}
+
+.ai-prompt-dialog-shell {
+  display: flex;
+  flex-direction: column;
+  max-height: inherit;
+  background: #FFFFFF;
+}
+
+.ai-prompt-dialog-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 20px 22px 17px;
+  border-bottom: 1px solid #E5EDF6;
+  background: linear-gradient(180deg, #FFFFFF 0%, #FAFCFF 100%);
+}
+
+.ai-prompt-dialog-header h2 {
+  margin: 0;
+  color: #0A2868;
+  font-size: 1.22rem;
+  line-height: 1.2;
+}
+
+.ai-prompt-dialog-header p {
+  margin: 5px 0 0;
+  color: #7083A2;
+  font-size: .8rem;
+  line-height: 1.4;
+}
+
+.ai-prompt-dialog-eyebrow {
+  color: #1B64E4 !important;
+  font-size: .66rem !important;
+  font-weight: 800;
+  letter-spacing: .16em;
+}
+
+.ai-prompt-dialog-close {
+  display: grid;
+  place-items: center;
+  flex: 0 0 34px;
+  width: 34px;
+  height: 34px;
+  border: 1px solid #DEE8F3;
+  border-radius: 10px;
+  color: #61799B;
+  background: #FFFFFF;
+  font-size: 1.35rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.ai-prompt-dialog-body,
+.ai-prompt-add-form {
+  overflow-y: auto;
+}
+
+.ai-prompt-dialog-body {
+  display: grid;
+  gap: 18px;
+  padding: 20px 22px;
+}
+
+.ai-prompt-detail-title-line {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex-wrap: wrap;
+}
+
+.ai-prompt-detail-featured {
+  padding: 4px 8px;
+  border-radius: 999px;
+  color: #9A6500;
+  background: #FFF4CE;
+  font-size: .68rem;
+  font-weight: 800;
+}
+
+.ai-prompt-detail-section h3 {
+  margin: 0 0 8px;
+  color: #16346D;
+  font-size: .82rem;
+}
+
+.ai-prompt-detail-meta {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.ai-prompt-detail-meta-item {
+  padding: 10px 11px;
+  border: 1px solid #E1EAF5;
+  border-radius: 10px;
+  background: #F9FBFE;
+}
+
+.ai-prompt-detail-meta-item span {
+  display: block;
+  margin-bottom: 3px;
+  color: #8393AD;
+  font-size: .65rem;
+  font-weight: 700;
+}
+
+.ai-prompt-detail-meta-item strong {
+  color: #315B93;
+  font-size: .76rem;
+}
+
+.ai-prompt-detail-description,
+.ai-prompt-detail-text {
+  margin: 0;
+  color: #5B7094;
+  font-size: .84rem;
+  line-height: 1.5;
+}
+
+.ai-prompt-detail-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.ai-prompt-detail-section-heading h3 { margin: 0; }
+
+.ai-prompt-copy-button {
+  min-height: 32px;
+  padding: 0 10px;
+  border-radius: 8px;
+  font-size: .73rem;
+}
+
+.ai-prompt-copy-button svg {
+  width: 14px;
+  height: 14px;
+}
+
+.ai-prompt-detail-prompt {
+  margin: 0;
+  padding: 14px;
+  border: 1px solid #DAE7F4;
+  border-radius: 11px;
+  overflow: auto;
+  color: #244C83;
+  background: #F6FAFF;
+  font: inherit;
+  font-size: .82rem;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.ai-prompt-dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 14px 22px 18px;
+  border-top: 1px solid #E8EFF7;
+  background: #FCFDFF;
+}
+
+.ai-prompt-primary-button,
+.ai-prompt-secondary-button {
+  min-height: 38px;
+  padding: 0 14px;
+  font-size: .8rem;
+}
+
+.ai-prompt-secondary-button {
+  border: 1px solid #D5E1EF;
+  border-radius: 10px;
+  color: #496486;
+  background: #FFFFFF;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+/* =========================================================
+   ADMIN FORM
+========================================================= */
+
+.ai-prompt-add-form {
+  padding: 20px 22px 0;
+}
+
+.ai-prompt-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.ai-prompt-form-field {
+  display: grid;
+  gap: 6px;
+}
+
+.ai-prompt-form-field--wide {
+  grid-column: 1 / -1;
+}
+
+.ai-prompt-form-field > span {
+  color: #3B557A;
+  font-size: .74rem;
+  font-weight: 800;
+}
+
+.ai-prompt-form-field > span b {
+  color: #1C63DF;
+}
+
+.ai-prompt-form-field input,
+.ai-prompt-form-field select {
+  min-height: 40px;
+  padding: 0 11px;
+  font-size: .82rem;
+}
+
+.ai-prompt-form-field textarea {
+  padding: 10px 11px;
+  resize: vertical;
+  font: inherit;
+  font-size: .82rem;
+  line-height: 1.5;
+}
+
+.ai-prompt-form-check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 58px;
+  padding: 10px 12px;
+  border: 1px solid #DEE8F3;
+  border-radius: 10px;
+  background: #F9FBFE;
+}
+
+.ai-prompt-form-check input {
+  width: 18px;
+  min-height: 18px;
+  margin: 0;
+}
+
+.ai-prompt-form-check span {
+  display: grid;
+  gap: 2px;
+}
+
+.ai-prompt-form-check strong {
+  color: #385987;
+  font-size: .77rem;
+}
+
+.ai-prompt-form-check small {
+  color: #7C8EAA;
+  font-size: .68rem;
+  font-weight: 500;
+}
+
+.ai-prompt-add-error {
+  margin: 14px 0 0;
+  padding: 10px 12px;
+  border: 1px solid #F4C7C3;
+  border-radius: 9px;
+  color: #A02C20;
+  background: #FFF4F2;
+  font-size: .78rem;
+}
+
+.ai-prompt-add-footer {
+  margin: 18px -22px 0;
+}
+
+.ai-prompt-primary-button:disabled {
+  opacity: .64;
+  cursor: wait;
+  transform: none;
+}
+
+/* =========================================================
+   TOAST
+========================================================= */
+
+.ai-prompt-library-toast {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 2200;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  max-width: min(380px, calc(100vw - 32px));
+  padding: 12px 14px;
+  border: 1px solid #BEE7CB;
+  border-radius: 11px;
+  color: #1F6540;
+  background: #F1FFF6;
+  box-shadow: 0 16px 42px rgb(7 42 27 / 16%);
+  font-size: .78rem;
+  font-weight: 700;
+}
+
+.ai-prompt-library-toast[data-toast-type="error"] {
+  border-color: #F1C3BF;
+  color: #9B3027;
+  background: #FFF4F2;
+}
+
+.ai-prompt-library-toast-icon {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  color: #FFFFFF;
+  background: #2FA866;
+}
+
+.ai-prompt-library-toast[data-toast-type="error"] .ai-prompt-library-toast-icon {
+  background: #C4473C;
+}
+
+
+
+@media (max-width: 1199px) {
+  .ai-prompt-card-grid,
+  .ai-prompt-skeleton-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 767px) {
+  .ai-prompt-library-placeholder-surface {
+    padding: 14px;
+  }
+
+  .ai-prompt-library-header {
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .ai-prompt-library-add-button {
+    width: 100%;
+  }
+
+  .ai-prompt-library-toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .ai-prompt-library-sort-field {
+    justify-content: space-between;
+  }
+
+  .ai-prompt-library-sort-field select {
+    min-width: 0;
+    width: min(180px, 58vw);
+  }
+
+  .ai-prompt-card-grid,
+  .ai-prompt-skeleton-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ai-prompt-card {
+    min-height: 160px;
+  }
+
+  .ai-prompt-dialog {
+    width: calc(100vw - 18px);
+    max-height: 92vh;
+    border-radius: 14px;
+  }
+
+  .ai-prompt-dialog-header,
+  .ai-prompt-dialog-body,
+  .ai-prompt-add-form {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .ai-prompt-dialog-footer {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .ai-prompt-detail-meta,
+  .ai-prompt-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ai-prompt-form-field--wide {
+    grid-column: auto;
+  }
+
+  .ai-prompt-add-footer {
+    margin-left: -14px;
+    margin-right: -14px;
+  }
+
+  .ai-prompt-library-toast {
+    right: 12px;
+    bottom: 12px;
+  }
+}
+
 </style>

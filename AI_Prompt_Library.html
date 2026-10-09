@@ -2,11 +2,9 @@
      AI PROMPT LIBRARY
      Novare Nexus / ONESCA
      ---------------------------------------------------------
-     Purpose:
-     - Dedicated AI Prompt Library landing page.
-     - Hero only for Phase 1.
-     - Blank content surface below the hero for future modules.
-     - No human faces in the hero.
+     - Shared Nexus hero pattern
+     - Sheet-backed prompt library
+     - Admin-only Add Prompt workflow
 ========================================================== -->
 
 <section
@@ -15,10 +13,6 @@
   aria-labelledby="ai-prompt-library-title"
 >
 
-  <!-- =======================================================
-       HERO
-       Uses the same semantic contract as other Nexus heroes.
-  ======================================================== -->
   <section
     class="ai-prompt-library-hero page-hero"
     data-page-hero
@@ -52,10 +46,7 @@
 
     <div class="ai-prompt-library-hero-content">
       <div class="ai-prompt-library-hero-copy">
-
-        <p class="ai-prompt-library-eyebrow">
-          AI PROMPT LIBRARY
-        </p>
+        <p class="ai-prompt-library-eyebrow">AI PROMPT LIBRARY</p>
 
         <h1
           id="ai-prompt-library-title"
@@ -70,25 +61,289 @@
           Ready-to-use prompt patterns for discovery, proposals,
           solutioning, delivery, and everyday productivity.
         </p>
-
       </div>
     </div>
   </section>
 
-  <!-- =======================================================
-       FUTURE CONTENT AREA
-       Intentionally blank for now.
-       Do not add cards, headings, buttons, or sample prompts yet.
-  ======================================================== -->
   <section
     id="ai-prompt-library-content"
     class="ai-prompt-library-placeholder"
     aria-label="AI Prompt Library content area"
   >
     <div
-      class="ai-prompt-library-placeholder-surface"
-      aria-hidden="true"
-    ></div>
+      id="ai-prompt-library-surface"
+      class="ai-prompt-library-placeholder-surface ai-prompt-library-surface"
+    >
+      <div id="ai-prompt-library-header" class="ai-prompt-library-header">
+        <div class="ai-prompt-library-heading-copy">
+          <p class="ai-prompt-library-kicker">PROMPT COLLECTION</p>
+          <div class="ai-prompt-library-title-row">
+            <h2>Prompt Library</h2>
+            <span id="ai-prompt-library-count" class="ai-prompt-library-count" aria-live="polite">
+              Loading prompts…
+            </span>
+          </div>
+          <p>
+            Browse reusable prompts maintained by the Nexus team and organized by category.
+          </p>
+        </div>
+
+        <button
+          id="ai-prompt-library-add"
+          class="ai-prompt-library-add-button"
+          type="button"
+          hidden
+        >
+          <span aria-hidden="true">＋</span>
+          Add Prompt
+        </button>
+      </div>
+
+      <div class="ai-prompt-library-toolbar" aria-label="Prompt Library controls">
+        <label class="ai-prompt-library-search-field" for="ai-prompt-library-search">
+          <span class="ai-prompt-library-search-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"></circle><path d="m16 16 4 4"></path></svg>
+          </span>
+          <input
+            id="ai-prompt-library-search"
+            type="search"
+            autocomplete="off"
+            placeholder="Search prompts, categories, use cases, or tags..."
+            aria-label="Search prompts"
+          >
+        </label>
+
+        <label class="ai-prompt-library-sort-field" for="ai-prompt-library-sort">
+          <span>Sort by</span>
+          <select id="ai-prompt-library-sort" aria-label="Sort prompts">
+            <option value="sheet">Library order</option>
+            <option value="featured">Featured first</option>
+            <option value="az">A–Z</option>
+          </select>
+        </label>
+      </div>
+
+      <div
+        id="ai-prompt-library-categories"
+        class="ai-prompt-library-categories"
+        aria-label="Prompt categories"
+      ></div>
+
+      <div id="ai-prompt-library-results" class="ai-prompt-library-results" aria-live="polite"></div>
+
+      <div id="ai-prompt-library-status" class="ai-prompt-library-state" hidden>
+        <div class="ai-prompt-library-state-icon" aria-hidden="true">✦</div>
+        <p data-ai-prompt-status-text>No prompts available yet.</p>
+        <button id="ai-prompt-library-retry" type="button" class="ai-prompt-library-retry" hidden>
+          Try Again
+        </button>
+      </div>
+    </div>
   </section>
 
+  <!-- Prompt detail modal -->
+  <dialog id="ai-prompt-detail-dialog" class="ai-prompt-dialog ai-prompt-detail-dialog">
+    <div class="ai-prompt-dialog-shell">
+      <header class="ai-prompt-dialog-header">
+        <div>
+          <div class="ai-prompt-detail-title-line">
+            <h2 id="ai-prompt-detail-title">Prompt</h2>
+            <span id="ai-prompt-detail-featured" class="ai-prompt-detail-featured" hidden>★ Featured</span>
+          </div>
+          <p>Review the prompt details, then copy it into your preferred AI tool.</p>
+        </div>
+        <button
+          class="ai-prompt-dialog-close"
+          type="button"
+          data-ai-prompt-detail-close
+          aria-label="Close prompt details"
+        >×</button>
+      </header>
+
+      <div class="ai-prompt-dialog-body">
+        <section class="ai-prompt-detail-section">
+          <h3>Basic Information</h3>
+          <div id="ai-prompt-detail-meta" class="ai-prompt-detail-meta"></div>
+        </section>
+
+        <section class="ai-prompt-detail-section">
+          <h3>Short Description</h3>
+          <p id="ai-prompt-detail-description" class="ai-prompt-detail-description"></p>
+        </section>
+
+        <section class="ai-prompt-detail-section">
+          <div class="ai-prompt-detail-section-heading">
+            <h3>Prompt</h3>
+            <button id="ai-prompt-detail-copy" class="ai-prompt-copy-button" type="button">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="10" height="10" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              Copy Prompt
+            </button>
+          </div>
+          <pre id="ai-prompt-detail-prompt" class="ai-prompt-detail-prompt"></pre>
+        </section>
+
+        <section id="ai-prompt-detail-variables-wrap" class="ai-prompt-detail-section" hidden>
+          <h3>Variables</h3>
+          <p id="ai-prompt-detail-variables" class="ai-prompt-detail-text"></p>
+        </section>
+
+        <section id="ai-prompt-detail-output-wrap" class="ai-prompt-detail-section" hidden>
+          <h3>Output Format</h3>
+          <p id="ai-prompt-detail-output" class="ai-prompt-detail-text"></p>
+        </section>
+
+        <section id="ai-prompt-detail-tags-wrap" class="ai-prompt-detail-section" hidden>
+          <h3>Tags</h3>
+          <div id="ai-prompt-detail-tags" class="ai-prompt-detail-tags"></div>
+        </section>
+      </div>
+
+      <footer class="ai-prompt-dialog-footer">
+        <button type="button" class="ai-prompt-secondary-button" data-ai-prompt-detail-close>
+          Close
+        </button>
+        <button type="button" class="ai-prompt-primary-button" id="ai-prompt-detail-copy-footer">
+          Copy Prompt
+        </button>
+      </footer>
+    </div>
+  </dialog>
+
+  <!-- Admin Add Prompt modal -->
+  <dialog id="ai-prompt-add-dialog" class="ai-prompt-dialog ai-prompt-add-dialog">
+    <div class="ai-prompt-dialog-shell">
+      <header class="ai-prompt-dialog-header">
+        <div>
+          <p class="ai-prompt-dialog-eyebrow">NEXUS ADMIN</p>
+          <h2>Add New Prompt</h2>
+          <p>The prompt will be saved directly to the AI_Prompt_Library sheet.</p>
+        </div>
+        <button
+          class="ai-prompt-dialog-close"
+          type="button"
+          data-ai-prompt-add-close
+          aria-label="Close Add Prompt"
+        >×</button>
+      </header>
+
+      <form id="ai-prompt-add-form" class="ai-prompt-add-form">
+        <div class="ai-prompt-form-grid">
+          <label class="ai-prompt-form-field">
+            <span>Icon <b>*</b></span>
+            <select name="icon" required>
+              <option value="sparkles">Sparkles</option>
+              <option value="search">Search</option>
+              <option value="document">Document</option>
+              <option value="chat">Chat</option>
+              <option value="lightbulb">Lightbulb</option>
+              <option value="layers">Layers</option>
+              <option value="code">Code</option>
+              <option value="target">Target</option>
+              <option value="rocket">Rocket</option>
+              <option value="checklist">Checklist</option>
+              <option value="tools">Tools</option>
+              <option value="shield">Shield</option>
+            </select>
+          </label>
+
+          <label class="ai-prompt-form-field">
+            <span>Category <b>*</b></span>
+            <input
+              id="ai-prompt-add-category"
+              name="category"
+              type="text"
+              list="ai-prompt-category-options"
+              maxlength="120"
+              placeholder="Select or type a category"
+              required
+            >
+            <datalist id="ai-prompt-category-options"></datalist>
+          </label>
+
+          <label class="ai-prompt-form-field">
+            <span>Category Sort Order <b>*</b></span>
+            <input id="ai-prompt-add-category-sort" name="categorySortOrder" type="number" min="0" step="1" required>
+          </label>
+
+          <label class="ai-prompt-form-field">
+            <span>Prompt Sort Order <b>*</b></span>
+            <input id="ai-prompt-add-prompt-sort" name="promptSortOrder" type="number" min="0" step="1" required>
+          </label>
+
+          <label class="ai-prompt-form-field ai-prompt-form-field--wide">
+            <span>Prompt Title <b>*</b></span>
+            <input name="promptTitle" type="text" maxlength="180" placeholder="Enter a clear prompt title" required>
+          </label>
+
+          <label class="ai-prompt-form-field ai-prompt-form-field--wide">
+            <span>Short Description <b>*</b></span>
+            <textarea name="shortDescription" rows="3" maxlength="500" placeholder="Briefly explain what the prompt helps users do" required></textarea>
+          </label>
+
+          <label class="ai-prompt-form-field ai-prompt-form-field--wide">
+            <span>Prompt <b>*</b></span>
+            <textarea name="prompt" rows="9" maxlength="12000" placeholder="Paste the complete reusable prompt" required></textarea>
+          </label>
+
+          <label class="ai-prompt-form-field">
+            <span>Use Case <b>*</b></span>
+            <input name="useCase" type="text" maxlength="180" placeholder="e.g. Client Discovery" required>
+          </label>
+
+          <label class="ai-prompt-form-field">
+            <span>Audience <b>*</b></span>
+            <input name="audience" type="text" maxlength="180" placeholder="e.g. Solutions Consultant" required>
+          </label>
+
+          <label class="ai-prompt-form-field ai-prompt-form-field--wide">
+            <span>Tags</span>
+            <input name="tags" type="text" maxlength="600" placeholder="discovery, requirements, client">
+          </label>
+
+          <label class="ai-prompt-form-field ai-prompt-form-field--wide">
+            <span>Variables</span>
+            <input name="variables" type="text" maxlength="1200" placeholder="{{CLIENT}}, {{INDUSTRY}}, {{SOLUTION}}">
+          </label>
+
+          <label class="ai-prompt-form-field ai-prompt-form-field--wide">
+            <span>Output Format</span>
+            <input name="outputFormat" type="text" maxlength="600" placeholder="e.g. Structured Questions">
+          </label>
+
+          <label class="ai-prompt-form-field">
+            <span>Status <b>*</b></span>
+            <select name="status" required>
+              <option value="Active">Active</option>
+              <option value="Draft">Draft</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+          </label>
+
+          <label class="ai-prompt-form-field ai-prompt-form-check">
+            <input name="featured" type="checkbox">
+            <span>
+              <strong>Featured Prompt</strong>
+              <small>Prioritize this prompt in Featured sorting.</small>
+            </span>
+          </label>
+        </div>
+
+        <p id="ai-prompt-add-error" class="ai-prompt-add-error" role="alert" hidden></p>
+
+        <footer class="ai-prompt-dialog-footer ai-prompt-add-footer">
+          <button type="button" class="ai-prompt-secondary-button" data-ai-prompt-add-close>
+            Cancel
+          </button>
+          <button id="ai-prompt-add-submit" type="submit" class="ai-prompt-primary-button">
+            Add Prompt
+          </button>
+        </footer>
+      </form>
+    </div>
+  </dialog>
+
+  <div id="ai-prompt-library-toast" class="ai-prompt-library-toast" role="status" aria-live="polite" hidden>
+    <span class="ai-prompt-library-toast-icon" aria-hidden="true">✓</span>
+    <span id="ai-prompt-library-toast-message"></span>
+  </div>
 </section>

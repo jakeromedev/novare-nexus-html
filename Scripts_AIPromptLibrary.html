@@ -38,10 +38,12 @@
     prompts: [],
     categories: [],
     categoryOptions: [],
+    promptTypeOptions: [],
     category: "all",
     query: "",
     sort: "sheet",
     activePromptId: "",
+    editingPromptId: "",
     loading: false
   };
 
@@ -129,6 +131,9 @@
     refs.detailPrompt = root.querySelector("#ai-prompt-detail-prompt");
     refs.detailCopy = root.querySelector("#ai-prompt-detail-copy");
     refs.detailCopyFooter = root.querySelector("#ai-prompt-detail-copy-footer");
+    refs.detailAdminActions = root.querySelector("#ai-prompt-detail-admin-actions");
+    refs.detailEdit = root.querySelector("#ai-prompt-detail-edit");
+    refs.detailDelete = root.querySelector("#ai-prompt-detail-delete");
     refs.detailClose = Array.from(
       root.querySelectorAll("[data-ai-prompt-detail-close]")
     );
@@ -140,6 +145,8 @@
     );
     refs.addError = root.querySelector("#ai-prompt-add-error");
     refs.addSubmit = root.querySelector("#ai-prompt-add-submit");
+    refs.editorTitle = root.querySelector("#ai-prompt-editor-title");
+    refs.editorDescription = root.querySelector("#ai-prompt-editor-description");
 
     refs.iconInput = root.querySelector("#ai-prompt-add-icon");
     refs.iconOptions = root.querySelector(
@@ -157,6 +164,19 @@
     );
     refs.newCategoryInput = root.querySelector(
       "#ai-prompt-add-new-category"
+    );
+
+    refs.promptTypeSelect = root.querySelector(
+      "#ai-prompt-add-type-select"
+    );
+    refs.newPromptTypeToggle = root.querySelector(
+      "#ai-prompt-add-new-type-toggle"
+    );
+    refs.newPromptTypeField = root.querySelector(
+      "#ai-prompt-add-new-type-field"
+    );
+    refs.newPromptTypeInput = root.querySelector(
+      "#ai-prompt-add-new-type"
     );
 
     refs.toast = root.querySelector("#ai-prompt-library-toast");
@@ -218,6 +238,14 @@
       refs.detailCopyFooter.addEventListener("click", copyActivePrompt);
     }
 
+    if (refs.detailEdit) {
+      refs.detailEdit.addEventListener("click", openEditPromptDialog);
+    }
+
+    if (refs.detailDelete) {
+      refs.detailDelete.addEventListener("click", deleteActivePrompt);
+    }
+
     refs.addClose.forEach(function (button) {
       button.addEventListener("click", closeAddPromptDialog);
     });
@@ -247,6 +275,20 @@
       );
     }
 
+    if (refs.promptTypeSelect) {
+      refs.promptTypeSelect.addEventListener(
+        "change",
+        handlePromptTypeSelectionChange
+      );
+    }
+
+    if (refs.newPromptTypeToggle) {
+      refs.newPromptTypeToggle.addEventListener(
+        "click",
+        toggleNewPromptTypeMode
+      );
+    }
+
     [refs.detailDialog, refs.addDialog].forEach(function (dialog) {
       if (!dialog) return;
       dialog.addEventListener("click", function (event) {
@@ -263,7 +305,14 @@
 
   function syncAdminUI() {
     const isAdmin = getEffectiveRole() === "admin";
-    if (refs.addButton) refs.addButton.hidden = !isAdmin;
+
+    if (refs.addButton) {
+      refs.addButton.hidden = !isAdmin;
+    }
+
+    if (refs.detailAdminActions) {
+      refs.detailAdminActions.hidden = !isAdmin;
+    }
   }
 
   function loadLibrary() {
@@ -292,6 +341,10 @@
             ? payload.categoryOptions
             : deriveCategoryOptions(state.prompts);
 
+          state.promptTypeOptions = Array.isArray(payload.promptTypeOptions)
+            ? payload.promptTypeOptions
+            : derivePromptTypeOptions(state.prompts);
+
           if (
             state.category !== "all" &&
             !state.categories.some(function (category) { return category.name === state.category; })
@@ -300,6 +353,7 @@
           }
 
           populateCategorySelect();
+          populatePromptTypeSelect();
           renderCategoryFilters();
           renderLibrary();
         })
@@ -571,11 +625,20 @@
     const footer = document.createElement("div");
     footer.className = "ai-prompt-card-footer";
 
+    const meta = document.createElement("div");
+    meta.className = "ai-prompt-card-meta";
+
+    if (prompt.promptType) {
+      meta.appendChild(
+        createPill(prompt.promptType)
+      );
+    }
+
     const action = document.createElement("span");
     action.className = "ai-prompt-card-action";
     action.textContent = "View Prompt";
 
-    footer.appendChild(action);
+    footer.append(meta, action);
     button.append(top, title, description, footer);
     return button;
   }
@@ -594,6 +657,7 @@
     if (refs.detailPrompt) refs.detailPrompt.textContent = prompt.prompt || "";
 
     renderDetailMeta(prompt);
+    syncAdminUI();
     openDialog(refs.detailDialog);
   }
 
@@ -602,7 +666,8 @@
     refs.detailMeta.replaceChildren();
 
     [
-      ["Category", prompt.category]
+      ["Category", prompt.category],
+      ["Prompt Type", prompt.promptType]
     ].forEach(function (entry) {
       if (!entry[1]) return;
       const item = document.createElement("div");
@@ -637,37 +702,171 @@
       });
   }
 
-  function openAddPromptDialog() {
+
+  function deleteActivePrompt() {
     if (
       getEffectiveRole() !== "admin" ||
-      !refs.addDialog ||
-      !refs.addForm
+      !state.activePromptId
     ) {
       return;
     }
+
+    const prompt = state.prompts.find(function (item) {
+      return String(item.id || "") === state.activePromptId;
+    });
+
+    if (!prompt) return;
+
+    const confirmed = window.confirm(
+      'Delete "' +
+      String(prompt.promptTitle || "this prompt") +
+      '"? This action cannot be undone.'
+    );
+
+    if (!confirmed) return;
+
+    if (!isAppsScriptAvailable()) {
+      showToast(
+        "Google Apps Script is unavailable in this environment.",
+        "error"
+      );
+      return;
+    }
+
+    if (refs.detailDelete) {
+      refs.detailDelete.disabled = true;
+      refs.detailDelete.textContent = "Deleting…";
+    }
+
+    google.script.run
+      .withSuccessHandler(function (response) {
+        if (refs.detailDelete) {
+          refs.detailDelete.disabled = false;
+          refs.detailDelete.textContent = "Delete";
+        }
+
+        closeDetailDialog();
+
+        showToast(
+          response && response.message
+            ? response.message
+            : "Prompt deleted successfully.",
+          "success"
+        );
+
+        loadLibrary();
+      })
+      .withFailureHandler(function (error) {
+        if (refs.detailDelete) {
+          refs.detailDelete.disabled = false;
+          refs.detailDelete.textContent = "Delete";
+        }
+
+        showToast(
+          getErrorMessage(
+            error,
+            "Unable to delete the prompt."
+          ),
+          "error"
+        );
+      })
+      .deleteAIPrompt(state.activePromptId);
+  }
+
+
+  function openAddPromptDialog() {
+    if (getEffectiveRole() !== "admin") {
+      return;
+    }
+
+    openPromptEditor(null);
+  }
+
+
+  function openEditPromptDialog() {
+    if (getEffectiveRole() !== "admin") {
+      return;
+    }
+
+    const prompt = state.prompts.find(function (item) {
+      return String(item.id || "") === state.activePromptId;
+    });
+
+    if (!prompt) return;
+
+    closeDetailDialog();
+    openPromptEditor(prompt);
+  }
+
+
+  function openPromptEditor(prompt) {
+    if (!refs.addDialog || !refs.addForm) {
+      return;
+    }
+
+    const isEditing = Boolean(prompt && prompt.id);
+
+    state.editingPromptId = isEditing
+      ? String(prompt.id)
+      : "";
 
     refs.addForm.reset();
     clearAddError();
 
     populateCategorySelect();
+    populatePromptTypeSelect();
     renderIconPicker();
-    setSelectedIcon("");
+
     setNewCategoryMode(false);
+    setNewPromptTypeMode(false);
 
-    const status = refs.addForm.elements.status;
-    if (status) status.value = "Active";
-
-    openDialog(refs.addDialog);
-
-    const firstIcon = refs.iconOptions
-      ? refs.iconOptions.querySelector("[data-ai-prompt-icon]")
-      : null;
-
-    if (firstIcon && typeof firstIcon.focus === "function") {
-      window.setTimeout(function () {
-        firstIcon.focus();
-      }, 50);
+    if (refs.editorTitle) {
+      refs.editorTitle.textContent = isEditing
+        ? "Edit Prompt"
+        : "Add New Prompt";
     }
+
+    if (refs.editorDescription) {
+      refs.editorDescription.textContent = isEditing
+        ? "Update this prompt directly in the AI_Prompt_Library sheet."
+        : "The prompt will be saved directly to the AI_Prompt_Library sheet.";
+    }
+
+    if (isEditing) {
+      setSelectedIcon(prompt.icon || "");
+
+      if (refs.categorySelect) {
+        refs.categorySelect.value = prompt.category || "";
+      }
+
+      if (refs.promptTypeSelect) {
+        refs.promptTypeSelect.value = prompt.promptType || "";
+      }
+
+      const title = refs.addForm.elements.promptTitle;
+      const description = refs.addForm.elements.shortDescription;
+      const promptText = refs.addForm.elements.prompt;
+      const status = refs.addForm.elements.status;
+
+      if (title) title.value = prompt.promptTitle || "";
+      if (description) {
+        description.value = prompt.shortDescription || "";
+      }
+      if (promptText) {
+        promptText.value = prompt.prompt || "";
+      }
+      if (status) {
+        status.value = prompt.status || "Active";
+      }
+    } else {
+      setSelectedIcon("");
+
+      const status = refs.addForm.elements.status;
+      if (status) status.value = "Active";
+    }
+
+    setAddSubmitting(false);
+    openDialog(refs.addDialog);
   }
 
 
@@ -675,6 +874,8 @@
     clearAddError();
     setAddSubmitting(false);
     setNewCategoryMode(false);
+    setNewPromptTypeMode(false);
+    state.editingPromptId = "";
     closeDialog(refs.addDialog);
   }
 
@@ -754,9 +955,8 @@
 
     const placeholder = document.createElement("option");
     placeholder.value = "";
-    placeholder.textContent = state.categoryOptions.length
-      ? "Select a category"
-      : "No categories yet";
+    placeholder.textContent = "Select a category";
+    placeholder.disabled = true;
     refs.categorySelect.appendChild(placeholder);
 
     state.categoryOptions.forEach(function (category) {
@@ -847,6 +1047,108 @@
   }
 
 
+
+  function populatePromptTypeSelect() {
+    if (!refs.promptTypeSelect) return;
+
+    const previous = refs.promptTypeSelect.value;
+    refs.promptTypeSelect.replaceChildren();
+
+    const placeholder = document.createElement("option");
+    placeholder.value = "";
+    placeholder.textContent = "Select a prompt type";
+    placeholder.disabled = true;
+
+    refs.promptTypeSelect.appendChild(placeholder);
+
+    state.promptTypeOptions.forEach(function (item) {
+      const option = document.createElement("option");
+      option.value = item.name;
+      option.textContent = item.name;
+      refs.promptTypeSelect.appendChild(option);
+    });
+
+    const stillExists = Array.from(
+      refs.promptTypeSelect.options
+    ).some(function (option) {
+      return option.value === previous;
+    });
+
+    refs.promptTypeSelect.value = stillExists
+      ? previous
+      : "";
+  }
+
+
+  function handlePromptTypeSelectionChange() {
+    if (!refs.promptTypeSelect) return;
+
+    if (refs.promptTypeSelect.value) {
+      setNewPromptTypeMode(false);
+    }
+  }
+
+
+  function toggleNewPromptTypeMode() {
+    const shouldEnable = refs.newPromptTypeField
+      ? refs.newPromptTypeField.hidden
+      : true;
+
+    setNewPromptTypeMode(shouldEnable);
+
+    if (
+      shouldEnable &&
+      refs.newPromptTypeInput &&
+      typeof refs.newPromptTypeInput.focus === "function"
+    ) {
+      window.setTimeout(function () {
+        refs.newPromptTypeInput.focus();
+      }, 30);
+    }
+  }
+
+
+  function setNewPromptTypeMode(enabled) {
+    const isEnabled = Boolean(enabled);
+
+    if (refs.newPromptTypeField) {
+      refs.newPromptTypeField.hidden = !isEnabled;
+    }
+
+    if (refs.newPromptTypeInput) {
+      refs.newPromptTypeInput.required = isEnabled;
+
+      if (!isEnabled) {
+        refs.newPromptTypeInput.value = "";
+      }
+    }
+
+    if (refs.promptTypeSelect) {
+      refs.promptTypeSelect.disabled = isEnabled;
+
+      if (isEnabled) {
+        refs.promptTypeSelect.value = "";
+      }
+    }
+
+    if (refs.newPromptTypeToggle) {
+      refs.newPromptTypeToggle.classList.toggle(
+        "is-active",
+        isEnabled
+      );
+
+      refs.newPromptTypeToggle.setAttribute(
+        "aria-expanded",
+        isEnabled ? "true" : "false"
+      );
+
+      refs.newPromptTypeToggle.innerHTML = isEnabled
+        ? '<span aria-hidden="true">←</span> Use existing prompt type'
+        : '<span aria-hidden="true">＋</span> New prompt type';
+    }
+  }
+
+
   function submitAddPrompt(event) {
     event.preventDefault();
 
@@ -894,6 +1196,32 @@
       return;
     }
 
+    const isNewPromptType = Boolean(
+      refs.newPromptTypeField &&
+      !refs.newPromptTypeField.hidden
+    );
+
+    const promptType = isNewPromptType
+      ? String(
+          refs.newPromptTypeInput
+            ? refs.newPromptTypeInput.value
+            : ""
+        ).trim()
+      : String(
+          refs.promptTypeSelect
+            ? refs.promptTypeSelect.value
+            : ""
+        ).trim();
+
+    if (!promptType) {
+      setAddError(
+        isNewPromptType
+          ? "Please enter the new prompt type."
+          : "Please select a prompt type or create a new one."
+      );
+      return;
+    }
+
     const icon = refs.iconInput
       ? String(refs.iconInput.value || "").trim()
       : "";
@@ -906,6 +1234,7 @@
     const payload = {
       icon: icon,
       category: category,
+      promptType: promptType,
       promptTitle: String(
         form.get("promptTitle") || ""
       ).trim(),
@@ -920,48 +1249,70 @@
       )
     };
 
+    const isEditing = Boolean(state.editingPromptId);
+
     clearAddError();
     setAddSubmitting(true);
 
+    const runner = google.script.run
+      .withSuccessHandler(function (response) {
+        setAddSubmitting(false);
+        closeAddPromptDialog();
+
+        showToast(
+          response && response.message
+            ? response.message
+            : (
+                isEditing
+                  ? "Prompt updated successfully."
+                  : "Prompt added successfully."
+              ),
+          "success"
+        );
+
+        loadLibrary();
+      })
+      .withFailureHandler(function (error) {
+        setAddSubmitting(false);
+
+        console.error(
+          isEditing
+            ? "[AI Prompt Library] Failed to update prompt:"
+            : "[AI Prompt Library] Failed to add prompt:",
+          error
+        );
+
+        setAddError(
+          getErrorMessage(
+            error,
+            isEditing
+              ? "Unable to update the prompt."
+              : "Unable to add the prompt."
+          )
+        );
+      });
+
     try {
-      google.script.run
-        .withSuccessHandler(function (response) {
-          setAddSubmitting(false);
-          closeAddPromptDialog();
-
-          showToast(
-            response && response.message
-              ? response.message
-              : "Prompt added successfully.",
-            "success"
-          );
-
-          loadLibrary();
-        })
-        .withFailureHandler(function (error) {
-          setAddSubmitting(false);
-          console.error(
-            "[AI Prompt Library] Failed to add prompt:",
-            error
-          );
-          setAddError(
-            getErrorMessage(
-              error,
-              "Unable to add the prompt."
-            )
-          );
-        })
-        .addAIPrompt(payload);
+      if (isEditing) {
+        runner.updateAIPrompt(
+          state.editingPromptId,
+          payload
+        );
+      } else {
+        runner.addAIPrompt(payload);
+      }
     } catch (error) {
       setAddSubmitting(false);
+
       console.error(
-        "[AI Prompt Library] Unable to start add request:",
+        "[AI Prompt Library] Unable to start save request:",
         error
       );
+
       setAddError(
         getErrorMessage(
           error,
-          "Unable to start the Add Prompt request."
+          "Unable to start the save request."
         )
       );
     }
@@ -972,7 +1323,14 @@
     if (!refs.addSubmit) return;
     refs.addSubmit.disabled = Boolean(isSubmitting);
     refs.addSubmit.classList.toggle("is-loading", Boolean(isSubmitting));
-    refs.addSubmit.textContent = isSubmitting ? "Saving…" : "Add Prompt";
+
+    if (isSubmitting) {
+      refs.addSubmit.textContent = "Saving…";
+    } else {
+      refs.addSubmit.textContent = state.editingPromptId
+        ? "Save Changes"
+        : "Add Prompt";
+    }
   }
 
   function setAddError(message) {
@@ -1033,6 +1391,40 @@
     });
   }
 
+
+  function derivePromptTypeOptions(prompts) {
+    const map = new Map();
+
+    prompts.forEach(function (prompt) {
+      const name = String(
+        prompt.promptType || ""
+      ).trim();
+
+      if (!name) return;
+
+      const key = name.toLowerCase();
+
+      if (!map.has(key)) {
+        map.set(key, {
+          name: name,
+          promptCount: 1
+        });
+        return;
+      }
+
+      map.get(key).promptCount += 1;
+    });
+
+    return Array.from(map.values()).sort(function (a, b) {
+      return String(a.name || "").localeCompare(
+        String(b.name || ""),
+        undefined,
+        { sensitivity: "base" }
+      );
+    });
+  }
+
+
   function deriveCategories(prompts) {
     const map = new Map();
     prompts.forEach(function (prompt) {
@@ -1058,7 +1450,8 @@
       prompt.promptTitle,
       prompt.shortDescription,
       prompt.prompt,
-      prompt.category
+      prompt.category,
+      prompt.promptType
     ].map(function (value) {
       return String(value || "").toLowerCase();
     }).join(" ");
@@ -1145,8 +1538,16 @@
 
   document.addEventListener("nexus:viewmodechange", function () {
     syncAdminUI();
-    if (getEffectiveRole() !== "admin" && refs.addDialog && refs.addDialog.open) {
-      closeAddPromptDialog();
+    if (getEffectiveRole() !== "admin") {
+      if (refs.addDialog && refs.addDialog.open) {
+        closeAddPromptDialog();
+      }
+
+      if (
+        refs.detailAdminActions
+      ) {
+        refs.detailAdminActions.hidden = true;
+      }
     }
   });
 

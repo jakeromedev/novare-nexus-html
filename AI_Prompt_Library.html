@@ -184,13 +184,32 @@
 
       </div>
 
-      <footer class="ai-prompt-dialog-footer">
-        <button type="button" class="ai-prompt-secondary-button" data-ai-prompt-detail-close>
-          Close
-        </button>
-        <button type="button" class="ai-prompt-primary-button" id="ai-prompt-detail-copy-footer">
-          Copy Prompt
-        </button>
+      <footer class="ai-prompt-dialog-footer ai-prompt-detail-footer">
+        <div id="ai-prompt-detail-admin-actions" class="ai-prompt-detail-admin-actions" hidden>
+          <button
+            id="ai-prompt-detail-delete"
+            type="button"
+            class="ai-prompt-danger-button"
+          >
+            Delete
+          </button>
+          <button
+            id="ai-prompt-detail-edit"
+            type="button"
+            class="ai-prompt-secondary-button"
+          >
+            Edit
+          </button>
+        </div>
+
+        <div class="ai-prompt-detail-user-actions">
+          <button type="button" class="ai-prompt-secondary-button" data-ai-prompt-detail-close>
+            Close
+          </button>
+          <button type="button" class="ai-prompt-primary-button" id="ai-prompt-detail-copy-footer">
+            Copy Prompt
+          </button>
+        </div>
       </footer>
     </div>
   </dialog>
@@ -201,8 +220,10 @@
       <header class="ai-prompt-dialog-header">
         <div>
           <p class="ai-prompt-dialog-eyebrow">NEXUS ADMIN</p>
-          <h2>Add New Prompt</h2>
-          <p>The prompt will be saved directly to the AI_Prompt_Library sheet.</p>
+          <h2 id="ai-prompt-editor-title">Add New Prompt</h2>
+          <p id="ai-prompt-editor-description">
+            The prompt will be saved directly to the AI_Prompt_Library sheet.
+          </p>
         </div>
         <button
           class="ai-prompt-dialog-close"
@@ -220,7 +241,7 @@
               <span class="ai-prompt-form-step" aria-hidden="true">1</span>
               <div>
                 <h3>Classification</h3>
-                <p>Choose an icon and category for this prompt.</p>
+                <p>Choose how this prompt is represented and organized in the library.</p>
               </div>
             </div>
 
@@ -279,6 +300,43 @@
                     type="text"
                     maxlength="120"
                     placeholder="e.g. Discovery & Qualification"
+                  >
+                </label>
+              </div>
+
+              <div class="ai-prompt-form-field ai-prompt-type-field">
+                <span class="ai-prompt-form-label">Prompt Type <b>*</b></span>
+
+                <select
+                  id="ai-prompt-add-type-select"
+                  name="promptTypeSelection"
+                  required
+                >
+                  <option value="">Select a prompt type</option>
+                </select>
+
+                <button
+                  id="ai-prompt-add-new-type-toggle"
+                  class="ai-prompt-new-category-toggle"
+                  type="button"
+                  aria-expanded="false"
+                >
+                  <span aria-hidden="true">＋</span>
+                  New prompt type
+                </button>
+
+                <label
+                  id="ai-prompt-add-new-type-field"
+                  class="ai-prompt-new-category-inline"
+                  hidden
+                >
+                  <span>New Prompt Type <b>*</b></span>
+                  <input
+                    id="ai-prompt-add-new-type"
+                    name="newPromptType"
+                    type="text"
+                    maxlength="120"
+                    placeholder="e.g. Summarization"
                   >
                 </label>
               </div>

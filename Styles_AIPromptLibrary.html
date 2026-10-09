@@ -2121,4 +2121,267 @@
   }
 }
 
+
+/* =========================================================
+   PROMPT TYPE + ADMIN UPDATE / DELETE
+========================================================= */
+
+.ai-prompt-classification-layout {
+  grid-template-columns:
+    minmax(0, 1.25fr)
+    minmax(220px, .75fr)
+    minmax(220px, .75fr);
+}
+
+.ai-prompt-category-field,
+.ai-prompt-type-field {
+  min-width: 0;
+}
+
+.ai-prompt-detail-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.ai-prompt-detail-admin-actions,
+.ai-prompt-detail-user-actions {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.ai-prompt-detail-admin-actions[hidden] {
+  display: none !important;
+}
+
+.ai-prompt-danger-button {
+  min-height: 40px;
+  padding: 0 15px;
+  border: 1px solid #F1B6BC;
+  border-radius: 10px;
+  color: #B4232F;
+  background: #FFF8F8;
+  cursor: pointer;
+  font: inherit;
+  font-size: .78rem;
+  font-weight: 800;
+  transition:
+    border-color .15s ease,
+    background .15s ease,
+    color .15s ease;
+}
+
+.ai-prompt-danger-button:hover {
+  border-color: #E88C96;
+  color: #941B25;
+  background: #FFF1F2;
+}
+
+.ai-prompt-danger-button:disabled {
+  opacity: .6;
+  cursor: wait;
+}
+
+.ai-prompt-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.ai-prompt-card-footer {
+  justify-content: space-between;
+  gap: 10px;
+}
+
+@media (max-width: 1100px) {
+  .ai-prompt-classification-layout {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .ai-prompt-icon-field {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 767px) {
+  .ai-prompt-classification-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .ai-prompt-icon-field {
+    grid-column: auto;
+  }
+
+  .ai-prompt-detail-footer {
+    align-items: stretch;
+    flex-direction: column-reverse;
+  }
+
+  .ai-prompt-detail-admin-actions,
+  .ai-prompt-detail-user-actions {
+    width: 100%;
+  }
+
+  .ai-prompt-detail-admin-actions button,
+  .ai-prompt-detail-user-actions button {
+    flex: 1 1 0;
+  }
+}
+
+
+/* =========================================================
+   CLASSIFICATION — TWO-ROW LAYOUT FIX
+   ---------------------------------------------------------
+   Row 1: full-width icon picker
+   Row 2: Category + Prompt Type
+========================================================= */
+
+.ai-prompt-form-section--classification {
+  padding-bottom: 16px;
+}
+
+/* Two equal metadata columns; icon picker spans both. */
+.ai-prompt-classification-layout {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 22px;
+  align-items: start;
+}
+
+.ai-prompt-icon-field {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+
+.ai-prompt-category-field,
+.ai-prompt-type-field {
+  min-width: 0;
+}
+
+/* Make the icon choice feel like one control, not the whole form. */
+.ai-prompt-icon-field .ai-prompt-form-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.ai-prompt-icon-field .ai-prompt-field-hint {
+  margin-top: 7px;
+}
+
+/* Compact full-width icon grid. */
+.ai-prompt-icon-options {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(70px, 1fr));
+  gap: 8px;
+  width: 100%;
+}
+
+.ai-prompt-icon-option {
+  min-width: 0;
+  min-height: 64px;
+  padding: 7px 5px;
+  border-radius: 11px;
+}
+
+.ai-prompt-icon-option-visual {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+}
+
+.ai-prompt-icon-option-visual svg {
+  width: 16px;
+  height: 16px;
+}
+
+.ai-prompt-icon-option > span:last-child {
+  font-size: .62rem;
+}
+
+/* Category and Prompt Type should read as a matched pair. */
+.ai-prompt-category-field,
+.ai-prompt-type-field {
+  display: grid;
+  align-content: start;
+  gap: 7px;
+}
+
+.ai-prompt-category-field > select,
+.ai-prompt-type-field > select {
+  width: 100%;
+  min-height: 43px;
+}
+
+.ai-prompt-new-category-toggle {
+  width: fit-content;
+  margin-top: 0;
+  padding: 2px 1px;
+  line-height: 1.3;
+}
+
+.ai-prompt-new-category-inline {
+  margin-top: 2px;
+}
+
+/* Give the metadata row a little breathing room below the icon grid. */
+.ai-prompt-category-field,
+.ai-prompt-type-field {
+  padding-top: 2px;
+}
+
+/* Remove old three-column assumptions from the prior patch. */
+@media (min-width: 1101px) {
+  .ai-prompt-classification-layout {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ai-prompt-icon-field {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Medium desktop/tablet: keep two metadata columns, reduce icon density. */
+@media (max-width: 1200px) {
+  .ai-prompt-icon-options {
+    grid-template-columns: repeat(6, minmax(68px, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .ai-prompt-icon-options {
+    grid-template-columns: repeat(5, minmax(64px, 1fr));
+  }
+}
+
+/* Mobile: everything stacks cleanly. */
+@media (max-width: 767px) {
+  .ai-prompt-classification-layout {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .ai-prompt-icon-field {
+    grid-column: auto;
+  }
+
+  .ai-prompt-icon-options {
+    grid-template-columns: repeat(4, minmax(60px, 1fr));
+  }
+
+  .ai-prompt-category-field,
+  .ai-prompt-type-field {
+    padding-top: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .ai-prompt-icon-options {
+    grid-template-columns: repeat(3, minmax(58px, 1fr));
+  }
+}
+
 </style>

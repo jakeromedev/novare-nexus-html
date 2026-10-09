@@ -23,6 +23,7 @@
     delivery:      { title: "Delivery",             templateId: "page-delivery-template",      showSearchFilters: true },
     governance:    { title: "Governance",           templateId: "page-governance-template",    showSearchFilters: true },
     tools:         { title: "Tools & Templates",    templateId: "page-tools-template",         showSearchFilters: true },
+    "ai-prompt-library": { title: "AI Prompt Library", templateId: "page-ai-prompt-library-template", showSearchFilters: true },
     support:       { title: "Help & Support",       templateId: "page-support-template",       showSearchFilters: true },
     search:        { title: "Search",               templateId: "page-search-template",        showSearchFilters: true }
   };
@@ -469,6 +470,16 @@
       fileId: "1pNdhrlO0_CN1zx2t0bMusTngik1c3vZ-",
       viewerUrl: "https://drive.google.com/file/d/1pNdhrlO0_CN1zx2t0bMusTngik1c3vZ-/view?usp=drive_link",
       phase: 2
+    }
+  };
+
+  // AI PROMPT LIBRARY — Phase 1 approved hero asset.
+  // Keep this key independent from the existing Global Search `search-hero`.
+  const aiPromptLibraryAssetRegistry = {
+    "ai-prompt-library-hero": {
+      fileId: "10U8-C0n0Pvzu55LzNDi5R6J-GbBzQ7t3",
+      viewerUrl: "https://drive.google.com/file/d/10U8-C0n0Pvzu55LzNDi5R6J-GbBzQ7t3/view?usp=drive_link",
+      phase: 1
     }
   };
 
@@ -3187,6 +3198,60 @@
       });
   }
 
+
+  function bindAIPromptLibraryAsset(image, fallback, width) {
+    if (!image) return;
+
+    const asset =
+      aiPromptLibraryAssetRegistry[
+        image.dataset.imageKey
+      ];
+
+    bindImageCandidates(
+      image,
+      fallback,
+      getDriveImageCandidates(asset, width)
+    );
+  }
+
+  function initializeAIPromptLibraryPage(pageRoot) {
+    if (!pageRoot) return;
+
+    if (pageRoot.dataset.pageInitialized !== "true") {
+      bindAIPromptLibraryAsset(
+        pageRoot.querySelector(
+          "#ai-prompt-library-hero-image"
+        ),
+        pageRoot.querySelector(
+          "#ai-prompt-library-hero-fallback"
+        ),
+        2400
+      );
+
+      pageRoot.dataset.pageInitialized = "true";
+      return;
+    }
+
+    retryFailedAIPromptLibraryAssets(pageRoot);
+  }
+
+  function retryFailedAIPromptLibraryAssets(pageRoot) {
+    if (!pageRoot) return;
+
+    pageRoot
+      .querySelectorAll(
+        'img[data-asset-state="error"]'
+      )
+      .forEach(function (image) {
+        if (
+          typeof image._nexusRetryAsset ===
+          "function"
+        ) {
+          image._nexusRetryAsset();
+        }
+      });
+  }
+
   function showSupportStatus(pageRoot, message) {
     if (!pageRoot) return;
     const status = pageRoot.querySelector("#support-status");
@@ -5757,6 +5822,7 @@
     if (route === "delivery") initializeDeliveryPage(wrapper);
     if (route === "governance") initializeGovernancePage(wrapper);
     if (route === "tools") initializeToolsPage(wrapper);
+    if (route === "ai-prompt-library") initializeAIPromptLibraryPage(wrapper);
     if (route === "support") initializeSupportPage(wrapper);
     if (
       route === "search" &&
@@ -5806,6 +5872,7 @@
     if (route === "delivery" && activePage) retryFailedDeliveryAssets(activePage);
     if (route === "governance" && activePage) retryFailedGovernanceAssets(activePage);
     if (route === "tools" && activePage) retryFailedToolsAssets(activePage);
+    if (route === "ai-prompt-library" && activePage) retryFailedAIPromptLibraryAssets(activePage);
     if (route === "support" && activePage) retryFailedSupportAssets(activePage);
     if (route === "search" && activePage) retryFailedSearchAssets(activePage);
     if (

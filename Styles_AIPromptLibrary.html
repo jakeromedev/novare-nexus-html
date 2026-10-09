@@ -1,0 +1,199 @@
+<style>
+/* =========================================================
+   NEXUS — AI PROMPT LIBRARY
+   ---------------------------------------------------------
+   IMPORTANT:
+   Hero geometry + typography are controlled by
+   Styles_HeroTypography.html, exactly like Overview,
+   Offerings, Opportunities, Programs, Delivery,
+   Governance, Tools, Support, and Search.
+
+   This file only owns:
+   - AI Prompt Library page colors
+   - hero image treatment
+   - hero overlay
+   - blank future-content surface
+========================================================= */
+
+.ai-prompt-library-page {
+  --ai-prompt-navy: #071D68;
+  --ai-prompt-blue: #1266F4;
+  --ai-prompt-cyan: #16CDE6;
+
+  width: 100%;
+  min-width: 0;
+  min-height: 100%;
+  overflow-x: clip;
+  color: var(--ai-prompt-navy);
+  background: #F8FCFF;
+}
+
+/* =========================================================
+   HERO
+   Geometry intentionally follows the shared Nexus standard.
+========================================================= */
+
+.ai-prompt-library-hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: #E7F4FF;
+}
+
+.ai-prompt-library-hero-media,
+.ai-prompt-library-hero-image,
+.ai-prompt-library-hero-fallback,
+.ai-prompt-library-hero-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.ai-prompt-library-hero-media {
+  z-index: 0;
+  overflow: hidden;
+}
+
+.ai-prompt-library-hero-image {
+  z-index: 0;
+  display: block;
+  object-fit: cover;
+  object-position: center center;
+  background: #E7F4FF;
+}
+
+.ai-prompt-library-hero-fallback {
+  z-index: 0;
+  border: 0;
+  border-radius: 0;
+  color: transparent;
+  background:
+    radial-gradient(circle at 82% 32%, rgb(46 165 255 / 24%), transparent 27%),
+    linear-gradient(110deg, #F8FCFF 0%, #E6F4FF 42%, #76BAF4 74%, #174A9E 100%);
+}
+
+.ai-prompt-library-hero-overlay {
+  z-index: 1;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      90deg,
+      rgb(248 252 255 / 99%) 0%,
+      rgb(248 252 255 / 97%) 24%,
+      rgb(248 252 255 / 82%) 39%,
+      rgb(248 252 255 / 42%) 51%,
+      rgb(235 248 255 / 8%) 68%,
+      transparent 100%
+    );
+}
+
+/* Keep AI page colors while using shared Nexus font sizing. */
+.ai-prompt-library-eyebrow {
+  color: #1358D6;
+}
+
+.ai-prompt-library-hero-copy h1 {
+  color: #071D68;
+}
+
+.ai-prompt-library-hero-copy h1 > span {
+  display: block;
+}
+
+.ai-prompt-library-hero-copy h1 strong {
+  color: transparent;
+  background: linear-gradient(
+    105deg,
+    #0757EF 0%,
+    #0B86FF 62%,
+    #00BED5 100%
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+}
+
+.ai-prompt-library-hero-description {
+  color: #153B82;
+}
+
+/* =========================================================
+   BLANK FUTURE CONTENT AREA
+   Intentionally contains no title, buttons, or cards yet.
+========================================================= */
+
+.ai-prompt-library-placeholder {
+  padding: 8px 20px 22px;
+  background: #F8FCFF;
+}
+
+.ai-prompt-library-placeholder-surface {
+  width: 100%;
+  min-height: clamp(430px, 49vh, 700px);
+  border: 1px solid #D8E7F4;
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 88% 8%, rgb(64 165 255 / 6%), transparent 30%),
+    linear-gradient(145deg, #FFFFFF 0%, #F7FBFF 100%);
+  box-shadow:
+    0 5px 14px rgb(0 47 115 / 4%),
+    inset 0 1px 0 rgb(255 255 255 / 82%);
+}
+
+/* =========================================================
+   RESPONSIVE IMAGE TREATMENT ONLY
+   Typography/layout remain shared.
+========================================================= */
+
+@media (max-width: 1199px) {
+  .ai-prompt-library-hero-image {
+    object-position: 58% center;
+  }
+
+  .ai-prompt-library-hero-overlay {
+    background:
+      linear-gradient(
+        90deg,
+        rgb(248 252 255 / 98%) 0%,
+        rgb(248 252 255 / 92%) 35%,
+        rgb(248 252 255 / 44%) 62%,
+        transparent 100%
+      );
+  }
+}
+
+@media (max-width: 767px) {
+  .ai-prompt-library-page {
+    padding: 0 10px 20px;
+  }
+
+  .ai-prompt-library-hero {
+    margin-inline: -10px;
+  }
+
+  .ai-prompt-library-hero-image {
+    object-position: 64% center;
+  }
+
+  .ai-prompt-library-hero-overlay {
+    background:
+      linear-gradient(
+        180deg,
+        rgb(248 252 255 / 98%) 0%,
+        rgb(248 252 255 / 94%) 48%,
+        rgb(238 248 255 / 52%) 70%,
+        rgb(229 244 255 / 12%) 100%
+      );
+  }
+
+  .ai-prompt-library-placeholder {
+    margin-inline: -10px;
+    padding: 10px;
+  }
+
+  .ai-prompt-library-placeholder-surface {
+    min-height: 420px;
+    border-radius: 14px;
+  }
+}
+</style>

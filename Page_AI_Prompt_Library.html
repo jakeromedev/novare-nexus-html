@@ -84,7 +84,7 @@
             </span>
           </div>
           <p>
-            Browse reusable prompts maintained by the Nexus team and organized by category.
+            Discover, use, and contribute reusable AI prompts for your daily work.
           </p>
         </div>
 
@@ -99,6 +99,29 @@
         </button>
       </div>
 
+      <aside
+        id="ai-prompt-library-missing-summary"
+        class="ai-prompt-library-missing-summary"
+        aria-live="polite"
+        hidden
+      >
+        <div class="ai-prompt-library-missing-summary-copy">
+          <span class="ai-prompt-library-missing-summary-icon" aria-hidden="true">!</span>
+          <div>
+            <strong id="ai-prompt-library-missing-summary-title">Prompts still need content.</strong>
+            <p>Help complete the library by adding prompt content to these entries.</p>
+          </div>
+        </div>
+        <button
+          id="ai-prompt-library-view-missing"
+          type="button"
+          class="ai-prompt-library-missing-summary-button"
+        >
+          View Missing Prompts
+          <span aria-hidden="true">→</span>
+        </button>
+      </aside>
+
       <div class="ai-prompt-library-toolbar" aria-label="Prompt Library controls">
         <label class="ai-prompt-library-search-field" for="ai-prompt-library-search">
           <span class="ai-prompt-library-search-icon" aria-hidden="true">
@@ -108,35 +131,200 @@
             id="ai-prompt-library-search"
             type="search"
             autocomplete="off"
-            placeholder="Search prompts or categories..."
+            placeholder="Search prompts, categories, use cases, or prompt content..."
             aria-label="Search prompts"
           >
         </label>
 
-        <label class="ai-prompt-library-sort-field" for="ai-prompt-library-sort">
-          <span>Sort by</span>
-          <select id="ai-prompt-library-sort" aria-label="Sort prompts">
-            <option value="sheet">Library order</option>
-            <option value="featured">Featured first</option>
-            <option value="az">A–Z</option>
-          </select>
-        </label>
+        <div class="ai-prompt-filter-menu-wrap">
+          <button
+            id="ai-prompt-library-filter-toggle"
+            class="ai-prompt-library-filter-toggle"
+            type="button"
+            aria-haspopup="dialog"
+            aria-expanded="false"
+            aria-controls="ai-prompt-library-filter-popover"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16"></path><path d="M7 12h10"></path><path d="M10 18h4"></path></svg>
+            <span>Filters</span>
+            <span
+              id="ai-prompt-library-filter-count"
+              class="ai-prompt-library-filter-count"
+              hidden
+            >0</span>
+          </button>
+
+          <section
+            id="ai-prompt-library-filter-popover"
+            class="ai-prompt-library-filter-popover"
+            role="dialog"
+            aria-modal="false"
+            aria-label="Prompt filters"
+            hidden
+          >
+            <header class="ai-prompt-filter-popover-header">
+              <div>
+                <h3>Filters</h3>
+                <p>Refine the prompts shown in the library.</p>
+              </div>
+              <button
+                id="ai-prompt-library-filter-close"
+                class="ai-prompt-filter-close"
+                type="button"
+                aria-label="Close filters"
+              >×</button>
+            </header>
+
+            <div class="ai-prompt-filter-popover-body">
+              <fieldset class="ai-prompt-filter-group">
+                <legend>Prompt Type</legend>
+                <div
+                  id="ai-prompt-library-filter-types"
+                  class="ai-prompt-filter-check-grid"
+                ></div>
+              </fieldset>
+
+              <fieldset
+                id="ai-prompt-library-filter-content-group"
+                class="ai-prompt-filter-group"
+              >
+                <legend>Prompt Content</legend>
+                <label class="ai-prompt-filter-option">
+                  <input
+                    type="radio"
+                    name="ai-prompt-content-filter-draft"
+                    value="all"
+                    checked
+                  >
+                  <span>All prompts</span>
+                </label>
+                <label class="ai-prompt-filter-option">
+                  <input
+                    type="radio"
+                    name="ai-prompt-content-filter-draft"
+                    value="has"
+                  >
+                  <span>Has prompt content</span>
+                </label>
+                <label class="ai-prompt-filter-option">
+                  <input
+                    type="radio"
+                    name="ai-prompt-content-filter-draft"
+                    value="missing"
+                  >
+                  <span>Missing prompt content</span>
+                </label>
+              </fieldset>
+
+              <fieldset
+                id="ai-prompt-library-filter-status-group"
+                class="ai-prompt-filter-group"
+                hidden
+              >
+                <legend>Status <small>Admin only</small></legend>
+                <div class="ai-prompt-filter-check-grid">
+                  <label class="ai-prompt-filter-option">
+                    <input type="checkbox" value="Active" data-ai-prompt-status-filter>
+                    <span>Active</span>
+                  </label>
+                  <label class="ai-prompt-filter-option">
+                    <input type="checkbox" value="Draft" data-ai-prompt-status-filter>
+                    <span>Draft</span>
+                  </label>
+                  <label class="ai-prompt-filter-option">
+                    <input type="checkbox" value="Inactive" data-ai-prompt-status-filter>
+                    <span>Inactive</span>
+                  </label>
+                  <label class="ai-prompt-filter-option">
+                    <input type="checkbox" value="Retired" data-ai-prompt-status-filter>
+                    <span>Retired</span>
+                  </label>
+                </div>
+              </fieldset>
+            </div>
+
+            <footer class="ai-prompt-filter-popover-footer">
+              <button
+                id="ai-prompt-library-filter-clear"
+                type="button"
+                class="ai-prompt-filter-clear"
+              >
+                Clear all
+              </button>
+              <div>
+                <button
+                  id="ai-prompt-library-filter-cancel"
+                  type="button"
+                  class="ai-prompt-secondary-button"
+                >
+                  Cancel
+                </button>
+                <button
+                  id="ai-prompt-library-filter-apply"
+                  type="button"
+                  class="ai-prompt-primary-button"
+                >
+                  Apply
+                </button>
+              </div>
+            </footer>
+          </section>
+        </div>
+      </div>
+
+      <div
+        id="ai-prompt-library-active-filters"
+        class="ai-prompt-library-active-filters"
+        aria-label="Active prompt filters"
+        hidden
+      >
+        <div
+          id="ai-prompt-library-active-filter-chips"
+          class="ai-prompt-library-active-filter-chips"
+        ></div>
+        <button
+          id="ai-prompt-library-clear-filters"
+          class="ai-prompt-library-clear-filters"
+          type="button"
+        >
+          Clear all
+        </button>
       </div>
 
       <div
         id="ai-prompt-library-categories"
         class="ai-prompt-library-categories"
-        aria-label="Prompt categories"
+        aria-label="Prompt categories and current library view"
       ></div>
 
       <div id="ai-prompt-library-results" class="ai-prompt-library-results" aria-live="polite"></div>
 
+      <nav
+        id="ai-prompt-library-pagination"
+        class="ai-prompt-library-pagination"
+        aria-label="Prompt Library pagination"
+        hidden
+      ></nav>
+
       <div id="ai-prompt-library-status" class="ai-prompt-library-state" hidden>
-        <div class="ai-prompt-library-state-icon" aria-hidden="true">✦</div>
+        <div class="ai-prompt-library-state-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"></circle><path d="m16 16 4 4"></path></svg>
+        </div>
+        <h3 data-ai-prompt-status-title>No prompts found</h3>
         <p data-ai-prompt-status-text>No prompts available yet.</p>
-        <button id="ai-prompt-library-retry" type="button" class="ai-prompt-library-retry" hidden>
-          Try Again
-        </button>
+        <div class="ai-prompt-library-state-actions">
+          <button
+            id="ai-prompt-library-state-action"
+            type="button"
+            class="ai-prompt-library-state-action"
+            hidden
+          >
+            Clear filters
+          </button>
+          <button id="ai-prompt-library-retry" type="button" class="ai-prompt-library-retry" hidden>
+            Try Again
+          </button>
+        </div>
       </div>
     </div>
   </section>
@@ -148,9 +336,9 @@
         <div>
           <div class="ai-prompt-detail-title-line">
             <h2 id="ai-prompt-detail-title">Prompt</h2>
-            <span id="ai-prompt-detail-featured" class="ai-prompt-detail-featured" hidden>★ Featured</span>
+            <span id="ai-prompt-detail-id" class="ai-prompt-detail-id"></span>
           </div>
-          <p>Review the prompt details, then copy it into your preferred AI tool.</p>
+          <p>Review the use case and copy the reusable prompt into your preferred AI tool.</p>
         </div>
         <button
           class="ai-prompt-dialog-close"
@@ -161,20 +349,26 @@
       </header>
 
       <div class="ai-prompt-dialog-body">
-        <section class="ai-prompt-detail-section">
-          <h3>Basic Information</h3>
-          <div id="ai-prompt-detail-meta" class="ai-prompt-detail-meta"></div>
-        </section>
+        <div id="ai-prompt-detail-meta" class="ai-prompt-detail-meta" aria-label="Prompt metadata"></div>
 
         <section class="ai-prompt-detail-section">
-          <h3>Short Description</h3>
-          <p id="ai-prompt-detail-description" class="ai-prompt-detail-description"></p>
+          <h3>Use Case</h3>
+          <p
+            id="ai-prompt-detail-use-case"
+            class="ai-prompt-detail-use-case"
+          ></p>
         </section>
 
         <section class="ai-prompt-detail-section">
           <div class="ai-prompt-detail-section-heading">
             <h3>Prompt</h3>
-            <button id="ai-prompt-detail-copy" class="ai-prompt-copy-button" type="button">
+            <button
+              id="ai-prompt-detail-copy"
+              class="ai-prompt-copy-button"
+              type="button"
+              title="Copy prompt"
+              aria-label="Copy prompt"
+            >
               <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="10" height="10" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
               Copy Prompt
             </button>
@@ -206,23 +400,23 @@
           <button type="button" class="ai-prompt-secondary-button" data-ai-prompt-detail-close>
             Close
           </button>
-          <button type="button" class="ai-prompt-primary-button" id="ai-prompt-detail-copy-footer">
-            Copy Prompt
-          </button>
         </div>
       </footer>
     </div>
   </dialog>
 
-  <!-- Admin Add Prompt modal -->
+  <!-- Admin Add / Edit Prompt modal -->
   <dialog id="ai-prompt-add-dialog" class="ai-prompt-dialog ai-prompt-add-dialog">
     <div class="ai-prompt-dialog-shell">
       <header class="ai-prompt-dialog-header">
         <div>
           <p class="ai-prompt-dialog-eyebrow">NEXUS ADMIN</p>
-          <h2 id="ai-prompt-editor-title">Add New Prompt</h2>
+          <div class="ai-prompt-editor-title-line">
+            <h2 id="ai-prompt-editor-title">Add New Prompt</h2>
+            <span id="ai-prompt-editor-id" class="ai-prompt-editor-id" hidden></span>
+          </div>
           <p id="ai-prompt-editor-description">
-            The prompt will be saved directly to the AI_Prompt_Library sheet.
+            Changes are saved directly to the 11_GenAI Prompts registry.
           </p>
         </div>
         <button
@@ -241,31 +435,21 @@
               <span class="ai-prompt-form-step" aria-hidden="true">1</span>
               <div>
                 <h3>Classification</h3>
-                <p>Choose how this prompt is represented and organized in the library.</p>
+                <p>Choose the category and prompt type used to organize this prompt.</p>
               </div>
             </div>
 
             <div class="ai-prompt-classification-layout">
-              <div class="ai-prompt-form-field ai-prompt-icon-field">
-                <span class="ai-prompt-form-label">Icon <b>*</b></span>
-
+              <label class="ai-prompt-form-field ai-prompt-name-field">
+                <span>Prompt Name <b>*</b></span>
                 <input
-                  id="ai-prompt-add-icon"
-                  name="icon"
-                  type="hidden"
+                  name="promptName"
+                  type="text"
+                  maxlength="180"
+                  placeholder="e.g. Corporate Profile Summarizer"
+                  required
                 >
-
-                <div
-                  id="ai-prompt-add-icon-options"
-                  class="ai-prompt-icon-options"
-                  role="radiogroup"
-                  aria-label="Choose prompt icon"
-                ></div>
-
-                <p class="ai-prompt-field-hint">
-                  Selected icons are automatically featured in the library.
-                </p>
-              </div>
+              </label>
 
               <div class="ai-prompt-form-field ai-prompt-category-field">
                 <span class="ai-prompt-form-label">Category <b>*</b></span>
@@ -347,32 +531,27 @@
             <div class="ai-prompt-form-section-heading">
               <span class="ai-prompt-form-step" aria-hidden="true">2</span>
               <div>
-                <h3>Prompt Content</h3>
-                <p>Write the title, quick summary, and reusable prompt users will copy.</p>
+                <h3>Prompt Information</h3>
+                <p>Describe when the prompt should be used, then provide the full reusable AI prompt.</p>
               </div>
             </div>
 
             <div class="ai-prompt-form-grid ai-prompt-form-grid--content">
               <label class="ai-prompt-form-field ai-prompt-form-field--wide">
-                <span>Prompt Title <b>*</b></span>
-                <input
-                  name="promptTitle"
-                  type="text"
-                  maxlength="180"
-                  placeholder="e.g. Corporate Profile Summarizer"
-                  required
-                >
-              </label>
-
-              <label class="ai-prompt-form-field ai-prompt-form-field--wide">
-                <span>Short Description <b>*</b></span>
+                <span>Use Case <b>*</b></span>
                 <textarea
-                  name="shortDescription"
+                  name="useCase"
                   rows="3"
                   maxlength="500"
-                  placeholder="Briefly explain what this prompt helps users do"
+                  placeholder="Briefly describe when or why this prompt should be used..."
                   required
                 ></textarea>
+                <div class="ai-prompt-field-footer">
+                  <small class="ai-prompt-field-hint">
+                    Keep this concise. It appears in the Prompt Library table.
+                  </small>
+                  <span id="ai-prompt-use-case-counter" class="ai-prompt-field-counter">0/500</span>
+                </div>
               </label>
 
               <label class="ai-prompt-form-field ai-prompt-form-field--wide">
@@ -381,9 +560,15 @@
                   name="prompt"
                   rows="10"
                   maxlength="12000"
-                  placeholder="Paste the complete reusable prompt here..."
+                  placeholder="Enter the complete reusable AI prompt users will copy..."
                   required
                 ></textarea>
+                <div class="ai-prompt-field-footer">
+                  <small class="ai-prompt-field-hint">
+                    This is the content users will copy into their AI tool.
+                  </small>
+                  <span id="ai-prompt-content-counter" class="ai-prompt-field-counter">0/12000</span>
+                </div>
               </label>
             </div>
           </section>
@@ -404,6 +589,7 @@
                   <option value="Active">Active — visible to users</option>
                   <option value="Draft">Draft — admin only</option>
                   <option value="Inactive">Inactive — hidden</option>
+                  <option value="Retired">Retired — archived from users</option>
                 </select>
               </label>
 
@@ -411,7 +597,7 @@
                 <span class="ai-prompt-system-note-icon" aria-hidden="true">✓</span>
                 <div>
                   <strong>Nexus handles the rest automatically</strong>
-                  <p>Featured status, category order, prompt order, Prompt ID, Owner, and Last Updated are generated when you save.</p>
+                  <p>Prompt ID, Owner, and Last Updated are managed automatically when you save.</p>
                 </div>
               </div>
             </div>

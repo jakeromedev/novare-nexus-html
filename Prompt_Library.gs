@@ -1,99 +1,105 @@
 /**
  * Novare Nexus — AI Prompt Library backend
  *
- * Data source:
- * Spreadsheet: 1lJetYhn8loCBmcMtiZZSVCH1OLMOIGBq8GGWoWH20Gw
- * Sheet: AI_Prompt_Library (gid is diagnostic-only)
+ * Source of truth:
+ * Spreadsheet: 1SFpdCxefmdyvoJ6dKOckYWeCYd-aVtlIc6WU21WMpgM
+ * Sheet: 11_GenAI Prompts
  *
- * Current sheet contract:
- * Prompt ID | Icon | Category | Prompt Type | Category Sort Order |
- * Prompt Title | Short Description | Prompt |
- * Featured | Prompt Sort Order | Status | Owner | Last Updated
+ * Sheet layout:
+ * - Row 1 is intentionally blank / reserved.
+ * - Headers are on row 2.
+ * - The registry starts in column B.
+ *
+ * Contract (B:J):
+ * Prompt ID | Prompt Name | Category | Prompt Type | Use Case | Prompt |
+ * Status | Owner | Last Updated
  *
  * Public functions:
- * - getAIPromptLibrary()
+ * - getAIPromptLibrary(options)
  * - addAIPrompt(payload)
+ * - updateAIPrompt(promptId, payload)
+ * - deleteAIPrompt(promptId)
+ * - fillAIPromptLibraryMetadata()
  * - runAIPromptLibraryDiagnostics()
  * - testAIPromptLibraryRead()
  */
 
 const AI_PROMPT_LIBRARY_CONFIG = Object.freeze({
-  spreadsheetId: '1lJetYhn8loCBmcMtiZZSVCH1OLMOIGBq8GGWoWH20Gw',
-  sheetName: 'AI_Prompt_Library',
-  sheetId: 1945694212, // diagnostic reference only; sheetName is authoritative
+  spreadsheetId: '1SFpdCxefmdyvoJ6dKOckYWeCYd-aVtlIc6WU21WMpgM',
+  sheetName: '11_GenAI Prompts',
+  sheetId: 376893256, // diagnostic reference only; sheetName is authoritative
+
+  headerRow: 2,
+  dataStartRow: 3,
+  startColumn: 2, // column B
 
   headers: Object.freeze([
     'Prompt ID',
-    'Icon',
+    'Prompt Name',
     'Category',
     'Prompt Type',
-    'Category Sort Order',
-    'Prompt Title',
-    'Short Description',
+    'Use Case',
     'Prompt',
-    'Featured',
-    'Prompt Sort Order',
     'Status',
     'Owner',
     'Last Updated'
   ]),
 
-  allowedIcons: Object.freeze([
-    'sparkles',
-    'search',
-    'document',
-    'chat',
-    'lightbulb',
-    'layers',
-    'code',
-    'target',
-    'rocket',
-    'checklist',
-    'tools',
-    'shield'
-  ]),
 
   allowedStatuses: Object.freeze([
     'Active',
+    'Inactive',
     'Draft',
-    'Inactive'
+    'Retired'
   ]),
 
   maxLengths: Object.freeze({
+    promptName: 180,
     category: 120,
     promptType: 120,
-    promptTitle: 180,
-    shortDescription: 500,
+    useCase: 500,
     prompt: 12000
   })
 });
 
 
 /**
- * Returns Active prompts for standard Nexus users.
+ * Returns the Prompt Library appropriate for the requested UI view.
  *
- * categoryOptions is built from ALL rows (including Draft/Inactive) so an admin
- * can reuse an existing category without accidentally creating a duplicate.
- * Only Active prompt records are returned in prompts/categories.
+ * options.viewMode:
+ * - "admin": returns every prompt status only if the real user is an admin.
+ * - "user": returns Active prompts only.
+ *
+ * If options are omitted, a real admin receives the admin dataset and a
+ * non-admin receives Active prompts only.
  */
-function getAIPromptLibrary() {
+function getAIPromptLibrary(options) {
+  const actor = getAIPromptLibraryCurrentUser_();
+  const requestedMode = normalizeAIPromptViewMode_(options);
+  const adminView = actor.isAdmin === true && requestedMode !== 'user';
+
   const sheet = getAIPromptLibrarySheet_();
   validateAIPromptLibraryHeaders_(sheet);
 
-  const allPrompts = readAIPromptRows_(sheet);
+  const allPrompts = readAIPromptRows_(sheet).sort(compareAIPrompts_);
 
-  const prompts = allPrompts
-    .filter(function (prompt) {
-      return prompt.status === 'Active';
-    })
-    .sort(compareAIPrompts_);
+  const prompts = adminView
+    ? allPrompts.slice()
+    : allPrompts.filter(function (prompt) {
+        return prompt.status === 'Active';
+      });
+
+  const optionSource = adminView
+    ? allPrompts
+    : prompts;
 
   return {
     ok: true,
+    adminView: adminView,
     prompts: prompts,
     categories: buildAIPromptCategories_(prompts),
-    categoryOptions: buildAIPromptCategoryOptions_(allPrompts),
-    promptTypeOptions: buildAIPromptTypeOptions_(allPrompts),
+    categoryOptions: buildAIPromptCategoryOptions_(optionSource),
+    promptTypeOptions: buildAIPromptTypeOptions_(optionSource),
     total: prompts.length,
     fetchedAt: new Date().toISOString()
   };
@@ -101,15 +107,7 @@ function getAIPromptLibrary() {
 
 
 /**
- * Appends one prompt.
- *
- * Security:
- * - The real Google Workspace account must be a Nexus admin.
- * - View-As-User is frontend-only and does not weaken server authorization.
- *
- * Featured behavior:
- * - Icon is required.
- * - Any prompt added through Nexus is automatically saved as Featured = TRUE.
+ * Adds one prompt to the registry.
  */
 function addAIPrompt(payload) {
   const actor = assertAIPromptLibraryAdmin_();
@@ -123,60 +121,31 @@ function addAIPrompt(payload) {
     validateAIPromptLibraryHeaders_(sheet);
 
     const existingPrompts = readAIPromptRows_(sheet);
-
-    const existingIds = new Set(
-      existingPrompts
-        .map(function (prompt) { return prompt.id; })
-        .filter(Boolean)
-    );
-
-    const promptId = createAIPromptId_(existingIds);
+    const promptId = createNextGenAIPromptId_(existingPrompts);
+    const owner = getAIPromptOwnerLabel_(actor);
     const now = new Date();
-    const owner = String(
-      actor.email || actor.name || 'Nexus Admin'
-    ).trim();
-
-    /*
-     * Classification is intentionally simple for admins.
-     * Nexus calculates ordering automatically:
-     *
-     * Existing category:
-     * - preserve its Category Sort Order
-     * - append prompt to the end of that category
-     *
-     * New category:
-     * - assign the next Category Sort Order
-     * - start Prompt Sort Order at 1
-     */
-    const ordering = resolveAIPromptOrdering_(
-      existingPrompts,
-      normalized.category
-    );
-
-    const featured = true;
 
     const row = [
-      promptId,                                  // A Prompt ID
-      safeSheetText_(normalized.icon),           // B Icon
-      safeSheetText_(ordering.category),         // C Category
-      safeSheetText_(normalized.promptType),     // D Prompt Type
-      ordering.categorySortOrder,                // E Category Sort Order
-      safeSheetText_(normalized.promptTitle),    // F Prompt Title
-      safeSheetText_(normalized.shortDescription), // G Short Description
-      safeSheetText_(normalized.prompt),         // H Prompt
-      featured,                                  // I Featured
-      ordering.promptSortOrder,                  // J Prompt Sort Order
-      normalized.status,                         // K Status
-      safeSheetText_(owner),                     // L Owner
-      now                                        // M Last Updated
+      promptId,                                      // B Prompt ID
+      safeSheetText_(normalized.promptName),         // C Prompt Name
+      safeSheetText_(normalized.category),           // D Category
+      safeSheetText_(normalized.promptType),         // E Prompt Type
+      safeSheetText_(normalized.useCase),            // F Use Case
+      safeSheetText_(normalized.prompt),             // G Prompt
+      normalized.status,                             // H Status
+      safeSheetText_(owner),                         // I Owner
+      now                                            // J Last Updated
     ];
 
-    const nextRow = Math.max(sheet.getLastRow() + 1, 2);
+    const nextRow = Math.max(
+      sheet.getLastRow() + 1,
+      AI_PROMPT_LIBRARY_CONFIG.dataStartRow
+    );
 
     sheet
       .getRange(
         nextRow,
-        1,
+        AI_PROMPT_LIBRARY_CONFIG.startColumn,
         1,
         AI_PROMPT_LIBRARY_CONFIG.headers.length
       )
@@ -189,21 +158,15 @@ function addAIPrompt(payload) {
     return {
       ok: true,
       prompt: saved,
-      visibleInLibrary: saved.status === 'Active',
-      ordering: {
-        categorySortOrder: ordering.categorySortOrder,
-        promptSortOrder: ordering.promptSortOrder,
-        categoryWasNew: ordering.categoryWasNew
-      },
+      visibleToUsers: saved.status === 'Active',
       message: saved.status === 'Active'
-        ? 'Prompt added successfully.'
+        ? 'Prompt added and published successfully.'
         : 'Prompt saved successfully as ' + saved.status + '.'
     };
   } finally {
     lock.releaseLock();
   }
 }
-
 
 
 /**
@@ -234,57 +197,22 @@ function updateAIPrompt(promptId, payload) {
       throw new Error('Prompt not found: ' + id);
     }
 
-    const actorName = String(
-      actor.email || actor.name || 'Nexus Admin'
-    ).trim();
-
-    const currentCategoryKey = String(
-      current.category || ''
-    ).trim().toLowerCase();
-
-    const requestedCategoryKey = String(
-      normalized.category || ''
-    ).trim().toLowerCase();
-
-    let ordering;
-
-    if (currentCategoryKey === requestedCategoryKey) {
-      ordering = {
-        category: current.category,
-        categorySortOrder: current.categorySortOrder,
-        promptSortOrder: current.promptSortOrder,
-        categoryWasNew: false
-      };
-    } else {
-      ordering = resolveAIPromptOrdering_(
-        allPrompts.filter(function (prompt) {
-          return String(prompt.id || '') !== id;
-        }),
-        normalized.category
-      );
-    }
-
-    const now = new Date();
     const row = [
-      id,                                         // A Prompt ID
-      safeSheetText_(normalized.icon),            // B Icon
-      safeSheetText_(ordering.category),          // C Category
-      safeSheetText_(normalized.promptType),      // D Prompt Type
-      ordering.categorySortOrder,                 // E Category Sort Order
-      safeSheetText_(normalized.promptTitle),     // F Prompt Title
-      safeSheetText_(normalized.shortDescription), // G Short Description
-      safeSheetText_(normalized.prompt),          // H Prompt
-      true,                                       // I Featured
-      ordering.promptSortOrder,                   // J Prompt Sort Order
-      normalized.status,                          // K Status
-      safeSheetText_(actorName),                  // L Owner
-      now                                         // M Last Updated
+      id,                                            // B Prompt ID
+      safeSheetText_(normalized.promptName),         // C Prompt Name
+      safeSheetText_(normalized.category),           // D Category
+      safeSheetText_(normalized.promptType),         // E Prompt Type
+      safeSheetText_(normalized.useCase),            // F Use Case
+      safeSheetText_(normalized.prompt),             // G Prompt
+      normalized.status,                             // H Status
+      safeSheetText_(getAIPromptOwnerLabel_(actor)), // I Owner
+      new Date()                                     // J Last Updated
     ];
 
     sheet
       .getRange(
         current.sheetRow,
-        1,
+        AI_PROMPT_LIBRARY_CONFIG.startColumn,
         1,
         AI_PROMPT_LIBRARY_CONFIG.headers.length
       )
@@ -300,7 +228,7 @@ function updateAIPrompt(promptId, payload) {
     return {
       ok: true,
       prompt: saved,
-      visibleInLibrary: saved.status === 'Active',
+      visibleToUsers: saved.status === 'Active',
       message: 'Prompt updated successfully.'
     };
   } finally {
@@ -310,7 +238,7 @@ function updateAIPrompt(promptId, payload) {
 
 
 /**
- * Permanently deletes one prompt by stable Prompt ID.
+ * Permanently deletes one registry row by stable Prompt ID.
  */
 function deleteAIPrompt(promptId) {
   assertAIPromptLibraryAdmin_();
@@ -350,6 +278,81 @@ function deleteAIPrompt(promptId) {
 }
 
 
+
+/**
+ * Manual metadata refresh utility.
+ *
+ * Fills the two system-managed metadata columns for every prompt row:
+ * - Owner: always jakerome.openiano@novare.com.ph
+ * - Last Updated: the timestamp captured when this function starts
+ *
+ * Prompt content and publishing fields are left untouched.
+ *
+ * Run manually from the Apps Script editor:
+ *   fillAIPromptLibraryMetadata()
+ */
+function fillAIPromptLibraryMetadata() {
+  assertAIPromptLibraryAdmin_();
+
+  const sheet = getAIPromptLibrarySheet_();
+  validateAIPromptLibraryHeaders_(sheet);
+
+  const config = AI_PROMPT_LIBRARY_CONFIG;
+  const lastRow = sheet.getLastRow();
+  const owner = 'jakerome.openiano@novare.com.ph';
+  const runTimestamp = new Date();
+
+  if (lastRow < config.dataStartRow) {
+    return {
+      ok: true,
+      updatedRows: 0,
+      owner: owner,
+      lastUpdated: runTimestamp.toISOString(),
+      message: 'No prompt rows were found to update.'
+    };
+  }
+
+  const rowCount = lastRow - config.dataStartRow + 1;
+  const range = sheet.getRange(
+    config.dataStartRow,
+    config.startColumn,
+    rowCount,
+    config.headers.length
+  );
+
+  const values = range.getValues();
+  const OWNER_INDEX = 7;
+  const LAST_UPDATED_INDEX = 8;
+  let updatedRows = 0;
+
+  values.forEach(function (row) {
+    const hasRecord = row.some(function (value, index) {
+      return index < OWNER_INDEX && String(value || '').trim() !== '';
+    });
+
+    if (!hasRecord) return;
+
+    row[OWNER_INDEX] = owner;
+    row[LAST_UPDATED_INDEX] = runTimestamp;
+    updatedRows += 1;
+  });
+
+  range.setValues(values);
+  SpreadsheetApp.flush();
+
+  return {
+    ok: true,
+    updatedRows: updatedRows,
+    owner: owner,
+    lastUpdated: runTimestamp.toISOString(),
+    message:
+      'AI Prompt Library metadata updated successfully for ' +
+      updatedRows +
+      ' prompt rows.'
+  };
+}
+
+
 /**
  * Manual Apps Script diagnostic.
  */
@@ -361,6 +364,8 @@ function runAIPromptLibraryDiagnostics() {
       sheetName: AI_PROMPT_LIBRARY_CONFIG.sheetName,
       sheetId: AI_PROMPT_LIBRARY_CONFIG.sheetId,
       sheetIdMode: 'diagnostic-only',
+      headerRow: AI_PROMPT_LIBRARY_CONFIG.headerRow,
+      startColumn: AI_PROMPT_LIBRARY_CONFIG.startColumn,
       expectedHeaders: AI_PROMPT_LIBRARY_CONFIG.headers.slice()
     }
   };
@@ -379,17 +384,18 @@ function runAIPromptLibraryDiagnostics() {
       lastRow: sheet.getLastRow(),
       lastColumn: sheet.getLastColumn(),
       promptCount: all.length,
-      activeCount: all.filter(function (item) {
-        return item.status === 'Active';
-      }).length,
-      draftCount: all.filter(function (item) {
-        return item.status === 'Draft';
-      }).length,
-      inactiveCount: all.filter(function (item) {
-        return item.status === 'Inactive';
-      }).length,
+      activeCount: countAIPromptStatus_(all, 'Active'),
+      draftCount: countAIPromptStatus_(all, 'Draft'),
+      inactiveCount: countAIPromptStatus_(all, 'Inactive'),
+      retiredCount: countAIPromptStatus_(all, 'Retired'),
       categoryCount: buildAIPromptCategoryOptions_(all).length,
-      promptTypeCount: buildAIPromptTypeOptions_(all).length
+      promptTypeCount: buildAIPromptTypeOptions_(all).length,
+      promptContentCount: all.filter(function (prompt) {
+        return Boolean(String(prompt.prompt || '').trim());
+      }).length,
+      missingPromptContentCount: all.filter(function (prompt) {
+        return !String(prompt.prompt || '').trim();
+      }).length
     };
 
     try {
@@ -436,17 +442,8 @@ function getAIPromptLibrarySheet_() {
     );
   }
 
-  /*
-   * IMPORTANT:
-   * Sheet name is the authoritative locator.
-   *
-   * A Google Sheet tab receives a new gid whenever the tab is recreated or
-   * re-imported, even when the tab name stays the same. Therefore, do not
-   * block the app when the gid changes.
-   *
-   * AI_PROMPT_LIBRARY_CONFIG.sheetId is retained only as a diagnostic
-   * reference so runAIPromptLibraryDiagnostics() can report the current tab.
-   */
+  // The sheet name is authoritative. The gid is diagnostic-only because
+  // recreating a Google Sheets tab can change its gid.
   return sheet;
 }
 
@@ -455,7 +452,12 @@ function validateAIPromptLibraryHeaders_(sheet) {
   const expected = AI_PROMPT_LIBRARY_CONFIG.headers;
 
   const actual = sheet
-    .getRange(1, 1, 1, expected.length)
+    .getRange(
+      AI_PROMPT_LIBRARY_CONFIG.headerRow,
+      AI_PROMPT_LIBRARY_CONFIG.startColumn,
+      1,
+      expected.length
+    )
     .getDisplayValues()[0]
     .map(function (value) {
       return String(value || '').trim();
@@ -467,7 +469,7 @@ function validateAIPromptLibraryHeaders_(sheet) {
     if (actual[index] !== header) {
       mismatches.push(
         'Column ' +
-        (index + 1) +
+        columnNumberToA1_(AI_PROMPT_LIBRARY_CONFIG.startColumn + index) +
         ': expected "' +
         header +
         '" but found "' +
@@ -479,7 +481,8 @@ function validateAIPromptLibraryHeaders_(sheet) {
 
   if (mismatches.length) {
     throw new Error(
-      'AI_Prompt_Library header schema mismatch. ' +
+      AI_PROMPT_LIBRARY_CONFIG.sheetName +
+      ' header schema mismatch. ' +
       mismatches.join('; ')
     );
   }
@@ -488,50 +491,56 @@ function validateAIPromptLibraryHeaders_(sheet) {
 
 function readAIPromptRows_(sheet) {
   const lastRow = sheet.getLastRow();
-  if (lastRow < 2) return [];
+
+  if (lastRow < AI_PROMPT_LIBRARY_CONFIG.dataStartRow) {
+    return [];
+  }
 
   const values = sheet
     .getRange(
-      2,
-      1,
-      lastRow - 1,
+      AI_PROMPT_LIBRARY_CONFIG.dataStartRow,
+      AI_PROMPT_LIBRARY_CONFIG.startColumn,
+      lastRow - AI_PROMPT_LIBRARY_CONFIG.dataStartRow + 1,
       AI_PROMPT_LIBRARY_CONFIG.headers.length
     )
     .getValues();
 
-  return values
+  const prompts = values
     .map(function (row, index) {
-      return normalizeAIPromptRow_(row, index + 2);
+      return normalizeAIPromptRow_(
+        row,
+        index + AI_PROMPT_LIBRARY_CONFIG.dataStartRow
+      );
     })
     .filter(function (prompt) {
       return Boolean(
         prompt.id ||
-        prompt.promptTitle ||
-        prompt.prompt ||
-        prompt.category
+        prompt.promptName ||
+        prompt.category ||
+        prompt.promptType ||
+        prompt.useCase ||
+        prompt.prompt
       );
     });
+
+  return prompts;
 }
 
 
 function normalizeAIPromptRow_(row, sheetRow) {
-  const lastUpdated = row[12] instanceof Date
-    ? row[12].toISOString()
-    : String(row[12] || '').trim();
+  const lastUpdated = row[8] instanceof Date
+    ? row[8].toISOString()
+    : String(row[8] || '').trim();
 
   return {
     id: cleanSheetText_(row[0]),
-    icon: normalizeAIPromptIcon_(row[1]),
+    promptName: cleanSheetText_(row[1]),
     category: cleanSheetText_(row[2]),
     promptType: cleanSheetText_(row[3]),
-    categorySortOrder: toAIPromptNumber_(row[4], 0),
-    promptTitle: cleanSheetText_(row[5]),
-    shortDescription: cleanSheetText_(row[6]),
-    prompt: cleanSheetText_(row[7]),
-    featured: toAIPromptBoolean_(row[8]),
-    promptSortOrder: toAIPromptNumber_(row[9], 0),
-    status: normalizeAIPromptStatus_(row[10]),
-    owner: cleanSheetText_(row[11]),
+    useCase: cleanSheetText_(row[4]),
+    prompt: cleanSheetText_(row[5]),
+    status: normalizeAIPromptStatus_(row[6]),
+    owner: cleanSheetText_(row[7]),
     lastUpdated: lastUpdated,
     sheetRow: sheetRow
   };
@@ -539,25 +548,22 @@ function normalizeAIPromptRow_(row, sheetRow) {
 
 
 function compareAIPrompts_(a, b) {
-  if (a.categorySortOrder !== b.categorySortOrder) {
-    return a.categorySortOrder - b.categorySortOrder;
-  }
+  const byName = String(a.promptName || '').localeCompare(
+    String(b.promptName || ''),
+    undefined,
+    { sensitivity: 'base' }
+  );
 
-  if (a.promptSortOrder !== b.promptSortOrder) {
-    return a.promptSortOrder - b.promptSortOrder;
-  }
+  if (byName !== 0) return byName;
 
-  return String(a.promptTitle || '').localeCompare(
-    String(b.promptTitle || ''),
+  return String(a.id || '').localeCompare(
+    String(b.id || ''),
     undefined,
     { sensitivity: 'base' }
   );
 }
 
 
-/**
- * Active category filters used by the public library.
- */
 function buildAIPromptCategories_(prompts) {
   const map = new Map();
 
@@ -566,32 +572,30 @@ function buildAIPromptCategories_(prompts) {
       prompt.category || ''
     ).trim() || 'Uncategorized';
 
-    const existing = map.get(name);
+    const key = name.toLowerCase();
+    const existing = map.get(key);
 
     if (!existing) {
-      map.set(name, {
+      map.set(key, {
         name: name,
-        sortOrder: prompt.categorySortOrder,
         count: 1
       });
       return;
     }
 
     existing.count += 1;
-    existing.sortOrder = Math.min(
-      existing.sortOrder,
-      prompt.categorySortOrder
-    );
   });
 
-  return Array.from(map.values()).sort(compareAIPromptCategories_);
+  return Array.from(map.values()).sort(function (a, b) {
+    return String(a.name || '').localeCompare(
+      String(b.name || ''),
+      undefined,
+      { sensitivity: 'base' }
+    );
+  });
 }
 
 
-/**
- * Admin dropdown categories built from ALL prompt rows.
- * Includes maxPromptSort so the Add form can suggest the next order.
- */
 function buildAIPromptCategoryOptions_(prompts) {
   const map = new Map();
 
@@ -605,27 +609,22 @@ function buildAIPromptCategoryOptions_(prompts) {
     if (!existing) {
       map.set(key, {
         name: name,
-        sortOrder: Number(prompt.categorySortOrder) || 0,
-        promptCount: 1,
-        maxPromptSort: Number(prompt.promptSortOrder) || 0
+        promptCount: 1
       });
       return;
     }
 
     existing.promptCount += 1;
-    existing.sortOrder = Math.min(
-      existing.sortOrder,
-      Number(prompt.categorySortOrder) || 0
-    );
-    existing.maxPromptSort = Math.max(
-      existing.maxPromptSort,
-      Number(prompt.promptSortOrder) || 0
-    );
   });
 
-  return Array.from(map.values()).sort(compareAIPromptCategories_);
+  return Array.from(map.values()).sort(function (a, b) {
+    return String(a.name || '').localeCompare(
+      String(b.name || ''),
+      undefined,
+      { sensitivity: 'base' }
+    );
+  });
 }
-
 
 
 function buildAIPromptTypeOptions_(prompts) {
@@ -658,100 +657,16 @@ function buildAIPromptTypeOptions_(prompts) {
 }
 
 
-function compareAIPromptCategories_(a, b) {
-  if (a.sortOrder !== b.sortOrder) {
-    return a.sortOrder - b.sortOrder;
-  }
-
-  return String(a.name || '').localeCompare(
-    String(b.name || ''),
-    undefined,
-    { sensitivity: 'base' }
-  );
-}
-
-
-
-function resolveAIPromptOrdering_(prompts, requestedCategory) {
-  const requested = String(requestedCategory || '').trim();
-  const requestedKey = requested.toLowerCase();
-
-  const sameCategory = prompts.filter(function (prompt) {
-    return String(prompt.category || '').trim().toLowerCase() === requestedKey;
-  });
-
-  if (sameCategory.length) {
-    const canonicalCategory = String(
-      sameCategory[0].category || requested
-    ).trim();
-
-    const categorySortOrder = sameCategory.reduce(
-      function (best, prompt) {
-        const value = Number(prompt.categorySortOrder) || 0;
-
-        if (best === null) return value;
-        return Math.min(best, value);
-      },
-      null
-    );
-
-    const maxPromptSort = sameCategory.reduce(
-      function (max, prompt) {
-        return Math.max(
-          max,
-          Number(prompt.promptSortOrder) || 0
-        );
-      },
-      0
-    );
-
-    return {
-      category: canonicalCategory,
-      categorySortOrder: categorySortOrder === null
-        ? 0
-        : categorySortOrder,
-      promptSortOrder: maxPromptSort + 1,
-      categoryWasNew: false
-    };
-  }
-
-  const maxCategorySort = prompts.reduce(
-    function (max, prompt) {
-      return Math.max(
-        max,
-        Number(prompt.categorySortOrder) || 0
-      );
-    },
-    0
-  );
-
-  return {
-    category: requested,
-    categorySortOrder: maxCategorySort + 1,
-    promptSortOrder: 1,
-    categoryWasNew: true
-  };
-}
-
-
 function validateAIPromptPayload_(payload) {
   if (!payload || typeof payload !== 'object') {
     throw new Error('Prompt details are required.');
   }
 
-  const rawIcon = String(
-    payload.icon || ''
-  ).trim().toLowerCase();
 
   const rawStatus = String(
     payload.status || ''
   ).trim();
 
-  if (
-    AI_PROMPT_LIBRARY_CONFIG.allowedIcons.indexOf(rawIcon) === -1
-  ) {
-    throw new Error('Invalid prompt icon.');
-  }
 
   if (
     AI_PROMPT_LIBRARY_CONFIG.allowedStatuses.indexOf(rawStatus) === -1
@@ -760,7 +675,12 @@ function validateAIPromptPayload_(payload) {
   }
 
   return {
-    icon: rawIcon,
+    promptName: validateAIPromptText_(
+      payload.promptName,
+      'Prompt Name',
+      AI_PROMPT_LIBRARY_CONFIG.maxLengths.promptName,
+      true
+    ),
 
     category: validateAIPromptText_(
       payload.category,
@@ -776,17 +696,10 @@ function validateAIPromptPayload_(payload) {
       true
     ),
 
-    promptTitle: validateAIPromptText_(
-      payload.promptTitle,
-      'Prompt Title',
-      AI_PROMPT_LIBRARY_CONFIG.maxLengths.promptTitle,
-      true
-    ),
-
-    shortDescription: validateAIPromptText_(
-      payload.shortDescription,
-      'Short Description',
-      AI_PROMPT_LIBRARY_CONFIG.maxLengths.shortDescription,
+    useCase: validateAIPromptText_(
+      payload.useCase,
+      'Use Case',
+      AI_PROMPT_LIBRARY_CONFIG.maxLengths.useCase,
       true
     ),
 
@@ -829,30 +742,6 @@ function validateAIPromptText_(
 }
 
 
-function validateAIPromptSortOrder_(value, label) {
-  const number = Number(value);
-
-  if (!Number.isFinite(number) || number < 0) {
-    throw new Error(
-      label + ' must be a non-negative number.'
-    );
-  }
-
-  return Math.floor(number);
-}
-
-
-function normalizeAIPromptIcon_(value) {
-  const icon = String(
-    value || ''
-  ).trim().toLowerCase();
-
-  return AI_PROMPT_LIBRARY_CONFIG.allowedIcons.indexOf(icon) !== -1
-    ? icon
-    : 'sparkles';
-}
-
-
 function normalizeAIPromptStatus_(value) {
   const status = String(
     value || ''
@@ -864,48 +753,46 @@ function normalizeAIPromptStatus_(value) {
 }
 
 
-function toAIPromptBoolean_(value) {
-  if (value === true || value === 1) return true;
-
-  const normalized = String(
-    value || ''
-  ).trim().toLowerCase();
-
-  return (
-    normalized === 'true' ||
-    normalized === 'yes' ||
-    normalized === '1'
-  );
-}
-
-
-function toAIPromptNumber_(value, fallback) {
-  const number = Number(value);
-  return Number.isFinite(number)
-    ? number
-    : fallback;
-}
-
-
-function createAIPromptId_(existingIds) {
-  for (let attempt = 0; attempt < 10; attempt += 1) {
-    const candidate = (
-      'PRM-' +
-      Utilities
-        .getUuid()
-        .replace(/-/g, '')
-        .slice(0, 8)
-        .toUpperCase()
-    );
-
-    if (!existingIds.has(candidate)) {
-      return candidate;
-    }
+function normalizeAIPromptViewMode_(options) {
+  if (
+    options &&
+    typeof options === 'object' &&
+    String(options.viewMode || '').toLowerCase() === 'user'
+  ) {
+    return 'user';
   }
 
-  throw new Error(
-    'Unable to generate a unique Prompt ID. Please try again.'
-  );
+  if (
+    options &&
+    typeof options === 'object' &&
+    String(options.viewMode || '').toLowerCase() === 'admin'
+  ) {
+    return 'admin';
+  }
+
+  return 'auto';
+}
+
+
+function createNextGenAIPromptId_(prompts) {
+  let maxId = 0;
+
+  prompts.forEach(function (prompt) {
+    const match = /^GP-(\d+)$/i.exec(
+      String(prompt.id || '').trim()
+    );
+
+    if (!match) return;
+
+    maxId = Math.max(
+      maxId,
+      Number(match[1]) || 0
+    );
+  });
+
+  const next = maxId + 1;
+
+  return 'GP-' + String(next).padStart(3, '0');
 }
 
 
@@ -930,9 +817,18 @@ function getAIPromptLibraryCurrentUser_() {
     );
   }
 
-  // Reuse the existing live Nexus identity/admin resolver.
-  // No authorization cache is introduced here.
   return getNexusCurrentUser();
+}
+
+
+function getAIPromptOwnerLabel_(actor) {
+  return String(
+    actor && (
+      actor.email ||
+      actor.name
+    ) ||
+    'Nexus Admin'
+  ).trim();
 }
 
 
@@ -958,8 +854,32 @@ function cleanSheetText_(value) {
 }
 
 
+function countAIPromptStatus_(prompts, status) {
+  return prompts.filter(function (prompt) {
+    return prompt.status === status;
+  }).length;
+}
+
+
+function columnNumberToA1_(columnNumber) {
+  let number = Number(columnNumber) || 0;
+  let result = '';
+
+  while (number > 0) {
+    number -= 1;
+    result =
+      String.fromCharCode(65 + (number % 26)) +
+      result;
+    number = Math.floor(number / 26);
+  }
+
+  return result || '?';
+}
+
+
 /**
- * Minimal browser-facing read smoke test.
+ * Browser-facing read smoke test.
+ * Real admins receive the full registry; non-admins receive Active prompts.
  */
 function testAIPromptLibraryRead() {
   const result = getAIPromptLibrary();

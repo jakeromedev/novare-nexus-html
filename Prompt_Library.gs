@@ -166,9 +166,7 @@ function addAIPrompt(payload) {
     validateNexusPromptCommunitySchema_(sheet);
     const existing = readAIPromptRows_(sheet);
     const id = createNextGenAIPromptId_(existing);
-    if (isNexusPromptPhase2Installed_()) {
-      ensureNexusPromptVersionBaseline_({sheet: sheet, prompt: current});
-    }
+    // New creations have no prior revision to backfill. Version 1 is saved after writing.
     const now = new Date();
     const row = [
       id, safeSheetText_(normalized.promptName),
@@ -229,6 +227,9 @@ function updateAIPrompt(promptId, payload) {
       if (['Inactive', 'Retired'].indexOf(current.status) >= 0) {
         throw new Error('This prompt is locked by an administrator.');
       }
+    }
+    if (isNexusPromptPhase2Installed_()) {
+      ensureNexusPromptVersionBaseline_({sheet: sheet, prompt: current});
     }
     const now = new Date();
     const row = [

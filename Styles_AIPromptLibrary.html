@@ -5367,4 +5367,22 @@ td.ai-prompt-table-action-cell:has(
   .ai-prompt-library-page .ai-prompt-phase2-modal-form{padding:17px}
   .ai-prompt-library-page .ai-prompt-phase2-report-bar h3{flex:1 0 100%}
 }
+
+/* Phase 3 — recommendations only; no Insights Dashboard or analytics components. */
+.ai-prompt-library-page .ai-prompt-library-toolbar[hidden],
+.ai-prompt-library-page .ai-prompt-community-nav>button[hidden],
+.ai-prompt-library-page .ai-prompt-community-nav>.ai-prompt-community-sort[hidden] {display:none!important;}
+.ai-prompt-library-page .ai-prompt-recommendations{display:grid;gap:16px;padding:8px 0 24px;color:#183953}
+.ai-prompt-library-page .ai-prompt-recommendations-header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.ai-prompt-library-page .ai-prompt-recommendations-header h3{margin:0;font-size:20px;font-weight:800;color:#163b62}
+.ai-prompt-library-page .ai-prompt-recommendations-refresh{border:1px solid #b7cce4;background:#fff;color:#24588b;border-radius:9px;padding:8px 12px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer}
+.ai-prompt-library-page .ai-prompt-recommendations-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.ai-prompt-library-page .ai-prompt-recommendation-card{border:1px solid #e0e8f2;background:#f8fbff;color:#1e456b;text-align:left;border-radius:12px;padding:16px;cursor:pointer;display:grid;gap:7px;min-width:0;transition:border-color .15s,box-shadow .15s}
+.ai-prompt-library-page .ai-prompt-recommendation-card:hover,.ai-prompt-library-page .ai-prompt-recommendation-card:focus-visible{border-color:#5c9ad0;box-shadow:0 2px 10px rgba(23,73,132,.10)}
+.ai-prompt-library-page .ai-prompt-recommendation-card strong{font-size:14px;overflow-wrap:anywhere}
+.ai-prompt-library-page .ai-prompt-recommendation-muted{font-size:12px;color:#698096}
+.ai-prompt-library-page .ai-prompt-recommendation-reason{font-size:12px;color:#466c90}
+.ai-prompt-library-page .ai-prompt-recommendations-note{font-size:12px;line-height:1.6;color:#677f95;margin:0}
+@media(max-width:660px){.ai-prompt-library-page .ai-prompt-recommendations-grid{grid-template-columns:1fr}}
+
 </style>

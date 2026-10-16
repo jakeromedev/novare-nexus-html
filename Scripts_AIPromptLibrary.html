@@ -12,6 +12,10 @@
     communityWritesEnabled: false,
     currentUserEmail: "",
     phase2Installed: false,
+    recommendationsData: null,
+    recommendationsLoading: false,
+    recommendationsError: "",
+    recommendationsRequestId: 0,
     reports: [],
     reportsStatus: "Open",
     reportsPage: 1,
@@ -176,6 +180,7 @@
     refs.communityExplore = root.querySelector("#ai-prompt-community-explore");
     refs.communityMy = root.querySelector("#ai-prompt-community-my");
     refs.phase2Bookmarks = root.querySelector("#ai-prompt-community-bookmarks");
+    refs.phase3ForYou = root.querySelector("#ai-prompt-community-for-you");
     refs.phase2Moderation = root.querySelector("#ai-prompt-community-moderation");
     refs.phase2Actions = root.querySelector("#ai-prompt-phase2-actions");
     refs.phase2Badge = root.querySelector("#ai-prompt-phase2-verified");
@@ -282,6 +287,9 @@
     });
     if (refs.phase2Moderation) refs.phase2Moderation.addEventListener("click", function () {
       setCommunityView_("moderation");
+    });
+    if (refs.phase3ForYou) refs.phase3ForYou.addEventListener("click", function () {
+      setCommunityView_("for-you");
     });
     if (refs.phase2Bookmark) refs.phase2Bookmark.addEventListener("click", function () {
       togglePhase2Bookmark_(state.activePromptId);
@@ -1134,7 +1142,7 @@
     const isAdmin = getEffectiveRole() === "admin";
 
     refs.missingSummary.hidden =
-      !isAdmin || missingCount === 0 || state.activeView === "my-prompts";
+      !isAdmin || missingCount === 0 || state.activeView !== "explore";
 
     if (
       isAdmin &&
@@ -1162,7 +1170,9 @@
       state.activeView === "explore" ||
       state.activeView === "my-prompts" ||
       state.activeView === "bookmarks" ||
-      state.activeView === "moderation"
+      state.activeView === "moderation" ||
+      state.activeView === "insights" ||
+      state.activeView === "for-you"
     );
   }
 
@@ -1348,9 +1358,14 @@
   }
 
   function setCommunityView_(name) {
-    const allowed = ["explore", "my-prompts", "bookmarks", "moderation"];
+    const allowed = ["explore", "my-prompts", "bookmarks", "moderation", "for-you"];
     const isAdmin = state.adminView && getEffectiveRole() === "admin";
-    state.activeView = allowed.includes(name) && (name !== "moderation" || isAdmin) ? name : "explore";
+    state.activeView = allowed.includes(name) && (name !== "moderation" || isAdmin)
+      ? name : "explore";
+    if (state.activeView === "for-you") {
+      state.recommendationsData = null;
+      state.recommendationsError = "";
+    }
     state.page = 1;
     state.category = "all";
     state.query = "";
@@ -1365,13 +1380,12 @@
   function syncCommunityView_() {
     const view = state.activeView;
     const isAdmin = state.adminView && getEffectiveRole() === "admin";
-    if (view === "moderation" && !isAdmin) {
-      state.activeView = "explore";
-    }
+    if (view === "moderation" && !isAdmin) state.activeView = "explore";
     [
       [refs.communityExplore, "explore"],
       [refs.communityMy, "my-prompts"],
       [refs.phase2Bookmarks, "bookmarks"],
+      [refs.phase3ForYou, "for-you"],
       [refs.phase2Moderation, "moderation"]
     ].forEach(function (entry) {
       const button = entry[0], page = entry[1];
@@ -1384,18 +1398,20 @@
       refs.communityMy.disabled = !state.identityVerified;
       refs.communityMy.title = state.identityVerified ? "View your contributions" : "Identity verification required";
     }
-    if (refs.phase2Bookmarks) {
-      refs.phase2Bookmarks.hidden = !state.phase2Installed || !state.identityVerified;
-    }
-    if (refs.phase2Moderation) {
-      refs.phase2Moderation.hidden = !state.phase2Installed || !isAdmin;
-    }
-    if (refs.communitySort) {
-      refs.communitySort.hidden = state.activeView === "moderation";
-    }
+    if (refs.phase2Bookmarks) refs.phase2Bookmarks.hidden = !state.phase2Installed || !state.identityVerified;
+    if (refs.phase2Moderation) refs.phase2Moderation.hidden = !state.phase2Installed || !isAdmin;
+    if (refs.phase3ForYou) refs.phase3ForYou.hidden = false;
+    const isRecommended = state.activeView === "for-you";
+    if (refs.communitySort) refs.communitySort.hidden = state.activeView === "moderation" || isRecommended;
     if (refs.categories) refs.categories.hidden = state.activeView !== "explore";
     if (refs.missingSummary) refs.missingSummary.hidden = state.activeView !== "explore";
+    const searchToolbar = state.root && state.root.querySelector(".ai-prompt-library-toolbar");
+    if (searchToolbar) searchToolbar.hidden = isRecommended || state.activeView === "moderation";
+    if (refs.activeFilters) refs.activeFilters.hidden = isRecommended || state.activeView === "moderation" || !hasActiveFilters_();
     if (state.activeView === "moderation") loadPhase2Reports_();
+    if (isRecommended && !state.recommendationsData && !state.recommendationsLoading && !state.recommendationsError) {
+      loadRecommendedPrompts_();
+    }
   }
 
   function loadLibrary() {
@@ -1419,6 +1435,8 @@
           state.identityVerified = payload.identityVerified === true;
           state.communityWritesEnabled = payload.communityWritesEnabled === true;
           state.phase2Installed = payload.phase2Installed === true;
+          state.recommendationsData = null;
+          state.recommendationsError = "";
           state.currentUserEmail = String(payload.currentUserEmail || "").toLowerCase();
           state.myPrompts = Array.isArray(payload.myPrompts) ? payload.myPrompts : [];
           state.prompts = Array.isArray(payload.prompts) ? payload.prompts : [];
@@ -1739,6 +1757,10 @@
 
   function renderCategoryFilters() {
     if (!refs.categories) return;
+    if (state.activeView !== "explore") {
+      refs.categories.replaceChildren();
+      return;
+    }
 
     refs.categories.replaceChildren();
     refs.categories.classList.remove(
@@ -1983,6 +2005,10 @@
     if (!refs.results) return;
 
     refs.results.replaceChildren();
+    if (state.activeView === "for-you") {
+      renderRecommendedPrompts_();
+      return;
+    }
     if (state.activeView === "moderation") {
       renderPhase2Moderation_();
       return;
@@ -4378,6 +4404,119 @@
     next.disabled=state.reportsPage*20>=(state.reportsTotal||0);
     next.addEventListener("click",function(){state.reportsPage+=1;loadPhase2Reports_();});
     pager.append(prev,label,next);refs.results.appendChild(pager);
+  }
+
+  // -------- Personalized discovery — no dashboard, snapshots or timers --------
+  function loadRecommendedPrompts_() {
+    if (state.recommendationsLoading || state.activeView !== "for-you") return;
+    state.recommendationsLoading = true;
+    state.recommendationsError = "";
+    const requestId = ++state.recommendationsRequestId;
+    renderRecommendedPrompts_();
+    if (!isAppsScriptAvailable()) {
+      state.recommendationsLoading = false;
+      state.recommendationsError = "Google Apps Script is unavailable.";
+      renderRecommendedPrompts_();
+      return;
+    }
+    google.script.run.withSuccessHandler(function (response) {
+      if (requestId !== state.recommendationsRequestId) return;
+      state.recommendationsLoading = false;
+      if (response && response.ok) {
+        state.recommendationsData = response;
+        state.recommendationsError = "";
+      } else {
+        state.recommendationsError = (response && response.message) || "Recommendations could not be loaded.";
+      }
+      if (state.activeView === "for-you") renderRecommendedPrompts_();
+    }).withFailureHandler(function (error) {
+      if (requestId !== state.recommendationsRequestId) return;
+      state.recommendationsLoading = false;
+      state.recommendationsError = getErrorMessage(error, "Could not load recommendations.");
+      if (state.activeView === "for-you") renderRecommendedPrompts_();
+    }).getNexusPromptRecommendations();
+  }
+
+  function renderRecommendedPrompts_() {
+    if (!refs.results || state.activeView !== "for-you") return;
+    refs.results.replaceChildren();
+    if (refs.status) refs.status.hidden = true;
+    if (refs.pagination) refs.pagination.hidden = true;
+    if (refs.count) refs.count.textContent = "Suggestions for you";
+
+    const panel = document.createElement("section");
+    panel.className = "ai-prompt-recommendations";
+    refs.results.appendChild(panel);
+    const heading = document.createElement("div");
+    heading.className = "ai-prompt-recommendations-header";
+    const title = document.createElement("h3");
+    title.textContent = "Recommended for You";
+    heading.appendChild(title);
+    const refresh = document.createElement("button");
+    refresh.type = "button";
+    refresh.className = "ai-prompt-recommendations-refresh";
+    refresh.textContent = "↻ Refresh";
+    refresh.addEventListener("click", function () {
+      state.recommendationsData = null;
+      state.recommendationsError = "";
+      loadRecommendedPrompts_();
+    });
+    heading.appendChild(refresh);
+    panel.appendChild(heading);
+
+    if (state.recommendationsLoading) {
+      panel.appendChild(document.createTextNode("Finding relevant published prompts…"));
+      return;
+    }
+    if (state.recommendationsError) {
+      const error = document.createElement("p");
+      error.className = "ai-prompt-recommendations-note";
+      error.textContent = state.recommendationsError;
+      panel.appendChild(error);
+      return;
+    }
+    const data = state.recommendationsData;
+    if (!data) {
+      panel.appendChild(document.createTextNode("Preparing suggestions…"));
+      return;
+    }
+    const description = document.createElement("p");
+    description.className = "ai-prompt-recommendations-note";
+    description.textContent = data.personalized
+      ? "Suggestions based on categories and prompt types you've engaged with."
+      : "Discover popular and verified prompts from the community.";
+    panel.appendChild(description);
+
+    const list = document.createElement("div");
+    list.className = "ai-prompt-recommendations-grid";
+    const items = Array.isArray(data.recommendations) ? data.recommendations : [];
+    items.forEach(function (item) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "ai-prompt-recommendation-card";
+      button.dataset.aiPromptOpen = "true";
+      button.dataset.aiPromptId = String(item.id || "");
+      const label = document.createElement("strong");
+      label.textContent = String(item.promptName || "Untitled Prompt");
+      const category = document.createElement("span");
+      category.className = "ai-prompt-recommendation-muted";
+      category.textContent = (item.category || "Uncategorized") + (item.verified ? " · ✓ Verified" : "");
+      const reason = document.createElement("span");
+      reason.className = "ai-prompt-recommendation-reason";
+      reason.textContent = String(item.reason || "Community recommendation");
+      button.append(label, category, reason);
+      list.appendChild(button);
+    });
+    if (!items.length) {
+      const empty = document.createElement("p");
+      empty.textContent = "No new published prompts to recommend yet.";
+      list.appendChild(empty);
+    }
+    panel.appendChild(list);
+    const footnote = document.createElement("p");
+    footnote.className = "ai-prompt-recommendations-note";
+    footnote.textContent = "Suggestions use existing bookmarks, upvotes, categories and prompt popularity. No daily snapshots, analytics dashboard or Gemini calls.";
+    panel.appendChild(footnote);
   }
 
   function getErrorMessage(error, fallback) {

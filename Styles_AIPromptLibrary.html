@@ -5224,4 +5224,58 @@ td.ai-prompt-table-action-cell:has(
   overflow: visible;
 }
 
+/* Collaborative AI Prompt Library — Phase 1 */
+.ai-prompt-library-page .ai-prompt-community-nav {
+  display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin:12px 0 18px;
+  padding:8px;border:1px solid #dbe4ef;background:#f8fbff;border-radius:15px;
+}
+.ai-prompt-community-nav>button {
+  border:0;background:transparent;color:#42556d;padding:11px 15px;
+  border-radius:10px;cursor:pointer;font-weight:700;font-size:13px;
+}
+.ai-prompt-community-nav>button.is-active {background:#0c3c79;color:#fff;box-shadow:0 3px 10px #0c3c7922;}
+.ai-prompt-community-nav>button:disabled {opacity:.45;cursor:not-allowed;}
+.ai-prompt-community-sort {display:flex;align-items:center;gap:8px;margin-left:auto;color:#53647c;font-size:12px;font-weight:700;}
+.ai-prompt-community-sort select {border:1px solid #d7e1ed;background:white;color:#10335f;border-radius:9px;padding:9px 12px;max-width:150px;}
+.ai-prompt-community-identity {font-size:12px;line-height:1.5;background:#fff9ea;border:1px solid #f0ddb4;border-radius:10px;padding:10px 13px;color:#644b24;margin:8px 0 14px;}
+.ai-prompt-table .ai-prompt-community-count {text-align:center;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;color:#31577d;}
+.ai-prompt-table .ai-prompt-community-author {display:block;font-weight:500;font-size:11px;color:#74869e;margin-top:4px;}
+.ai-prompt-icon-action.is-upvote[aria-pressed="true"] {background:#e2eeff;color:#0864bb;border-color:#9bc7f0;}
+.ai-prompt-icon-action.is-upvote:disabled {opacity:.55;cursor:not-allowed;}
+.ai-prompt-community-engagement {display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:12px 0;border-bottom:1px solid #e5ebf3;color:#60728a;font-size:12px;}
+.ai-prompt-community-engagement button {padding:8px 13px;border:1px solid #a5bfdc;border-radius:10px;background:#edf5ff;color:#0c4688;font-weight:750;cursor:pointer;}
+.ai-prompt-community-engagement button[aria-pressed="true"] {background:#0c4688;color:white;}
+.ai-prompt-community-engagement button:disabled {opacity:.5;cursor:not-allowed;}
+.ai-prompt-community-discussion {padding:18px 0 0;margin-top:14px;border-top:1px solid #e0e7ef;}
+.ai-prompt-community-discussion h3 {margin:0 0 10px;color:#183a68;font-size:16px;}
+.ai-prompt-community-comment {border:1px solid #e0e8f0;border-radius:12px;padding:14px;margin:12px 0;background:white;}
+.ai-prompt-community-comment-meta {display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:12px;color:#385a7b;}
+.ai-prompt-community-comment-meta small {color:#8090a3;white-space:nowrap;}
+.ai-prompt-community-comment p {white-space:pre-wrap;overflow-wrap:anywhere;margin:8px 0;line-height:1.55;font-size:13px;color:#30485f;}
+.ai-prompt-community-comment-actions {display:flex;gap:9px;justify-content:end;}
+.ai-prompt-community-comment-actions button,.ai-prompt-community-comments-pager button {border:1px solid #d5e0eb;background:#f8fafc;color:#335478;padding:7px 11px;border-radius:8px;cursor:pointer;font-size:12px;}
+.ai-prompt-community-comments-pager {display:flex;align-items:center;justify-content:center;gap:15px;padding:12px 0;font-size:12px;color:#5c6d81;}
+.ai-prompt-community-comment-form {display:flex;flex-direction:column;gap:8px;margin-top:10px;}
+.ai-prompt-community-comment-form label {font-size:12px;font-weight:700;color:#294465;}
+.ai-prompt-community-comment-form textarea {border:1px solid #cedae8;border-radius:10px;padding:12px;background:white;resize:vertical;min-height:80px;}
+.ai-prompt-community-comment-form button {background:#0b4a93;color:#fff;border:0;border-radius:10px;align-self:flex-end;padding:10px 16px;font-weight:700;cursor:pointer;}
+@media(max-width:650px) {
+  .ai-prompt-community-sort {width:100%;margin-left:0;justify-content:space-between;}
+  .ai-prompt-community-nav>button {flex:1;}
+  .ai-prompt-table {min-width:980px;}
+}
+
+
+.ai-prompt-library-page .ai-prompt-community-publish-action {
+  border:1px solid #b8cde1;background:#f1f7ff;color:#12558d;
+  padding:5px 8px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;
+}
+.ai-prompt-library-page #ai-prompt-library-categories[hidden] {display:none!important;}
+.ai-prompt-library-page #ai-prompt-library-missing-summary[hidden] {display:none!important;}
+
+.ai-prompt-community-comment-hidden {color:#93562a;font-size:10px;background:#fff1db;border-radius:5px;padding:3px 6px;}
+
+.ai-prompt-library-page .ai-prompt-community-feed-title {
+  margin:20px 0 14px;font-size:17px;color:#193c6a;font-weight:750;
+}
 </style>

@@ -95,9 +95,24 @@
           hidden
         >
           <span aria-hidden="true">＋</span>
-          Add Prompt
+          Post a Prompt
         </button>
       </div>
+
+      <nav class="ai-prompt-community-nav" aria-label="Prompt Library sections">
+        <button type="button" id="ai-prompt-community-explore" class="is-active" aria-current="page">Explore Prompts</button>
+        <button type="button" id="ai-prompt-community-my" aria-current="false">My Prompts</button>
+        <label class="ai-prompt-community-sort" for="ai-prompt-community-sort">
+          Sort by
+          <select id="ai-prompt-community-sort" aria-label="Sort prompts">
+            <option value="top-upvoted">Most Upvoted</option>
+            <option value="most-copied">Most Copied</option>
+            <option value="newest">Newest</option>
+            <option value="name">A–Z</option>
+          </select>
+        </label>
+      </nav>
+      <p class="ai-prompt-community-identity" id="ai-prompt-community-identity" role="status" hidden></p>
 
       <aside
         id="ai-prompt-library-missing-summary"
@@ -350,6 +365,12 @@
 
       <div class="ai-prompt-dialog-body">
         <div id="ai-prompt-detail-meta" class="ai-prompt-detail-meta" aria-label="Prompt metadata"></div>
+        <div id="ai-prompt-community-detail-engagement" class="ai-prompt-community-engagement">
+          <button id="ai-prompt-community-detail-upvote" type="button" aria-pressed="false">▲ Upvote</button>
+          <span id="ai-prompt-community-detail-votes">0 upvotes</span>
+          <span id="ai-prompt-community-detail-copies">0 copies</span>
+          <span id="ai-prompt-community-detail-comment-count">0 comments</span>
+        </div>
 
         <section class="ai-prompt-detail-section">
           <h3>Use Case</h3>
@@ -376,6 +397,20 @@
           <pre id="ai-prompt-detail-prompt" class="ai-prompt-detail-prompt"></pre>
         </section>
 
+        <section class="ai-prompt-community-discussion" aria-label="Prompt discussion">
+          <h3>Discussion</h3>
+          <div id="ai-prompt-community-comments" aria-live="polite"></div>
+          <div class="ai-prompt-community-comments-pager">
+            <button type="button" id="ai-prompt-comments-prev">Previous</button>
+            <span id="ai-prompt-comments-page">Page 1</span>
+            <button type="button" id="ai-prompt-comments-next">Next</button>
+          </div>
+          <form id="ai-prompt-comment-form" class="ai-prompt-community-comment-form">
+            <label for="ai-prompt-comment-body">Add a comment</label>
+            <textarea id="ai-prompt-comment-body" maxlength="2000" rows="3" placeholder="Share a suggestion or improvement…" required></textarea>
+            <button id="ai-prompt-comment-submit" type="submit">Post Comment</button>
+          </form>
+        </section>
       </div>
 
       <footer class="ai-prompt-dialog-footer ai-prompt-detail-footer">
@@ -410,9 +445,9 @@
     <div class="ai-prompt-dialog-shell">
       <header class="ai-prompt-dialog-header">
         <div>
-          <p class="ai-prompt-dialog-eyebrow">NEXUS ADMIN</p>
+          <p class="ai-prompt-dialog-eyebrow">NEXUS COMMUNITY</p>
           <div class="ai-prompt-editor-title-line">
-            <h2 id="ai-prompt-editor-title">Add New Prompt</h2>
+            <h2 id="ai-prompt-editor-title">Post a Prompt</h2>
             <span id="ai-prompt-editor-id" class="ai-prompt-editor-id" hidden></span>
           </div>
           <p id="ai-prompt-editor-description">
@@ -587,7 +622,7 @@
                 <span>Publish as <b>*</b></span>
                 <select name="status" required>
                   <option value="Active">Active — visible to users</option>
-                  <option value="Draft">Draft — admin only</option>
+                  <option value="Draft">Draft — visible to you and admins</option>
                   <option value="Inactive">Inactive — hidden</option>
                   <option value="Retired">Retired — archived from users</option>
                 </select>
@@ -597,7 +632,7 @@
                 <span class="ai-prompt-system-note-icon" aria-hidden="true">✓</span>
                 <div>
                   <strong>Nexus handles the rest automatically</strong>
-                  <p>Prompt ID, Owner, and Last Updated are managed automatically when you save.</p>
+                  <p>Nexus automatically records the creator, prompt ID, and edit time. Never paste passwords, access tokens, or confidential client data.</p>
                 </div>
               </div>
             </div>
@@ -611,7 +646,7 @@
             Cancel
           </button>
           <button id="ai-prompt-add-submit" type="submit" class="ai-prompt-primary-button">
-            Add Prompt
+            Publish Prompt
           </button>
         </footer>
       </form>

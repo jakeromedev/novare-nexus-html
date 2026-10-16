@@ -5,6 +5,16 @@
   const state = {
     root: null,
     prompts: [],
+    myPrompts: [],
+    activeView: "explore",
+    sortMode: "top-upvoted",
+    identityVerified: false,
+    communityWritesEnabled: false,
+    currentUserEmail: "",
+    commentsPage: 1,
+    commentsTotal: 0,
+    votePending: {},
+    commentSubmitting: false,
     categories: [],
     categoryOptions: [],
     promptTypeOptions: [],
@@ -157,6 +167,20 @@
     );
     refs.retry = root.querySelector("#ai-prompt-library-retry");
     refs.addButton = root.querySelector("#ai-prompt-library-add");
+    refs.communityExplore = root.querySelector("#ai-prompt-community-explore");
+    refs.communityMy = root.querySelector("#ai-prompt-community-my");
+    refs.communitySort = root.querySelector("#ai-prompt-community-sort");
+    refs.communityIdentity = root.querySelector("#ai-prompt-community-identity");
+    refs.detailUpvote = root.querySelector("#ai-prompt-community-detail-upvote");
+    refs.detailVotes = root.querySelector("#ai-prompt-community-detail-votes");
+    refs.detailCopies = root.querySelector("#ai-prompt-community-detail-copies");
+    refs.detailCommentCount = root.querySelector("#ai-prompt-community-detail-comment-count");
+    refs.comments = root.querySelector("#ai-prompt-community-comments");
+    refs.commentForm = root.querySelector("#ai-prompt-comment-form");
+    refs.commentBody = root.querySelector("#ai-prompt-comment-body");
+    refs.commentsPrev = root.querySelector("#ai-prompt-comments-prev");
+    refs.commentsNext = root.querySelector("#ai-prompt-comments-next");
+    refs.commentsPage = root.querySelector("#ai-prompt-comments-page");
 
     refs.detailDialog = root.querySelector("#ai-prompt-detail-dialog");
     refs.detailTitle = root.querySelector("#ai-prompt-detail-title");
@@ -225,6 +249,30 @@
   }
 
   function bindEvents(root) {
+    if (refs.communityExplore) refs.communityExplore.addEventListener("click", function () {
+      setCommunityView_("explore");
+    });
+    if (refs.communityMy) refs.communityMy.addEventListener("click", function () {
+      setCommunityView_("my-prompts");
+    });
+    if (refs.communitySort) refs.communitySort.addEventListener("change", function () {
+      state.sortMode = refs.communitySort.value || "top-upvoted";
+      state.page = 1;
+      renderLibrary();
+    });
+    if (refs.detailUpvote) refs.detailUpvote.addEventListener("click", function () {
+      setCommunityVote_(state.activePromptId);
+    });
+    if (refs.commentForm) refs.commentForm.addEventListener("submit", submitCommunityComment_);
+    if (refs.commentsPrev) refs.commentsPrev.addEventListener("click", function () {
+      state.commentsPage = Math.max(1, state.commentsPage - 1);
+      loadCommunityComments_();
+    });
+    if (refs.commentsNext) refs.commentsNext.addEventListener("click", function () {
+      state.commentsPage += 1;
+      loadCommunityComments_();
+    });
+    if (refs.comments) refs.comments.addEventListener("click", handleCommunityCommentAction_);
     if (refs.search) {
       refs.search.addEventListener("input", function () {
         state.query = refs.search.value.trim().toLowerCase();
@@ -373,6 +421,14 @@
           const action =
             actionButton.dataset.aiPromptAction || "";
 
+          if (action === "publish" || action === "unpublish") {
+            setCommunityPublication_(promptId, action === "publish");
+            return;
+          }
+          if (action === "upvote") {
+            setCommunityVote_(promptId);
+            return;
+          }
           if (action === "edit") {
             editPromptById(promptId);
             return;
@@ -1030,7 +1086,7 @@
     const isAdmin = getEffectiveRole() === "admin";
 
     refs.missingSummary.hidden =
-      !isAdmin || missingCount === 0;
+      !isAdmin || missingCount === 0 || state.activeView === "my-prompts";
 
     if (
       isAdmin &&
@@ -1054,7 +1110,9 @@
     return Boolean(
       state.query ||
       state.category !== "all" ||
-      hasActiveFilters_()
+      hasActiveFilters_() ||
+      state.activeView === "explore" ||
+      state.activeView === "my-prompts"
     );
   }
 
@@ -1188,27 +1246,83 @@
   }
 
 
+  function canWriteCommunity_() {
+    return state.identityVerified && state.communityWritesEnabled;
+  }
+
+  function findCommunityPrompt_(id) {
+    return state.prompts.concat(state.myPrompts).find(function (item) {
+      return String(item.id || "") === String(id || "");
+    });
+  }
+
+  function canEditCommunityPrompt_(prompt) {
+    if (!prompt || !canWriteCommunity_()) return false;
+    const actualAdminInView = state.adminView && getEffectiveRole() === "admin";
+    const isAuthor = prompt.createdByEmail &&
+      prompt.createdByEmail === state.currentUserEmail;
+    return Boolean(actualAdminInView || (isAuthor &&
+      ["Active", "Draft"].includes(prompt.status)));
+  }
+
   function syncAdminUI() {
     const isAdmin = getEffectiveRole() === "admin";
-
     if (refs.addButton) {
-      refs.addButton.hidden = !isAdmin;
+      refs.addButton.hidden = !canWriteCommunity_();
+      refs.addButton.textContent = "+ Post a Prompt";
     }
-
     if (refs.detailAdminActions) {
-      refs.detailAdminActions.hidden = !isAdmin;
+      const prompt = findCommunityPrompt_(state.activePromptId);
+      refs.detailAdminActions.hidden = !canEditCommunityPrompt_(prompt);
     }
-
-    if (refs.filterStatusGroup) {
-      refs.filterStatusGroup.hidden = !isAdmin;
+    if (refs.detailDelete) {
+      refs.detailDelete.hidden = !state.adminView || !isAdmin;
+      refs.detailDelete.textContent = "Delete Permanently";
     }
-
-    if (!isAdmin && state.filters.statuses.length) {
-      state.filters.statuses = [];
+    if (refs.filterStatusGroup) refs.filterStatusGroup.hidden = !isAdmin;
+    if (!isAdmin && state.filters.statuses.length) state.filters.statuses = [];
+    if (refs.communityIdentity) {
+      let msg = "";
+      if (!state.identityVerified) {
+        msg = "You can browse prompts, but posting, voting and comments require a verified employee identity.";
+      } else if (!state.communityWritesEnabled) {
+        msg = "Community interaction is awaiting administrator activation after identity verification.";
+      }
+      refs.communityIdentity.hidden = !msg;
+      refs.communityIdentity.textContent = msg;
     }
-
+    syncCommunityView_();
     renderMissingSummary_();
     renderFilterSummary_();
+  }
+
+  function setCommunityView_(name) {
+    state.activeView = name === "my-prompts" ? "my-prompts" : "explore";
+    state.page = 1;
+    state.category = "all";
+    state.query = "";
+    if (refs.search) refs.search.value = "";
+    state.filters = {promptTypes:[],content:"all",statuses:[]};
+    renderFilterSummary_();
+    syncCommunityView_();
+    renderCategoryFilters();
+    renderLibrary();
+  }
+
+  function syncCommunityView_() {
+    const mine = state.activeView === "my-prompts";
+    if (refs.communityExplore) {
+      refs.communityExplore.classList.toggle("is-active", !mine);
+      refs.communityExplore.setAttribute("aria-current", mine ? "false" : "page");
+    }
+    if (refs.communityMy) {
+      refs.communityMy.classList.toggle("is-active", mine);
+      refs.communityMy.setAttribute("aria-current", mine ? "page" : "false");
+      refs.communityMy.disabled = !state.identityVerified;
+      refs.communityMy.title = state.identityVerified ? "View your contributions" : "Identity verification required";
+    }
+    if (refs.categories) refs.categories.hidden = mine;
+    if (refs.missingSummary) refs.missingSummary.hidden = mine;
   }
 
   function loadLibrary() {
@@ -1229,6 +1343,10 @@
           state.loading = false;
           const payload = response && typeof response === "object" ? response : {};
           state.adminView = payload.adminView === true;
+          state.identityVerified = payload.identityVerified === true;
+          state.communityWritesEnabled = payload.communityWritesEnabled === true;
+          state.currentUserEmail = String(payload.currentUserEmail || "").toLowerCase();
+          state.myPrompts = Array.isArray(payload.myPrompts) ? payload.myPrompts : [];
           state.prompts = Array.isArray(payload.prompts) ? payload.prompts : [];
           state.categories = Array.isArray(payload.categories)
             ? payload.categories
@@ -1251,6 +1369,7 @@
 
           populateCategorySelect();
           populatePromptTypeSelect();
+          syncAdminUI();
           sanitizeActiveFilters_();
           renderFilterControls_(state.filters);
           renderMissingSummary_();
@@ -1472,7 +1591,10 @@
       ? refs.search.value.trim()
       : "";
 
-    if (state.query) {
+    if (state.activeView === "my-prompts" && !state.myPrompts.length) {
+      title = "You haven't posted any prompts yet";
+      message = "Use Post a Prompt to share your first contribution.";
+    } else if (state.query) {
       title = rawQuery
         ? 'No prompts match "' + rawQuery + '"'
         : "No prompts match your search";
@@ -1549,22 +1671,16 @@
       "is-loading"
     );
 
-    const showTable = shouldShowTable_();
-
-    refs.categories.classList.toggle(
-      "is-grid-view",
-      !showTable
+    // Keep the original category monogram cards on the default Explore view
+    // while ALSO showing the community popularity feed below them.
+    const showContext = Boolean(
+      state.query || state.category !== "all" || hasActiveFilters_()
     );
+    refs.categories.classList.toggle("is-grid-view", !showContext);
+    refs.categories.classList.toggle("is-context-view", showContext);
 
-    refs.categories.classList.toggle(
-      "is-context-view",
-      showTable
-    );
-
-    if (showTable) {
-      refs.categories.appendChild(
-        createLibraryContextBar_()
-      );
+    if (showContext) {
+      refs.categories.appendChild(createLibraryContextBar_());
       return;
     }
 
@@ -1795,8 +1911,9 @@
     refs.results.replaceChildren();
 
     if (refs.count) {
-      refs.count.textContent =
-        pluralizePrompt(state.prompts.length);
+      refs.count.textContent = state.activeView === "my-prompts"
+        ? pluralizePrompt(state.myPrompts.length)
+        : pluralizePrompt(state.prompts.length);
     }
 
     if (!shouldShowTable_()) {
@@ -1842,9 +1959,15 @@
       start + state.pageSize
     );
 
-    refs.results.appendChild(
-      createPromptTable(pageItems)
-    );
+    if (state.activeView === "my-prompts" ||
+        (!state.query && state.category === "all" && !hasActiveFilters_())) {
+      const heading = document.createElement("h3");
+      heading.className = "ai-prompt-community-feed-title";
+      heading.textContent = state.activeView === "my-prompts"
+        ? "My Contributions" : "Top Community Prompts";
+      refs.results.appendChild(heading);
+    }
+    refs.results.appendChild(createPromptTable(pageItems));
 
     renderPagination(
       filtered.length,
@@ -1856,7 +1979,9 @@
 
 
   function getVisiblePrompts() {
-    let prompts = state.prompts.slice();
+    let prompts = state.activeView === "my-prompts"
+      ? state.myPrompts.slice()
+      : state.prompts.slice();
 
     if (state.query) {
       prompts = prompts.filter(
@@ -1915,21 +2040,17 @@
     }
 
     prompts.sort(function (a, b) {
-      const byName = String(
-        a.promptName || ""
-      ).localeCompare(
-        String(b.promptName || ""),
-        undefined,
-        { sensitivity: "base" }
-      );
-
-      if (byName !== 0) return byName;
-
-      return String(a.id || "").localeCompare(
-        String(b.id || ""),
-        undefined,
-        { sensitivity: "base" }
-      );
+      const votes = function (p) { return Math.max(0, Number(p.upvoteCount) || 0); };
+      const copies = function (p) { return Math.max(0, Number(p.copyCount) || 0); };
+      const name = function (x, y) { return String(x.promptName || "").localeCompare(String(y.promptName || ""), undefined, {sensitivity:"base"}); };
+      let result = 0;
+      if (state.sortMode === "most-copied") result = copies(b)-copies(a) || votes(b)-votes(a);
+      else if (state.sortMode === "newest") {
+        const ta = a.createdAt ? Date.parse(a.createdAt) || 0 : 0;
+        const tb = b.createdAt ? Date.parse(b.createdAt) || 0 : 0;
+        result = tb-ta;
+      } else if (state.sortMode === "top-upvoted") result = votes(b)-votes(a) || copies(b)-copies(a);
+      return result || name(a,b) || String(a.id||"").localeCompare(String(b.id||""));
     });
 
     return prompts;
@@ -2075,7 +2196,7 @@
 
     const table = document.createElement("table");
     table.className = "ai-prompt-table";
-    table.classList.toggle("is-admin", state.adminView);
+    table.classList.toggle("is-admin", state.adminView || state.activeView === "my-prompts");
 
     const colgroup = document.createElement("colgroup");
 
@@ -2094,15 +2215,14 @@
     const useCaseCol = document.createElement("col");
     useCaseCol.className = "ai-prompt-table-colgroup-use-case";
 
-    colgroup.append(
-      actionCol,
-      nameCol,
-      categoryCol,
-      typeCol,
-      useCaseCol
-    );
+    colgroup.append(actionCol, nameCol, categoryCol, typeCol, useCaseCol);
+    ["votes", "copies", "comments"].forEach(function (name) {
+      const col = document.createElement("col");
+      col.className = "ai-prompt-community-col-" + name;
+      colgroup.appendChild(col);
+    });
 
-    if (state.adminView) {
+    if (state.adminView || state.activeView === "my-prompts") {
       const statusCol = document.createElement("col");
       statusCol.className = "ai-prompt-table-colgroup-status";
       colgroup.appendChild(statusCol);
@@ -2131,7 +2251,10 @@
       ["Prompt Name", "ai-prompt-table-col-name"],
       ["Category", "ai-prompt-table-col-category"],
       ["Prompt Type", "ai-prompt-table-col-type"],
-      ["Use Case", "ai-prompt-table-col-use-case"]
+      ["Use Case", "ai-prompt-table-col-use-case"],
+      ["Upvotes", "ai-prompt-table-col-votes"],
+      ["Copies", "ai-prompt-table-col-copies"],
+      ["Comments", "ai-prompt-table-col-comments"]
     ].forEach(function (entry) {
       const th = document.createElement("th");
       th.scope = "col";
@@ -2140,7 +2263,7 @@
       headerRow.appendChild(th);
     });
 
-    if (state.adminView) {
+    if (state.adminView || state.activeView === "my-prompts") {
       const statusHeading = document.createElement("th");
       statusHeading.scope = "col";
       statusHeading.className =
@@ -2246,7 +2369,17 @@
       )
     );
 
-    if (state.adminView) {
+    if (prompt.status === "Active") {
+      const upvote = createPromptTableActionButton(
+        "upvote", prompt, "Upvote this prompt"
+      );
+      upvote.setAttribute("aria-pressed", prompt.upvotedByMe === true ? "true" : "false");
+      upvote.title = prompt.upvotedByMe ? "Remove upvote" : "Upvote this prompt";
+      upvote.disabled = !canWriteCommunity_();
+      actions.appendChild(upvote);
+    }
+
+    if (canEditCommunityPrompt_(prompt)) {
       actions.appendChild(
         createPromptTableActionButton(
           "edit",
@@ -2255,13 +2388,19 @@
         )
       );
 
-      actions.appendChild(
-        createPromptTableActionButton(
-          "delete",
-          prompt,
-          "Delete prompt"
-        )
-      );
+      if (state.adminView && getEffectiveRole() === "admin") {
+        actions.appendChild(
+          createPromptTableActionButton("delete", prompt, "Delete prompt permanently")
+        );
+      }
+    }
+
+    if (state.activeView === "my-prompts" && canEditCommunityPrompt_(prompt)) {
+      if (prompt.status === "Draft") {
+        actions.appendChild(createCommunityPublicationButton_(prompt, true));
+      } else if (prompt.status === "Active") {
+        actions.appendChild(createCommunityPublicationButton_(prompt, false));
+      }
     }
 
     actionCell.appendChild(actions);
@@ -2309,6 +2448,12 @@
     const id = document.createElement("small");
     id.textContent = String(prompt.id || "");
     nameCell.appendChild(id);
+    if (prompt.owner) {
+      const author = document.createElement("small");
+      author.className = "ai-prompt-community-author";
+      author.textContent = "by " + String(prompt.owner);
+      nameCell.appendChild(author);
+    }
 
     const categoryCell = document.createElement("td");
     categoryCell.className =
@@ -2351,8 +2496,14 @@
       typeCell,
       useCaseCell
     );
+    [["upvoteCount", "votes"], ["copyCount", "copies"], ["commentCount", "comments"]].forEach(function (entry) {
+      const cell = document.createElement("td");
+      cell.className = "ai-prompt-community-count";
+      cell.textContent = String(Math.max(0, Number(prompt[entry[0]]) || 0));
+      row.appendChild(cell);
+    });
 
-    if (state.adminView) {
+    if (state.adminView || state.activeView === "my-prompts") {
       const statusCell = document.createElement("td");
       statusCell.className =
         "ai-prompt-table-col-status";
@@ -2365,6 +2516,17 @@
     return row;
   }
 
+
+  function createCommunityPublicationButton_(prompt, publish) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "ai-prompt-community-publish-action";
+    button.dataset.aiPromptAction = publish ? "publish" : "unpublish";
+    button.dataset.aiPromptId = String(prompt.id || "");
+    button.textContent = publish ? "Publish" : "Unpublish";
+    button.setAttribute("title", button.textContent + " prompt");
+    return button;
+  }
 
   function createPromptTableActionButton(
     action,
@@ -2437,6 +2599,10 @@
         '<path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"></path>',
         '</svg>'
       ].join("");
+    }
+
+    if (action === "upvote") {
+      return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 4 8 12H4z"></path></svg>';
     }
 
     if (action === "delete") {
@@ -2640,14 +2806,7 @@
   }
 
   function openPromptDetail(promptId) {
-    const prompt = state.prompts.find(
-      function (item) {
-        return (
-          String(item.id || "") ===
-          String(promptId || "")
-        );
-      }
-    );
+    const prompt = findCommunityPrompt_(promptId);
 
     if (!prompt || !refs.detailDialog) {
       return;
@@ -2709,7 +2868,11 @@
 
     renderDetailMeta(prompt);
     syncAdminUI();
+    updateCommunityEngagement_(prompt);
+    state.commentsPage = 1;
+    if (refs.commentBody) refs.commentBody.value = "";
     openDialog(refs.detailDialog);
+    loadCommunityComments_();
   }
 
   function renderDetailMeta(prompt) {
@@ -2718,6 +2881,7 @@
     refs.detailMeta.replaceChildren();
 
     const entries = [
+      { label: "Posted by", value: prompt.owner || "Nexus Team", className: "is-author" },
       {
         label: "Category",
         value: prompt.category,
@@ -2779,9 +2943,7 @@
 
 
   function copyPromptById(promptId, triggerButton) {
-    const prompt = state.prompts.find(function (item) {
-      return String(item.id || "") === String(promptId || "");
-    });
+    const prompt = findCommunityPrompt_(promptId);
 
     if (!prompt) return;
 
@@ -2801,6 +2963,7 @@
       .then(function () {
         showToast("Prompt copied to clipboard.", "success");
         showCopiedButtonState(triggerButton);
+        trackCommunityCopy_(promptId);
       })
       .catch(function () {
         showToast(
@@ -2939,7 +3102,8 @@
 
 
   function openAddPromptDialog() {
-    if (getEffectiveRole() !== "admin") {
+    if (!canWriteCommunity_()) {
+      showToast("Community posting requires a verified account and administrator activation.", "error");
       return;
     }
 
@@ -2953,13 +3117,8 @@
 
 
   function editPromptById(promptId) {
-    if (getEffectiveRole() !== "admin") {
-      return;
-    }
-
-    const prompt = state.prompts.find(function (item) {
-      return String(item.id || "") === String(promptId || "");
-    });
+    const prompt = findCommunityPrompt_(promptId);
+    if (!canEditCommunityPrompt_(prompt)) return;
 
     if (!prompt) return;
 
@@ -2996,6 +3155,15 @@
 
     refs.addForm.reset();
     clearAddError();
+    const statusOptions = refs.addForm.elements.status;
+    if (statusOptions) {
+      Array.from(statusOptions.options).forEach(function (option) {
+        if (["Inactive", "Retired"].includes(option.value)) {
+          option.hidden = !(state.adminView && getEffectiveRole() === "admin");
+          option.disabled = option.hidden;
+        }
+      });
+    }
 
     populateCategorySelect();
     populatePromptTypeSelect();
@@ -3006,7 +3174,7 @@
     if (refs.editorTitle) {
       refs.editorTitle.textContent = isEditing
         ? "Edit Prompt"
-        : "Add New Prompt";
+        : "Post a Prompt";
     }
 
     if (refs.editorId) {
@@ -3019,7 +3187,7 @@
     if (refs.editorDescription) {
       refs.editorDescription.textContent = isEditing
         ? "Update the prompt information and reusable content below."
-        : "Create a reusable prompt for the Nexus Prompt Library.";
+        : "Share a reusable prompt with the Nexus community.";
     }
 
     if (isEditing) {
@@ -3319,8 +3487,8 @@
   function submitAddPrompt(event) {
     event.preventDefault();
 
-    if (getEffectiveRole() !== "admin") {
-      setAddError("Administrator access is required.");
+    if (!canWriteCommunity_()) {
+      setAddError("Verified employee access and community activation are required.");
       return;
     }
 
@@ -3487,7 +3655,7 @@
     } else {
       refs.addSubmit.textContent = state.editingPromptId
         ? "Save Changes"
-        : "Add Prompt";
+        : "Publish / Save Draft";
     }
   }
 
@@ -3676,6 +3844,181 @@
     }, 3200);
   }
 
+  function setCommunityPublication_(id, publish) {
+    const prompt = findCommunityPrompt_(id);
+    if (!canEditCommunityPrompt_(prompt)) return;
+    if (!publish && !window.confirm("Unpublish this prompt and save it as Draft?")) return;
+    google.script.run.withSuccessHandler(function (response) {
+      showToast(response.message || "Prompt status updated.","success");
+      loadLibrary();
+    }).withFailureHandler(function (error) {
+      showToast(getErrorMessage(error,"Unable to update publication."),"error");
+    }).setNexusPromptPublication(id,publish);
+  }
+
+  function updateCommunityPromptMetrics_(id, updates) {
+    [state.prompts, state.myPrompts].forEach(function (list) {
+      list.forEach(function (prompt) {
+        if (prompt.id !== id) return;
+        Object.keys(updates).forEach(function (key) { prompt[key] = updates[key]; });
+      });
+    });
+    renderLibrary();
+    if (state.activePromptId === id) {
+      const prompt = findCommunityPrompt_(id);
+      if (prompt) updateCommunityEngagement_(prompt);
+    }
+  }
+
+  function updateCommunityEngagement_(prompt) {
+    if (!prompt) return;
+    if (refs.detailVotes) refs.detailVotes.textContent = (Number(prompt.upvoteCount)||0) + " upvotes";
+    if (refs.detailCopies) refs.detailCopies.textContent = (Number(prompt.copyCount)||0) + " copies";
+    if (refs.detailCommentCount) refs.detailCommentCount.textContent = (Number(prompt.commentCount)||0) + " comments";
+    if (refs.detailUpvote) {
+      refs.detailUpvote.disabled = !canWriteCommunity_() || prompt.status !== "Active" || !!state.votePending[prompt.id];
+      refs.detailUpvote.setAttribute("aria-pressed", prompt.upvotedByMe ? "true" : "false");
+      refs.detailUpvote.textContent = prompt.upvotedByMe ? "▲ Upvoted" : "▲ Upvote";
+    }
+  }
+
+  function setCommunityVote_(promptId) {
+    const prompt = findCommunityPrompt_(promptId);
+    if (!prompt || !canWriteCommunity_() || prompt.status !== "Active" || state.votePending[promptId]) return;
+    const desired = !Boolean(prompt.upvotedByMe);
+    state.votePending[promptId] = true;
+    updateCommunityEngagement_(prompt);
+    google.script.run.withSuccessHandler(function (response) {
+      delete state.votePending[promptId];
+      updateCommunityPromptMetrics_(promptId, {
+        upvotedByMe: response.upvoted === true,
+        upvoteCount: Math.max(0, Number(response.upvoteCount)||0)
+      });
+    }).withFailureHandler(function (error) {
+      delete state.votePending[promptId];
+      updateCommunityEngagement_(prompt);
+      showToast(getErrorMessage(error, "Could not update upvote."), "error");
+    }).setNexusPromptUpvote(promptId, desired);
+  }
+
+  function trackCommunityCopy_(promptId) {
+    const prompt = findCommunityPrompt_(promptId);
+    if (!prompt || !canWriteCommunity_() || prompt.status !== "Active") return;
+    // Clipboard copy is already done; one non-retried server increment.
+    google.script.run.withSuccessHandler(function (response) {
+      updateCommunityPromptMetrics_(promptId, {copyCount: Math.max(0,Number(response.copyCount)||0)});
+    }).withFailureHandler(function (error) {
+      console.warn("[AI Prompt Library] Prompt copied, but metric was not recorded:", error);
+    }).recordNexusPromptCopy(promptId);
+  }
+
+  function loadCommunityComments_() {
+    if (!state.activePromptId || !refs.comments) return;
+    const id = state.activePromptId;
+    const page = state.commentsPage;
+    refs.comments.textContent = "Loading discussion…";
+    google.script.run.withSuccessHandler(function (response) {
+      if (id !== state.activePromptId) return;
+      const data = response || {};
+      state.commentsTotal = Number(data.total)||0;
+      renderCommunityComments_(Array.isArray(data.comments)?data.comments:[]);
+      if (refs.commentsPage) refs.commentsPage.textContent = "Page " + state.commentsPage;
+      if (refs.commentsPrev) refs.commentsPrev.disabled = state.commentsPage <= 1;
+      if (refs.commentsNext) refs.commentsNext.disabled = state.commentsPage * 15 >= state.commentsTotal;
+      if (refs.commentForm) refs.commentForm.hidden = data.canComment !== true;
+    }).withFailureHandler(function (error) {
+      if (id === state.activePromptId) refs.comments.textContent = getErrorMessage(error,"Unable to load discussion.");
+    }).getNexusPromptComments(id, {page:page,pageSize:15,includeHidden: state.adminView});
+  }
+
+  function renderCommunityComments_(comments) {
+    if (!refs.comments) return;
+    refs.comments.replaceChildren();
+    if (!comments.length) { refs.comments.textContent = "No comments yet. Share a suggestion to help others."; return; }
+    comments.forEach(function (comment) {
+      const article = document.createElement("article");
+      article.className = "ai-prompt-community-comment";
+      const meta = document.createElement("div"); meta.className = "ai-prompt-community-comment-meta";
+      const author = document.createElement("strong"); author.textContent = comment.authorName || "Nexus Contributor";
+      const date = document.createElement("small");
+      date.textContent = comment.createdAt ? new Date(comment.createdAt).toLocaleDateString() : "";
+      meta.append(author,date);
+      const body = document.createElement("p"); body.textContent = comment.comment || "";
+      if (comment.status === "Hidden") {
+        const marker = document.createElement("small");
+        marker.textContent = "Hidden by a Nexus administrator";
+        marker.className = "ai-prompt-community-comment-hidden";
+        meta.appendChild(marker);
+      }
+      article.append(meta,body);
+      if (comment.canEdit) {
+        const buttons = document.createElement("div"); buttons.className = "ai-prompt-community-comment-actions";
+        const actions = state.adminView && getEffectiveRole() === "admin"
+          ? (comment.status === "Hidden"
+              ? ["restore","remove"]
+              : ["edit","remove","hide"])
+          : ["edit","remove"];
+        actions.forEach(function (action) {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.dataset.communityCommentAction = action;
+          button.dataset.communityCommentId = comment.id;
+          button.dataset.communityCommentBody = comment.comment;
+          button.textContent = action === "edit" ? "Edit" : action === "hide" ? "Hide" : action === "restore" ? "Restore" : "Remove";
+          buttons.appendChild(button);
+        });
+        article.appendChild(buttons);
+      }
+      refs.comments.appendChild(article);
+    });
+  }
+
+  function submitCommunityComment_(event) {
+    event.preventDefault();
+    if (!canWriteCommunity_() || !state.activePromptId || state.commentSubmitting) return;
+    const body = String(refs.commentBody && refs.commentBody.value || "").trim();
+    if (!body) return;
+    state.commentSubmitting = true;
+    const id = state.activePromptId;
+    google.script.run.withSuccessHandler(function (response) {
+      state.commentSubmitting = false;
+      if (refs.commentBody) refs.commentBody.value = "";
+      updateCommunityPromptMetrics_(id, {commentCount:Number(response.commentCount)||0});
+      state.commentsPage = 1;
+      loadCommunityComments_();
+    }).withFailureHandler(function (error) {
+      state.commentSubmitting = false;
+      showToast(getErrorMessage(error,"Unable to submit comment."),"error");
+    }).createNexusPromptComment(id,body);
+  }
+
+  function handleCommunityCommentAction_(event) {
+    const button = event.target.closest("[data-community-comment-action]");
+    if (!button || !canWriteCommunity_()) return;
+    const id = button.dataset.communityCommentId || "";
+    const action = button.dataset.communityCommentAction;
+    if (action === "edit") {
+      const previous = button.dataset.communityCommentBody || "";
+      const body = window.prompt("Edit your comment:", previous);
+      if (body === null || !body.trim() || body === previous) return;
+      google.script.run.withSuccessHandler(loadCommunityComments_)
+        .withFailureHandler(function (error) {showToast(getErrorMessage(error,"Unable to edit comment."),"error");})
+        .updateNexusPromptComment(id,body);
+    } else if ((action === "hide" || action === "restore") && state.adminView) {
+      google.script.run.withSuccessHandler(function (response) {
+        updateCommunityPromptMetrics_(state.activePromptId,{commentCount:Number(response.commentCount)||0});
+        loadCommunityComments_();
+      }).withFailureHandler(function (error) {showToast(getErrorMessage(error,"Unable to moderate comment."),"error");})
+        .moderateNexusPromptComment(id,action === "hide");
+    } else if (action === "remove" && window.confirm("Remove this comment?")) {
+      google.script.run.withSuccessHandler(function (response) {
+        updateCommunityPromptMetrics_(state.activePromptId,{commentCount:Number(response.commentCount)||0});
+        loadCommunityComments_();
+      }).withFailureHandler(function (error) {showToast(getErrorMessage(error,"Unable to remove comment."),"error");})
+        .deleteNexusPromptComment(id);
+    }
+  }
+
   function getErrorMessage(error, fallback) {
     if (!error) return fallback;
     if (typeof error === "string") return error;
@@ -3689,23 +4032,27 @@
       closeDetailDialog();
     }
 
-    if (getEffectiveRole() !== "admin") {
-      if (refs.addDialog && refs.addDialog.open) {
-        closeAddPromptDialog(true);
-      }
-
-      if (refs.detailAdminActions) {
-        refs.detailAdminActions.hidden = true;
-      }
+    if (refs.addDialog && refs.addDialog.open &&
+        state.editingPromptId &&
+        !canEditCommunityPrompt_(findCommunityPrompt_(state.editingPromptId))) {
+      closeAddPromptDialog(true);
     }
-
     loadLibrary();
   });
 
   window.NexusAIPromptLibrary = {
     initialize: initialize,
     refresh: loadLibrary,
-    syncAdminUI: syncAdminUI
+    syncAdminUI: syncAdminUI,
+    // Read-only local identity diagnostic for cross-account deployment testing.
+    getCommunityStatus: function () {
+      return {
+        identityVerified: state.identityVerified,
+        currentUserEmail: state.currentUserEmail,
+        communityWritesEnabled: state.communityWritesEnabled,
+        activeView: state.activeView
+      };
+    }
   };
 })();
 </script>

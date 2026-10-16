@@ -53,6 +53,11 @@ const AI_PROMPT_LIBRARY_CONFIG = Object.freeze({
     'Retired'
   ]),
 
+  communityHeaders: Object.freeze([
+    'Created By Email', 'Created At', 'Upvote Count',
+    'Copy Count', 'Comment Count'
+  ]),
+
   maxLengths: Object.freeze({
     promptName: 180,
     category: 120,
@@ -75,28 +80,60 @@ const AI_PROMPT_LIBRARY_CONFIG = Object.freeze({
  */
 function getAIPromptLibrary(options) {
   const actor = getAIPromptLibraryCurrentUser_();
+  const identity = getNexusPromptCommunityIdentity_();
   const requestedMode = normalizeAIPromptViewMode_(options);
   const adminView = actor.isAdmin === true && requestedMode !== 'user';
-
   const sheet = getAIPromptLibrarySheet_();
   validateAIPromptLibraryHeaders_(sheet);
+  validateNexusPromptCommunitySchema_(sheet);
 
   const allPrompts = readAIPromptRows_(sheet).sort(compareAIPrompts_);
-
   const prompts = adminView
     ? allPrompts.slice()
     : allPrompts.filter(function (prompt) {
         return prompt.status === 'Active';
       });
+  const myPrompts = identity.verified
+    ? allPrompts.filter(function (prompt) {
+        return prompt.createdByEmail === identity.email;
+      })
+    : [];
+  const optionSource = adminView ? allPrompts : prompts;
+  const myVotes = identity.verified
+    ? getNexusPromptCommunityVotedIds_(identity.email)
+    : {};
 
-  const optionSource = adminView
-    ? allPrompts
-    : prompts;
+  // Only an employee's OWN creator email may appear in their feed response.
+  // Do not expose everyone else's email or sheet row number to the browser.
+  const publicPrompts = prompts.map(function (original) {
+    const item = Object.assign({}, original);
+    if (!identity.verified || item.createdByEmail !== identity.email) {
+      item.createdByEmail = '';
+    }
+    delete item.sheetRow;
+    return item;
+  });
+  const publicMyPrompts = myPrompts.map(function (original) {
+    const item = Object.assign({}, original);
+    delete item.sheetRow;
+    return item;
+  });
+
+  // Return only per-user vote state; never disclose other voters' emails.
+  [publicPrompts, publicMyPrompts].forEach(function (items) {
+    items.forEach(function (prompt) {
+      prompt.upvotedByMe = myVotes[prompt.id] === true;
+    });
+  });
 
   return {
     ok: true,
     adminView: adminView,
-    prompts: prompts,
+    identityVerified: identity.verified,
+    communityWritesEnabled: isNexusPromptCommunityEnabled_(),
+    currentUserEmail: identity.verified ? identity.email : '',
+    prompts: publicPrompts,
+    myPrompts: publicMyPrompts,
     categories: buildAIPromptCategories_(prompts),
     categoryOptions: buildAIPromptCategoryOptions_(optionSource),
     promptTypeOptions: buildAIPromptTypeOptions_(optionSource),
@@ -105,143 +142,108 @@ function getAIPromptLibrary(options) {
   };
 }
 
-
 /**
  * Adds one prompt to the registry.
  */
 function addAIPrompt(payload) {
-  const actor = assertAIPromptLibraryAdmin_();
+  const actor = assertNexusPromptCommunityActor_();
   const normalized = validateAIPromptPayload_(payload);
+  if (normalized.status !== 'Active' && normalized.status !== 'Draft' && !actor.isAdmin) {
+    throw new Error('Employees may publish or save Draft prompts only.');
+  }
+
   const lock = LockService.getScriptLock();
-
   lock.waitLock(10000);
-
   try {
     const sheet = getAIPromptLibrarySheet_();
     validateAIPromptLibraryHeaders_(sheet);
-
-    const existingPrompts = readAIPromptRows_(sheet);
-    const promptId = createNextGenAIPromptId_(existingPrompts);
-    const owner = getAIPromptOwnerLabel_(actor);
+    validateNexusPromptCommunitySchema_(sheet);
+    const existing = readAIPromptRows_(sheet);
+    const id = createNextGenAIPromptId_(existing);
     const now = new Date();
-
     const row = [
-      promptId,                                      // B Prompt ID
-      safeSheetText_(normalized.promptName),         // C Prompt Name
-      safeSheetText_(normalized.category),           // D Category
-      safeSheetText_(normalized.promptType),         // E Prompt Type
-      safeSheetText_(normalized.useCase),            // F Use Case
-      safeSheetText_(normalized.prompt),             // G Prompt
-      normalized.status,                             // H Status
-      safeSheetText_(owner),                         // I Owner
-      now                                            // J Last Updated
+      id, safeSheetText_(normalized.promptName),
+      safeSheetText_(normalized.category),
+      safeSheetText_(normalized.promptType),
+      safeSheetText_(normalized.useCase),
+      safeSheetText_(normalized.prompt),
+      normalized.status,
+      safeSheetText_(getAIPromptOwnerLabel_(actor)),
+      now,
+      safeSheetText_(actor.email),
+      now,
+      0, 0, 0
     ];
-
-    const nextRow = Math.max(
-      sheet.getLastRow() + 1,
-      AI_PROMPT_LIBRARY_CONFIG.dataStartRow
-    );
-
-    sheet
-      .getRange(
-        nextRow,
-        AI_PROMPT_LIBRARY_CONFIG.startColumn,
-        1,
-        AI_PROMPT_LIBRARY_CONFIG.headers.length
-      )
-      .setValues([row]);
-
+    const nextRow = Math.max(sheet.getLastRow() + 1, AI_PROMPT_LIBRARY_CONFIG.dataStartRow);
+    sheet.getRange(nextRow, AI_PROMPT_LIBRARY_CONFIG.startColumn, 1, row.length).setValues([row]);
     SpreadsheetApp.flush();
-
-    const saved = normalizeAIPromptRow_(row, nextRow);
-
     return {
       ok: true,
-      prompt: saved,
-      visibleToUsers: saved.status === 'Active',
-      message: saved.status === 'Active'
-        ? 'Prompt added and published successfully.'
-        : 'Prompt saved successfully as ' + saved.status + '.'
+      prompt: normalizeAIPromptRow_(row, nextRow),
+      visibleToUsers: normalized.status === 'Active',
+      message: normalized.status === 'Active' ? 'Prompt published.' : 'Draft saved.'
     };
   } finally {
     lock.releaseLock();
   }
 }
-
 
 /**
  * Updates one prompt by stable Prompt ID.
  */
 function updateAIPrompt(promptId, payload) {
-  const actor = assertAIPromptLibraryAdmin_();
+  const actor = assertNexusPromptCommunityActor_();
   const normalized = validateAIPromptPayload_(payload);
   const id = String(promptId || '').trim();
-
-  if (!id) {
-    throw new Error('Prompt ID is required.');
-  }
+  if (!id) throw new Error('Prompt ID is required.');
 
   const lock = LockService.getScriptLock();
   lock.waitLock(10000);
-
   try {
     const sheet = getAIPromptLibrarySheet_();
     validateAIPromptLibraryHeaders_(sheet);
-
-    const allPrompts = readAIPromptRows_(sheet);
-    const current = allPrompts.find(function (prompt) {
-      return String(prompt.id || '') === id;
-    });
-
-    if (!current) {
-      throw new Error('Prompt not found: ' + id);
+    validateNexusPromptCommunitySchema_(sheet);
+    const current = readAIPromptRows_(sheet).find(function (item) { return item.id === id; });
+    if (!current) throw new Error('Prompt not found.');
+    const isAuthor = current.createdByEmail && current.createdByEmail === actor.email;
+    if (!actor.isAdmin && !isAuthor) throw new Error('Only the author may edit this prompt.');
+    if (!actor.isAdmin) {
+      if (['Active', 'Draft'].indexOf(normalized.status) < 0) {
+        throw new Error('Employees can only publish or save a draft.');
+      }
+      if (['Inactive', 'Retired'].indexOf(current.status) >= 0) {
+        throw new Error('This prompt is locked by an administrator.');
+      }
     }
-
+    const now = new Date();
     const row = [
-      id,                                            // B Prompt ID
-      safeSheetText_(normalized.promptName),         // C Prompt Name
-      safeSheetText_(normalized.category),           // D Category
-      safeSheetText_(normalized.promptType),         // E Prompt Type
-      safeSheetText_(normalized.useCase),            // F Use Case
-      safeSheetText_(normalized.prompt),             // G Prompt
-      normalized.status,                             // H Status
-      safeSheetText_(getAIPromptOwnerLabel_(actor)), // I Owner
-      new Date()                                     // J Last Updated
+      id, safeSheetText_(normalized.promptName),
+      safeSheetText_(normalized.category),
+      safeSheetText_(normalized.promptType),
+      safeSheetText_(normalized.useCase),
+      safeSheetText_(normalized.prompt),
+      normalized.status,
+      safeSheetText_(current.owner), // immutable original author label
+      now,
+      safeSheetText_(current.createdByEmail), // immutable canonical author
+      current.createdAt ? new Date(current.createdAt) : '',
+      current.upvoteCount, current.copyCount, current.commentCount
     ];
-
-    sheet
-      .getRange(
-        current.sheetRow,
-        AI_PROMPT_LIBRARY_CONFIG.startColumn,
-        1,
-        AI_PROMPT_LIBRARY_CONFIG.headers.length
-      )
-      .setValues([row]);
-
+    sheet.getRange(current.sheetRow, AI_PROMPT_LIBRARY_CONFIG.startColumn, 1, row.length).setValues([row]);
     SpreadsheetApp.flush();
-
-    const saved = normalizeAIPromptRow_(
-      row,
-      current.sheetRow
-    );
-
-    return {
-      ok: true,
-      prompt: saved,
-      visibleToUsers: saved.status === 'Active',
-      message: 'Prompt updated successfully.'
-    };
+    return {ok: true, prompt: normalizeAIPromptRow_(row, current.sheetRow),
+      visibleToUsers: normalized.status === 'Active', message: 'Prompt updated.'};
   } finally {
     lock.releaseLock();
   }
 }
 
-
 /**
  * Permanently deletes one registry row by stable Prompt ID.
  */
 function deleteAIPrompt(promptId) {
-  assertAIPromptLibraryAdmin_();
+  const actor = assertNexusPromptCommunityActor_();
+  if (!actor.isAdmin) throw new Error('Only administrators may permanently delete prompts.');
 
   const id = String(promptId || '').trim();
 
@@ -264,6 +266,7 @@ function deleteAIPrompt(promptId) {
       throw new Error('Prompt not found: ' + id);
     }
 
+    removeNexusPromptCommunityRelations_(id);
     sheet.deleteRow(prompt.sheetRow);
     SpreadsheetApp.flush();
 
@@ -292,66 +295,11 @@ function deleteAIPrompt(promptId) {
  *   fillAIPromptLibraryMetadata()
  */
 function fillAIPromptLibraryMetadata() {
-  assertAIPromptLibraryAdmin_();
-
-  const sheet = getAIPromptLibrarySheet_();
-  validateAIPromptLibraryHeaders_(sheet);
-
-  const config = AI_PROMPT_LIBRARY_CONFIG;
-  const lastRow = sheet.getLastRow();
-  const owner = 'jakerome.openiano@novare.com.ph';
-  const runTimestamp = new Date();
-
-  if (lastRow < config.dataStartRow) {
-    return {
-      ok: true,
-      updatedRows: 0,
-      owner: owner,
-      lastUpdated: runTimestamp.toISOString(),
-      message: 'No prompt rows were found to update.'
-    };
-  }
-
-  const rowCount = lastRow - config.dataStartRow + 1;
-  const range = sheet.getRange(
-    config.dataStartRow,
-    config.startColumn,
-    rowCount,
-    config.headers.length
+  throw new Error(
+    'Deprecated for community ownership safety. This historical utility overwrote ' +
+    'Owner on every row. Do not run it after the collaborative migration.'
   );
-
-  const values = range.getValues();
-  const OWNER_INDEX = 7;
-  const LAST_UPDATED_INDEX = 8;
-  let updatedRows = 0;
-
-  values.forEach(function (row) {
-    const hasRecord = row.some(function (value, index) {
-      return index < OWNER_INDEX && String(value || '').trim() !== '';
-    });
-
-    if (!hasRecord) return;
-
-    row[OWNER_INDEX] = owner;
-    row[LAST_UPDATED_INDEX] = runTimestamp;
-    updatedRows += 1;
-  });
-
-  range.setValues(values);
-  SpreadsheetApp.flush();
-
-  return {
-    ok: true,
-    updatedRows: updatedRows,
-    owner: owner,
-    lastUpdated: runTimestamp.toISOString(),
-    message:
-      'AI Prompt Library metadata updated successfully for ' +
-      updatedRows +
-      ' prompt rows.'
-  };
 }
-
 
 /**
  * Manual Apps Script diagnostic.
@@ -411,6 +359,7 @@ function runAIPromptLibraryDiagnostics() {
       );
     }
 
+    report.community = getNexusPromptCommunitySchemaStatus_();
     report.ok = true;
   } catch (error) {
     report.ok = false;
@@ -501,7 +450,7 @@ function readAIPromptRows_(sheet) {
       AI_PROMPT_LIBRARY_CONFIG.dataStartRow,
       AI_PROMPT_LIBRARY_CONFIG.startColumn,
       lastRow - AI_PROMPT_LIBRARY_CONFIG.dataStartRow + 1,
-      AI_PROMPT_LIBRARY_CONFIG.headers.length
+      AI_PROMPT_LIBRARY_CONFIG.headers.length + AI_PROMPT_LIBRARY_CONFIG.communityHeaders.length
     )
     .getValues();
 
@@ -529,9 +478,9 @@ function readAIPromptRows_(sheet) {
 
 function normalizeAIPromptRow_(row, sheetRow) {
   const lastUpdated = row[8] instanceof Date
-    ? row[8].toISOString()
-    : String(row[8] || '').trim();
-
+    ? row[8].toISOString() : String(row[8] || '').trim();
+  const createdAt = row[10] instanceof Date
+    ? row[10].toISOString() : String(row[10] || '').trim();
   return {
     id: cleanSheetText_(row[0]),
     promptName: cleanSheetText_(row[1]),
@@ -542,10 +491,14 @@ function normalizeAIPromptRow_(row, sheetRow) {
     status: normalizeAIPromptStatus_(row[6]),
     owner: cleanSheetText_(row[7]),
     lastUpdated: lastUpdated,
+    createdByEmail: String(row[9] || '').trim().toLowerCase(),
+    createdAt: createdAt,
+    upvoteCount: Math.max(0, Number(row[11]) || 0),
+    copyCount: Math.max(0, Number(row[12]) || 0),
+    commentCount: Math.max(0, Number(row[13]) || 0),
     sheetRow: sheetRow
   };
 }
-
 
 function compareAIPrompts_(a, b) {
   const byName = String(a.promptName || '').localeCompare(
@@ -824,10 +777,10 @@ function getAIPromptLibraryCurrentUser_() {
 function getAIPromptOwnerLabel_(actor) {
   return String(
     actor && (
-      actor.email ||
-      actor.name
+      actor.name ||
+      actor.email
     ) ||
-    'Nexus Admin'
+    'Nexus Contributor'
   ).trim();
 }
 

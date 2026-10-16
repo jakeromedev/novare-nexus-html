@@ -20,7 +20,7 @@
    */
 
   const instances = new WeakMap();
-  const NEXUS_ADMIN_DEBUG = true;
+  const NEXUS_ADMIN_DEBUG = false;
 
   function adminDebugLog(message, details) {
     if (!NEXUS_ADMIN_DEBUG) return;
@@ -407,64 +407,126 @@
   }
 
   function unlockAdminInteractiveNode(node) {
-    if (!node || node.nodeType !== 1) return;
-
-    // A native disabled form control does not reliably emit a click event,
-    // so simply making the managed parent clickable is not enough. Remove
-    // disabled states from the entire actionable subtree for NEXUS Admins.
-    if ("disabled" in node && node.disabled) {
-      node.disabled = false;
+    if (!node || node.nodeType !== 1) {
+      return false;
     }
 
-    node.removeAttribute("disabled");
+    let changed = false;
+
+    // A native disabled form control does not reliably emit a click event,
+    // so simply making the managed parent clickable is not enough.
+    if ("disabled" in node && node.disabled) {
+      node.disabled = false;
+      changed = true;
+    }
+
+    if (node.hasAttribute("disabled")) {
+      node.removeAttribute("disabled");
+      changed = true;
+    }
 
     if (node.getAttribute("aria-disabled") === "true") {
       node.setAttribute("aria-disabled", "false");
+      changed = true;
     }
 
-    // A stale loading class can also keep a missing-link control inert.
-    node.classList.remove("nexus-control-loading");
-    node.removeAttribute("aria-busy");
+    if (node.classList.contains("nexus-control-loading")) {
+      node.classList.remove("nexus-control-loading");
+      changed = true;
+    }
 
-    // Inline !important wins over legacy page rules that use
-    // pointer-events:none!important on unavailable affordances.
+    if (node.hasAttribute("aria-busy")) {
+      node.removeAttribute("aria-busy");
+      changed = true;
+    }
+
+    // Avoid rewriting the style attribute when the desired value is already
+    // present. Repeated style writes can create unnecessary DOM mutations.
     try {
-      node.style.setProperty("pointer-events", "auto", "important");
+      const currentPointerEvents =
+        node.style.getPropertyValue("pointer-events");
+      const currentPriority =
+        node.style.getPropertyPriority("pointer-events");
+
+      if (
+        currentPointerEvents !== "auto" ||
+        currentPriority !== "important"
+      ) {
+        node.style.setProperty(
+          "pointer-events",
+          "auto",
+          "important"
+        );
+        changed = true;
+      }
     } catch (error) {
       // Non-critical; continue with the remaining unlock steps.
     }
+
+    return changed;
   }
 
   function makeManagedElementAdminInteractive(element) {
-    if (!element) return;
+    if (!element) return false;
 
-    element.dataset.managedAdminEditable = "true";
-
-    unlockAdminInteractiveNode(element);
-
-    // Some managed controls are cards with nested native buttons/anchors.
-    // Unlock all likely interactive descendants so a disabled child cannot
-    // swallow the pointer before the delegated managed-link handler receives it.
-    element
-      .querySelectorAll(
-        'button, a, input, [role="button"], [aria-disabled="true"], [disabled], .nexus-control-loading'
-      )
-      .forEach(unlockAdminInteractiveNode);
+    let changed = false;
 
     if (
-      !/^(A|BUTTON|INPUT|SELECT|TEXTAREA)$/i.test(element.tagName || "") &&
+      element.dataset.managedAdminEditable !== "true"
+    ) {
+      element.dataset.managedAdminEditable = "true";
+      changed = true;
+    }
+
+    if (unlockAdminInteractiveNode(element)) {
+      changed = true;
+    }
+
+    // Some managed controls are cards with nested native buttons/anchors.
+    // Only descendants that are currently in a locked/loading state need
+    // to be touched.
+    element
+      .querySelectorAll(
+        'button:disabled, input:disabled, select:disabled, textarea:disabled, [aria-disabled="true"], .nexus-control-loading, [aria-busy="true"]'
+      )
+      .forEach(function (node) {
+        if (unlockAdminInteractiveNode(node)) {
+          changed = true;
+        }
+      });
+
+    if (
+      !/^(A|BUTTON|INPUT|SELECT|TEXTAREA)$/i.test(
+        element.tagName || ""
+      ) &&
       !element.hasAttribute("tabindex")
     ) {
       element.setAttribute("tabindex", "0");
+      changed = true;
     }
 
-    adminDebugLog("Admin interactivity unlocked for managed link.", {
-      key: String(element.dataset.linkKey || ""),
-      tag: element.tagName,
-      disabled: "disabled" in element ? Boolean(element.disabled) : null,
-      ariaDisabled: element.getAttribute("aria-disabled"),
-      pointerEvents: window.getComputedStyle(element).pointerEvents
-    });
+    // Do not emit a log on every observer pass. Only log when the function
+    // actually had to change the managed control.
+    if (changed) {
+      adminDebugLog(
+        "Admin interactivity unlocked for managed link.",
+        {
+          key: String(element.dataset.linkKey || ""),
+          tag: element.tagName,
+          disabled:
+            "disabled" in element
+              ? Boolean(element.disabled)
+              : null,
+          ariaDisabled:
+            element.getAttribute("aria-disabled"),
+          pointerEvents:
+            window.getComputedStyle(element)
+              .pointerEvents
+        }
+      );
+    }
+
+    return changed;
   }
 
   function refreshAdminInteractivity(root) {
@@ -2045,17 +2107,106 @@
       if (!isCurrentUserAdmin()) return;
 
       const relevant = mutations.some(function (mutation) {
-        if (mutation.type === "childList") return true;
-        if (mutation.type !== "attributes") return false;
-        return [
-          "disabled",
-          "aria-disabled",
-          "class",
+        if (mutation.type === "childList") {
+          return Array.from(
+            mutation.addedNodes || []
+          ).some(function (node) {
+            if (!node || node.nodeType !== 1) {
+              return false;
+            }
+
+            if (
+              typeof node.matches === "function" &&
+              node.matches(
+                '[data-managed-link-missing="true"]'
+              )
+            ) {
+              return true;
+            }
+
+            return Boolean(
+              node.querySelector &&
+              node.querySelector(
+                '[data-managed-link-missing="true"]'
+              )
+            );
+          });
+        }
+
+        if (mutation.type !== "attributes") {
+          return false;
+        }
+
+        const target = mutation.target;
+
+        if (
+          !target ||
+          target.nodeType !== 1
+        ) {
+          return false;
+        }
+
+        if (
+          mutation.attributeName ===
           "data-managed-link-missing"
-        ].indexOf(mutation.attributeName) !== -1;
+        ) {
+          return (
+            target.getAttribute(
+              "data-managed-link-missing"
+            ) === "true"
+          );
+        }
+
+        const managedRoot =
+          typeof target.closest === "function"
+            ? target.closest(
+                '[data-managed-link-missing="true"]'
+              )
+            : null;
+
+        if (!managedRoot) {
+          return false;
+        }
+
+        if (
+          mutation.attributeName === "disabled"
+        ) {
+          return (
+            target.hasAttribute("disabled") ||
+            (
+              "disabled" in target &&
+              target.disabled === true
+            )
+          );
+        }
+
+        if (
+          mutation.attributeName ===
+          "aria-disabled"
+        ) {
+          return (
+            target.getAttribute(
+              "aria-disabled"
+            ) === "true"
+          );
+        }
+
+        if (
+          mutation.attributeName === "class"
+        ) {
+          // Only a class mutation that actually introduces the managed-link
+          // loading/inert state requires an admin unlock refresh.
+          return target.classList.contains(
+            "nexus-control-loading"
+          );
+        }
+
+        return false;
       });
 
-      if (relevant) queueAdminInteractivityRefresh();
+      if (relevant) {
+        queueAdminInteractivityRefresh();
+      }
     });
 
     adminDomObserver.observe(app, {

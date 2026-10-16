@@ -5181,4 +5181,47 @@ th.ai-prompt-table-col-actions {
   overscroll-behavior-block: auto !important;
 }
 
+
+/* =========================================================
+   ACTION TOOLTIP STACKING FIX
+========================================================= */
+
+/* The sticky Actions cell creates its own stacking context.
+   Raise that cell while the disabled Prompt tooltip is active so
+   the tooltip can render above the header and neighboring columns. */
+.ai-prompt-table tbody
+td.ai-prompt-table-action-cell:has(
+  .ai-prompt-action-tooltip-wrap:hover
+),
+.ai-prompt-table tbody
+td.ai-prompt-table-action-cell:has(
+  .ai-prompt-action-tooltip-wrap:focus-visible
+),
+.ai-prompt-table tbody
+td.ai-prompt-table-action-cell:has(
+  .ai-prompt-action-tooltip-wrap:focus-within
+) {
+  z-index: 120 !important;
+  overflow: visible !important;
+}
+
+/* Keep the tooltip itself above everything inside the active cell. */
+.ai-prompt-action-tooltip-wrap {
+  z-index: 121;
+}
+
+.ai-prompt-action-tooltip-wrap::before {
+  z-index: 122 !important;
+}
+
+.ai-prompt-action-tooltip-wrap::after {
+  z-index: 123 !important;
+}
+
+/* Ensure the row/cell do not clip the tooltip. */
+.ai-prompt-table tbody tr,
+.ai-prompt-table tbody td {
+  overflow: visible;
+}
+
 </style>

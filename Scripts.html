@@ -34,6 +34,15 @@
   const ADMIN_VIEW_MODE_STORAGE_KEY = "nexus.adminViewMode";
   const adminViewState = { actualIsAdmin: false, actualRole: "user", viewMode: "user" };
 
+  // Site-wide access logging state.
+  // A new in-memory Session ID is created for each full Nexus page load.
+  // Route changes within the SPA keep the same Session ID.
+  const siteAccessLogState = {
+    initialized: false,
+    sessionId: "",
+    lastLoggedRoute: ""
+  };
+
   // 4. GLOBAL SHELL DOM REFERENCES
   const dom = {
     app: document.getElementById("nexus-app"),
@@ -6047,6 +6056,10 @@
     renderRoute(route);
     updateNavHeaderScrollEffect();
 
+    if (changed) {
+      logNexusSitePageView(route, false);
+    }
+
     const drawerWasOpen = state.mobileOpen;
     if (drawerWasOpen) setMobileSidebar(false, false);
     if (focusContent && (changed || drawerWasOpen)) focusPageTitle();
@@ -7251,6 +7264,153 @@
     );
   }
 
+  function createNexusAccessSessionId() {
+    const timePart = Date.now().toString(36).toUpperCase();
+
+    try {
+      if (
+        window.crypto &&
+        typeof window.crypto.randomUUID === "function"
+      ) {
+        return (
+          "NXS-" +
+          timePart +
+          "-" +
+          window.crypto
+            .randomUUID()
+            .replace(/-/g, "")
+            .slice(0, 10)
+            .toUpperCase()
+        );
+      }
+    } catch (error) {
+      // Fall through to Math.random fallback.
+    }
+
+    return (
+      "NXS-" +
+      timePart +
+      "-" +
+      Math.random()
+        .toString(36)
+        .slice(2, 12)
+        .toUpperCase()
+    );
+  }
+
+
+  function getNexusAccessSource() {
+    try {
+      return window.top === window.self
+        ? "Direct Web App"
+        : "Google Sites Embed";
+    } catch (error) {
+      return "Google Sites Embed";
+    }
+  }
+
+
+  function initializeNexusSiteAccessLogging() {
+    if (siteAccessLogState.initialized) {
+      return;
+    }
+
+    siteAccessLogState.initialized = true;
+    siteAccessLogState.sessionId =
+      createNexusAccessSessionId();
+
+    console.info(
+      "[NEXUS ACCESS LOG] Session initialized:",
+      siteAccessLogState.sessionId
+    );
+  }
+
+
+  function logNexusSitePageView(route, force) {
+    if (
+      !siteAccessLogState.initialized ||
+      !NexusAPI.isAppsScriptAvailable()
+    ) {
+      return;
+    }
+
+    const routeKey = String(
+      route || config.defaultRoute
+    ).trim();
+
+    if (!routeKey) {
+      return;
+    }
+
+    if (
+      force !== true &&
+      siteAccessLogState.lastLoggedRoute === routeKey
+    ) {
+      return;
+    }
+
+    const routeConfig = routes[routeKey] || {};
+    const pageName = String(
+      routeConfig.title || routeKey
+    ).trim();
+
+    const effectiveView =
+      typeof getEffectiveUserRole === "function"
+        ? getEffectiveUserRole()
+        : "user";
+
+    // Mark locally before starting the async request so duplicate hashchange
+    // events do not create duplicate page views.
+    siteAccessLogState.lastLoggedRoute = routeKey;
+
+    google.script.run
+      .withSuccessHandler(function (response) {
+        console.info(
+          "[NEXUS ACCESS LOG] Page view recorded:",
+          response && response.logId
+            ? response.logId
+            : routeKey
+        );
+      })
+      .withFailureHandler(function (error) {
+        const message = String(
+          error && error.message
+            ? error.message
+            : error || "Unknown Apps Script error"
+        );
+
+        console.error(
+          "[NEXUS ACCESS LOG] Page view was NOT recorded:",
+          message
+        );
+
+        if (
+          /not found|does not exist|unknown function|script function/i.test(
+            message
+          )
+        ) {
+          console.error(
+            "[NEXUS ACCESS LOG] The live Apps Script deployment may not include logNexusSitePageView(). Update/redeploy the web app after adding Site_Access_Logs.gs."
+          );
+        }
+
+        // Permit a retry if the same route is rendered again later.
+        if (
+          siteAccessLogState.lastLoggedRoute === routeKey
+        ) {
+          siteAccessLogState.lastLoggedRoute = "";
+        }
+      })
+      .logNexusSitePageView({
+        sessionId: siteAccessLogState.sessionId,
+        pageKey: routeKey,
+        pageName: pageName,
+        effectiveView: effectiveView,
+        source: getNexusAccessSource()
+      });
+  }
+
+
   function initializeUser() {
     console.log(
       "[Nexus User Debug] initializeUser(); Apps Script available:",
@@ -7274,6 +7434,11 @@
     state.desktopCollapsed = readDesktopSidebarCollapsed();
     bindAdminViewControls();
     bindNotificationControls();
+
+    // Start site-wide logging independently from the navbar/user-profile call.
+    // The backend resolves the signed-in identity securely on its own.
+    initializeNexusSiteAccessLogging();
+
     initializeUser();
 
     dom.navItems.forEach(function (item) {

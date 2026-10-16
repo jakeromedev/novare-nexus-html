@@ -11,6 +11,12 @@
     identityVerified: false,
     communityWritesEnabled: false,
     currentUserEmail: "",
+    phase2Installed: false,
+    reports: [],
+    reportsStatus: "Open",
+    reportsPage: 1,
+    reportTarget: null,
+    phase2Busy: false,
     commentsPage: 1,
     commentsTotal: 0,
     votePending: {},
@@ -169,6 +175,22 @@
     refs.addButton = root.querySelector("#ai-prompt-library-add");
     refs.communityExplore = root.querySelector("#ai-prompt-community-explore");
     refs.communityMy = root.querySelector("#ai-prompt-community-my");
+    refs.phase2Bookmarks = root.querySelector("#ai-prompt-community-bookmarks");
+    refs.phase2Moderation = root.querySelector("#ai-prompt-community-moderation");
+    refs.phase2Actions = root.querySelector("#ai-prompt-phase2-actions");
+    refs.phase2Badge = root.querySelector("#ai-prompt-phase2-verified");
+    refs.phase2Bookmark = root.querySelector("#ai-prompt-phase2-bookmark");
+    refs.phase2Fork = root.querySelector("#ai-prompt-phase2-fork");
+    refs.phase2History = root.querySelector("#ai-prompt-phase2-history");
+    refs.phase2Report = root.querySelector("#ai-prompt-phase2-report");
+    refs.phase2Verify = root.querySelector("#ai-prompt-phase2-verify");
+    refs.phase2Origin = root.querySelector("#ai-prompt-phase2-origin");
+    refs.phase2ReportDialog = root.querySelector("#ai-prompt-phase2-report-dialog");
+    refs.phase2ReportForm = root.querySelector("#ai-prompt-phase2-report-form");
+    refs.phase2Reason = root.querySelector("#ai-prompt-phase2-report-reason");
+    refs.phase2ReportDetails = root.querySelector("#ai-prompt-phase2-report-details");
+    refs.phase2VersionsDialog = root.querySelector("#ai-prompt-phase2-versions-dialog");
+    refs.phase2Versions = root.querySelector("#ai-prompt-phase2-versions");
     refs.communitySort = root.querySelector("#ai-prompt-community-sort");
     refs.communityIdentity = root.querySelector("#ai-prompt-community-identity");
     refs.detailUpvote = root.querySelector("#ai-prompt-community-detail-upvote");
@@ -255,6 +277,28 @@
     if (refs.communityMy) refs.communityMy.addEventListener("click", function () {
       setCommunityView_("my-prompts");
     });
+    if (refs.phase2Bookmarks) refs.phase2Bookmarks.addEventListener("click", function () {
+      setCommunityView_("bookmarks");
+    });
+    if (refs.phase2Moderation) refs.phase2Moderation.addEventListener("click", function () {
+      setCommunityView_("moderation");
+    });
+    if (refs.phase2Bookmark) refs.phase2Bookmark.addEventListener("click", function () {
+      togglePhase2Bookmark_(state.activePromptId);
+    });
+    if (refs.phase2Fork) refs.phase2Fork.addEventListener("click", forkPhase2Prompt_);
+    if (refs.phase2Report) refs.phase2Report.addEventListener("click", function () {
+      openPhase2Report_("prompt", state.activePromptId);
+    });
+    if (refs.phase2History) refs.phase2History.addEventListener("click", openPhase2Versions_);
+    if (refs.phase2Verify) refs.phase2Verify.addEventListener("click", verifyPhase2Prompt_);
+    if (refs.phase2ReportForm) refs.phase2ReportForm.addEventListener("submit", submitPhase2Report_);
+    if (root.querySelector("#ai-prompt-phase2-report-cancel")) {
+      root.querySelector("#ai-prompt-phase2-report-cancel").addEventListener("click", function () {closeDialog(refs.phase2ReportDialog);});
+    }
+    if (root.querySelector("#ai-prompt-phase2-versions-close")) {
+      root.querySelector("#ai-prompt-phase2-versions-close").addEventListener("click", function () {closeDialog(refs.phase2VersionsDialog);});
+    }
     if (refs.communitySort) refs.communitySort.addEventListener("change", function () {
       state.sortMode = refs.communitySort.value || "top-upvoted";
       state.page = 1;
@@ -427,6 +471,10 @@
           }
           if (action === "upvote") {
             setCommunityVote_(promptId);
+            return;
+          }
+          if (action === "bookmark") {
+            togglePhase2Bookmark_(promptId);
             return;
           }
           if (action === "edit") {
@@ -1112,7 +1160,9 @@
       state.category !== "all" ||
       hasActiveFilters_() ||
       state.activeView === "explore" ||
-      state.activeView === "my-prompts"
+      state.activeView === "my-prompts" ||
+      state.activeView === "bookmarks" ||
+      state.activeView === "moderation"
     );
   }
 
@@ -1283,8 +1333,9 @@
     if (!isAdmin && state.filters.statuses.length) state.filters.statuses = [];
     if (refs.communityIdentity) {
       let msg = "";
+      if (!state.phase2Installed) msg = "Phase 2 setup is pending. Ask an administrator to run setupNexusPromptPhase2Sheets().";
       if (!state.identityVerified) {
-        msg = "You can browse prompts, but posting, voting and comments require a verified employee identity.";
+        msg = "You can browse prompts, but community changes require a verified employee identity.";
       } else if (!state.communityWritesEnabled) {
         msg = "Community interaction is awaiting administrator activation after identity verification.";
       }
@@ -1297,7 +1348,9 @@
   }
 
   function setCommunityView_(name) {
-    state.activeView = name === "my-prompts" ? "my-prompts" : "explore";
+    const allowed = ["explore", "my-prompts", "bookmarks", "moderation"];
+    const isAdmin = state.adminView && getEffectiveRole() === "admin";
+    state.activeView = allowed.includes(name) && (name !== "moderation" || isAdmin) ? name : "explore";
     state.page = 1;
     state.category = "all";
     state.query = "";
@@ -1310,19 +1363,39 @@
   }
 
   function syncCommunityView_() {
-    const mine = state.activeView === "my-prompts";
-    if (refs.communityExplore) {
-      refs.communityExplore.classList.toggle("is-active", !mine);
-      refs.communityExplore.setAttribute("aria-current", mine ? "false" : "page");
+    const view = state.activeView;
+    const isAdmin = state.adminView && getEffectiveRole() === "admin";
+    if (view === "moderation" && !isAdmin) {
+      state.activeView = "explore";
     }
+    [
+      [refs.communityExplore, "explore"],
+      [refs.communityMy, "my-prompts"],
+      [refs.phase2Bookmarks, "bookmarks"],
+      [refs.phase2Moderation, "moderation"]
+    ].forEach(function (entry) {
+      const button = entry[0], page = entry[1];
+      if (!button) return;
+      const active = state.activeView === page;
+      button.classList.toggle("is-active", active);
+      button.setAttribute("aria-current", active ? "page" : "false");
+    });
     if (refs.communityMy) {
-      refs.communityMy.classList.toggle("is-active", mine);
-      refs.communityMy.setAttribute("aria-current", mine ? "page" : "false");
       refs.communityMy.disabled = !state.identityVerified;
       refs.communityMy.title = state.identityVerified ? "View your contributions" : "Identity verification required";
     }
-    if (refs.categories) refs.categories.hidden = mine;
-    if (refs.missingSummary) refs.missingSummary.hidden = mine;
+    if (refs.phase2Bookmarks) {
+      refs.phase2Bookmarks.hidden = !state.phase2Installed || !state.identityVerified;
+    }
+    if (refs.phase2Moderation) {
+      refs.phase2Moderation.hidden = !state.phase2Installed || !isAdmin;
+    }
+    if (refs.communitySort) {
+      refs.communitySort.hidden = state.activeView === "moderation";
+    }
+    if (refs.categories) refs.categories.hidden = state.activeView !== "explore";
+    if (refs.missingSummary) refs.missingSummary.hidden = state.activeView !== "explore";
+    if (state.activeView === "moderation") loadPhase2Reports_();
   }
 
   function loadLibrary() {
@@ -1345,6 +1418,7 @@
           state.adminView = payload.adminView === true;
           state.identityVerified = payload.identityVerified === true;
           state.communityWritesEnabled = payload.communityWritesEnabled === true;
+          state.phase2Installed = payload.phase2Installed === true;
           state.currentUserEmail = String(payload.currentUserEmail || "").toLowerCase();
           state.myPrompts = Array.isArray(payload.myPrompts) ? payload.myPrompts : [];
           state.prompts = Array.isArray(payload.prompts) ? payload.prompts : [];
@@ -1909,11 +1983,16 @@
     if (!refs.results) return;
 
     refs.results.replaceChildren();
-
+    if (state.activeView === "moderation") {
+      renderPhase2Moderation_();
+      return;
+    }
     if (refs.count) {
       refs.count.textContent = state.activeView === "my-prompts"
         ? pluralizePrompt(state.myPrompts.length)
-        : pluralizePrompt(state.prompts.length);
+        : state.activeView === "bookmarks"
+          ? pluralizePrompt(state.prompts.filter(function(p){return p.bookmarkedByMe;}).length)
+          : pluralizePrompt(state.prompts.length);
     }
 
     if (!shouldShowTable_()) {
@@ -1964,7 +2043,8 @@
       const heading = document.createElement("h3");
       heading.className = "ai-prompt-community-feed-title";
       heading.textContent = state.activeView === "my-prompts"
-        ? "My Contributions" : "Top Community Prompts";
+        ? "My Contributions" : state.activeView === "bookmarks"
+          ? "My Bookmarks" : "Top Community Prompts";
       refs.results.appendChild(heading);
     }
     refs.results.appendChild(createPromptTable(pageItems));
@@ -1981,7 +2061,9 @@
   function getVisiblePrompts() {
     let prompts = state.activeView === "my-prompts"
       ? state.myPrompts.slice()
-      : state.prompts.slice();
+      : state.activeView === "bookmarks"
+        ? state.prompts.filter(function(p){return p.bookmarkedByMe;})
+        : state.prompts.slice();
 
     if (state.query) {
       prompts = prompts.filter(
@@ -2369,6 +2451,12 @@
       )
     );
 
+    if (state.phase2Installed && prompt.status === "Active" && state.identityVerified) {
+      const bookmark = createPromptTableActionButton("bookmark", prompt, prompt.bookmarkedByMe ? "Remove bookmark" : "Bookmark prompt");
+      bookmark.setAttribute("aria-pressed", prompt.bookmarkedByMe ? "true" : "false");
+      bookmark.disabled = !canWriteCommunity_();
+      actions.appendChild(bookmark);
+    }
     if (prompt.status === "Active") {
       const upvote = createPromptTableActionButton(
         "upvote", prompt, "Upvote this prompt"
@@ -2445,6 +2533,13 @@
       nameCell.appendChild(nameButton);
     }
 
+    if (prompt.verified === true) {
+      const verified = document.createElement("span");
+      verified.className = "ai-prompt-phase2-verified";
+      verified.textContent = "✓ Verified";
+      verified.title = "Endorsed by a Nexus administrator";
+      nameCell.appendChild(verified);
+    }
     const id = document.createElement("small");
     id.textContent = String(prompt.id || "");
     nameCell.appendChild(id);
@@ -2601,6 +2696,9 @@
       ].join("");
     }
 
+    if (action === "bookmark") {
+      return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h14v18l-7-5-7 5z"></path></svg>';
+    }
     if (action === "upvote") {
       return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 4 8 12H4z"></path></svg>';
     }
@@ -2869,6 +2967,7 @@
     renderDetailMeta(prompt);
     syncAdminUI();
     updateCommunityEngagement_(prompt);
+    updatePhase2Details_(prompt);
     state.commentsPage = 1;
     if (refs.commentBody) refs.commentBody.value = "";
     openDialog(refs.detailDialog);
@@ -3951,20 +4050,21 @@
         meta.appendChild(marker);
       }
       article.append(meta,body);
-      if (comment.canEdit) {
+      if (comment.canEdit || (state.phase2Installed && canWriteCommunity_() && comment.status === "Visible")) {
         const buttons = document.createElement("div"); buttons.className = "ai-prompt-community-comment-actions";
-        const actions = state.adminView && getEffectiveRole() === "admin"
-          ? (comment.status === "Hidden"
-              ? ["restore","remove"]
-              : ["edit","remove","hide"])
-          : ["edit","remove"];
+        const actions = comment.canEdit
+          ? (state.adminView && getEffectiveRole() === "admin"
+            ? (comment.status === "Hidden" ? ["restore","remove"] : ["edit","remove","hide"])
+            : ["edit","remove"])
+          : [];
+        if (state.phase2Installed && canWriteCommunity_() && comment.status === "Visible") actions.push("report");
         actions.forEach(function (action) {
           const button = document.createElement("button");
           button.type = "button";
           button.dataset.communityCommentAction = action;
           button.dataset.communityCommentId = comment.id;
           button.dataset.communityCommentBody = comment.comment;
-          button.textContent = action === "edit" ? "Edit" : action === "hide" ? "Hide" : action === "restore" ? "Restore" : "Remove";
+          button.textContent = action === "edit" ? "Edit" : action === "hide" ? "Hide" : action === "restore" ? "Restore" : action === "report" ? "Report" : "Remove";
           buttons.appendChild(button);
         });
         article.appendChild(buttons);
@@ -3997,6 +4097,10 @@
     if (!button || !canWriteCommunity_()) return;
     const id = button.dataset.communityCommentId || "";
     const action = button.dataset.communityCommentAction;
+    if (action === "report") {
+      openPhase2Report_("comment", id);
+      return;
+    }
     if (action === "edit") {
       const previous = button.dataset.communityCommentBody || "";
       const body = window.prompt("Edit your comment:", previous);
@@ -4017,6 +4121,263 @@
       }).withFailureHandler(function (error) {showToast(getErrorMessage(error,"Unable to remove comment."),"error");})
         .deleteNexusPromptComment(id);
     }
+  }
+
+  // ------------------ PHASE 2 QUALITY & GOVERNANCE ------------------
+  function isPhase2Admin_() {
+    return state.adminView && getEffectiveRole() === "admin";
+  }
+
+  function canPhase2Change_() {
+    return canWriteCommunity_() && state.phase2Installed;
+  }
+
+  function updatePhase2Details_(prompt) {
+    if (!refs.phase2Actions) return;
+    const enabled = state.phase2Installed;
+    refs.phase2Actions.hidden = !enabled;
+    const published = prompt.status === "Active";
+    const writable = canPhase2Change_();
+    const mine = !!prompt.createdByEmail && prompt.createdByEmail === state.currentUserEmail;
+    if (refs.phase2Badge) refs.phase2Badge.hidden = !prompt.verified;
+    if (refs.phase2Bookmark) {
+      refs.phase2Bookmark.hidden = !state.identityVerified || !published;
+      refs.phase2Bookmark.disabled = !writable;
+      refs.phase2Bookmark.textContent = prompt.bookmarkedByMe ? "★ Saved" : "☆ Save";
+      refs.phase2Bookmark.setAttribute("aria-pressed", prompt.bookmarkedByMe ? "true" : "false");
+    }
+    if (refs.phase2Fork) {
+      refs.phase2Fork.hidden = !published || !state.identityVerified;
+      refs.phase2Fork.disabled = !writable || state.phase2Busy;
+    }
+    if (refs.phase2Report) {
+      refs.phase2Report.hidden = !published || !state.identityVerified;
+      refs.phase2Report.disabled = !writable || state.phase2Busy;
+    }
+    if (refs.phase2History) {
+      refs.phase2History.hidden = !state.identityVerified || !(mine || isPhase2Admin_());
+    }
+    if (refs.phase2Verify) {
+      refs.phase2Verify.hidden = !isPhase2Admin_();
+      refs.phase2Verify.disabled = !writable || state.phase2Busy || (!prompt.verified && !published);
+      refs.phase2Verify.textContent = prompt.verified ? "Remove Verification" : "Verify Prompt";
+    }
+    if (refs.phase2Origin) {
+      refs.phase2Origin.hidden = !prompt.forkedFrom;
+      refs.phase2Origin.textContent = prompt.forkedFrom
+        ? "Adapted from prompt " + prompt.forkedFrom + " · Credit to the original contributor"
+        : "";
+    }
+  }
+
+  function updatePhase2LocalPrompt_(promptId, updates) {
+    [state.prompts, state.myPrompts].forEach(function (list) {
+      list.forEach(function (p) {
+        if (p.id !== promptId) return;
+        Object.keys(updates).forEach(function (k) {p[k] = updates[k];});
+      });
+    });
+    renderLibrary();
+    const active = findCommunityPrompt_(state.activePromptId);
+    if (active) updatePhase2Details_(active);
+  }
+
+  function togglePhase2Bookmark_(promptId) {
+    const prompt = findCommunityPrompt_(promptId);
+    if (!prompt || !canPhase2Change_() || state.phase2Busy) return;
+    const desired = !prompt.bookmarkedByMe;
+    state.phase2Busy = true;
+    google.script.run.withSuccessHandler(function (result) {
+      state.phase2Busy = false;
+      updatePhase2LocalPrompt_(promptId, {bookmarkedByMe: result.bookmarked === true});
+      showToast(result.bookmarked ? "Saved to bookmarks." : "Removed from bookmarks.", "success");
+    }).withFailureHandler(function (error) {
+      state.phase2Busy = false;
+      showToast(getErrorMessage(error, "Unable to update bookmark."), "error");
+    }).setNexusPromptBookmark(promptId, desired);
+  }
+
+  function forkPhase2Prompt_() {
+    const id = state.activePromptId;
+    if (!id || !canPhase2Change_() || state.phase2Busy) return;
+    if (!window.confirm("Create your own editable Draft from this prompt, while crediting its original author?")) return;
+    state.phase2Busy = true;
+    google.script.run.withSuccessHandler(function (result) {
+      state.phase2Busy = false;
+      closeDetailDialog();
+      setCommunityView_("my-prompts");
+      showToast(result.message || "Fork saved as a Draft.", "success");
+      loadLibrary();
+    }).withFailureHandler(function (error) {
+      state.phase2Busy = false;
+      showToast(getErrorMessage(error, "Unable to fork prompt."), "error");
+    }).forkNexusPrompt(id);
+  }
+
+  function verifyPhase2Prompt_() {
+    const prompt = findCommunityPrompt_(state.activePromptId);
+    if (!prompt || !isPhase2Admin_() || !canPhase2Change_() || state.phase2Busy) return;
+    const verify = prompt.verified !== true;
+    state.phase2Busy = true;
+    google.script.run.withSuccessHandler(function (result) {
+      state.phase2Busy = false;
+      updatePhase2LocalPrompt_(prompt.id, {verified:result.verified === true});
+      showToast(result.verified ? "Prompt verified." : "Verification removed.", "success");
+    }).withFailureHandler(function (error) {
+      state.phase2Busy = false;
+      showToast(getErrorMessage(error, "Unable to change verification."), "error");
+    }).setNexusPromptVerified(prompt.id, verify);
+  }
+
+  function openPhase2Report_(type, id) {
+    if (!canPhase2Change_() || !id || state.phase2Busy) return;
+    state.reportTarget = {type:type,id:id};
+    if (refs.phase2ReportForm) refs.phase2ReportForm.reset();
+    openDialog(refs.phase2ReportDialog);
+  }
+  function submitPhase2Report_(event) {
+    event.preventDefault();
+    if (!canPhase2Change_() || !state.reportTarget || state.phase2Busy) return;
+    const reason=refs.phase2Reason ? refs.phase2Reason.value : "";
+    const details=refs.phase2ReportDetails ? refs.phase2ReportDetails.value.trim() : "";
+    if (!reason) return;
+    const target=state.reportTarget;
+    const submit=state.root.querySelector("#ai-prompt-phase2-report-submit");
+    if (submit) submit.disabled=true;
+    state.phase2Busy=true;
+    google.script.run.withSuccessHandler(function (result) {
+      state.phase2Busy=false;
+      if (submit) submit.disabled=false;
+      closeDialog(refs.phase2ReportDialog);
+      state.reportTarget=null;
+      showToast(result.message || "Report received.","success");
+    }).withFailureHandler(function (error) {
+      state.phase2Busy=false;
+      if (submit) submit.disabled=false;
+      showToast(getErrorMessage(error,"Unable to submit report."),"error");
+    }).reportNexusPromptContent(target.type,target.id,reason,details);
+  }
+
+  function openPhase2Versions_() {
+    const id=state.activePromptId, prompt=findCommunityPrompt_(id);
+    const mine=prompt && prompt.createdByEmail && prompt.createdByEmail===state.currentUserEmail;
+    if(!id || !state.phase2Installed || !(mine || isPhase2Admin_()))return;
+    if(refs.phase2Versions)refs.phase2Versions.textContent="Loading versions…";
+    openDialog(refs.phase2VersionsDialog);
+    google.script.run.withSuccessHandler(function (result) {
+      if(id!==state.activePromptId && state.activePromptId!=='')return;
+      renderPhase2Versions_(id,result);
+    }).withFailureHandler(function (error) {
+      if(refs.phase2Versions)refs.phase2Versions.textContent=getErrorMessage(error,"Unable to load history.");
+    }).getNexusPromptVersionHistory(id);
+  }
+
+  function renderPhase2Versions_(promptId,result) {
+    if(!refs.phase2Versions)return;
+    refs.phase2Versions.replaceChildren();
+    const versions=Array.isArray(result&&result.versions)?result.versions:[];
+    if(!versions.length){refs.phase2Versions.textContent="No stored versions yet. An administrator can run backfillNexusPromptPhase2Versions().";return;}
+    versions.forEach(function (revision) {
+      const section=document.createElement("section");
+      section.className="ai-prompt-phase2-revision";
+      const head=document.createElement("div");head.className="ai-prompt-phase2-revision-head";
+      const title=document.createElement("strong");title.textContent="Version "+revision.revision+" · "+revision.event;
+      const date=document.createElement("small");
+      date.textContent=revision.editedAt ? new Date(revision.editedAt).toLocaleString() : "";
+      head.append(title,date);
+      const promptText=document.createElement("pre");
+      promptText.textContent=revision.prompt||"(empty prompt)";
+      const meta=document.createElement("p");meta.textContent=revision.promptName+" · "+revision.category+" · "+revision.status;
+      section.append(head,meta,promptText);
+      if(result.canRestore===true && canPhase2Change_() && revision.revision!==result.currentRevision){
+        const button=document.createElement("button");button.type="button";
+        button.textContent="Restore as Draft";
+        button.addEventListener("click",function () {
+          if (!window.confirm("Restore version "+revision.revision+" as a new Draft? Existing author and counters will be kept."))return;
+          button.disabled=true;
+          google.script.run.withSuccessHandler(function (response) {
+            closeDialog(refs.phase2VersionsDialog);
+            closeDetailDialog();
+            setCommunityView_("my-prompts");
+            loadLibrary();
+            showToast(response.message||"Restored as Draft.","success");
+          }).withFailureHandler(function (error) {
+            button.disabled=false;
+            showToast(getErrorMessage(error,"Unable to restore revision."),"error");
+          }).restoreNexusPromptVersion(promptId,revision.revision);
+        });
+        section.appendChild(button);
+      }
+      refs.phase2Versions.appendChild(section);
+    });
+  }
+
+  function loadPhase2Reports_() {
+    if(!state.phase2Installed || !isPhase2Admin_() || state.activeView!=="moderation")return;
+    google.script.run.withSuccessHandler(function (response) {
+      if(state.activeView!=="moderation" || !isPhase2Admin_())return;
+      state.reportsError="";
+      state.reports=Array.isArray(response.items)?response.items:[];
+      state.reportsTotal=Number(response.total)||0;
+      renderPhase2Moderation_();
+    }).withFailureHandler(function (error) {
+      state.reportsError=getErrorMessage(error,"Unable to load reports.");
+      renderPhase2Moderation_();
+    }).getNexusPromptReports({status:state.reportsStatus,page:state.reportsPage});
+  }
+
+  function renderPhase2Moderation_() {
+    if(!refs.results || state.activeView!=="moderation")return;
+    refs.results.replaceChildren();
+    if(refs.pagination)refs.pagination.hidden=true;
+    if(refs.count)refs.count.textContent=(Number(state.reportsTotal)||0)+" reports";
+    if(!isPhase2Admin_()){
+      refs.results.textContent="Administrator view is required.";return;
+    }
+    const bar=document.createElement("div");bar.className="ai-prompt-phase2-report-bar";
+    const title=document.createElement("h3");title.textContent="Moderation Queue";
+    const filter=document.createElement("select");filter.setAttribute("aria-label","Report status");
+    ["Open","Resolved","Dismissed","All"].forEach(function(value){const option=document.createElement("option");option.value=value;option.textContent=value;filter.appendChild(option);});
+    filter.value=state.reportsStatus;
+    filter.addEventListener("change",function(){state.reportsStatus=filter.value;state.reportsPage=1;loadPhase2Reports_();});
+    const refresh=document.createElement("button");refresh.type="button";refresh.textContent="Refresh";refresh.addEventListener("click",loadPhase2Reports_);
+    bar.append(title,filter,refresh);refs.results.appendChild(bar);
+    if(state.reportsError){const err=document.createElement("p");err.textContent=state.reportsError;refs.results.appendChild(err);return;}
+    if(!state.reports.length){const empty=document.createElement("p");empty.textContent="No reports in this view.";refs.results.appendChild(empty);}
+    state.reports.forEach(function(report){
+      const article=document.createElement("article");article.className="ai-prompt-phase2-report";
+      const heading=document.createElement("strong");heading.textContent=report.reason+" · "+report.targetType+" · "+report.targetId;
+      const meta=document.createElement("small");meta.textContent=report.reporterEmail+" · "+(report.reportedAt ? new Date(report.reportedAt).toLocaleString():"")+" · "+report.status;
+      const body=document.createElement("p");body.textContent=report.details||"No additional details.";
+      article.append(heading,meta,body);
+      if(report.status==="Open"){
+        const buttons=document.createElement("div");buttons.className="ai-prompt-phase2-report-buttons";
+        [["Hide","Hide content"],["Resolve","Resolve without hiding"],["Dismiss","Dismiss"]].forEach(function(entry){
+          const button=document.createElement("button");button.type="button";button.textContent=entry[1];
+          button.addEventListener("click",function(){
+            const decision=entry[0];
+            if(!window.confirm("Apply action: "+entry[1]+"?"))return;
+            const note=window.prompt("Moderator notes (optional, max 500 characters):","");
+            if(note===null)return;
+            button.disabled=true;
+            google.script.run.withSuccessHandler(function(response){showToast(response.message||"Report reviewed.","success");loadPhase2Reports_();loadLibrary();})
+              .withFailureHandler(function(error){button.disabled=false;showToast(getErrorMessage(error,"Moderation failed."),"error");})
+              .resolveNexusPromptReport(report.id,decision,note);
+          });
+          buttons.appendChild(button);
+        });
+        article.appendChild(buttons);
+      }
+      refs.results.appendChild(article);
+    });
+    const pager=document.createElement("nav");pager.className="ai-prompt-phase2-reports-pager";
+    const prev=document.createElement("button");prev.type="button";prev.textContent="Previous";prev.disabled=state.reportsPage<=1;
+    prev.addEventListener("click",function(){state.reportsPage-=1;loadPhase2Reports_();});
+    const label=document.createElement("span");label.textContent="Page "+state.reportsPage;
+    const next=document.createElement("button");next.type="button";next.textContent="Next";
+    next.disabled=state.reportsPage*20>=(state.reportsTotal||0);
+    next.addEventListener("click",function(){state.reportsPage+=1;loadPhase2Reports_();});
+    pager.append(prev,label,next);refs.results.appendChild(pager);
   }
 
   function getErrorMessage(error, fallback) {

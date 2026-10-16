@@ -203,8 +203,12 @@ function setNexusPromptPublication(promptId, publish) {
       throw new Error('The prompt must have all required fields before publishing.');
     }
     var newStatus = publish ? 'Active' : 'Draft';
-    item.sheet.getRange(item.prompt.sheetRow,8).setValue(newStatus); // H Status
-    item.sheet.getRange(item.prompt.sheetRow,10).setValue(new Date()); // J Last Updated
+    if (newStatus !== item.prompt.status) {
+      if (isNexusPromptPhase2Installed_()) ensureNexusPromptVersionBaseline_(item);
+      item.sheet.getRange(item.prompt.sheetRow,8).setValue(newStatus); // H Status
+      item.sheet.getRange(item.prompt.sheetRow,10).setValue(new Date()); // J Last Updated
+      if (isNexusPromptPhase2Installed_()) appendNexusPromptVersionAfterChange_(id,'Publication changed',actor.email);
+    }
     return {ok:true,promptId:id,status:newStatus,message:publish?'Prompt published.':'Prompt unpublished and saved as Draft.'};
   } finally {lock.releaseLock();}
 }

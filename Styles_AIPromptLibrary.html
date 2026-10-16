@@ -5278,4 +5278,93 @@ td.ai-prompt-table-action-cell:has(
 .ai-prompt-library-page .ai-prompt-community-feed-title {
   margin:20px 0 14px;font-size:17px;color:#193c6a;font-weight:750;
 }
+
+/* === PHASE 2 · Community governance, scoped to Prompt Library === */
+.ai-prompt-library-page .ai-prompt-phase2-actions{
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  padding:8px 0 13px;border-bottom:1px solid rgba(31,77,129,.13);
+}
+.ai-prompt-library-page .ai-prompt-phase2-actions[hidden],
+.ai-prompt-library-page .ai-prompt-phase2-origin[hidden]{display:none!important}
+.ai-prompt-library-page .ai-prompt-phase2-actions button,
+.ai-prompt-library-page .ai-prompt-phase2-report-bar button,
+.ai-prompt-library-page .ai-prompt-phase2-report-buttons button,
+.ai-prompt-library-page .ai-prompt-phase2-revision button,
+.ai-prompt-library-page .ai-prompt-phase2-reports-pager button{
+  border:1px solid #ccdaec;background:#fff;color:#225082;border-radius:9px;
+  padding:8px 11px;cursor:pointer;font-size:12px;font-weight:600;font-family:inherit;
+}
+.ai-prompt-library-page .ai-prompt-phase2-actions button:hover,
+.ai-prompt-library-page .ai-prompt-phase2-report-buttons button:hover,
+.ai-prompt-library-page .ai-prompt-phase2-revision button:hover{background:#eff5ff}
+.ai-prompt-library-page .ai-prompt-phase2-actions button:disabled,
+.ai-prompt-library-page .ai-prompt-phase2-report-buttons button:disabled,
+.ai-prompt-library-page .ai-prompt-phase2-revision button:disabled{opacity:.55;cursor:not-allowed}
+.ai-prompt-library-page .ai-prompt-phase2-verified{
+  display:inline-flex;align-items:center;max-width:100%;font-size:11px;font-weight:750;
+  letter-spacing:.01em;background:#e8f5ef;color:#1d7956;border:1px solid #c1e6d3;
+  padding:4px 8px;border-radius:999px;margin:3px 5px;
+}
+.ai-prompt-library-page .ai-prompt-phase2-verified[hidden]{display:none!important}
+.ai-prompt-library-page .ai-prompt-phase2-origin{
+  margin:5px 0 13px;font-size:12px;color:#5b6b7d;line-height:1.5;
+}
+.ai-prompt-library-page .ai-prompt-phase2-report-bar{
+  display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:15px 0;
+}
+.ai-prompt-library-page .ai-prompt-phase2-report-bar h3{margin:0 auto 0 0;color:#173b65;font-size:18px}
+.ai-prompt-library-page .ai-prompt-phase2-report-bar select,
+.ai-prompt-library-page .ai-prompt-phase2-modal-form select,
+.ai-prompt-library-page .ai-prompt-phase2-modal-form textarea{
+  border:1px solid #cfdaea;border-radius:9px;padding:9px;min-width:0;
+  background:#fff;color:#16395c;font:inherit;
+}
+.ai-prompt-library-page .ai-prompt-phase2-report{
+  display:flex;flex-direction:column;gap:7px;padding:15px;margin:12px 0;
+  border:1px solid #dce5f2;border-radius:13px;background:#fff;
+}
+.ai-prompt-library-page .ai-prompt-phase2-report strong{font-size:14px;color:#103864}
+.ai-prompt-library-page .ai-prompt-phase2-report small{font-size:11px;color:#69798b}
+.ai-prompt-library-page .ai-prompt-phase2-report p{white-space:pre-wrap;overflow-wrap:anywhere;margin:3px 0;font-size:13px;color:#364960}
+.ai-prompt-library-page .ai-prompt-phase2-report-buttons,
+.ai-prompt-library-page .ai-prompt-phase2-reports-pager{
+  display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px;
+}
+.ai-prompt-library-page .ai-prompt-phase2-modal-form{
+  width:min(620px,94vw);max-height:min(80vh,760px);overflow:auto;box-sizing:border-box;
+  border-radius:16px;background:#fff;padding:24px;display:flex;flex-direction:column;gap:12px;
+}
+.ai-prompt-library-page .ai-prompt-phase2-modal-form h2{margin:0;font-size:20px;color:#133f6f}
+.ai-prompt-library-page .ai-prompt-phase2-modal-form p{margin:0;color:#68798b;font-size:13px;line-height:1.5}
+.ai-prompt-library-page .ai-prompt-phase2-modal-form label{color:#25415e;font-size:12px;font-weight:700}
+.ai-prompt-library-page .ai-prompt-phase2-modal-form textarea{resize:vertical;min-height:90px}
+.ai-prompt-library-page .ai-prompt-phase2-modal-footer{
+  display:flex;align-items:center;justify-content:flex-end;gap:10px;margin-top:7px;
+}
+.ai-prompt-library-page .ai-prompt-phase2-modal-footer button{
+  cursor:pointer;border:1px solid #bcd0ea;border-radius:9px;padding:9px 14px;
+  background:#f7faff;color:#1b4576;font-weight:700;
+}
+.ai-prompt-library-page .ai-prompt-phase2-modal-footer button[type="submit"]{
+  background:#1e62b6;color:#fff;border-color:#1e62b6;
+}
+.ai-prompt-library-page .ai-prompt-phase2-revision{
+  padding:13px 0;border-top:1px solid #dde6ef;display:grid;gap:7px;
+}
+.ai-prompt-library-page .ai-prompt-phase2-revision-head{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;color:#19436c}
+.ai-prompt-library-page .ai-prompt-phase2-revision-head small{color:#8491a1}
+.ai-prompt-library-page .ai-prompt-phase2-revision pre{
+  white-space:pre-wrap;overflow-wrap:anywhere;max-height:190px;overflow:auto;
+  background:#f4f7fb;border-radius:8px;padding:12px;
+  font:12px/1.55 ui-monospace,Menlo,Consolas,monospace;color:#2a4059;
+}
+.ai-prompt-library-page .ai-prompt-phase2-revision button{justify-self:start}
+.ai-prompt-library-page .ai-prompt-phase2-dialog{
+  border:0;background:transparent;max-width:96vw;padding:0;box-shadow:none;
+}
+.ai-prompt-library-page .ai-prompt-phase2-dialog::backdrop{background:rgba(12,30,54,.56)}
+@media(max-width:620px){
+  .ai-prompt-library-page .ai-prompt-phase2-modal-form{padding:17px}
+  .ai-prompt-library-page .ai-prompt-phase2-report-bar h3{flex:1 0 100%}
+}
 </style>

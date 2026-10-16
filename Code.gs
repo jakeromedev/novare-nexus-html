@@ -17,7 +17,25 @@ function doGet() {
  * Use only with trusted project files.
  */
 function include(filename) {
-  return HtmlService.createHtmlOutputFromFile(filename).getContent();
+  var sourceName = String(filename || '').trim();
+  try {
+    return HtmlService.createHtmlOutputFromFile(sourceName).getContent();
+  } catch (error) {
+    var message = String(error && error.message ? error.message : error);
+
+    // Report only the failing include, not the full malformed HTML content.
+    console.error(
+      '[NEXUS HTML INCLUDE ERROR] File: ' + sourceName +
+      ' | Problem: ' + message.slice(0, 220)
+    );
+
+    throw new Error(
+      'NEXUS failed to load the HTML include "' + sourceName + '". ' +
+      'Check that the Apps Script HTML file contains the expected markup, ' +
+      'and that server-side .gs code was not pasted into it. ' +
+      'Original error: ' + message.slice(0, 220)
+    );
+  }
 }
 
 /**

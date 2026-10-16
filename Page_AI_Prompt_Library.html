@@ -102,6 +102,10 @@
       <nav class="ai-prompt-community-nav" aria-label="Prompt Library sections">
         <button type="button" id="ai-prompt-community-explore" class="is-active" aria-current="page">Explore Prompts</button>
         <button type="button" id="ai-prompt-community-my" aria-current="false">My Prompts</button>
+        <button type="button" id="ai-prompt-community-bookmarks" aria-current="false" hidden>Bookmarks</button>
+        <button type="button" id="ai-prompt-community-insights" aria-current="false" hidden>Insights</button>
+        <button type="button" id="ai-prompt-community-for-you" aria-current="false" hidden>For You</button>
+        <button type="button" id="ai-prompt-community-moderation" aria-current="false" hidden>Reports <span id="ai-prompt-reports-count"></span></button>
         <label class="ai-prompt-community-sort" for="ai-prompt-community-sort">
           Sort by
           <select id="ai-prompt-community-sort" aria-label="Sort prompts">
@@ -371,6 +375,15 @@
           <span id="ai-prompt-community-detail-copies">0 copies</span>
           <span id="ai-prompt-community-detail-comment-count">0 comments</span>
         </div>
+        <div class="ai-prompt-phase2-actions" id="ai-prompt-phase2-actions" hidden>
+          <span id="ai-prompt-phase2-verified" class="ai-prompt-phase2-verified" hidden>✓ Verified by Nexus</span>
+          <button type="button" id="ai-prompt-phase2-bookmark" aria-pressed="false">☆ Save</button>
+          <button type="button" id="ai-prompt-phase2-fork">Fork Prompt</button>
+          <button type="button" id="ai-prompt-phase2-history">Version History</button>
+          <button type="button" id="ai-prompt-phase2-report">Report</button>
+          <button type="button" id="ai-prompt-phase2-verify" hidden>Verify Prompt</button>
+        </div>
+        <p id="ai-prompt-phase2-origin" class="ai-prompt-phase2-origin" hidden></p>
 
         <section class="ai-prompt-detail-section">
           <h3>Use Case</h3>
@@ -437,6 +450,41 @@
           </button>
         </div>
       </footer>
+    </div>
+  </dialog>
+
+  <!-- Phase 2: Prompt / comment reporting -->
+  <dialog id="ai-prompt-phase2-report-dialog" class="ai-prompt-dialog ai-prompt-phase2-dialog">
+    <form id="ai-prompt-phase2-report-form" class="ai-prompt-phase2-modal-form">
+      <h2>Report Content</h2>
+      <p>Help Nexus moderators keep the Prompt Hub useful and safe.</p>
+      <label for="ai-prompt-phase2-report-reason">Reason</label>
+      <select id="ai-prompt-phase2-report-reason" required>
+        <option value="">Choose a reason</option>
+        <option>Inaccurate or misleading</option>
+        <option>Confidential or sensitive information</option>
+        <option>Inappropriate content</option>
+        <option>Duplicate or spam</option>
+        <option>Outdated prompt</option>
+        <option>Other</option>
+      </select>
+      <label for="ai-prompt-phase2-report-details">Details (optional)</label>
+      <textarea id="ai-prompt-phase2-report-details" maxlength="1000" rows="4" placeholder="What should moderators review?"></textarea>
+      <div class="ai-prompt-phase2-modal-footer">
+        <button type="button" id="ai-prompt-phase2-report-cancel">Cancel</button>
+        <button type="submit" id="ai-prompt-phase2-report-submit">Submit Report</button>
+      </div>
+    </form>
+  </dialog>
+  <!-- Phase 2: Revision review and restore -->
+  <dialog id="ai-prompt-phase2-versions-dialog" class="ai-prompt-dialog ai-prompt-phase2-dialog">
+    <div class="ai-prompt-phase2-modal-form">
+      <h2>Prompt Version History</h2>
+      <p>Review prior versions. A restore creates a new Draft without changing authorship or usage counters.</p>
+      <div id="ai-prompt-phase2-versions" aria-live="polite"></div>
+      <div class="ai-prompt-phase2-modal-footer">
+        <button type="button" id="ai-prompt-phase2-versions-close">Close</button>
+      </div>
     </div>
   </dialog>
 

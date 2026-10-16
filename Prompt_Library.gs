@@ -119,10 +119,15 @@ function getAIPromptLibrary(options) {
     return item;
   });
 
-  // Return only per-user vote state; never disclose other voters' emails.
+  // Return only per-user vote/bookmark state; never expose other users' emails.
+  const phase2 = getNexusPromptPhase2State_(identity, allPrompts);
+  const bookmarked = {};
+  (phase2.bookmarkedIds || []).forEach(function(id) { bookmarked[id] = true; });
   [publicPrompts, publicMyPrompts].forEach(function (items) {
     items.forEach(function (prompt) {
       prompt.upvotedByMe = myVotes[prompt.id] === true;
+      prompt.bookmarkedByMe = bookmarked[prompt.id] === true;
+      if (!adminView) prompt.verifiedBy = '';
     });
   });
 
@@ -131,6 +136,7 @@ function getAIPromptLibrary(options) {
     adminView: adminView,
     identityVerified: identity.verified,
     communityWritesEnabled: isNexusPromptCommunityEnabled_(),
+    phase2Installed: phase2.installed === true,
     currentUserEmail: identity.verified ? identity.email : '',
     prompts: publicPrompts,
     myPrompts: publicMyPrompts,
@@ -160,6 +166,9 @@ function addAIPrompt(payload) {
     validateNexusPromptCommunitySchema_(sheet);
     const existing = readAIPromptRows_(sheet);
     const id = createNextGenAIPromptId_(existing);
+    if (isNexusPromptPhase2Installed_()) {
+      ensureNexusPromptVersionBaseline_({sheet: sheet, prompt: current});
+    }
     const now = new Date();
     const row = [
       id, safeSheetText_(normalized.promptName),
@@ -174,12 +183,18 @@ function addAIPrompt(payload) {
       now,
       0, 0, 0
     ];
+    if (isNexusPromptPhase2Installed_()) {
+      row.push(false, '', '', '', 0);
+    }
     const nextRow = Math.max(sheet.getLastRow() + 1, AI_PROMPT_LIBRARY_CONFIG.dataStartRow);
     sheet.getRange(nextRow, AI_PROMPT_LIBRARY_CONFIG.startColumn, 1, row.length).setValues([row]);
+    if (isNexusPromptPhase2Installed_()) {
+      recordNexusPromptVersion_({sheet: sheet, prompt: normalizeAIPromptRow_(row, nextRow)}, 'Created', actor.email);
+    }
     SpreadsheetApp.flush();
     return {
       ok: true,
-      prompt: normalizeAIPromptRow_(row, nextRow),
+      prompt: normalizeAIPromptRow_(sheet.getRange(nextRow, 2, 1, 19).getValues()[0], nextRow),
       visibleToUsers: normalized.status === 'Active',
       message: normalized.status === 'Active' ? 'Prompt published.' : 'Draft saved.'
     };
@@ -229,9 +244,15 @@ function updateAIPrompt(promptId, payload) {
       current.createdAt ? new Date(current.createdAt) : '',
       current.upvoteCount, current.copyCount, current.commentCount
     ];
+    if (isNexusPromptPhase2Installed_()) {
+      row.push(false, '', '', current.forkedFrom || '', current.currentRevision || 0);
+    }
     sheet.getRange(current.sheetRow, AI_PROMPT_LIBRARY_CONFIG.startColumn, 1, row.length).setValues([row]);
+    if (isNexusPromptPhase2Installed_()) {
+      appendNexusPromptVersionAfterChange_(id, 'Edited', actor.email);
+    }
     SpreadsheetApp.flush();
-    return {ok: true, prompt: normalizeAIPromptRow_(row, current.sheetRow),
+    return {ok: true, prompt: normalizeAIPromptRow_(sheet.getRange(current.sheetRow, 2, 1, 19).getValues()[0], current.sheetRow),
       visibleToUsers: normalized.status === 'Active', message: 'Prompt updated.'};
   } finally {
     lock.releaseLock();
@@ -267,6 +288,7 @@ function deleteAIPrompt(promptId) {
     }
 
     removeNexusPromptCommunityRelations_(id);
+    removeNexusPromptPhase2Relations_(id);
     sheet.deleteRow(prompt.sheetRow);
     SpreadsheetApp.flush();
 
@@ -450,7 +472,7 @@ function readAIPromptRows_(sheet) {
       AI_PROMPT_LIBRARY_CONFIG.dataStartRow,
       AI_PROMPT_LIBRARY_CONFIG.startColumn,
       lastRow - AI_PROMPT_LIBRARY_CONFIG.dataStartRow + 1,
-      AI_PROMPT_LIBRARY_CONFIG.headers.length + AI_PROMPT_LIBRARY_CONFIG.communityHeaders.length
+      AI_PROMPT_LIBRARY_CONFIG.headers.length + AI_PROMPT_LIBRARY_CONFIG.communityHeaders.length + 5
     )
     .getValues();
 
@@ -496,6 +518,11 @@ function normalizeAIPromptRow_(row, sheetRow) {
     upvoteCount: Math.max(0, Number(row[11]) || 0),
     copyCount: Math.max(0, Number(row[12]) || 0),
     commentCount: Math.max(0, Number(row[13]) || 0),
+    verified: row[14] === true || String(row[14]).toUpperCase() === 'TRUE',
+    verifiedBy: String(row[15] || '').trim(),
+    verifiedAt: row[16] instanceof Date ? row[16].toISOString() : String(row[16] || ''),
+    forkedFrom: cleanSheetText_(row[17]),
+    currentRevision: Math.max(0, Number(row[18]) || 0),
     sheetRow: sheetRow
   };
 }

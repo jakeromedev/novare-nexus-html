@@ -5993,14 +5993,21 @@ td.ai-prompt-table-action-cell:has(
    and stays in view while scrolling the Prompt Library.
 ============================================================ */
 .ai-prompt-library-page .ai-prompt-create-floating {
-  position: sticky;
-  top: 12px;
-  z-index: 48;
+  /* Fixed to the visible screen, not the scrolling Prompt Library. */
+  position: fixed;
+  top: calc(82px + env(safe-area-inset-top, 0px));
+  right: clamp(16px, 2.8vw, 44px);
+  bottom: auto;
+  left: auto;
+  z-index: 995;
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  min-height: 58px;
-  margin: 6px 4px 8px 0;
+  width: max-content;
+  max-width: calc(100vw - 32px);
+  min-height: 0;
+  margin: 0;
+  padding: 0;
   pointer-events: none;
 }
 .ai-prompt-library-page .ai-prompt-create-floating .ai-prompt-create-cta {
@@ -6059,15 +6066,50 @@ td.ai-prompt-table-action-cell:has(
   color: #126fac;
   background: #e2f2ff;
 }
+.ai-prompt-library-page .ai-prompt-category-card-monogram.is-delivery {
+  color: #0d68d6;
+  background: #e0edff;
+}
+.ai-prompt-library-page .ai-prompt-category-card-monogram.is-governance {
+  color: #7653bd;
+  background: #eee6ff;
+}
+.ai-prompt-library-page .ai-prompt-category-card-monogram.is-offerings {
+  color: #0c9d88;
+  background: #dff8f1;
+}
+.ai-prompt-library-page .ai-prompt-category-card-monogram.is-opportunities {
+  color: #df8a10;
+  background: #fff1d8;
+}
+.ai-prompt-library-page .ai-prompt-category-card-monogram.is-others {
+  color: #dc638c;
+  background: #ffe9f1;
+}
+.ai-prompt-library-page .ai-prompt-category-card-monogram.is-overviews {
+  color: #2d7cae;
+  background: #e0f3fd;
+}
+.ai-prompt-library-page .ai-prompt-category-card-monogram.is-programs {
+  color: #6e56cf;
+  background: #ebe7ff;
+}
+.ai-prompt-library-page .ai-prompt-category-card-monogram.is-generic {
+  color: #536895;
+  background: #e9eef9;
+}
 .ai-prompt-library-page .ai-prompt-category-card-monogram.is-fallback {
   color: #5e6992;
   background: #ebeff9;
 }
 @media (max-width: 580px) {
   .ai-prompt-library-page .ai-prompt-create-floating {
-    top: 8px;
-    min-height: 56px;
-    margin: 7px 2px 7px 0;
+    /* Keep clear of the lower-right Ask NOSCA floating widget on phones. */
+    top: auto;
+    bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+    right: auto;
+    left: calc(16px + env(safe-area-inset-left, 0px));
+    max-width: calc(100vw - 32px);
   }
   .ai-prompt-library-page .ai-prompt-create-floating .ai-prompt-create-cta {
     min-height: 43px;

@@ -1,0 +1,12 @@
+# Upload only Apps Script sources; exclude generated/local development artifacts.
+**/**
+!appsscript.json
+!**/*.js
+!**/*.gs
+!**/*.html
+.git/**
+**/node_modules/**
+.local/**
+docs/**
+tests/**
+secrets/**

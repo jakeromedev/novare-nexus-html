@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="description" content="Novare Nexus 2026 — shared knowledge workspace.">
+  <base target="_top">
+  <?!= include('frontend/styles/Styles_Core'); ?>
+  <?!= include('frontend/styles/Styles_Home'); ?>
+  <?!= include('frontend/styles/Styles_Layout'); ?>
+  <?!= include('frontend/styles/Styles_Overview'); ?>
+  <?!= include('frontend/styles/Styles_Offerings'); ?>
+  <?!= include('frontend/styles/Styles_Opportunities'); ?>
+  <?!= include('frontend/styles/Styles_Programs'); ?>
+  <?!= include('frontend/styles/Styles_Delivery'); ?>
+  <?!= include('frontend/styles/Styles_Governance'); ?>
+  <?!= include('frontend/styles/Styles_Tools'); ?>
+  <?!= include('frontend/styles/Styles_Support'); ?>
+  <?!= include('frontend/styles/Styles_AIPromptLibrary'); ?>
+  <?!= include('frontend/styles/Styles_Offerings_Refinements'); ?>
+  <?!= include('frontend/styles/Styles_Opportunities_Refinements'); ?>
+  <?!= include('frontend/styles/Styles_Overview_Refinements'); ?>
+  <?!= include('frontend/styles/Styles_Nosca'); ?>
+  <?!= include('frontend/styles/Styles_Search'); ?>
+  <?!= include('frontend/styles/Styles_Nosca_Floating'); ?>
+  <?!= include('frontend/styles/Styles_Runtime'); ?>
+  <?!= include('frontend/styles/Styles_ManagedLinks'); ?>
+  <?!= include('frontend/styles/Styles_Responsive'); ?>
+  <?!= include('frontend/styles/Styles_Home_Enhancements'); ?>
+  <?!= include('frontend/styles/Styles_Loading'); ?>
+  <?!= include('frontend/styles/Styles_Overview_Enhancements'); ?>
+  <?!= include('frontend/styles/Styles_Opportunities_Enhancements'); ?>
+  <?!= include('frontend/styles/Styles_HeroTypography'); ?>
+  <?!= include('frontend/styles/Styles_SidebarTooltips'); ?>
+</head>
+<body>
+  <a class="skip-link" href="#nexus-content">Skip to content</a>
+
+  <div id="nexus-app">
+    <?!= include('frontend/shell/Component_Sidebar'); ?>
+
+    <div id="sidebar-overlay" class="sidebar-overlay" hidden aria-hidden="true"></div>
+
+    <div id="nexus-workspace">
+      <?!= include('frontend/shell/Component_NavHeader'); ?>
+
+      <main id="nexus-content" tabindex="-1">
+        <div id="page-mount"></div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Route templates: instantiated lazily by Scripts.html. -->
+  <template id="page-home-template">
+    <?!= include('frontend/pages/Page_Home'); ?>
+  </template>
+  <template id="page-workspace-template">
+    <?!= include('frontend/pages/Page_Workspace'); ?>
+  </template>
+  <template id="page-analytics-template">
+    <?!= include('frontend/pages/Page_Analytics'); ?>
+  </template>
+  <template id="page-overview-template">
+    <?!= include('frontend/pages/Page_Overview'); ?>
+  </template>
+  <template id="page-offerings-template">
+    <?!= include('frontend/pages/Page_Offerings'); ?>
+  </template>
+  <template id="page-opportunities-template">
+    <?!= include('frontend/pages/Page_Opportunities'); ?>
+  </template>
+  <template id="page-programs-template">
+    <?!= include('frontend/pages/Page_Programs'); ?>
+  </template>
+  <template id="page-delivery-template">
+    <?!= include('frontend/pages/Page_Delivery'); ?>
+  </template>
+  <template id="page-governance-template">
+    <?!= include('frontend/pages/Page_Governance'); ?>
+  </template>
+  <template id="page-tools-template">
+    <?!= include('frontend/pages/Page_Tools'); ?>
+  </template>
+  <template id="page-ai-prompt-library-template">
+    <?!= include('frontend/pages/Page_AI_Prompt_Library'); ?>
+  </template>
+  <template id="page-support-template">
+    <?!= include('frontend/pages/Page_Support'); ?>
+  </template>
+  <template id="page-search-template">
+    <?!= include('frontend/pages/Page_Search'); ?>
+  </template>
+
+  <?!= include('frontend/components/Component_NoscaDialog'); ?>
+  <?!= include('frontend/scripts/Scripts_ManagedLinks'); ?>
+  <?!= include('frontend/scripts/Scripts_HomeLinks'); ?>
+  <?!= include('frontend/scripts/Scripts_OfferingsLinks'); ?>
+  <?!= include('frontend/scripts/Scripts_OpportunitiesLinks'); ?>
+  <?!= include('frontend/scripts/Scripts_ProgramsLinks'); ?>
+  <?!= include('frontend/scripts/Scripts_DeliveryLinks'); ?>
+  <?!= include('frontend/scripts/Scripts_GovernanceLinks'); ?>
+  <?!= include('frontend/scripts/Scripts_ToolsLinks'); ?>
+  <?!= include('frontend/scripts/Scripts_SupportLinks'); ?>
+  <?!= include('frontend/scripts/Scripts_Overview'); ?>
+  <?!= include('frontend/scripts/Scripts_Nosca'); ?>
+  <?!= include('frontend/components/Search_SiteIndex'); ?>
+  <?!= include('frontend/scripts/Scripts_Search'); ?>
+  <?!= include('frontend/scripts/Scripts_AIPromptLibrary'); ?>
+  <?!= include('frontend/shell/Scripts'); ?>
+</body>
+</html>

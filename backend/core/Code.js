@@ -3,7 +3,7 @@
  * Deploy this Apps Script project as a Web App, then embed the /exec URL in Google Sites.
  */
 function doGet() {
-  const template = HtmlService.createTemplateFromFile('Index');
+  const template = HtmlService.createTemplateFromFile('frontend/pages/Index');
 
   return template
     .evaluate()

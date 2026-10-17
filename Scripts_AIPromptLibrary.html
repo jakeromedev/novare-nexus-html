@@ -37,8 +37,13 @@
       statuses: []
     },
     page: 1,
-    pageSize: 10,
+    pageSize: 6,
+    exploreExpanded: false,
     activePromptId: "",
+    detailRequestId: 0,
+    lastDetailId: "",
+    listingContext: null,
+    isDetailRoute: false,
     editingPromptId: "",
     editorBaseline: "",
     documentFilterListenerBound: false,
@@ -77,11 +82,13 @@
         bindEvents(root);
         root.dataset.promptLibraryInitialized = "true";
         syncAdminUI();
+        handlePromptSubroute_();
         loadLibrary();
         return;
       }
 
       syncAdminUI();
+      handlePromptSubroute_();
     } catch (error) {
       console.error(
         "[AI Prompt Library] Frontend initialization error:",
@@ -111,9 +118,23 @@
 
   function cacheRefs(root) {
     refs.surface = root.querySelector("#ai-prompt-library-surface");
+    refs.hero = root.querySelector(".ai-prompt-library-hero");
+    refs.listContent = root.querySelector("#ai-prompt-library-content");
+    refs.detailPage = root.querySelector("#ai-prompt-detail-dialog");
+    refs.detailShell = refs.detailPage && refs.detailPage.querySelector(".ai-prompt-dialog-shell");
+    refs.detailState = root.querySelector("#ai-prompt-phase1-state");
+    refs.detailStateTitle = root.querySelector("#ai-prompt-phase1-state-title");
+    refs.detailStateMessage = root.querySelector("#ai-prompt-phase1-state-message");
+    refs.detailBack = root.querySelector("#ai-prompt-phase1-back");
+    refs.detailOrigin = root.querySelector("#ai-prompt-phase1-origin");
+    refs.detailCurrent = root.querySelector("#ai-prompt-phase1-current");
+    refs.detailRelated = root.querySelector("#ai-prompt-phase1-related-list");
+    refs.detailShare = root.querySelector("#ai-prompt-phase1-share");
     refs.header = root.querySelector("#ai-prompt-library-header");
     refs.count = root.querySelector("#ai-prompt-library-count");
     refs.search = root.querySelector("#ai-prompt-library-search");
+    refs.categoryQuickSelect = root.querySelector("#ai-prompt-library-category-select");
+    refs.typeQuickSelect = root.querySelector("#ai-prompt-library-type-select");
     refs.missingSummary = root.querySelector(
       "#ai-prompt-library-missing-summary"
     );
@@ -294,11 +315,11 @@
     if (refs.phase2Bookmark) refs.phase2Bookmark.addEventListener("click", function () {
       togglePhase2Bookmark_(state.activePromptId);
     });
-    if (refs.phase2Fork) refs.phase2Fork.addEventListener("click", forkPhase2Prompt_);
+    // Fork-to-Draft is on hold; retain the backend but do not expose its UI.
     if (refs.phase2Report) refs.phase2Report.addEventListener("click", function () {
       openPhase2Report_("prompt", state.activePromptId);
     });
-    if (refs.phase2History) refs.phase2History.addEventListener("click", openPhase2Versions_);
+    // Revision History is on hold; preserve stored versions without a UI route.
     if (refs.phase2Verify) refs.phase2Verify.addEventListener("click", verifyPhase2Prompt_);
     if (refs.phase2ReportForm) refs.phase2ReportForm.addEventListener("submit", submitPhase2Report_);
     if (root.querySelector("#ai-prompt-phase2-report-cancel")) {
@@ -310,6 +331,19 @@
     if (refs.communitySort) refs.communitySort.addEventListener("change", function () {
       state.sortMode = refs.communitySort.value || "top-upvoted";
       state.page = 1;
+      renderLibrary();
+    });
+    if (refs.categoryQuickSelect) refs.categoryQuickSelect.addEventListener("change", function () {
+      state.category = refs.categoryQuickSelect.value || "all";
+      state.page = 1;
+      renderCategoryFilters();
+      renderLibrary();
+    });
+    if (refs.typeQuickSelect) refs.typeQuickSelect.addEventListener("change", function () {
+      state.filters.promptTypes = refs.typeQuickSelect.value ? [refs.typeQuickSelect.value] : [];
+      state.page = 1;
+      renderFilterSummary_();
+      renderCategoryFilters();
       renderLibrary();
     });
     if (refs.detailUpvote) refs.detailUpvote.addEventListener("click", function () {
@@ -460,6 +494,14 @@
 
     if (refs.results) {
       refs.results.addEventListener("click", function (event) {
+        const expandButton = event.target.closest("[data-ai-prompt-expand]");
+        if (expandButton) {
+          state.exploreExpanded = !state.exploreExpanded;
+          state.pageSize = state.exploreExpanded ? 12 : 6;
+          state.page = 1;
+          renderLibrary();
+          return;
+        }
         const actionButton = event.target.closest(
           "[data-ai-prompt-action]"
         );
@@ -474,7 +516,7 @@
             actionButton.dataset.aiPromptAction || "";
 
           if (action === "publish" || action === "unpublish") {
-            setCommunityPublication_(promptId, action === "publish");
+            showToast("Draft management is on hold for this release.", "error");
             return;
           }
           if (action === "upvote") {
@@ -519,15 +561,11 @@
           return;
         }
 
-        const row = event.target.closest(
-          "tr[data-ai-prompt-id]"
-        );
-
-        if (!row) return;
-
-        openPromptDetail(
-          row.dataset.aiPromptId || ""
-        );
+        const row = event.target.closest("tr[data-ai-prompt-id]");
+        const card = event.target.closest(".ai-prompt-feed-card[data-ai-prompt-id]");
+        const target = row || card;
+        if (!target) return;
+        openPromptDetail(target.dataset.aiPromptId || "");
       });
     }
 
@@ -583,6 +621,14 @@
       );
     }
 
+    if (refs.detailBack) refs.detailBack.addEventListener("click", closeDetailDialog);
+    if (refs.detailRelated) refs.detailRelated.addEventListener("click", function (event) {
+      const button = event.target.closest("[data-ai-prompt-related-id]");
+      if (button) openPromptDetail(button.dataset.aiPromptRelatedId || "");
+    });
+    // Global router handles all top-level routes. Prompt Hub handles only its subroute.
+    window.addEventListener("hashchange", handlePromptSubroute_);
+    window.addEventListener("popstate", handlePromptSubroute_);
     refs.detailClose.forEach(function (button) {
       button.addEventListener(
         "click",
@@ -658,17 +704,6 @@
       );
     }
 
-    if (refs.detailDialog) {
-      refs.detailDialog.addEventListener(
-        "click",
-        function (event) {
-          if (event.target === refs.detailDialog) {
-            closeDetailDialog();
-          }
-        }
-      );
-    }
-
     if (refs.addDialog) {
       refs.addDialog.addEventListener(
         "click",
@@ -718,13 +753,6 @@
         return;
       }
 
-      if (
-        refs.detailDialog &&
-        refs.detailDialog.open
-      ) {
-        closeDetailDialog();
-        return;
-      }
 
       if (
         refs.addDialog &&
@@ -1321,15 +1349,19 @@
     const actualAdminInView = state.adminView && getEffectiveRole() === "admin";
     const isAuthor = prompt.createdByEmail &&
       prompt.createdByEmail === state.currentUserEmail;
-    return Boolean(actualAdminInView || (isAuthor &&
-      ["Active", "Draft"].includes(prompt.status)));
+    // Phase 1 holds Draft editing and publishing even for verified authors.
+    return Boolean(prompt.status === "Active" && (actualAdminInView || isAuthor));
   }
 
   function syncAdminUI() {
     const isAdmin = getEffectiveRole() === "admin";
     if (refs.addButton) {
       refs.addButton.hidden = !canWriteCommunity_();
-      refs.addButton.textContent = "+ Post a Prompt";
+      const actionWrap = refs.addButton.closest(".ai-prompt-create-floating");
+      if (actionWrap) actionWrap.hidden = !canWriteCommunity_();
+      // Preserve the CTA's inline SVG and accessible text: updating textContent
+      // would destroy the markup. Visibility still follows verified-user writes.
+      refs.addButton.setAttribute("aria-label", "Create a Prompt");
     }
     if (refs.detailAdminActions) {
       const prompt = findCommunityPrompt_(state.activePromptId);
@@ -1367,6 +1399,8 @@
       state.recommendationsError = "";
     }
     state.page = 1;
+    state.exploreExpanded = false;
+    state.pageSize = state.activeView === "explore" ? 6 : 10;
     state.category = "all";
     state.query = "";
     if (refs.search) refs.search.value = "";
@@ -1401,8 +1435,9 @@
     if (refs.phase2Bookmarks) refs.phase2Bookmarks.hidden = !state.phase2Installed || !state.identityVerified;
     if (refs.phase2Moderation) refs.phase2Moderation.hidden = !state.phase2Installed || !isAdmin;
     if (refs.phase3ForYou) refs.phase3ForYou.hidden = false;
+    if (state.root) state.root.classList.toggle("is-explore-view", state.activeView === "explore");
     const isRecommended = state.activeView === "for-you";
-    if (refs.communitySort) refs.communitySort.hidden = state.activeView === "moderation" || isRecommended;
+    if (refs.communitySort) refs.communitySort.disabled = state.activeView === "moderation" || isRecommended;
     if (refs.categories) refs.categories.hidden = state.activeView !== "explore";
     if (refs.missingSummary) refs.missingSummary.hidden = state.activeView !== "explore";
     const searchToolbar = state.root && state.root.querySelector(".ai-prompt-library-toolbar");
@@ -1461,6 +1496,7 @@
 
           populateCategorySelect();
           populatePromptTypeSelect();
+          populateExploreQuickFilters_();
           syncAdminUI();
           sanitizeActiveFilters_();
           renderFilterControls_(state.filters);
@@ -1468,6 +1504,18 @@
           renderFilterSummary_();
           renderCategoryFilters();
           renderLibrary();
+          handlePromptSubroute_();
+          // A cold deep link may finish detail validation before the
+          // registry response. Synchronize access-dependent actions and
+          // related recommendations after the listing finishes loading.
+          if (state.isDetailRoute && state.activePromptId) {
+            const active = findCommunityPrompt_(state.activePromptId);
+            if (active && active.status === "Active") {
+              updateCommunityEngagement_(active);
+              updatePhase2Details_(active);
+              renderPhase1Related_(active);
+            }
+          }
         })
         .withFailureHandler(function (error) {
           state.loading = false;
@@ -1756,6 +1804,7 @@
 
 
   function renderCategoryFilters() {
+    syncExploreQuickFilters_();
     if (!refs.categories) return;
     if (state.activeView !== "explore") {
       refs.categories.replaceChildren();
@@ -1767,18 +1816,9 @@
       "is-loading"
     );
 
-    // Keep the original category monogram cards on the default Explore view
-    // while ALSO showing the community popularity feed below them.
-    const showContext = Boolean(
-      state.query || state.category !== "all" || hasActiveFilters_()
-    );
-    refs.categories.classList.toggle("is-grid-view", !showContext);
-    refs.categories.classList.toggle("is-context-view", showContext);
-
-    if (showContext) {
-      refs.categories.appendChild(createLibraryContextBar_());
-      return;
-    }
+    // Keep categories visible while filtering, as in the reference design.
+    refs.categories.classList.add("is-grid-view");
+    refs.categories.classList.remove("is-context-view");
 
     const heading = document.createElement("div");
     heading.className =
@@ -1803,6 +1843,8 @@
 
     heading.append(title, description);
     refs.categories.appendChild(heading);
+    // All Prompts is a real filter, not a fabricated category or count.
+    refs.categories.appendChild(createCategoryCard_({name:"All Prompts", count:state.prompts.length}, true));
 
     getVisibleCategories_().forEach(
       function (category) {
@@ -1813,6 +1855,39 @@
     );
   }
 
+
+  function populateExploreQuickFilters_() {
+    if (refs.categoryQuickSelect) {
+      refs.categoryQuickSelect.replaceChildren();
+      refs.categoryQuickSelect.add(new Option("All Categories", "all"));
+      getVisibleCategories_().forEach(function (category) {
+        refs.categoryQuickSelect.add(new Option(category.name, category.name));
+      });
+    }
+    if (refs.typeQuickSelect) {
+      refs.typeQuickSelect.replaceChildren();
+      refs.typeQuickSelect.add(new Option("All Prompt Types", ""));
+      state.promptTypeOptions.forEach(function (entry) {
+        const label = typeof entry === "string" ? entry : String(entry && (entry.name || entry.promptType || entry.value) || "");
+        if (label) refs.typeQuickSelect.add(new Option(label, label));
+      });
+    }
+    syncExploreQuickFilters_();
+  }
+
+  function syncExploreQuickFilters_() {
+    if (refs.categoryQuickSelect) {
+      refs.categoryQuickSelect.value = state.category;
+      if (refs.categoryQuickSelect.selectedIndex < 0) refs.categoryQuickSelect.value = "all";
+    }
+    if (refs.typeQuickSelect) {
+      refs.typeQuickSelect.value = state.filters.promptTypes.length === 1 ? state.filters.promptTypes[0] : "";
+      if (refs.typeQuickSelect.selectedIndex < 0) refs.typeQuickSelect.value = "";
+      refs.typeQuickSelect.title = state.filters.promptTypes.length > 1
+        ? "Multiple prompt types selected in More filters" : "Filter by prompt type";
+    }
+    if (refs.communitySort) refs.communitySort.value = state.sortMode;
+  }
 
   function getVisibleCategories_() {
     return state.categories.slice().sort(function (a, b) {
@@ -1871,18 +1946,44 @@
   }
 
 
-  function createCategoryCard_(category) {
+  // Temporary, hardcoded category-icon mapping. Category names and counts
+  // continue coming from the backend. Unknown categories use monogram fallback.
+  const CATEGORY_ICON_MAP_ = Object.freeze({
+    "consulting": "consulting",
+    "project management": "project",
+    "project delivery": "project",
+    "documentation": "documentation",
+    "analysis": "analysis",
+    "client communication": "communication",
+    "communication": "communication",
+    "design & content": "design",
+    "design and content": "design",
+    "data & ai": "data",
+    "data and ai": "data",
+    "data science": "data",
+    "it & development": "development",
+    "software engineering": "development"
+  });
+
+  function hardcodedCategoryIcon_(name, isAll) {
+    if (isAll) return "all";
+    const key = String(name || "").trim().toLowerCase().replace(/\s+/g, " ");
+    return CATEGORY_ICON_MAP_[key] || "";
+  }
+
+  function createCategoryCard_(category, isAll) {
     const card = document.createElement("article");
     card.className =
       "ai-prompt-category-card " +
-      getCategoryAccentClass_(category.name);
+      getCategoryAccentClass_(category.name) +
+      ((isAll ? "all" : category.name) === state.category ? " is-selected" : "") +
+      (isAll ? " is-all-prompts" : "");
 
     const button = document.createElement("button");
     button.type = "button";
     button.className =
       "ai-prompt-category-card-open";
-    button.dataset.aiPromptCategory =
-      category.name;
+    button.dataset.aiPromptCategory = isAll ? "all" : category.name;
     button.setAttribute(
       "aria-label",
       "View prompts in " + category.name
@@ -1895,8 +1996,13 @@
     monogram.className =
       "ai-prompt-category-card-monogram";
     monogram.setAttribute("aria-hidden", "true");
-    monogram.textContent =
-      getCategoryMonogram_(category.name);
+    const iconKind = hardcodedCategoryIcon_(category.name, isAll);
+    monogram.classList.add("is-" + (iconKind || "fallback"));
+    if (iconKind) {
+      monogram.innerHTML = exploreIconMarkup_(iconKind);
+    } else {
+      monogram.textContent = getCategoryMonogram_(category.name);
+    }
 
     const name = document.createElement("strong");
     name.textContent = category.name;
@@ -1909,21 +2015,7 @@
     count.textContent =
       pluralizePrompt(category.count);
 
-    const footer = document.createElement("span");
-    footer.className =
-      "ai-prompt-category-card-footer";
-
-    const view = document.createElement("span");
-    view.textContent = "View prompts";
-
-    const arrow = document.createElement("span");
-    arrow.className =
-      "ai-prompt-category-card-arrow";
-    arrow.setAttribute("aria-hidden", "true");
-    arrow.textContent = "→";
-
-    footer.append(view, arrow);
-    button.append(top, count, footer);
+    button.append(top, count);
     card.appendChild(button);
 
     return card;
@@ -2015,7 +2107,7 @@
     }
     if (refs.count) {
       refs.count.textContent = state.activeView === "my-prompts"
-        ? pluralizePrompt(state.myPrompts.length)
+        ? pluralizePrompt(state.myPrompts.filter(function(p) {return p.status === "Active";}).length)
         : state.activeView === "bookmarks"
           ? pluralizePrompt(state.prompts.filter(function(p){return p.bookmarkedByMe;}).length)
           : pluralizePrompt(state.prompts.length);
@@ -2064,16 +2156,23 @@
       start + state.pageSize
     );
 
-    if (state.activeView === "my-prompts" ||
-        (!state.query && state.category === "all" && !hasActiveFilters_())) {
-      const heading = document.createElement("h3");
-      heading.className = "ai-prompt-community-feed-title";
-      heading.textContent = state.activeView === "my-prompts"
-        ? "My Contributions" : state.activeView === "bookmarks"
-          ? "My Bookmarks" : "Top Community Prompts";
-      refs.results.appendChild(heading);
+    if (state.activeView === "explore") {
+      refs.results.appendChild(createExploreFeedHeading_(filtered.length));
+      const feed = document.createElement("div");
+      feed.className = "ai-prompt-explore-grid";
+      pageItems.forEach(function (prompt) {
+        feed.appendChild(createExplorePromptCard_(prompt));
+      });
+      refs.results.appendChild(feed);
+    } else {
+      if (state.activeView === "my-prompts" || state.activeView === "bookmarks") {
+        const heading = document.createElement("h3");
+        heading.className = "ai-prompt-community-feed-title";
+        heading.textContent = state.activeView === "my-prompts" ? "My Contributions" : "My Bookmarks";
+        refs.results.appendChild(heading);
+      }
+      refs.results.appendChild(createPromptTable(pageItems));
     }
-    refs.results.appendChild(createPromptTable(pageItems));
 
     renderPagination(
       filtered.length,
@@ -2086,7 +2185,7 @@
 
   function getVisiblePrompts() {
     let prompts = state.activeView === "my-prompts"
-      ? state.myPrompts.slice()
+      ? state.myPrompts.filter(function(p) {return p.status === "Active";})
       : state.activeView === "bookmarks"
         ? state.prompts.filter(function(p){return p.bookmarkedByMe;})
         : state.prompts.slice();
@@ -2099,7 +2198,8 @@
           );
         }
       );
-    } else if (state.category !== "all") {
+    }
+    if (state.category !== "all") {
       prompts = prompts.filter(
         function (prompt) {
           return (
@@ -2287,6 +2387,144 @@
     );
   }
 
+
+  function exploreIconMarkup_(kind) {
+    const icons = {
+      consulting: '<path d="M6 19v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><circle cx="12" cy="7" r="4"/>',
+      documentation: '<path d="M6 3h9l4 4v14H6z"/><path d="M15 3v5h4M9 12h7M9 16h7"/>',
+      analysis: '<path d="M4 20V4M4 20h16M8 16l4-5 3 2 5-7"/>',
+      communication: '<path d="M4 5h16v12H9l-5 4V5z"/><path d="M8 10h8"/>',
+      project: '<rect x="4" y="6" width="16" height="15" rx="2"/><path d="M8 3v6M16 3v6M4 11h16M9 16l2 2 4-4"/>',
+      design: '<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8" cy="9" r="1.5"/><path d="m4 18 5-5 3 3 3-4 5 6"/>',
+      data: '<path d="M4 20V4M4 20h16"/><rect x="7" y="12" width="3" height="5" rx="1"/><rect x="12" y="8" width="3" height="9" rx="1"/><rect x="17" y="5" width="3" height="12" rx="1"/>',
+      development: '<path d="m8 8-4 4 4 4m8-8 4 4-4 4M14 4l-4 16"/>',
+      all: '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>'
+    };
+    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (icons[kind] || icons.documentation) + '</svg>';
+  }
+
+  function promptIconKind_(name) {
+    const n = String(name || "").toLowerCase();
+    if (/consult|proposal/.test(n)) return "consulting";
+    if (/project|delivery|agile/.test(n)) return "project";
+    if (/analys|data|insight/.test(n)) return "analysis";
+    if (/communicat|client|meeting|support/.test(n)) return "communication";
+    return "documentation";
+  }
+
+  function createExploreFeedHeading_(total) {
+    const heading = document.createElement("div");
+    heading.className = "ai-prompt-explore-heading";
+    const copy = document.createElement("div");
+    const title = document.createElement("h3");
+    title.textContent = state.query ? "Search Results"
+      : state.category !== "all" ? state.category + " Prompts"
+      : hasActiveFilters_() ? "Filtered Prompts"
+      : state.exploreExpanded ? "All Prompts" : "Popular Prompts";
+    const subtitle = document.createElement("p");
+    subtitle.textContent = state.query ? total + " matching prompts"
+      : state.category !== "all" || hasActiveFilters_() ? pluralizePrompt(total) + " in this view"
+      : "High-quality prompts used and upvoted by the NEXUS community.";
+    copy.append(title, subtitle);
+    const expand = document.createElement("button");
+    expand.type = "button";
+    expand.className = "ai-prompt-explore-view-all";
+    expand.dataset.aiPromptExpand = "true";
+    expand.textContent = state.exploreExpanded ? "Show fewer" : "View all";
+    expand.setAttribute("aria-label", state.exploreExpanded ? "Show six prompts per page" : "Show more prompts per page");
+    heading.append(copy, expand);
+    return heading;
+  }
+
+  function createExplorePromptCard_(prompt) {
+    const card = document.createElement("article");
+    card.className = "ai-prompt-feed-card";
+    card.dataset.aiPromptId = String(prompt.id || "");
+    const icon = document.createElement("span");
+    const kind = promptIconKind_(prompt.category || prompt.promptType);
+    icon.className = "ai-prompt-feed-icon is-" + kind;
+    icon.innerHTML = exploreIconMarkup_(kind);
+    const main = document.createElement("div");
+    main.className = "ai-prompt-feed-main";
+    const heading = document.createElement("div");
+    heading.className = "ai-prompt-feed-heading";
+    const title = document.createElement("button");
+    title.type = "button";
+    title.className = "ai-prompt-feed-title";
+    title.dataset.aiPromptOpen = "true";
+    title.dataset.aiPromptId = String(prompt.id || "");
+    appendHighlightedText_(title, prompt.promptName || "Untitled Prompt", state.query);
+    heading.appendChild(title);
+    if (prompt.verified === true) {
+      const verified = document.createElement("span");
+      verified.className = "ai-prompt-feed-verified";
+      verified.textContent = "✓ Verified";
+      verified.title = "Verified by a NEXUS administrator";
+      heading.appendChild(verified);
+    }
+    const description = document.createElement("p");
+    description.className = "ai-prompt-feed-description";
+    appendHighlightedText_(description, prompt.useCase || "Open this prompt to view the complete content and use case.", state.query);
+    const footer = document.createElement("div");
+    footer.className = "ai-prompt-feed-footer";
+    const chips = document.createElement("div");
+    chips.className = "ai-prompt-feed-tags";
+    [prompt.category, prompt.promptType].filter(Boolean).forEach(function (tag) {
+      const chip = document.createElement("span");
+      chip.className = "ai-prompt-feed-tag";
+      chip.textContent = tag;
+      chips.appendChild(chip);
+    });
+    const stats = document.createElement("div");
+    stats.className = "ai-prompt-feed-stats";
+    const votes = document.createElement("button");
+    votes.type = "button";
+    votes.className = "ai-prompt-feed-stat is-vote";
+    votes.dataset.aiPromptAction = "upvote";
+    votes.dataset.aiPromptId = String(prompt.id || "");
+    votes.disabled = !canWriteCommunity_() || prompt.status !== "Active" || !!state.votePending[prompt.id];
+    votes.setAttribute("aria-pressed", prompt.upvotedByMe === true ? "true" : "false");
+    votes.title = prompt.upvotedByMe ? "Remove upvote" : "Upvote this prompt";
+    votes.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m12 4-8 9h5v7h6v-7h5z"/></svg>';
+    const voteCount = document.createElement("span");
+    voteCount.textContent = String(Math.max(0, Number(prompt.upvoteCount) || 0));
+    votes.appendChild(voteCount);
+    const comments = document.createElement("button");
+    comments.type = "button";
+    comments.className = "ai-prompt-feed-stat";
+    comments.dataset.aiPromptOpen = "true";
+    comments.dataset.aiPromptId = String(prompt.id || "");
+    comments.title = "Open discussion";
+    comments.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 5h16v12H9l-5 4V5z"/></svg>';
+    const commentCount = document.createElement("span");
+    commentCount.textContent = String(Math.max(0, Number(prompt.commentCount) || 0));
+    comments.appendChild(commentCount);
+    const copies = document.createElement("span");
+    copies.className = "ai-prompt-feed-stat";
+    copies.title = "Prompt copies";
+    copies.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 5H5v11"/></svg>';
+    const copyCount = document.createElement("span");
+    copyCount.textContent = String(Math.max(0, Number(prompt.copyCount) || 0));
+    copies.appendChild(copyCount);
+    stats.append(votes, comments, copies);
+    if (state.phase2Installed && state.identityVerified) {
+      const bookmark = document.createElement("button");
+      bookmark.type = "button";
+      bookmark.className = "ai-prompt-feed-bookmark";
+      bookmark.dataset.aiPromptAction = "bookmark";
+      bookmark.dataset.aiPromptId = String(prompt.id || "");
+      bookmark.setAttribute("aria-pressed", prompt.bookmarkedByMe === true ? "true" : "false");
+      bookmark.setAttribute("aria-label", prompt.bookmarkedByMe ? "Remove bookmark" : "Bookmark prompt");
+      bookmark.title = prompt.bookmarkedByMe ? "Remove bookmark" : "Save prompt";
+      bookmark.disabled = !canWriteCommunity_() || prompt.status !== "Active";
+      bookmark.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M6 3h12v18l-6-4-6 4z"/></svg>';
+      stats.appendChild(bookmark);
+    }
+    footer.append(chips, stats);
+    main.append(heading, description, footer);
+    card.append(icon, main);
+    return card;
+  }
 
   function createPromptTable(prompts) {
     const shell = document.createElement("div");
@@ -2509,13 +2747,7 @@
       }
     }
 
-    if (state.activeView === "my-prompts" && canEditCommunityPrompt_(prompt)) {
-      if (prompt.status === "Draft") {
-        actions.appendChild(createCommunityPublicationButton_(prompt, true));
-      } else if (prompt.status === "Active") {
-        actions.appendChild(createCommunityPublicationButton_(prompt, false));
-      }
-    }
+    // Publishing/unpublishing Drafts is deferred (no publication action in Phase 1).
 
     actionCell.appendChild(actions);
 
@@ -2929,15 +3161,177 @@
     return badge;
   }
 
-  function openPromptDetail(promptId) {
-    const prompt = findCommunityPrompt_(promptId);
 
-    if (!prompt || !refs.detailDialog) {
+  // Phase 1 sub-routing: only Details is new. Existing listing tabs remain
+  // unchanged until Phase 2, so their in-memory search/page state is preserved.
+  function parsePhase1Subroute_() {
+    const hash = String(window.location.hash || "").replace(/^#/, "");
+    const parts = hash.split("?");
+    if (parts[0] !== "ai-prompt-library") return null;
+    const params = new URLSearchParams(parts.slice(1).join("?"));
+    const view = params.get("view") || "explore";
+    if (view !== "prompt") return {view:view};
+    const id = String(params.get("id") || "").trim();
+    return {view:"prompt", id: /^[a-zA-Z0-9_-]{1,80}$/.test(id) ? id : ""};
+  }
+
+  function showPhase1DetailState_(title, message) {
+    if (refs.detailShell) refs.detailShell.hidden = true;
+    if (refs.detailState) refs.detailState.hidden = false;
+    if (refs.detailStateTitle) refs.detailStateTitle.textContent = title;
+    if (refs.detailStateMessage) refs.detailStateMessage.textContent = message;
+  }
+
+  function setPhase1Layout_(showDetails) {
+    state.isDetailRoute = !!showDetails;
+    if (refs.hero) refs.hero.hidden = showDetails;
+    if (refs.surface) refs.surface.hidden = showDetails;
+    if (refs.detailPage) refs.detailPage.hidden = !showDetails;
+    // Leave the outer content root mounted so the related dialogs/toast work.
+    if (state.root) state.root.classList.toggle("is-phase1-detail-route", showDetails);
+  }
+
+  function handlePromptSubroute_() {
+    if (!state.root) return;
+    const route = parsePhase1Subroute_();
+    if (!route) {
+      // Another global NEXUS page was selected; invalidate pending detail reads.
+      if (state.isDetailRoute) {
+        state.detailRequestId += 1;
+        state.lastDetailId = "";
+        state.activePromptId = "";
+        setPhase1Layout_(false);
+      }
       return;
     }
+    if (route.view !== "prompt") {
+      // Invalidate old reads so returning from Details cannot reveal a stale page.
+      if (state.isDetailRoute) {
+        state.detailRequestId += 1;
+        state.lastDetailId = "";
+        state.activePromptId = "";
+        setPhase1Layout_(false);
+        if (state.listingContext) {
+          const context = state.listingContext;
+          state.activeView = context.view;
+          state.query = context.query;
+          state.category = context.category;
+          state.sortMode = context.sortMode;
+          state.page = context.page;
+          state.pageSize = context.pageSize || (context.view === "explore" ? 6 : 10);
+          state.exploreExpanded = !!context.exploreExpanded;
+          state.filters = context.filters;
+          if (refs.search) refs.search.value = context.queryRaw || context.query;
+          if (refs.communitySort) refs.communitySort.value = context.sortMode;
+          syncCommunityView_();
+          renderFilterSummary_();
+          renderCategoryFilters();
+          renderLibrary();
+          requestAnimationFrame(function () {
+            if (document.scrollingElement) document.scrollingElement.scrollTop = context.scroll;
+          });
+        }
+      }
+      return;
+    }
+    const wasDetail = state.isDetailRoute;
+    setPhase1Layout_(true);
+    if (!wasDetail || state.lastDetailId !== route.id) {
+      requestAnimationFrame(function () {
+        if (state.isDetailRoute && document.scrollingElement) {
+          document.scrollingElement.scrollTop = 0;
+        }
+      });
+    }
+    if (!route.id) {
+      state.detailRequestId += 1;
+      state.lastDetailId = "";
+      state.activePromptId = "";
+      showPhase1DetailState_("Prompt unavailable", "This prompt link is invalid. Return to the library to browse published prompts.");
+      return;
+    }
+    // Avoid repeated reads from global route re-renders or simultaneous hash/popstate.
+    if (state.lastDetailId === route.id) return;
+    state.lastDetailId = route.id;
+    state.activePromptId = "";
+    const request = ++state.detailRequestId;
+    showPhase1DetailState_("Loading prompt…", "Checking the published prompt and your access permissions.");
+    if (!isAppsScriptAvailable()) {
+      showPhase1DetailState_("Prompt unavailable", "Open the NEXUS web app to read this prompt.");
+      return;
+    }
+    google.script.run.withSuccessHandler(function (response) {
+      if (request !== state.detailRequestId || !state.isDetailRoute) return;
+      if (!response || response.ok !== true || !response.prompt || response.prompt.status !== "Active") {
+        showPhase1DetailState_("Prompt unavailable", "This prompt is not published, has been removed, or you do not have access.");
+        return;
+      }
+      const prompt = response.prompt;
+      const existing = state.prompts.findIndex(function (item) {return item.id === prompt.id;});
+      if (existing >= 0) state.prompts[existing] = prompt;
+      else state.prompts.push(prompt);
+      renderPhase1PromptDetail_(prompt);
+    }).withFailureHandler(function (error) {
+      if (request !== state.detailRequestId || !state.isDetailRoute) return;
+      console.warn("[Prompt Hub] Cannot load prompt detail:", error);
+      showPhase1DetailState_("Prompt unavailable", "Unable to open this published prompt. Check your access and try again.");
+    }).getNexusPublishedPromptDetail(route.id);
+  }
 
-    state.activePromptId =
-      String(prompt.id || "");
+  function renderPhase1Related_(current) {
+    if (!refs.detailRelated) return;
+    refs.detailRelated.replaceChildren();
+    const matches = state.prompts.filter(function (item) {
+      return item && item.status === "Active" && item.id !== current.id &&
+        (item.category === current.category || item.promptType === current.promptType);
+    }).slice(0, 3);
+    if (!matches.length) {
+      const empty = document.createElement("p");
+      empty.className = "ai-prompt-phase1-related-empty";
+      empty.textContent = "No related published prompts yet.";
+      refs.detailRelated.appendChild(empty);
+    }
+    matches.forEach(function (item) {
+      const link = document.createElement("button");
+      link.type = "button";
+      link.dataset.aiPromptRelatedId = String(item.id || "");
+      link.className = "ai-prompt-phase1-related-card";
+      const title = document.createElement("strong");
+      title.textContent = item.promptName || item.id;
+      const caption = document.createElement("span");
+      caption.textContent = (item.category || "Prompt") + " · " + (item.promptType || "General");
+      link.append(title, caption);
+      refs.detailRelated.appendChild(link);
+    });
+  }
+
+
+  function openPromptDetail(promptId) {
+    const id = String(promptId || "").trim();
+    if (!/^[a-zA-Z0-9_-]{1,80}$/.test(id)) return;
+    if (!state.isDetailRoute) {
+      state.listingContext = {
+        view: state.activeView, query: state.query,
+        queryRaw: refs.search ? refs.search.value : state.query,
+        category: state.category,
+        sortMode: state.sortMode, page: state.page,
+        pageSize: state.pageSize, exploreExpanded: state.exploreExpanded,
+        filters: {
+          promptTypes: state.filters.promptTypes.slice(),
+          content: state.filters.content,
+          statuses: state.filters.statuses.slice()
+        },
+        scroll: document.scrollingElement ? document.scrollingElement.scrollTop : 0
+      };
+    }
+    window.location.hash = "ai-prompt-library?view=prompt&id=" + encodeURIComponent(id);
+    // hashchange / popstate will dispatch; calling here also covers same-hash clicks.
+    handlePromptSubroute_();
+  }
+
+  function renderPhase1PromptDetail_(prompt) {
+    if (!prompt || !refs.detailPage || prompt.status !== "Active") return;
+    state.activePromptId = String(prompt.id || "");
 
     if (refs.detailTitle) {
       refs.detailTitle.textContent =
@@ -2996,7 +3390,15 @@
     updatePhase2Details_(prompt);
     state.commentsPage = 1;
     if (refs.commentBody) refs.commentBody.value = "";
-    openDialog(refs.detailDialog);
+    if (refs.detailCurrent) refs.detailCurrent.textContent = prompt.promptName || "Prompt Details";
+    if (refs.detailOrigin) refs.detailOrigin.textContent = state.listingContext && state.listingContext.view === "bookmarks"
+      ? "Bookmarks" : state.listingContext && state.listingContext.view === "for-you"
+      ? "For You" : state.listingContext && state.listingContext.view === "my-prompts"
+      ? "My Prompts" : "Explore";
+    if (refs.detailRelated) renderPhase1Related_(prompt);
+    if (refs.detailState) refs.detailState.hidden = true;
+    if (refs.detailShell) refs.detailShell.hidden = false;
+    if (refs.detailTitle) refs.detailTitle.focus({preventScroll:true});
     loadCommunityComments_();
   }
 
@@ -3016,20 +3418,11 @@
         label: "Prompt Type",
         value: prompt.promptType,
         className: "is-type"
-      }
+      },
+      { label:"Status", value:"Published", className:"is-status is-active" },
+      { label:"Last updated", value:prompt.lastUpdated
+          ? String(prompt.lastUpdated).slice(0, 10) : "", className:"is-updated" }
     ];
-
-    if (getEffectiveRole() === "admin") {
-      entries.push({
-        label: "Status",
-        value: prompt.status,
-        className:
-          "is-status is-" +
-          String(
-            prompt.status || "Inactive"
-          ).toLowerCase()
-      });
-    }
 
     entries.forEach(function (entry) {
       if (!entry.value) return;
@@ -3058,8 +3451,12 @@
 
 
   function closeDetailDialog() {
-    state.activePromptId = "";
-    closeDialog(refs.detailDialog);
+    if (!state.isDetailRoute) return;
+    const base = state.listingContext && state.listingContext.view;
+    // The original list route is already in browser history for in-app clicks.
+    // A cold deep link has no list history; navigate explicitly to Explore.
+    window.location.hash = "ai-prompt-library?view=" + encodeURIComponent(base || "explore");
+    handlePromptSubroute_();
   }
 
   function copyActivePrompt() {
@@ -3193,7 +3590,7 @@
 
         if (
           refs.detailDialog &&
-          refs.detailDialog.open &&
+          !refs.detailDialog.hidden &&
           state.activePromptId === String(promptId)
         ) {
           closeDetailDialog();
@@ -3251,16 +3648,7 @@
       openPromptEditor(prompt);
     };
 
-    if (refs.detailDialog && refs.detailDialog.open) {
-      closeDetailDialog();
-
-      // Let the browser fully dismiss the detail <dialog> before
-      // opening the edit <dialog>. This prevents both dialogs from
-      // appearing stacked during the transition.
-      window.requestAnimationFrame(openEditor);
-      return;
-    }
-
+    // Editing remains a modal until Phase 3; do not abandon the Details route.
     openEditor();
   }
 
@@ -4173,7 +4561,7 @@
       refs.phase2Bookmark.setAttribute("aria-pressed", prompt.bookmarkedByMe ? "true" : "false");
     }
     if (refs.phase2Fork) {
-      refs.phase2Fork.hidden = !published || !state.identityVerified;
+      refs.phase2Fork.hidden = true; // Phase 3 hold: no fork-to-Draft.
       refs.phase2Fork.disabled = !writable || state.phase2Busy;
     }
     if (refs.phase2Report) {
@@ -4181,7 +4569,7 @@
       refs.phase2Report.disabled = !writable || state.phase2Busy;
     }
     if (refs.phase2History) {
-      refs.phase2History.hidden = !state.identityVerified || !(mine || isPhase2Admin_());
+      refs.phase2History.hidden = true; // Deferred Version History.
     }
     if (refs.phase2Verify) {
       refs.phase2Verify.hidden = !isPhase2Admin_();
@@ -4528,7 +4916,7 @@
   document.addEventListener("nexus:viewmodechange", function () {
     syncAdminUI();
 
-    if (refs.detailDialog && refs.detailDialog.open) {
+    if (refs.detailDialog && !refs.detailDialog.hidden) {
       closeDetailDialog();
     }
 

@@ -88,32 +88,28 @@
           </p>
         </div>
 
+      </div>
+
+      <!-- Floating primary action: intentionally outside the tab navigation. -->
+      <div class="ai-prompt-create-floating" id="ai-prompt-create-floating">
         <button
           id="ai-prompt-library-add"
-          class="ai-prompt-library-add-button"
+          class="ai-prompt-library-add-button ai-prompt-create-cta"
           type="button"
+          aria-label="Create a Prompt"
           hidden
         >
-          <span aria-hidden="true">＋</span>
-          Post a Prompt
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          <span>Create a Prompt</span>
         </button>
       </div>
 
       <nav class="ai-prompt-community-nav" aria-label="Prompt Library sections">
-        <button type="button" id="ai-prompt-community-explore" class="is-active" aria-current="page">Explore Prompts</button>
-        <button type="button" id="ai-prompt-community-my" aria-current="false">My Prompts</button>
-        <button type="button" id="ai-prompt-community-bookmarks" aria-current="false" hidden>Bookmarks</button>
+        <button type="button" id="ai-prompt-community-explore" class="is-active" aria-current="page">Explore</button>
         <button type="button" id="ai-prompt-community-for-you" aria-current="false" hidden>For You</button>
-        <button type="button" id="ai-prompt-community-moderation" aria-current="false" hidden>Reports <span id="ai-prompt-reports-count"></span></button>
-        <label class="ai-prompt-community-sort" for="ai-prompt-community-sort">
-          Sort by
-          <select id="ai-prompt-community-sort" aria-label="Sort prompts">
-            <option value="top-upvoted">Most Upvoted</option>
-            <option value="most-copied">Most Copied</option>
-            <option value="newest">Newest</option>
-            <option value="name">A–Z</option>
-          </select>
-        </label>
+        <button type="button" id="ai-prompt-community-bookmarks" aria-current="false" hidden>Bookmarks</button>
+        <button type="button" id="ai-prompt-community-my" aria-current="false">My Prompts</button>
+        <button type="button" id="ai-prompt-community-moderation" aria-current="false" hidden>Moderation <span id="ai-prompt-reports-count"></span></button>
       </nav>
       <p class="ai-prompt-community-identity" id="ai-prompt-community-identity" role="status" hidden></p>
 
@@ -154,6 +150,27 @@
           >
         </label>
 
+        <label class="ai-prompt-quick-filter" for="ai-prompt-library-category-select">
+          <span class="sr-only">Filter by category</span>
+          <select id="ai-prompt-library-category-select" aria-label="Filter by category">
+            <option value="all">All Categories</option>
+          </select>
+        </label>
+        <label class="ai-prompt-quick-filter" for="ai-prompt-library-type-select">
+          <span class="sr-only">Filter by prompt type</span>
+          <select id="ai-prompt-library-type-select" aria-label="Filter by prompt type">
+            <option value="">All Prompt Types</option>
+          </select>
+        </label>
+        <label class="ai-prompt-community-sort" for="ai-prompt-community-sort">
+          <span class="sr-only">Sort prompts</span>
+          <select id="ai-prompt-community-sort" aria-label="Sort prompts">
+            <option value="top-upvoted">Most Upvoted</option>
+            <option value="most-copied">Most Copied</option>
+            <option value="newest">Newest</option>
+            <option value="name">A–Z</option>
+          </select>
+        </label>
         <div class="ai-prompt-filter-menu-wrap">
           <button
             id="ai-prompt-library-filter-toggle"
@@ -164,7 +181,7 @@
             aria-controls="ai-prompt-library-filter-popover"
           >
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16"></path><path d="M7 12h10"></path><path d="M10 18h4"></path></svg>
-            <span>Filters</span>
+            <span class="ai-prompt-advanced-filter-label">More filters</span>
             <span
               id="ai-prompt-library-filter-count"
               class="ai-prompt-library-filter-count"
@@ -347,23 +364,29 @@
     </div>
   </section>
 
-  <!-- Prompt detail modal -->
-  <dialog id="ai-prompt-detail-dialog" class="ai-prompt-dialog ai-prompt-detail-dialog">
+  <!-- Phase 1: real routed, in-content Prompt Details view (never a modal). -->
+  <section id="ai-prompt-detail-dialog" class="ai-prompt-phase1-detail-page" aria-label="Prompt Details" hidden>
+    <div class="ai-prompt-phase1-navigation">
+      <button id="ai-prompt-phase1-back" type="button" class="ai-prompt-phase1-back">← Back to results</button>
+      <nav id="ai-prompt-phase1-breadcrumbs" aria-label="Breadcrumb">
+        <span>Prompt Hub</span><span aria-hidden="true">›</span><span id="ai-prompt-phase1-origin">Explore</span><span aria-hidden="true">›</span><span id="ai-prompt-phase1-current">Prompt Details</span>
+      </nav>
+    </div>
+    <div id="ai-prompt-phase1-state" class="ai-prompt-phase1-state" role="status" aria-live="polite" hidden>
+      <h2 id="ai-prompt-phase1-state-title" tabindex="-1">Loading prompt…</h2>
+      <p id="ai-prompt-phase1-state-message">Checking availability and access.</p>
+      <button type="button" class="ai-prompt-secondary-button" data-ai-prompt-detail-close>Back to results</button>
+    </div>
     <div class="ai-prompt-dialog-shell">
       <header class="ai-prompt-dialog-header">
         <div>
           <div class="ai-prompt-detail-title-line">
-            <h2 id="ai-prompt-detail-title">Prompt</h2>
+            <h2 id="ai-prompt-detail-title" tabindex="-1">Prompt</h2>
             <span id="ai-prompt-detail-id" class="ai-prompt-detail-id"></span>
           </div>
-          <p>Review the use case and copy the reusable prompt into your preferred AI tool.</p>
+          <p>Read the full prompt, engage with colleagues, and reuse it in your preferred AI tool.</p>
         </div>
-        <button
-          class="ai-prompt-dialog-close"
-          type="button"
-          data-ai-prompt-detail-close
-          aria-label="Close prompt details"
-        >×</button>
+        <!-- Direct-link sharing is withheld until standalone/embed URL behavior is verified. -->
       </header>
 
       <div class="ai-prompt-dialog-body">
@@ -377,8 +400,8 @@
         <div class="ai-prompt-phase2-actions" id="ai-prompt-phase2-actions" hidden>
           <span id="ai-prompt-phase2-verified" class="ai-prompt-phase2-verified" hidden>✓ Verified by Nexus</span>
           <button type="button" id="ai-prompt-phase2-bookmark" aria-pressed="false">☆ Save</button>
-          <button type="button" id="ai-prompt-phase2-fork">Fork Prompt</button>
-          <button type="button" id="ai-prompt-phase2-history">Version History</button>
+          <button type="button" id="ai-prompt-phase2-fork" hidden>Fork Prompt</button>
+          <button type="button" id="ai-prompt-phase2-history" hidden>Version History</button>
           <button type="button" id="ai-prompt-phase2-report">Report</button>
           <button type="button" id="ai-prompt-phase2-verify" hidden>Verify Prompt</button>
         </div>
@@ -423,6 +446,10 @@
             <button id="ai-prompt-comment-submit" type="submit">Post Comment</button>
           </form>
         </section>
+        <section class="ai-prompt-phase1-related" aria-label="Related published prompts">
+          <h3>Related Prompts</h3>
+          <div id="ai-prompt-phase1-related-list" class="ai-prompt-phase1-related-list"></div>
+        </section>
       </div>
 
       <footer class="ai-prompt-dialog-footer ai-prompt-detail-footer">
@@ -445,12 +472,12 @@
 
         <div class="ai-prompt-detail-user-actions">
           <button type="button" class="ai-prompt-secondary-button" data-ai-prompt-detail-close>
-            Close
+            Back to results
           </button>
         </div>
       </footer>
     </div>
-  </dialog>
+  </section>
 
   <!-- Phase 2: Prompt / comment reporting -->
   <dialog id="ai-prompt-phase2-report-dialog" class="ai-prompt-dialog ai-prompt-phase2-dialog">
@@ -669,7 +696,7 @@
                 <span>Publish as <b>*</b></span>
                 <select name="status" required>
                   <option value="Active">Active — visible to users</option>
-                  <option value="Draft">Draft — visible to you and admins</option>
+                  <option value="Draft" disabled hidden>Draft — on hold</option>
                   <option value="Inactive">Inactive — hidden</option>
                   <option value="Retired">Retired — archived from users</option>
                 </select>

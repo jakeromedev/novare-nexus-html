@@ -872,3 +872,36 @@ function testAIPromptLibraryRead() {
 
   return result;
 }
+
+
+/**
+ * Phase 1 Prompt Hub detail endpoint. Resolves the ID on every view and
+ * never returns Draft, Inactive, Retired or another user's private metadata.
+ * The URL fragment is untrusted; this validation must remain server-side.
+ */
+function getNexusPublishedPromptDetail(promptId) {
+  const id = String(promptId || '').trim();
+  if (!/^GP-[0-9]+$/i.test(id)) return {ok:false};
+  const actor = getAIPromptLibraryCurrentUser_();
+  const identity = getNexusPromptCommunityIdentity_();
+  let item;
+  try { item = getNexusPromptById_(id); }
+  catch (error) {
+    if (/does not exist/i.test(String(error && error.message || ''))) return {ok:false};
+    throw error;
+  }
+  if (!item || item.prompt.status !== 'Active') return {ok:false};
+  const prompt = Object.assign({}, item.prompt);
+  delete prompt.sheetRow;
+  if (!identity.verified || prompt.createdByEmail !== identity.email) {
+    prompt.createdByEmail = '';
+  }
+  if (!actor.isAdmin) prompt.verifiedBy = '';
+  prompt.upvotedByMe = identity.verified
+    ? getNexusPromptCommunityVotedIds_(identity.email)[prompt.id] === true
+    : false;
+  prompt.bookmarkedByMe = identity.verified
+    ? getNexusPromptPhase2State_(identity, [item.prompt]).bookmarkedIds.indexOf(prompt.id) !== -1
+    : false;
+  return {ok:true, prompt:prompt};
+}

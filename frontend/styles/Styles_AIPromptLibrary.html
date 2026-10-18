@@ -5989,26 +5989,35 @@ td.ai-prompt-table-action-cell:has(
 }
 
 /* ============================================================
-   Prompt Hub CTA: separate from tabs, floats at the upper right
-   and stays in view while scrolling the Prompt Library.
+   Prompt Hub CTA: overlaid inside the lower-right of the hero,
+   directly above navigation, without reserving background space.
 ============================================================ */
-.ai-prompt-library-page .ai-prompt-create-floating {
-  /* Fixed to the visible screen, not the scrolling Prompt Library. */
-  position: fixed;
-  top: calc(82px + env(safe-area-inset-top, 0px));
-  right: clamp(16px, 2.8vw, 44px);
-  bottom: auto;
-  left: auto;
-  z-index: 995;
+/*
+ * The CTA must stay in the content flow immediately above the tabs.
+ * Avoid absolute/fixed placement or negative margins: these can place it
+ * over the hero or at the bottom of the viewport in Google Sites embeds.
+ */
+.ai-prompt-library-page .ai-prompt-library-placeholder-surface > #ai-prompt-create-floating {
+  position: sticky !important;
+  top: calc(98px + env(safe-area-inset-top, 0px)) !important;
+  right: auto !important;
+  bottom: auto !important;
+  left: auto !important;
+  z-index: 80;
   display: flex;
-  justify-content: flex-end;
   align-items: center;
-  width: max-content;
-  max-width: calc(100vw - 32px);
+  justify-content: flex-end;
+  width: 100%;
+  max-width: 100%;
   min-height: 0;
-  margin: 0;
-  padding: 0;
+  height: auto;
+  margin: 0 !important;
+  padding: 10px 9px 2px;
+  border: 0;
+  box-shadow: none;
+  background: transparent !important;
   pointer-events: none;
+  box-sizing: border-box;
 }
 .ai-prompt-library-page .ai-prompt-create-floating .ai-prompt-create-cta {
   display: inline-flex;
@@ -6103,13 +6112,13 @@ td.ai-prompt-table-action-cell:has(
   background: #ebeff9;
 }
 @media (max-width: 580px) {
-  .ai-prompt-library-page .ai-prompt-create-floating {
-    /* Keep clear of the lower-right Ask NOSCA floating widget on phones. */
-    top: auto;
-    bottom: calc(20px + env(safe-area-inset-bottom, 0px));
-    right: auto;
-    left: calc(16px + env(safe-area-inset-left, 0px));
-    max-width: calc(100vw - 32px);
+  .ai-prompt-library-page .ai-prompt-library-placeholder-surface > #ai-prompt-create-floating {
+    top: calc(72px + env(safe-area-inset-top, 0px)) !important;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    margin: 0 !important;
+    padding: 9px 7px 1px;
   }
   .ai-prompt-library-page .ai-prompt-create-floating .ai-prompt-create-cta {
     min-height: 43px;
@@ -6124,4 +6133,243 @@ td.ai-prompt-table-action-cell:has(
   }
 }
 
+
+/* Phase 2 routed Discovery: shared Explore cards for search/category/bookmarks/For You. */
+.ai-prompt-library-page .ai-prompt-discovery-breadcrumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 9px;
+  margin: 12px 0 15px;
+  color: #587095;
+  font-size: 12px;
+  font-weight: 650;
+}
+.ai-prompt-library-page .ai-prompt-discovery-breadcrumbs[hidden] { display: none !important; }
+.ai-prompt-library-page .ai-prompt-discovery-breadcrumbs button {
+  border: 0;
+  padding: 4px 2px;
+  background: transparent;
+  color: #155bdc;
+  font: inherit;
+  cursor: pointer;
+}
+.ai-prompt-library-page .ai-prompt-discovery-breadcrumbs button:hover { text-decoration: underline; }
+.ai-prompt-library-page .ai-prompt-discovery-breadcrumbs button:focus-visible {
+  outline: 2px solid #2875f5;
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+.ai-prompt-library-page .ai-prompt-recommendations-feed { margin-top: 18px; }
+.ai-prompt-library-page .ai-prompt-recommendations-feed .ai-prompt-feed-card {
+  min-width: 0;
+}
+.ai-prompt-library-page .ai-prompt-recommendation-reason {
+  padding-top: 8px;
+  color: #4263a0;
+  font-size: 12px;
+  font-weight: 600;
+}
+.ai-prompt-library-page .ai-prompt-recommendation-compact { flex-direction: column; align-items: flex-start; }
+.ai-prompt-library-page .ai-prompt-recommendations-empty {
+  grid-column: 1 / -1;
+  color: #5f708d;
+  padding: 20px 12px;
+}
+@media (max-width: 700px) {
+  .ai-prompt-library-page .ai-prompt-discovery-breadcrumbs { margin: 10px 0 13px; }
+}
+
+
+/* The hero is only removed for the remainder of this Prompt Library visit.
+   Keep the shared Nexus hero scroll effect untouched for other modules. */
+.ai-prompt-library-page.is-prompt-hero-dismissed > .ai-prompt-library-hero {
+  display: none !important;
+}
+
+
+/* V2: Collapsing the hero does not require scrolling the document/iframe.
+   The transparent NEXUS header stays readable after collapse. */
+.ai-prompt-library-page.is-prompt-hero-collapsing > .ai-prompt-library-hero {
+  overflow: hidden !important;
+  padding-block: 0 !important;
+  margin-block: 0 !important;
+  border: 0 !important;
+  transition: height .48s cubic-bezier(.22,1,.36,1),
+              min-height .48s cubic-bezier(.22,1,.36,1),
+              max-height .48s cubic-bezier(.22,1,.36,1),
+              opacity .35s ease !important;
+}
+.ai-prompt-library-page.is-prompt-hero-dismissed > .ai-prompt-library-hero,
+.ai-prompt-library-page.is-prompt-hero-dismissed > .ai-prompt-library-hero[hidden] {
+  display: none !important;
+}
+/* The global hero route overlaps its banner using a negative header margin.
+   Restore ordinary header flow after the banner has been dismissed, so
+   the Prompt Hub tabs and Create action do not sit behind the NEXUS header.
+   This applies only while the AI Prompt Library hero is dismissed. */
+#nexus-app.nexus-prompt-hero-gone.hero-route #nexus-nav-header {
+  margin-bottom: 0 !important;
+  --nav-header-opacity: .94 !important;
+  --nav-header-border-opacity: .72 !important;
+  --nav-header-shadow-opacity: .08 !important;
+  --nav-header-blur: 14px !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ai-prompt-library-page.is-prompt-hero-collapsing > .ai-prompt-library-hero {
+    transition: none !important;
+  }
+}
+/* ============================================================
+   NEXUS Prompt Hub — sticky unified navigation + Create CTA
+   Keep the row under the NEXUS header even after hero dismissal.
+   The tabs may scroll horizontally without hiding the blue action.
+   --prompt-hub-sticky-top is synchronized to the actual header height.
+============================================================ */
+.ai-prompt-library-page .ai-prompt-community-nav {
+  position: sticky;
+  top: var(--prompt-hub-sticky-top, 96px);
+  z-index: 35; /* below global NEXUS header (z-index: 40) */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  gap: 12px;
+  min-width: 0;
+  min-height: 72px;
+  padding: 6px clamp(6px, 1vw, 14px);
+  margin: 0 0 22px;
+  border: 0;
+  border-bottom: 1px solid #e2e9f3;
+  border-radius: 0;
+  background: rgb(250 252 255 / 98%);
+  box-shadow: 0 5px 14px rgb(9 38 87 / 4%);
+  overflow: visible;
+  scrollbar-width: auto;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+.ai-prompt-library-page .ai-prompt-community-tabs {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  align-items: stretch;
+  gap: clamp(7px, 1.25vw, 23px);
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  overscroll-behavior-x: contain;
+}
+.ai-prompt-library-page .ai-prompt-community-tabs > button {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  min-height: 57px;
+  padding: 0 11px;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: #40516b;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.ai-prompt-library-page .ai-prompt-community-tabs > button.is-active {
+  color: var(--hub-blue, #1764f5);
+  border-bottom-color: var(--hub-blue, #1764f5);
+  background: transparent;
+}
+.ai-prompt-library-page .ai-prompt-community-tabs > button:hover:not(:disabled),
+.ai-prompt-library-page .ai-prompt-community-tabs > button:focus-visible {
+  color: #1764f5;
+  background: #eef4ff;
+}
+.ai-prompt-library-page .ai-prompt-community-tabs > button:disabled {
+  opacity: .48;
+  cursor: not-allowed;
+}
+.ai-prompt-library-page .ai-prompt-community-tabs > button[hidden] {display: none !important;}
+.ai-prompt-library-page .ai-prompt-community-nav #ai-prompt-create-floating {
+  position: static !important;
+  inset: auto !important;
+  z-index: auto;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  width: auto;
+  height: auto;
+  min-height: 0;
+  max-width: none;
+  margin: 0 !important;
+  padding: 0;
+  border: 0;
+  background: transparent !important;
+  box-shadow: none;
+  pointer-events: none;
+}
+.ai-prompt-library-page .ai-prompt-community-nav #ai-prompt-create-floating[hidden] {display: none !important;}
+.ai-prompt-library-page .ai-prompt-community-nav #ai-prompt-library-add {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0 17px;
+  border: 1px solid #2267ee;
+  border-radius: 10px;
+  background: linear-gradient(110deg, #2877ff, #1554de);
+  box-shadow: 0 4px 13px rgb(21 88 216 / 22%);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+  cursor: pointer;
+  pointer-events: auto;
+}
+.ai-prompt-library-page .ai-prompt-community-nav #ai-prompt-library-add svg {
+  width: 17px;
+  height: 17px;
+  flex: none;
+}
+.ai-prompt-library-page .ai-prompt-community-nav #ai-prompt-library-add:hover {
+  background: linear-gradient(110deg,#1566ef,#0945c5);
+  box-shadow: 0 6px 16px rgb(21 88 216 / 26%);
+}
+.ai-prompt-library-page .ai-prompt-community-nav #ai-prompt-library-add[hidden] {display:none !important;}
+.ai-prompt-library-page .ai-prompt-community-nav button:focus-visible {
+  outline: 2px solid #397af5;
+  outline-offset: -3px;
+}
+@media (max-width: 1199px) {
+  .ai-prompt-library-page .ai-prompt-community-nav {
+    top: var(--prompt-hub-sticky-top, 72px);
+  }
+}
+@media (max-width: 580px) {
+  .ai-prompt-library-page .ai-prompt-community-nav {
+    gap: 6px;
+    padding: 6px 4px;
+    min-height: 61px;
+  }
+  .ai-prompt-library-page .ai-prompt-community-tabs {gap: 3px;}
+  .ai-prompt-library-page .ai-prompt-community-tabs > button {
+    padding: 0 8px;
+    font-size: 12px;
+    min-height: 48px;
+    flex: 0 0 auto;
+  }
+  .ai-prompt-library-page .ai-prompt-community-nav #ai-prompt-library-add {
+    min-height: 38px;
+    padding: 0 10px;
+    gap: 5px;
+    font-size: 11px;
+    border-radius: 9px;
+  }
+  .ai-prompt-library-page .ai-prompt-community-nav #ai-prompt-library-add svg {width:15px;height:15px;}
+}
 </style>

@@ -12,6 +12,7 @@
     communityWritesEnabled: false,
     currentUserEmail: "",
     phase2Installed: false,
+    libraryLoaded: false,
     recommendationsData: null,
     recommendationsLoading: false,
     recommendationsError: "",
@@ -44,9 +45,22 @@
     lastDetailId: "",
     listingContext: null,
     isDetailRoute: false,
+    lastAppliedListingHash: "",
+    searchOriginHash: "",
+    searchTimer: null,
     editingPromptId: "",
     editorBaseline: "",
     documentFilterListenerBound: false,
+    // This flag lives only for the current visit to the Prompt Library route.
+    // It is reset when the global Nexus route changes to another module.
+    promptHeroVisitActive: false,
+    promptHeroDismissed: false,
+    promptHeroAnimating: false,
+    promptHeroAnimationFrame: 0,
+    promptHeroFinishTimer: 0,
+    promptHeroObserver: null,
+    promptHeroWasVisible: false,
+    promptHeroScrollSuppressUntil: 0,
     loading: false
   };
 
@@ -77,6 +91,7 @@
 
     try {
       cacheRefs(root);
+      syncPromptHubStickyOffset_();
 
       if (root.dataset.promptLibraryInitialized !== "true") {
         bindEvents(root);
@@ -119,6 +134,7 @@
   function cacheRefs(root) {
     refs.surface = root.querySelector("#ai-prompt-library-surface");
     refs.hero = root.querySelector(".ai-prompt-library-hero");
+    refs.communityNav = root.querySelector(".ai-prompt-community-nav");
     refs.listContent = root.querySelector("#ai-prompt-library-content");
     refs.detailPage = root.querySelector("#ai-prompt-detail-dialog");
     refs.detailShell = refs.detailPage && refs.detailPage.querySelector(".ai-prompt-dialog-shell");
@@ -130,8 +146,10 @@
     refs.detailCurrent = root.querySelector("#ai-prompt-phase1-current");
     refs.detailRelated = root.querySelector("#ai-prompt-phase1-related-list");
     refs.detailShare = root.querySelector("#ai-prompt-phase1-share");
-    refs.header = root.querySelector("#ai-prompt-library-header");
-    refs.count = root.querySelector("#ai-prompt-library-count");
+    // The redundant Prompt Collection heading was removed. Keep pagination
+    // scroll-to-top working by targeting the sticky Prompt Hub tabs instead.
+    refs.header = refs.communityNav;
+    refs.count = null;
     refs.search = root.querySelector("#ai-prompt-library-search");
     refs.categoryQuickSelect = root.querySelector("#ai-prompt-library-category-select");
     refs.typeQuickSelect = root.querySelector("#ai-prompt-library-type-select");
@@ -185,6 +203,7 @@
     );
     refs.categories = root.querySelector("#ai-prompt-library-categories");
     refs.results = root.querySelector("#ai-prompt-library-results");
+    refs.discoveryBreadcrumbs = root.querySelector("#ai-prompt-discovery-breadcrumbs");
     refs.pagination = root.querySelector("#ai-prompt-library-pagination");
     refs.status = root.querySelector("#ai-prompt-library-status");
     refs.statusTitle = refs.status
@@ -296,7 +315,26 @@
     );
   }
 
+  // The global header is responsive. Measure its actual rendered height so
+  // the Prompt Hub nav sticks immediately below it (rather than behind it).
+  function syncPromptHubStickyOffset_() {
+    if (!refs.communityNav) return;
+    const header = document.getElementById("nexus-nav-header");
+    if (!header) return;
+    const pixels = Math.ceil(header.getBoundingClientRect().height);
+    if (pixels > 0) refs.communityNav.style.setProperty("--prompt-hub-sticky-top", pixels + "px");
+  }
+
   function bindEvents(root) {
+    bindPromptHeroInteractions_(root);
+    window.addEventListener("resize", syncPromptHubStickyOffset_, { passive: true });
+    if (typeof ResizeObserver !== "undefined") {
+      const nexusHeader = document.getElementById("nexus-nav-header");
+      if (nexusHeader) {
+        const headerSizeObserver = new ResizeObserver(syncPromptHubStickyOffset_);
+        headerSizeObserver.observe(nexusHeader);
+      }
+    }
     if (refs.communityExplore) refs.communityExplore.addEventListener("click", function () {
       setCommunityView_("explore");
     });
@@ -331,20 +369,17 @@
     if (refs.communitySort) refs.communitySort.addEventListener("change", function () {
       state.sortMode = refs.communitySort.value || "top-upvoted";
       state.page = 1;
-      renderLibrary();
+      navigateListing_(state.activeView);
     });
     if (refs.categoryQuickSelect) refs.categoryQuickSelect.addEventListener("change", function () {
       state.category = refs.categoryQuickSelect.value || "all";
       state.page = 1;
-      renderCategoryFilters();
-      renderLibrary();
+      navigateListing_(state.query ? "search" : state.category === "all" ? "explore" : "category");
     });
     if (refs.typeQuickSelect) refs.typeQuickSelect.addEventListener("change", function () {
       state.filters.promptTypes = refs.typeQuickSelect.value ? [refs.typeQuickSelect.value] : [];
       state.page = 1;
-      renderFilterSummary_();
-      renderCategoryFilters();
-      renderLibrary();
+      navigateListing_(state.activeView);
     });
     if (refs.detailUpvote) refs.detailUpvote.addEventListener("click", function () {
       setCommunityVote_(state.activePromptId);
@@ -361,10 +396,37 @@
     if (refs.comments) refs.comments.addEventListener("click", handleCommunityCommentAction_);
     if (refs.search) {
       refs.search.addEventListener("input", function () {
+        if (!state.searchOriginHash) state.searchOriginHash = window.location.hash || "#ai-prompt-library?view=explore";
         state.query = refs.search.value.trim().toLowerCase();
         state.page = 1;
+        const view = ["bookmarks", "my-prompts"].includes(state.activeView) ? state.activeView
+          : state.query ? "search" : state.category !== "all" ? "category" : "explore";
+        // Update results immediately, then replace the URL after a short debounce.
+        state.activeView = view;
+        syncCommunityView_();
         renderCategoryFilters();
         renderLibrary();
+        renderDiscoveryBreadcrumbs_();
+        if (state.searchTimer) clearTimeout(state.searchTimer);
+        state.searchTimer = setTimeout(function () {
+          state.searchTimer = null;
+          navigateListing_(view, {replace:true, preserveSearchOrigin:true});
+        }, 300);
+      });
+      refs.search.addEventListener("keydown", function (event) {
+        if (event.key !== "Enter") return;
+        event.preventDefault();
+        if (state.searchTimer) { clearTimeout(state.searchTimer); state.searchTimer = null; }
+        const view = ["bookmarks", "my-prompts"].includes(state.activeView) ? state.activeView
+          : state.query ? "search" : state.category !== "all" ? "category" : "explore";
+        // Commit one navigable search entry without one entry per keystroke.
+        const origin = state.searchOriginHash;
+        const destination = buildListingHash_(view);
+        if (origin && origin !== destination) {
+          replaceListingHash_(origin);
+        }
+        state.searchOriginHash = "";
+        navigateListing_(view);
       });
     }
 
@@ -457,9 +519,7 @@
 
           state.filters.content = "missing";
           state.page = 1;
-          renderFilterSummary_();
-          renderCategoryFilters();
-          renderLibrary();
+          navigateListing_("explore");
         }
       );
     }
@@ -473,8 +533,7 @@
         if (back) {
           state.category = "all";
           state.page = 1;
-          renderCategoryFilters();
-          renderLibrary();
+          navigateListing_("explore");
           return;
         }
 
@@ -484,11 +543,11 @@
 
         if (!button) return;
 
-        state.category =
-          button.dataset.aiPromptCategory || "all";
+        state.category = button.dataset.aiPromptCategory || "all";
+        state.query = "";
+        if (refs.search) refs.search.value = "";
         state.page = 1;
-        renderCategoryFilters();
-        renderLibrary();
+        navigateListing_(state.category === "all" ? "explore" : "category");
       });
     }
 
@@ -499,7 +558,7 @@
           state.exploreExpanded = !state.exploreExpanded;
           state.pageSize = state.exploreExpanded ? 12 : 6;
           state.page = 1;
-          renderLibrary();
+          navigateListing_("explore");
           return;
         }
         const actionButton = event.target.closest(
@@ -586,7 +645,7 @@
         }
 
         state.page = page;
-        renderLibrary();
+        navigateListing_(state.activeView);
 
         if (
           refs.header &&
@@ -597,6 +656,27 @@
             block: "start"
           });
         }
+      });
+    }
+
+    if (refs.discoveryBreadcrumbs) {
+      refs.discoveryBreadcrumbs.addEventListener("click", function (event) {
+        const target = event.target.closest("[data-ai-prompt-nav-view]");
+        if (!target) return;
+        event.preventDefault();
+        const view = target.dataset.aiPromptNavView || "explore";
+        if (view === "explore") {
+          state.category = "all";
+          state.query = "";
+          if (refs.search) refs.search.value = "";
+          state.filters = normalizeFilterState_({});
+          state.page = 1;
+        } else if (view === "category") {
+          state.query = "";
+          if (refs.search) refs.search.value = "";
+          state.page = 1;
+        }
+        navigateListing_(view);
       });
     }
 
@@ -975,18 +1055,14 @@
 
     state.page = 1;
     closeFilterPopover_();
-    renderFilterSummary_();
-    renderCategoryFilters();
-    renderLibrary();
+    navigateListing_(state.activeView);
   }
 
 
   function clearActiveFilters_() {
     state.filters = normalizeFilterState_({});
     state.page = 1;
-    renderFilterSummary_();
-    renderCategoryFilters();
-    renderLibrary();
+    navigateListing_(state.activeView);
   }
 
 
@@ -1017,9 +1093,7 @@
     }
 
     state.page = 1;
-    renderFilterSummary_();
-    renderCategoryFilters();
-    renderLibrary();
+    navigateListing_(state.activeView);
   }
 
 
@@ -1196,6 +1270,8 @@
       state.category !== "all" ||
       hasActiveFilters_() ||
       state.activeView === "explore" ||
+      state.activeView === "category" ||
+      state.activeView === "search" ||
       state.activeView === "my-prompts" ||
       state.activeView === "bookmarks" ||
       state.activeView === "moderation" ||
@@ -1223,14 +1299,13 @@
       state.filters = normalizeFilterState_({});
     }
 
-    if (action === "category") {
+    if (action === "category" || action === "browse") {
       state.category = "all";
+      if (action === "browse") state.activeView = "explore";
     }
 
     state.page = 1;
-    renderFilterSummary_();
-    renderCategoryFilters();
-    renderLibrary();
+    navigateListing_(state.query ? "search" : state.category !== "all" ? "category" : state.activeView);
   }
 
 
@@ -1389,26 +1464,70 @@
     renderFilterSummary_();
   }
 
-  function setCommunityView_(name) {
-    const allowed = ["explore", "my-prompts", "bookmarks", "moderation", "for-you"];
-    const isAdmin = state.adminView && getEffectiveRole() === "admin";
-    state.activeView = allowed.includes(name) && (name !== "moderation" || isAdmin)
-      ? name : "explore";
-    if (state.activeView === "for-you") {
-      state.recommendationsData = null;
-      state.recommendationsError = "";
+  // Phase 2: all discovery screens share the same listing controls/cards but
+  // have independent, refreshable fragment routes. Never place user identities
+  // in URLs; server data remains the authority for private actions.
+  const LISTING_VIEWS_ = ["explore", "category", "search", "bookmarks", "for-you", "my-prompts", "moderation"];
+  function buildListingHash_(view) {
+    const target = LISTING_VIEWS_.includes(view) ? view : "explore";
+    const params = new URLSearchParams();
+    params.set("view", target);
+    if (target === "category" || (target === "search" && state.category !== "all")) {
+      params.set("name", state.category);
     }
-    state.page = 1;
-    state.exploreExpanded = false;
-    state.pageSize = state.activeView === "explore" ? 6 : 10;
+    if (["search", "bookmarks", "my-prompts"].includes(target) && state.query) params.set("q", refs.search ? refs.search.value.trim() : state.query);
+    if (!["for-you", "moderation"].includes(target)) {
+      if (state.filters.promptTypes.length) params.set("types", state.filters.promptTypes.join("|"));
+      if (state.filters.content !== "all") params.set("content", state.filters.content);
+      if (state.filters.statuses.length && state.adminView) params.set("statuses", state.filters.statuses.join("|"));
+      if (state.sortMode !== "top-upvoted") params.set("sort", state.sortMode);
+      if (state.page > 1) params.set("page", String(state.page));
+      if (target === "explore" && state.exploreExpanded) params.set("expanded", "1");
+    }
+    return "#ai-prompt-library?" + params.toString();
+  }
+  function replaceListingHash_(hash) {
+    try {
+      history.replaceState(history.state, "", location.pathname + location.search + hash);
+    } catch (error) {
+      // Some embedded hosting surfaces restrict History APIs. Hash routing
+      // remains functional, although that fallback adds a history entry.
+      window.location.hash = hash;
+    }
+  }
+  function navigateListing_(view, options) {
+    const opts = options || {};
+    const target = LISTING_VIEWS_.includes(view) ? view : "explore";
+    if (state.searchTimer && !opts.preserveSearchOrigin) { clearTimeout(state.searchTimer); state.searchTimer = null; }
+    if (!opts.preserveSearchOrigin) state.searchOriginHash = "";
+    state.activeView = target;
+    const hash = buildListingHash_(target);
+    if (opts.replace) {
+      replaceListingHash_(hash);
+      handlePromptSubroute_();
+    } else if (window.location.hash !== hash) {
+      window.location.hash = hash;
+      handlePromptSubroute_();
+    } else {
+      state.lastAppliedListingHash = "";
+      handlePromptSubroute_();
+    }
+  }
+  function setCommunityView_(name) {
+    const target = LISTING_VIEWS_.includes(name) ? name : "explore";
+    const isAdmin = state.adminView && getEffectiveRole() === "admin";
+    if (target === "moderation" && !isAdmin) return;
+    if (["my-prompts", "bookmarks", "for-you"].includes(target) && !state.identityVerified) return;
+    if (target === "bookmarks" && !state.phase2Installed) return;
     state.category = "all";
     state.query = "";
     if (refs.search) refs.search.value = "";
-    state.filters = {promptTypes:[],content:"all",statuses:[]};
-    renderFilterSummary_();
-    syncCommunityView_();
-    renderCategoryFilters();
-    renderLibrary();
+    state.filters = normalizeFilterState_({});
+    state.page = 1;
+    state.exploreExpanded = false;
+    state.pageSize = target === "explore" ? 6 : 10;
+    if (target === "for-you") { state.recommendationsData = null; state.recommendationsError = ""; }
+    navigateListing_(target);
   }
 
   function syncCommunityView_() {
@@ -1424,7 +1543,7 @@
     ].forEach(function (entry) {
       const button = entry[0], page = entry[1];
       if (!button) return;
-      const active = state.activeView === page;
+      const active = state.activeView === page || (page === "explore" && ["category", "search"].includes(state.activeView));
       button.classList.toggle("is-active", active);
       button.setAttribute("aria-current", active ? "page" : "false");
     });
@@ -1434,8 +1553,8 @@
     }
     if (refs.phase2Bookmarks) refs.phase2Bookmarks.hidden = !state.phase2Installed || !state.identityVerified;
     if (refs.phase2Moderation) refs.phase2Moderation.hidden = !state.phase2Installed || !isAdmin;
-    if (refs.phase3ForYou) refs.phase3ForYou.hidden = false;
-    if (state.root) state.root.classList.toggle("is-explore-view", state.activeView === "explore");
+    if (refs.phase3ForYou) refs.phase3ForYou.hidden = !state.identityVerified;
+    if (state.root) state.root.classList.toggle("is-explore-view", ["explore", "category", "search", "bookmarks", "for-you"].includes(state.activeView));
     const isRecommended = state.activeView === "for-you";
     if (refs.communitySort) refs.communitySort.disabled = state.activeView === "moderation" || isRecommended;
     if (refs.categories) refs.categories.hidden = state.activeView !== "explore";
@@ -1443,8 +1562,9 @@
     const searchToolbar = state.root && state.root.querySelector(".ai-prompt-library-toolbar");
     if (searchToolbar) searchToolbar.hidden = isRecommended || state.activeView === "moderation";
     if (refs.activeFilters) refs.activeFilters.hidden = isRecommended || state.activeView === "moderation" || !hasActiveFilters_();
+    renderDiscoveryBreadcrumbs_();
     if (state.activeView === "moderation") loadPhase2Reports_();
-    if (isRecommended && !state.recommendationsData && !state.recommendationsLoading && !state.recommendationsError) {
+    if (isRecommended && state.libraryLoaded && state.identityVerified && !state.recommendationsData && !state.recommendationsLoading && !state.recommendationsError) {
       loadRecommendedPrompts_();
     }
   }
@@ -1470,6 +1590,7 @@
           state.identityVerified = payload.identityVerified === true;
           state.communityWritesEnabled = payload.communityWritesEnabled === true;
           state.phase2Installed = payload.phase2Installed === true;
+          state.libraryLoaded = true;
           state.recommendationsData = null;
           state.recommendationsError = "";
           state.currentUserEmail = String(payload.currentUserEmail || "").toLowerCase();
@@ -1504,6 +1625,7 @@
           renderFilterSummary_();
           renderCategoryFilters();
           renderLibrary();
+          state.lastAppliedListingHash = "";
           handlePromptSubroute_();
           // A cold deep link may finish detail validation before the
           // registry response. Synchronize access-dependent actions and
@@ -1731,7 +1853,12 @@
       ? refs.search.value.trim()
       : "";
 
-    if (state.activeView === "my-prompts" && !state.myPrompts.length) {
+    if (state.activeView === "bookmarks" && !state.prompts.some(function(p){return p.status === "Active" && p.bookmarkedByMe;})) {
+      title = "No saved prompts yet";
+      message = "Explore published prompts and use the bookmark icon to save your favorites.";
+      action = "browse";
+      actionLabel = "Explore prompts";
+    } else if (state.activeView === "my-prompts" && !state.myPrompts.length) {
       title = "You haven't posted any prompts yet";
       message = "Use Post a Prompt to share your first contribution.";
     } else if (state.query) {
@@ -2119,7 +2246,7 @@
       refs.count.textContent = state.activeView === "my-prompts"
         ? pluralizePrompt(state.myPrompts.filter(function(p) {return p.status === "Active";}).length)
         : state.activeView === "bookmarks"
-          ? pluralizePrompt(state.prompts.filter(function(p){return p.bookmarkedByMe;}).length)
+          ? pluralizePrompt(state.prompts.filter(function(p){return p.bookmarkedByMe && p.status === "Active";}).length)
           : pluralizePrompt(state.prompts.length);
     }
 
@@ -2166,7 +2293,7 @@
       start + state.pageSize
     );
 
-    if (state.activeView === "explore") {
+    if (["explore", "category", "search", "bookmarks"].includes(state.activeView)) {
       refs.results.appendChild(createExploreFeedHeading_(filtered.length));
       const feed = document.createElement("div");
       feed.className = "ai-prompt-explore-grid";
@@ -2175,10 +2302,10 @@
       });
       refs.results.appendChild(feed);
     } else {
-      if (state.activeView === "my-prompts" || state.activeView === "bookmarks") {
+      if (state.activeView === "my-prompts") {
         const heading = document.createElement("h3");
         heading.className = "ai-prompt-community-feed-title";
-        heading.textContent = state.activeView === "my-prompts" ? "My Contributions" : "My Bookmarks";
+        heading.textContent = "My Contributions";
         refs.results.appendChild(heading);
       }
       refs.results.appendChild(createPromptTable(pageItems));
@@ -2197,9 +2324,12 @@
     let prompts = state.activeView === "my-prompts"
       ? state.myPrompts.filter(function(p) {return p.status === "Active";})
       : state.activeView === "bookmarks"
-        ? state.prompts.filter(function(p){return p.bookmarkedByMe;})
+        ? state.prompts.filter(function(p){return p.bookmarkedByMe && p.status === "Active";})
         : state.prompts.slice();
 
+    if (["category", "search"].includes(state.activeView)) {
+      prompts = prompts.filter(function (prompt) {return prompt.status === "Active";});
+    }
     if (state.query) {
       prompts = prompts.filter(
         function (prompt) {
@@ -2435,13 +2565,16 @@
     heading.className = "ai-prompt-explore-heading";
     const copy = document.createElement("div");
     const title = document.createElement("h3");
-    title.textContent = state.query ? "Search Results"
-      : state.category !== "all" ? state.category + " Prompts"
+    title.textContent = state.activeView === "bookmarks" ? "Saved Prompts"
+      : state.activeView === "search" ? "Search Results"
+      : state.activeView === "category" ? state.category + " Prompts"
       : hasActiveFilters_() ? "Filtered Prompts"
       : state.exploreExpanded ? "All Prompts" : "Popular Prompts";
     const subtitle = document.createElement("p");
-    subtitle.textContent = state.query ? total + " matching prompts"
-      : state.category !== "all" || hasActiveFilters_() ? pluralizePrompt(total) + " in this view"
+    subtitle.textContent = state.activeView === "bookmarks" ? pluralizePrompt(total) + (state.query ? " matching your saved prompt search." : " saved for later.")
+      : state.activeView === "search" ? pluralizePrompt(total) + (state.query ? ' matching "' + (refs.search ? refs.search.value.trim() : state.query) + '"' : "") + (state.category !== "all" ? " in " + state.category : "")
+      : state.activeView === "category" ? pluralizePrompt(total) + " in this category."
+      : hasActiveFilters_() ? pluralizePrompt(total) + " match your filters."
       : "High-quality prompts used and upvoted by the NEXUS community.";
     copy.append(title, subtitle);
     const expand = document.createElement("button");
@@ -2450,7 +2583,8 @@
     expand.dataset.aiPromptExpand = "true";
     expand.textContent = state.exploreExpanded ? "Show fewer" : "View all";
     expand.setAttribute("aria-label", state.exploreExpanded ? "Show six prompts per page" : "Show more prompts per page");
-    heading.append(copy, expand);
+    if (state.activeView === "explore") heading.append(copy, expand);
+    else heading.appendChild(copy);
     return heading;
   }
 
@@ -3180,17 +3314,261 @@
   }
 
 
-  // Phase 1 sub-routing: only Details is new. Existing listing tabs remain
-  // unchanged until Phase 2, so their in-memory search/page state is preserved.
+
+  // ============================================================
+  // Prompt Hub hero lifecycle (embedded Google Sites safe)
+  //
+  // Unlike the previous implementation, this does NOT depend on
+  // document.scrollingElement moving, and does NOT cancel/replay clicks.
+  // A real CSS height transition collapses the hero while normal button,
+  // link, input and route handlers run unchanged.  Manual scrolling inside
+  // the web app also dismisses the hero. In Google Sites, scrolling the
+  // OUTER parent page cannot always be observed from the embedded iframe.
+  // ============================================================
+  function promptHeroApp_() {
+    return document.getElementById("nexus-app");
+  }
+
+  function stopPromptHeroAnimation_() {
+    if (state.promptHeroAnimationFrame) cancelAnimationFrame(state.promptHeroAnimationFrame);
+    state.promptHeroAnimationFrame = 0;
+    if (state.promptHeroFinishTimer) clearTimeout(state.promptHeroFinishTimer);
+    state.promptHeroFinishTimer = 0;
+    state.promptHeroAnimating = false;
+  }
+
+  function resetPromptHeroStyles_() {
+    if (!refs.hero) return;
+    refs.hero.hidden = false;
+    refs.hero.style.removeProperty("height");
+    refs.hero.style.removeProperty("min-height");
+    refs.hero.style.removeProperty("max-height");
+    refs.hero.style.removeProperty("opacity");
+    refs.hero.classList.remove("is-scroll-faded");
+    ["--hero-scroll-opacity", "--hero-copy-opacity", "--hero-media-scale", "--hero-copy-offset"].forEach(function (key) {
+      refs.hero.style.removeProperty(key);
+    });
+  }
+
+  function enterPromptHeroVisit_() {
+    if (state.promptHeroVisitActive) return;
+    stopPromptHeroAnimation_();
+    state.promptHeroVisitActive = true;
+    state.promptHeroDismissed = false;
+    state.promptHeroWasVisible = false;
+    state.promptHeroScrollSuppressUntil = performance.now() + 35;
+    if (state.root) {
+      state.root.classList.remove("is-prompt-hero-dismissed", "is-prompt-hero-collapsing");
+    }
+    const app = promptHeroApp_();
+    if (app) app.classList.remove("nexus-prompt-hero-gone");
+    resetPromptHeroStyles_();
+    // Do not force top-of-document scroll in an embedded Google Sites page:
+    // the parent document may be the real scroll owner.
+  }
+
+  function exitPromptHeroVisit_() {
+    if (!state.promptHeroVisitActive) return;
+    stopPromptHeroAnimation_();
+    state.promptHeroVisitActive = false;
+    state.promptHeroDismissed = false;
+    if (state.root) {
+      state.root.classList.remove("is-prompt-hero-dismissed", "is-prompt-hero-collapsing");
+    }
+    const app = promptHeroApp_();
+    if (app) app.classList.remove("nexus-prompt-hero-gone");
+    resetPromptHeroStyles_();
+  }
+
+  function promptHeroModuleActive_() {
+    const page = state.root && state.root.closest(".route-page");
+    return !!(state.promptHeroVisitActive &&
+      window.location.hash.slice(1).split("?")[0] === "ai-prompt-library" &&
+      (!page || !page.hidden) && !state.isDetailRoute);
+  }
+
+  function completePromptHeroCollapse_() {
+    if (!state.promptHeroVisitActive || !state.promptHeroDismissed) return;
+    stopPromptHeroAnimation_();
+    if (refs.hero) {
+      refs.hero.hidden = true;
+      refs.hero.style.removeProperty("height");
+      refs.hero.style.removeProperty("min-height");
+      refs.hero.style.removeProperty("max-height");
+      refs.hero.style.removeProperty("opacity");
+    }
+    if (state.root) {
+      state.root.classList.remove("is-prompt-hero-collapsing");
+      state.root.classList.add("is-prompt-hero-dismissed");
+    }
+    const app = promptHeroApp_();
+    if (app) app.classList.add("nexus-prompt-hero-gone");
+  }
+
+  function dismissPromptHero_(animate) {
+    if (!state.promptHeroVisitActive || state.promptHeroDismissed || !refs.hero) return false;
+    state.promptHeroDismissed = true; // Cannot reappear until next entry.
+    const app = promptHeroApp_();
+    if (app) app.classList.add("nexus-prompt-hero-gone");
+
+    if (!animate || refs.hero.hidden || state.isDetailRoute ||
+        (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches)) {
+      completePromptHeroCollapse_();
+      return true;
+    }
+    // Measure before changing min-height: the shared Nexus hero styles
+    // impose their own responsive min-heights.
+    const pixels = Math.max(0, refs.hero.getBoundingClientRect().height);
+    if (pixels < 2) {
+      completePromptHeroCollapse_();
+      return true;
+    }
+    state.promptHeroAnimating = true;
+    refs.hero.style.setProperty("height", pixels + "px", "important");
+    refs.hero.style.setProperty("min-height", pixels + "px", "important");
+    refs.hero.style.setProperty("max-height", pixels + "px", "important");
+    // Force layout so the browser sees the start and end values separately.
+    void refs.hero.offsetHeight;
+    if (state.root) state.root.classList.add("is-prompt-hero-collapsing");
+    state.promptHeroAnimationFrame = requestAnimationFrame(function () {
+      if (!state.promptHeroVisitActive || !state.promptHeroDismissed || !refs.hero) return;
+      refs.hero.style.setProperty("height", "0px", "important");
+      refs.hero.style.setProperty("min-height", "0px", "important");
+      refs.hero.style.setProperty("max-height", "0px", "important");
+      refs.hero.style.setProperty("opacity", "0", "important");
+    });
+    state.promptHeroFinishTimer = setTimeout(completePromptHeroCollapse_, 540);
+    return true;
+  }
+
+  function onPromptHeroManualScroll_() {
+    if (!promptHeroModuleActive_() || state.promptHeroDismissed ||
+        !refs.hero || refs.hero.hidden || performance.now() < state.promptHeroScrollSuppressUntil) return;
+    const header = document.getElementById("nexus-nav-header");
+    const headerBottom = header ? Math.max(0, header.getBoundingClientRect().bottom) : 0;
+    const heroBottom = refs.hero.getBoundingClientRect().bottom;
+    if (heroBottom <= headerBottom + 2 || refs.hero.classList.contains("is-scroll-faded")) {
+      // Already scrolled out: hide immediately; no second layout animation.
+      dismissPromptHero_(false);
+    }
+  }
+
+  function bindPromptHeroInteractions_(root) {
+    // Capture clicks but NEVER preventDefault, stop propagation or replay
+    // event targets. That previously broke real interactions in the iframe.
+    root.addEventListener("click", function (event) {
+      if (!promptHeroModuleActive_() || state.promptHeroDismissed || !refs.hero || refs.hero.hidden) return;
+      const target = event.target && event.target.closest ? event.target.closest(
+        "button, a[href], input, select, textarea, [role='button'], [data-ai-prompt-open], [data-ai-prompt-category], .ai-prompt-feed-card, .ai-prompt-library-row"
+      ) : null;
+      if (!target || !root.contains(target) || target.disabled ||
+          target.closest("dialog, [role='dialog'], .ai-prompt-phase1-detail-page")) return;
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      dismissPromptHero_(true);
+    }, true);
+
+    window.addEventListener("scroll", onPromptHeroManualScroll_, { passive: true });
+    const workspace = document.getElementById("nexus-workspace");
+    if (workspace) workspace.addEventListener("scroll", onPromptHeroManualScroll_, { passive: true });
+    // Catch nested app scroll containers without relying on a single scroll owner.
+    root.addEventListener("scroll", onPromptHeroManualScroll_, { passive: true, capture: true });
+    if (typeof IntersectionObserver === "function" && refs.hero) {
+      const observer = new IntersectionObserver(function (entries) {
+        if (!promptHeroModuleActive_() || state.promptHeroDismissed ||
+            performance.now() < state.promptHeroScrollSuppressUntil) return;
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            state.promptHeroWasVisible = true;
+          } else if (state.promptHeroWasVisible) {
+            // May also detect a Google Sites embed clipped by its parent's
+            // viewport (browser dependent; cross-origin scrolling is not
+            // directly readable from the embedded web app).
+            dismissPromptHero_(false);
+          }
+        });
+      }, { threshold: [0] });
+      observer.observe(refs.hero);
+      state.promptHeroObserver = observer;
+    }
+  }
+
+  // Phase 2 subrouter, sharing the existing Phase 1 prompt-detail screen.
   function parsePhase1Subroute_() {
     const hash = String(window.location.hash || "").replace(/^#/, "");
     const parts = hash.split("?");
     if (parts[0] !== "ai-prompt-library") return null;
     const params = new URLSearchParams(parts.slice(1).join("?"));
-    const view = params.get("view") || "explore";
-    if (view !== "prompt") return {view:view};
+    const rawView = params.get("view") || "explore";
+    const view = rawView === "prompt" || LISTING_VIEWS_.includes(rawView) ? rawView : "explore";
     const id = String(params.get("id") || "").trim();
-    return {view:"prompt", id: /^[a-zA-Z0-9_-]{1,80}$/.test(id) ? id : ""};
+    return {
+      view: view, id: /^[a-zA-Z0-9_-]{1,80}$/.test(id) ? id : "",
+      name: String(params.get("name") || "").trim().slice(0, 120),
+      q: String(params.get("q") || "").trim().slice(0, 300),
+      types: String(params.get("types") || "").split("|").filter(Boolean).slice(0, 12),
+      content: ["all", "has", "missing"].includes(params.get("content")) ? params.get("content") : "all",
+      statuses: String(params.get("statuses") || "").split("|").filter(Boolean).slice(0, 6),
+      sort: ["top-upvoted", "most-copied", "newest", "name"].includes(params.get("sort")) ? params.get("sort") : "top-upvoted",
+      page: Math.min(100000, Math.max(1, parseInt(params.get("page"), 10) || 1)),
+      expanded: params.get("expanded") === "1"
+    };
+  }
+  function renderDiscoveryBreadcrumbs_() {
+    if (!refs.discoveryBreadcrumbs) return;
+    const view = state.activeView;
+    refs.discoveryBreadcrumbs.replaceChildren();
+    const supported = ["category", "search", "bookmarks", "for-you"];
+    refs.discoveryBreadcrumbs.hidden = !supported.includes(view);
+    if (!supported.includes(view)) return;
+    const home = document.createElement("button");
+    home.type = "button";
+    home.dataset.aiPromptNavView = "explore";
+    home.textContent = "Explore";
+    refs.discoveryBreadcrumbs.appendChild(home);
+    const label = function (value) {
+      const item = document.createElement("span");
+      item.textContent = value;
+      refs.discoveryBreadcrumbs.appendChild(item);
+    };
+    label("›");
+    if (view === "search" && state.category !== "all") {
+      const category = document.createElement("button");
+      category.type = "button";
+      category.dataset.aiPromptNavView = "category";
+      category.textContent = state.category;
+      refs.discoveryBreadcrumbs.appendChild(category);
+      label("›");
+    }
+    label(view === "category" ? state.category : view === "search" ? "Search Results" : view === "bookmarks" ? "Bookmarks" : "For You");
+  }
+  function applyListingRoute_(route) {
+    const admin = state.adminView && getEffectiveRole() === "admin";
+    let view = route.view;
+    const privateView = ["my-prompts", "bookmarks", "for-you"].includes(view);
+    if (state.libraryLoaded && ((privateView && !state.identityVerified) || (view === "bookmarks" && !state.phase2Installed) || (view === "moderation" && !admin))) {
+      view = "explore";
+      replaceListingHash_("#ai-prompt-library?view=explore");
+    }
+    state.activeView = view;
+    state.category = ["category", "search"].includes(view) && route.name ? route.name : "all";
+    state.query = ["search", "bookmarks", "my-prompts"].includes(view) ? route.q.toLowerCase() : "";
+    if (refs.search) refs.search.value = ["search", "bookmarks", "my-prompts"].includes(view) ? route.q : "";
+    state.sortMode = route.sort;
+    state.filters = normalizeFilterState_({
+      promptTypes: route.types, content: route.content,
+      statuses: admin ? route.statuses : []
+    });
+    state.page = route.page;
+    state.exploreExpanded = view === "explore" && route.expanded;
+    state.pageSize = view === "explore" ? (state.exploreExpanded ? 12 : 6) : 10;
+    if (view === "for-you" && !state.recommendationsData && !state.recommendationsLoading) {
+      state.recommendationsError = "";
+    }
+    syncCommunityView_();
+    renderFilterSummary_();
+    renderCategoryFilters();
+    renderLibrary();
+    renderDiscoveryBreadcrumbs_();
   }
 
   function showPhase1DetailState_(title, message) {
@@ -3202,7 +3580,7 @@
 
   function setPhase1Layout_(showDetails) {
     state.isDetailRoute = !!showDetails;
-    if (refs.hero) refs.hero.hidden = showDetails;
+    if (refs.hero) refs.hero.hidden = !!showDetails || state.promptHeroDismissed;
     if (refs.surface) refs.surface.hidden = showDetails;
     if (refs.detailPage) refs.detailPage.hidden = !showDetails;
     // Leave the outer content root mounted so the related dialogs/toast work.
@@ -3213,6 +3591,7 @@
     if (!state.root) return;
     const route = parsePhase1Subroute_();
     if (!route) {
+      exitPromptHeroVisit_();
       // Another global NEXUS page was selected; invalidate pending detail reads.
       if (state.isDetailRoute) {
         state.detailRequestId += 1;
@@ -3222,33 +3601,29 @@
       }
       return;
     }
+    enterPromptHeroVisit_();
+    // Opening a prompt from a direct link is already a content-first entry.
+    // Keep the hero out of subsequent listing navigation in this visit.
+    if (route.view === "prompt" && !state.promptHeroDismissed) {
+      dismissPromptHero_(false);
+    }
     if (route.view !== "prompt") {
-      // Invalidate old reads so returning from Details cannot reveal a stale page.
-      if (state.isDetailRoute) {
+      const returnedFromDetail = state.isDetailRoute;
+      if (returnedFromDetail) {
         state.detailRequestId += 1;
         state.lastDetailId = "";
         state.activePromptId = "";
         setPhase1Layout_(false);
-        if (state.listingContext) {
-          const context = state.listingContext;
-          state.activeView = context.view;
-          state.query = context.query;
-          state.category = context.category;
-          state.sortMode = context.sortMode;
-          state.page = context.page;
-          state.pageSize = context.pageSize || (context.view === "explore" ? 6 : 10);
-          state.exploreExpanded = !!context.exploreExpanded;
-          state.filters = context.filters;
-          if (refs.search) refs.search.value = context.queryRaw || context.query;
-          if (refs.communitySort) refs.communitySort.value = context.sortMode;
-          syncCommunityView_();
-          renderFilterSummary_();
-          renderCategoryFilters();
-          renderLibrary();
-          requestAnimationFrame(function () {
-            if (document.scrollingElement) document.scrollingElement.scrollTop = context.scroll;
-          });
-        }
+      }
+      const hash = window.location.hash;
+      if (!returnedFromDetail && state.lastAppliedListingHash === hash) return;
+      state.lastAppliedListingHash = hash;
+      applyListingRoute_(route);
+      if (returnedFromDetail && state.listingContext && state.listingContext.routeHash === hash) {
+        const scroll = state.listingContext.scroll;
+        requestAnimationFrame(function () {
+          if (document.scrollingElement) document.scrollingElement.scrollTop = scroll;
+        });
       }
       return;
     }
@@ -3327,6 +3702,8 @@
   function openPromptDetail(promptId) {
     const id = String(promptId || "").trim();
     if (!/^[a-zA-Z0-9_-]{1,80}$/.test(id)) return;
+    if (state.searchTimer) {clearTimeout(state.searchTimer); state.searchTimer = null;}
+    state.searchOriginHash = "";
     if (!state.isDetailRoute) {
       state.listingContext = {
         view: state.activeView, query: state.query,
@@ -3339,7 +3716,8 @@
           content: state.filters.content,
           statuses: state.filters.statuses.slice()
         },
-        scroll: document.scrollingElement ? document.scrollingElement.scrollTop : 0
+        scroll: document.scrollingElement ? document.scrollingElement.scrollTop : 0,
+        routeHash: buildListingHash_(state.activeView)
       };
     }
     window.location.hash = "ai-prompt-library?view=prompt&id=" + encodeURIComponent(id);
@@ -3412,7 +3790,9 @@
     if (refs.detailOrigin) refs.detailOrigin.textContent = state.listingContext && state.listingContext.view === "bookmarks"
       ? "Bookmarks" : state.listingContext && state.listingContext.view === "for-you"
       ? "For You" : state.listingContext && state.listingContext.view === "my-prompts"
-      ? "My Prompts" : "Explore";
+      ? "My Prompts" : state.listingContext && state.listingContext.view === "category"
+      ? state.listingContext.category : state.listingContext && state.listingContext.view === "search"
+      ? "Search Results" : "Explore";
     if (refs.detailRelated) renderPhase1Related_(prompt);
     if (refs.detailState) refs.detailState.hidden = true;
     if (refs.detailShell) refs.detailShell.hidden = false;
@@ -3473,7 +3853,8 @@
     const base = state.listingContext && state.listingContext.view;
     // The original list route is already in browser history for in-app clicks.
     // A cold deep link has no list history; navigate explicitly to Explore.
-    window.location.hash = "ai-prompt-library?view=" + encodeURIComponent(base || "explore");
+    const fallback = "#ai-prompt-library?view=" + encodeURIComponent(base || "explore");
+    window.location.hash = (state.listingContext && state.listingContext.routeHash) || fallback;
     handlePromptSubroute_();
   }
 
@@ -4894,28 +5275,41 @@
     panel.appendChild(description);
 
     const list = document.createElement("div");
-    list.className = "ai-prompt-recommendations-grid";
+    list.className = "ai-prompt-explore-grid ai-prompt-recommendations-feed";
     const items = Array.isArray(data.recommendations) ? data.recommendations : [];
     items.forEach(function (item) {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "ai-prompt-recommendation-card";
-      button.dataset.aiPromptOpen = "true";
-      button.dataset.aiPromptId = String(item.id || "");
-      const label = document.createElement("strong");
-      label.textContent = String(item.promptName || "Untitled Prompt");
-      const category = document.createElement("span");
-      category.className = "ai-prompt-recommendation-muted";
-      category.textContent = (item.category || "Uncategorized") + (item.verified ? " · ✓ Verified" : "");
-      const reason = document.createElement("span");
-      reason.className = "ai-prompt-recommendation-reason";
-      reason.textContent = String(item.reason || "Community recommendation");
-      button.append(label, category, reason);
-      list.appendChild(button);
+      // Recommendation endpoint returns only published IDs + explanations.
+      // The standard listing dataset supplies badges, counts, and action state.
+      const prompt = state.prompts.find(function (p) {return p.id === item.id && p.status === "Active";});
+      let card;
+      if (prompt) {
+        card = createExplorePromptCard_(prompt);
+        const reason = document.createElement("div");
+        reason.className = "ai-prompt-recommendation-reason";
+        reason.textContent = String(item.reason || "Community recommendation");
+        const main = card.querySelector(".ai-prompt-feed-main");
+        if (main) main.appendChild(reason);
+      } else {
+        // Never manufacture engagement counts from the reduced API payload.
+        card = document.createElement("article");
+        card.className = "ai-prompt-feed-card ai-prompt-recommendation-compact";
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "ai-prompt-feed-title";
+        button.dataset.aiPromptOpen = "true";
+        button.dataset.aiPromptId = String(item.id || "");
+        button.textContent = item.promptName || "Untitled Prompt";
+        const reason = document.createElement("p");
+        reason.className = "ai-prompt-recommendation-reason";
+        reason.textContent = String(item.reason || "Community recommendation");
+        card.append(button, reason);
+      }
+      list.appendChild(card);
     });
     if (!items.length) {
       const empty = document.createElement("p");
-      empty.textContent = "No new published prompts to recommend yet.";
+      empty.className = "ai-prompt-recommendations-empty";
+      empty.textContent = "Explore popular prompts to help tailor your recommendations.";
       list.appendChild(empty);
     }
     panel.appendChild(list);
@@ -4951,12 +5345,25 @@
     refresh: loadLibrary,
     syncAdminUI: syncAdminUI,
     // Read-only local identity diagnostic for cross-account deployment testing.
+    getHeroInteractionStatus: function () {
+      return {
+        implementation: "Hero interaction fix v2",
+        active: state.promptHeroVisitActive,
+        dismissed: state.promptHeroDismissed,
+        animating: state.promptHeroAnimating,
+        route: String(window.location.hash || ""),
+        heroFound: !!refs.hero,
+        heroHidden: !!(refs.hero && refs.hero.hidden)
+      };
+    },
     getCommunityStatus: function () {
       return {
         identityVerified: state.identityVerified,
         currentUserEmail: state.currentUserEmail,
         communityWritesEnabled: state.communityWritesEnabled,
-        activeView: state.activeView
+        activeView: state.activeView,
+        category: state.category,
+        query: state.query
       };
     }
   };

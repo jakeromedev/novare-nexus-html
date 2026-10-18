@@ -63,6 +63,8 @@
         </p>
       </div>
     </div>
+
+
   </section>
 
   <section
@@ -74,44 +76,31 @@
       id="ai-prompt-library-surface"
       class="ai-prompt-library-placeholder-surface ai-prompt-library-surface"
     >
-      <div id="ai-prompt-library-header" class="ai-prompt-library-header">
-        <div class="ai-prompt-library-heading-copy">
-          <p class="ai-prompt-library-kicker">PROMPT COLLECTION</p>
-          <div class="ai-prompt-library-title-row">
-            <h2>Prompt Library</h2>
-            <span id="ai-prompt-library-count" class="ai-prompt-library-count" aria-live="polite">
-              Loading prompts…
-            </span>
-          </div>
-          <p>
-            Discover, use, and contribute reusable AI prompts for your daily work.
-          </p>
-        </div>
-
-      </div>
-
-      <!-- Floating primary action: intentionally outside the tab navigation. -->
-      <div class="ai-prompt-create-floating" id="ai-prompt-create-floating">
-        <button
-          id="ai-prompt-library-add"
-          class="ai-prompt-library-add-button ai-prompt-create-cta"
-          type="button"
-          aria-label="Create a Prompt"
-          hidden
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
-          <span>Create a Prompt</span>
-        </button>
-      </div>
-
+      <!-- Sticky Prompt Hub navigation: the creation CTA is a blue nav action,
+           not a separate floating row. Preserve the existing button ID for JS. -->
       <nav class="ai-prompt-community-nav" aria-label="Prompt Library sections">
-        <button type="button" id="ai-prompt-community-explore" class="is-active" aria-current="page">Explore</button>
-        <button type="button" id="ai-prompt-community-for-you" aria-current="false" hidden>For You</button>
-        <button type="button" id="ai-prompt-community-bookmarks" aria-current="false" hidden>Bookmarks</button>
-        <button type="button" id="ai-prompt-community-my" aria-current="false">My Prompts</button>
-        <button type="button" id="ai-prompt-community-moderation" aria-current="false" hidden>Moderation <span id="ai-prompt-reports-count"></span></button>
+        <div class="ai-prompt-community-tabs" role="group" aria-label="Browse Prompt Hub">
+          <button type="button" id="ai-prompt-community-explore" class="is-active" aria-current="page">Explore</button>
+          <button type="button" id="ai-prompt-community-for-you" aria-current="false" hidden>For You</button>
+          <button type="button" id="ai-prompt-community-bookmarks" aria-current="false" hidden>Bookmarks</button>
+          <button type="button" id="ai-prompt-community-my" aria-current="false">My Prompts</button>
+          <button type="button" id="ai-prompt-community-moderation" aria-current="false" hidden>Moderation <span id="ai-prompt-reports-count"></span></button>
+        </div>
+        <div class="ai-prompt-create-floating" id="ai-prompt-create-floating">
+          <button
+            id="ai-prompt-library-add"
+            class="ai-prompt-library-add-button ai-prompt-create-cta"
+            type="button"
+            aria-label="Create a Prompt"
+            hidden
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+            <span>Create a Prompt</span>
+          </button>
+        </div>
       </nav>
       <p class="ai-prompt-community-identity" id="ai-prompt-community-identity" role="status" hidden></p>
+      <nav id="ai-prompt-discovery-breadcrumbs" class="ai-prompt-discovery-breadcrumbs" aria-label="Prompt Hub breadcrumbs" hidden></nav>
 
       <aside
         id="ai-prompt-library-missing-summary"

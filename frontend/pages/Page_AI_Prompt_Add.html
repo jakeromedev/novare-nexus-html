@@ -1,0 +1,118 @@
+<!-- NOVARE NEXUS — dedicated Post / Edit a Prompt view; mounted in the existing Prompt Hub route. -->
+<section id="ai-prompt-add-dialog" class="ai-prompt-phase3-editor-page ai-prompt-add-dialog nx-prompt-add" aria-label="Post or edit an AI prompt" hidden>
+  <nav class="ai-prompt-phase3-breadcrumb nx-add-breadcrumb" aria-label="Editor navigation">
+    <button type="button" data-ai-prompt-add-close><svg class="nx-add-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m19 12-14 0M11 6l-6 6 6 6"/></svg> Back to Prompt Hub</button>
+    <div><span>Prompt Hub</span><span aria-hidden="true">›</span><span>Explore</span><span aria-hidden="true">›</span><span id="ai-prompt-phase3-crumb">Post a Prompt</span></div>
+  </nav>
+  <div id="ai-prompt-phase3-access" class="ai-prompt-phase3-access" role="status" aria-live="polite" hidden>
+    <h2 id="ai-prompt-phase3-access-title">Checking access…</h2>
+    <p id="ai-prompt-phase3-access-message">Checking whether you can publish or edit this prompt.</p>
+    <button type="button" data-ai-prompt-add-close>Return to Prompt Hub</button>
+  </div>
+  <div class="ai-prompt-dialog-shell nx-add-shell">
+    <!-- Keep editor labels available to screen readers and the existing
+         Post/Edit route logic, without rendering the introductory banner. -->
+    <div class="nx-add-visually-hidden">
+      <h2 id="ai-prompt-editor-title" tabindex="-1">Post a Prompt</h2>
+      <span id="ai-prompt-editor-id" class="ai-prompt-editor-id" hidden></span>
+      <p id="ai-prompt-editor-description">Share a reusable prompt with the NEXUS community.</p>
+    </div>
+
+    <div class="nx-add-workspace">
+      <nav class="nx-add-steps" aria-label="Form steps">
+        <button type="button" class="nx-add-step is-active" data-nx-add-step="1" aria-controls="nx-add-step-1" aria-current="step"><span class="nx-add-step-number">1</span><span><strong>Classification</strong><small>Category and type</small></span></button>
+        <button type="button" class="nx-add-step" data-nx-add-step="2" aria-controls="nx-add-step-2" aria-disabled="true" disabled><span class="nx-add-step-number">2</span><span><strong>Prompt Information</strong><small>Use case and content</small></span></button>
+        <button type="button" class="nx-add-step" data-nx-add-step="3" aria-controls="nx-add-step-3" aria-disabled="true" disabled><span class="nx-add-step-number">3</span><span><strong>Publish</strong><small>Review and confirm</small></span></button>
+        <button type="button" class="nx-add-step" data-nx-add-step="4" aria-controls="nx-add-step-4" aria-disabled="true" disabled><span class="nx-add-step-number">4</span><span><strong>Preview</strong><small>See how it will appear</small></span></button>
+      </nav>
+
+      <form id="ai-prompt-add-form" class="ai-prompt-add-form nx-add-form" novalidate>
+        <div class="ai-prompt-add-scroll nx-add-form-grid">
+          <div class="nx-add-fields">
+            <section id="nx-add-step-1" class="ai-prompt-form-section ai-prompt-form-section--classification nx-add-card" aria-labelledby="nx-add-classification-title">
+              <div class="ai-prompt-form-section-heading nx-add-section-title">
+                <span class="nx-add-card-icon"><svg class="nx-add-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 4 9 0 9 9-8 8-10-10V4Z"/><circle cx="8" cy="8" r="1.5"/></svg></span>
+                <div><h3 id="nx-add-classification-title">Classification</h3><p>Choose the category and prompt type used to organize this prompt.</p></div>
+              </div>
+              <div class="ai-prompt-classification-layout">
+                <label class="ai-prompt-form-field ai-prompt-name-field">
+                  <span>Prompt Name <b>*</b></span>
+                  <input name="promptName" type="text" maxlength="180" placeholder="e.g. Corporate Profile Summarizer" required>
+                  <div class="ai-prompt-field-footer"><small class="ai-prompt-field-hint">Give your prompt a clear and descriptive name.</small><span id="nx-add-title-counter" class="ai-prompt-field-counter">0/180</span></div>
+                </label>
+                <div class="ai-prompt-form-field ai-prompt-category-field">
+                  <label class="ai-prompt-form-label" for="ai-prompt-add-category-select">Category <b>*</b></label>
+                  <select id="ai-prompt-add-category-select" name="categorySelection" required><option value="">Select a category</option></select>
+                  <button id="ai-prompt-add-new-category-toggle" class="ai-prompt-new-category-toggle" type="button" aria-expanded="false"><span aria-hidden="true">+</span> Add new category</button>
+                  <label id="ai-prompt-add-new-category-field" class="ai-prompt-new-category-inline" hidden><span>New Category Name <b>*</b></span><input id="ai-prompt-add-new-category" name="newCategory" type="text" maxlength="120" placeholder="e.g. Discovery &amp; Qualification"></label>
+                  <p class="nx-add-help">Select an existing category or create a new one.</p>
+                </div>
+                <div class="ai-prompt-form-field ai-prompt-type-field">
+                  <label class="ai-prompt-form-label" for="ai-prompt-add-type-select">Prompt Type <b>*</b></label>
+                  <select id="ai-prompt-add-type-select" name="promptTypeSelection" required><option value="">Select a prompt type</option></select>
+                  <button id="ai-prompt-add-new-type-toggle" class="ai-prompt-new-category-toggle" type="button" aria-expanded="false"><span aria-hidden="true">+</span> Add new prompt type</button>
+                  <label id="ai-prompt-add-new-type-field" class="ai-prompt-new-category-inline" hidden><span>New Prompt Type <b>*</b></span><input id="ai-prompt-add-new-type" name="newPromptType" type="text" maxlength="120" placeholder="e.g. Summarization"></label>
+                  <p class="nx-add-help">Select an existing prompt type or create a new one.</p>
+                </div>
+              </div>
+            </section>
+
+            <section id="nx-add-step-2" hidden class="ai-prompt-form-section nx-add-card" aria-labelledby="nx-add-information-title">
+              <div class="ai-prompt-form-section-heading nx-add-section-title">
+                <span class="nx-add-card-icon"><svg class="nx-add-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3h9l5 5v13H5z"/><path d="M14 3v5h5M8 13h8M8 17h7"/></svg></span>
+                <div><h3 id="nx-add-information-title">Prompt Information</h3><p>Provide the use case and the complete prompt content.</p></div>
+              </div>
+              <div class="ai-prompt-form-grid ai-prompt-form-grid--content">
+                <label class="ai-prompt-form-field ai-prompt-form-field--wide">
+                  <span>Use Case <b>*</b></span>
+                  <textarea name="useCase" rows="3" maxlength="500" placeholder="Describe when or why this prompt should be used, e.g. the problem it solves, intended audience, and expected outcome." required></textarea>
+                  <div class="ai-prompt-field-footer"><small class="ai-prompt-field-hint">Keep it concise and focused.</small><span id="ai-prompt-use-case-counter" class="ai-prompt-field-counter">0/500</span></div>
+                </label>
+                <label class="ai-prompt-form-field ai-prompt-form-field--wide">
+                  <span>Prompt <b>*</b></span>
+                  <textarea name="prompt" rows="5" maxlength="12000" placeholder="Enter the complete reusable AI prompt that others can copy and use." required></textarea>
+                  <div class="ai-prompt-field-footer"><small class="ai-prompt-field-hint">Include clear instructions, context, and any format or constraints.</small><span id="ai-prompt-content-counter" class="ai-prompt-field-counter">0/12000</span></div>
+                </label>
+              </div>
+            </section>
+
+            <section id="nx-add-step-3" hidden class="ai-prompt-form-section ai-prompt-form-section--publish nx-add-card" aria-labelledby="nx-add-publish-title">
+              <div class="ai-prompt-form-section-heading nx-add-section-title">
+                <span class="nx-add-card-icon"><svg class="nx-add-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 2 2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4L12 2Z"/></svg></span>
+                <div><h3 id="nx-add-publish-title">Publish</h3><p>Review and confirm visibility before publishing to NEXUS.</p></div>
+              </div>
+              <div class="ai-prompt-publish-row">
+                <label class="ai-prompt-form-field ai-prompt-status-field"><span>Publish as <b>*</b></span><select name="status" required><option value="Active">Publish now — visible to users</option></select></label>
+                <div class="ai-prompt-system-note"><span class="ai-prompt-system-note-icon" aria-hidden="true">✓</span><div><strong>NEXUS handles the rest automatically</strong><p>Creator, prompt ID, and update time are recorded automatically. Avoid passwords, access tokens, or confidential client data.</p></div></div>
+              </div>
+            </section>
+          </div>
+
+          <aside id="nx-add-step-4" class="nx-add-preview-rail" aria-label="Live prompt preview">
+            <section class="ai-prompt-form-section ai-prompt-phase3-preview nx-add-preview-panel">
+              <div class="ai-prompt-form-section-heading nx-add-section-title"><span class="nx-add-card-icon"><svg class="nx-add-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></span><div><h3>Preview</h3><p>This is how your prompt will appear in the library.</p></div></div>
+              <div class="ai-prompt-phase3-preview-card">
+                <div class="ai-prompt-phase3-preview-header"><h4 id="ai-prompt-phase3-preview-title">Your prompt title</h4><span class="ai-prompt-phase3-preview-badge">● Published</span></div>
+                <p class="nx-add-preview-description" id="nx-add-preview-description">Use case description will appear here.</p>
+                <div class="nx-add-preview-tags"><span id="nx-add-preview-category">Category</span><span id="nx-add-preview-type">Prompt Type</span></div>
+                <div class="nx-add-preview-byline"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M5 21v-2c0-4 3-6 7-6s7 2 7 6v2"/></svg> You</span><span><svg class="nx-add-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18"/></svg> Just now</span></div>
+                <div class="nx-add-preview-content"><h5><svg class="nx-add-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3h9l5 5v13H5z"/><path d="M14 3v5h5M8 13h8M8 17h7"/></svg> Use Case</h5><p id="ai-prompt-phase3-preview-use-case">Your use case description will appear here.</p></div>
+                <div class="nx-add-preview-content nx-add-preview-prompt"><h5><svg class="nx-add-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3h9l5 5v13H5z"/><path d="M14 3v5h5M8 13h8M8 17h7"/></svg> Prompt Content</h5><pre id="ai-prompt-phase3-preview-prompt">Your prompt content will appear here…</pre></div>
+                <p id="ai-prompt-phase3-preview-meta" class="ai-prompt-phase3-preview-meta nx-add-visually-hidden"></p>
+              </div>
+              <div class="nx-add-preview-tip"><svg class="nx-add-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 10v6M12 7h.01"/></svg><span><strong>Preview updates in real time</strong><small>Fill out the fields on the left to see how your published prompt will look.</small></span></div>
+            </section>
+          </aside>
+          <p id="ai-prompt-add-error" class="ai-prompt-add-error nx-add-error" role="alert" hidden></p>
+        </div>
+        <footer class="ai-prompt-dialog-footer ai-prompt-add-footer nx-add-action-bar">
+          <button type="button" class="ai-prompt-secondary-button" data-ai-prompt-add-close>Cancel</button>
+          <div class="nx-add-action-primary">
+            <button type="button" id="nx-add-next" class="ai-prompt-primary-button">Next: Prompt Information <svg class="nx-add-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 14 0M13 6l6 6-6 6"/></svg></button>
+            <button id="ai-prompt-add-submit" type="submit" class="ai-prompt-primary-button" hidden>Publish Prompt</button>
+          </div>
+        </footer>
+      </form>
+    </div>
+  </div>
+</section>

@@ -94,6 +94,21 @@
     }
   }
 
+  // The Post/Edit Prompt form has its own dedicated partial, mounted under
+  // the same Prompt Hub root so all existing form handlers and route guards apply.
+  function mountDedicatedPromptAdd_(root) {
+    if (root.querySelector("#ai-prompt-add-dialog.nx-prompt-add")) return;
+    const template = document.getElementById("nexus-prompt-add-template");
+    if (!template || !template.content) {
+      console.error("[Prompt Hub] Missing Page_AI_Prompt_Add template in Index.html");
+      return;
+    }
+    const fragment = template.content.cloneNode(true);
+    if (!fragment.querySelector("#ai-prompt-add-dialog")) return;
+    // Keep the editor after the discovery content, inside the library root.
+    root.appendChild(fragment);
+  }
+
   function isAppsScriptAvailable() {
     return Boolean(
       typeof google !== "undefined" &&
@@ -119,6 +134,7 @@
 
     try {
       mountDedicatedPromptDetails_(root);
+      mountDedicatedPromptAdd_(root);
       cacheRefs(root);
       syncPromptHubStickyOffset_();
 
@@ -785,6 +801,8 @@
       );
     }
 
+    bindDedicatedPromptAddUI_(root);
+
     refs.addClose.forEach(function (button) {
       button.addEventListener(
         "click",
@@ -1378,8 +1396,105 @@
     if (refs.editorPreviewMeta) refs.editorPreviewMeta.textContent = [category, type].filter(Boolean).join(" · ") || "Select a category and prompt type";
     if (refs.editorPreviewUseCase) refs.editorPreviewUseCase.textContent = String(form.useCase && form.useCase.value || "").trim() || "Describe the use case…";
     if (refs.editorPreviewPrompt) refs.editorPreviewPrompt.textContent = String(form.prompt && form.prompt.value || "").trim() || "Your reusable prompt will appear here…";
+    const categoryTag = refs.addDialog && refs.addDialog.querySelector("#nx-add-preview-category");
+    const typeTag = refs.addDialog && refs.addDialog.querySelector("#nx-add-preview-type");
+    const summary = refs.addDialog && refs.addDialog.querySelector("#nx-add-preview-description");
+    if (categoryTag) categoryTag.textContent = category || "Category";
+    if (typeTag) typeTag.textContent = type || "Prompt Type";
+    if (summary) summary.textContent = String(form.useCase && form.useCase.value || "").trim() || "Use case description will appear here.";
+    const titleCounter = refs.addDialog && refs.addDialog.querySelector("#nx-add-title-counter");
+    if (titleCounter) titleCounter.textContent = String(form.promptName && form.promptName.value || "").length + "/180";
   }
 
+
+  // Progressive authoring: unlock the next section only after the current
+  // section validates. Previously unlocked sections stay visible and editable.
+  // The live preview remains visible on the right at every step.
+  let promptEditorStep_ = 1;
+  let promptEditorUnlockedStep_ = 1;
+  const EDITOR_STEPS_ = ["Classification", "Prompt Information", "Publish", "Preview"];
+  function setEditorStep_(nextStep, scroll, unlock) {
+    if (!refs.addDialog) return;
+    const requestedStep = Math.min(4, Math.max(1, Number(nextStep) || 1));
+    if (unlock === true) {
+      // Only the Next action may unlock the following step; prevent jumps.
+      promptEditorUnlockedStep_ = Math.min(4, Math.max(promptEditorUnlockedStep_,
+        Math.min(requestedStep, promptEditorUnlockedStep_ + 1)));
+    }
+    promptEditorStep_ = Math.min(requestedStep, promptEditorUnlockedStep_);
+
+    // The DOM is pre-hidden as well, avoiding any flash of future fields.
+    for (let step = 2; step <= 3; step += 1) {
+      const section = refs.addDialog.querySelector("#nx-add-step-" + step);
+      if (section) section.hidden = step > promptEditorUnlockedStep_;
+    }
+    refs.addDialog.querySelectorAll("[data-nx-add-step]").forEach(function (button) {
+      const step = Number(button.dataset.nxAddStep);
+      const active = step === promptEditorStep_;
+      const unlocked = step <= promptEditorUnlockedStep_;
+      button.disabled = !unlocked;
+      button.setAttribute("aria-disabled", unlocked ? "false" : "true");
+      button.classList.toggle("is-active", active);
+      button.classList.toggle("is-completed", unlocked && step < promptEditorStep_);
+      if (active) button.setAttribute("aria-current", "step");
+      else button.removeAttribute("aria-current");
+    });
+    const nextButton = refs.addDialog.querySelector("#nx-add-next");
+    if (nextButton) {
+      nextButton.hidden = promptEditorStep_ === 4;
+      nextButton.textContent = "Next: " + EDITOR_STEPS_[promptEditorStep_] + " →";
+    }
+    if (refs.addSubmit) refs.addSubmit.hidden = promptEditorStep_ !== 4;
+    if (scroll) {
+      const target = refs.addDialog.querySelector("#nx-add-step-" + promptEditorStep_);
+      if (target && typeof target.scrollIntoView === "function") {
+        const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        target.scrollIntoView({behavior: reduce ? "auto" : "smooth", block: "start"});
+      }
+    }
+  }
+  function validateEditorStep_(step) {
+    if (!refs.addForm) return false;
+    const fields = refs.addForm.elements;
+    let targets = [];
+    if (step === 1) {
+      targets = [fields.promptName, refs.newCategoryField && !refs.newCategoryField.hidden ? refs.newCategoryInput : refs.categorySelect,
+        refs.newPromptTypeField && !refs.newPromptTypeField.hidden ? refs.newPromptTypeInput : refs.promptTypeSelect];
+    } else if (step === 2) targets = [fields.useCase, fields.prompt];
+    for (const field of targets) {
+      if (!field) continue;
+      if (!String(field.value || "").trim()) {
+        if (typeof field.reportValidity === "function") field.reportValidity();
+        else field.focus();
+        return false;
+      }
+      if (typeof field.checkValidity === "function" && !field.checkValidity()) {
+        field.reportValidity();
+        return false;
+      }
+    }
+    return true;
+  }
+  function advanceEditorStep_() {
+    if (promptEditorStep_ >= 4 || state.editorSaving) return;
+    if (validateEditorStep_(promptEditorStep_)) {
+      clearAddError();
+      setEditorStep_(promptEditorStep_ + 1, true, true);
+    }
+  }
+  function bindDedicatedPromptAddUI_(root) {
+    if (!refs.addDialog) return;
+    refs.addDialog.querySelectorAll("[data-nx-add-step]").forEach(function (button) {
+      button.addEventListener("click", function () {
+        // Returning to an earlier unlocked step does not re-hide later cards.
+        if (Number(button.dataset.nxAddStep) <= promptEditorUnlockedStep_) {
+          setEditorStep_(button.dataset.nxAddStep, true);
+        }
+      });
+    });
+    const next = refs.addDialog.querySelector("#nx-add-next");
+    if (next) next.addEventListener("click", advanceEditorStep_);
+  }
 
   function getEditorSignature_() {
     if (!refs.addForm) return "";
@@ -4278,7 +4393,7 @@
     if (refs.editorDescription) {
       refs.editorDescription.textContent = isEditing
         ? "Update the prompt information and reusable content below."
-        : "Share a reusable prompt with the Nexus community.";
+        : "Share a reusable prompt with the NEXUS community and help your colleagues work smarter with AI.";
     }
 
     if (isEditing) {
@@ -4346,6 +4461,10 @@
     if (refs.editorCrumb) refs.editorCrumb.textContent = isEditing ? "Edit Prompt" : "Post a Prompt";
     if (refs.editorAccess) refs.editorAccess.hidden = true;
     if (refs.addDialog.querySelector(".ai-prompt-dialog-shell")) refs.addDialog.querySelector(".ai-prompt-dialog-shell").hidden = false;
+    // Reset progression for each new Post/Edit visit; edits also start
+    // collapsed, with their existing field values safely retained.
+    promptEditorUnlockedStep_ = 1;
+    setEditorStep_(1, false);
     updatePromptFieldCounters_();
     updateEditorBaseline_();
     requestAnimationFrame(function () {
@@ -4580,12 +4699,21 @@
   function submitAddPrompt(event) {
     event.preventDefault();
 
+    // Enter/implicit submit must not skip unrevealed form sections.
+    // Form uses novalidate so browser native validation cannot block the
+    // event due to required inputs within hidden steps.
+    if (promptEditorStep_ < 4) {
+      advanceEditorStep_();
+      return;
+    }
+
     if (!canWriteCommunity_()) {
       setAddError("Verified employee access and community activation are required.");
       return;
     }
 
-    if (!refs.addForm || !refs.addForm.reportValidity()) {
+    if (!refs.addForm || ![1, 2, 3].every(validateEditorStep_) ||
+        !refs.addForm.reportValidity()) {
       return;
     }
 

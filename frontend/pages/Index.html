@@ -32,6 +32,7 @@
   <?!= include('frontend/styles/Styles_HeroTypography'); ?>
   <?!= include('frontend/styles/Styles_SidebarTooltips'); ?>
   <?!= include('frontend/styles/Styles_AI_Prompt_Details'); ?>
+  <?!= include('frontend/styles/Styles_AI_Prompt_Add'); ?>
 </head>
 <body>
   <a class="skip-link" href="#nexus-content">Skip to content</a>
@@ -92,6 +93,9 @@
   </template>
   <template id="page-search-template">
     <?!= include('frontend/pages/Page_Search'); ?>
+  </template>
+  <template id="nexus-prompt-add-template">
+    <?!= include('frontend/pages/Page_AI_Prompt_Add'); ?>
   </template>
 
   <?!= include('frontend/components/Component_NoscaDialog'); ?>

@@ -3,7 +3,7 @@
      IDs deliberately preserve existing community handlers and server permission checks. -->
 <section id="ai-prompt-detail-dialog" class="ai-prompt-phase1-detail-page nx-prompt-detail" aria-label="Prompt Details" hidden>
   <div class="ai-prompt-phase1-navigation nx-prompt-detail-breadcrumbs">
-    <button id="ai-prompt-phase1-back" type="button" class="ai-prompt-phase1-back nx-link-back">← &nbsp; Back to Results</button>
+    <button id="ai-prompt-phase1-back" type="button" class="ai-prompt-phase1-back nx-link-back">Back to Results</button>
     <nav id="ai-prompt-phase1-breadcrumbs" aria-label="Prompt location">
       <span>Prompt Hub</span><span aria-hidden="true">›</span>
       <span id="ai-prompt-phase1-origin">Explore</span><span aria-hidden="true">›</span>
@@ -32,7 +32,7 @@
               <p id="nx-prompt-detail-summary" class="nx-prompt-detail-summary">A reusable prompt shared by the NEXUS community.</p>
             </div>
             <div id="ai-prompt-community-detail-engagement" class="ai-prompt-community-engagement nx-detail-stats" aria-label="Prompt engagement">
-              <button id="ai-prompt-community-detail-upvote" type="button" aria-pressed="false" class="nx-stat-vote" title="Upvote this prompt">♧ Upvote</button>
+              <button id="ai-prompt-community-detail-upvote" type="button" aria-pressed="false" class="nx-stat-vote" title="Upvote this prompt">Upvote</button>
               <span id="ai-prompt-community-detail-votes">0 upvotes</span>
               <span id="ai-prompt-community-detail-copies">0 copies</span>
               <span id="ai-prompt-community-detail-comment-count">0 comments</span>
@@ -40,9 +40,9 @@
           </div>
           <div class="nx-prompt-detail-quick-actions">
             <div id="ai-prompt-phase2-actions" class="ai-prompt-phase2-actions" hidden>
-              <button type="button" id="ai-prompt-phase2-bookmark" aria-pressed="false">☆ Save</button>
-              <button type="button" id="ai-prompt-phase2-report">⚑ Report</button>
-              <button type="button" class="nx-copy-secondary" data-ai-prompt-detail-copy>▣ Copy Prompt</button>
+              <button type="button" id="ai-prompt-phase2-bookmark" aria-pressed="false">Save</button>
+              <button type="button" id="ai-prompt-phase2-report">Report</button>
+              <button type="button" class="nx-copy-secondary" data-ai-prompt-detail-copy>Copy Prompt</button>
               <button type="button" id="ai-prompt-phase2-verify" hidden>Verify Prompt</button>
               <button type="button" id="ai-prompt-phase2-fork" hidden>Fork Prompt</button>
               <button type="button" id="ai-prompt-phase2-history" hidden>Version History</button>
@@ -54,13 +54,13 @@
 
         <div class="ai-prompt-dialog-body nx-prompt-detail-body">
           <section class="ai-prompt-detail-section nx-detail-panel nx-use-case" aria-label="Use Case">
-            <h3><span class="nx-panel-icon" aria-hidden="true">◎</span> Use Case</h3>
+            <h3><span class="nx-panel-icon" aria-hidden="true"><svg class="nx-panel-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"></circle><path d="m12 8 3 3-3 5-3-5 3-3Z"></path></svg></span> Use Case</h3>
             <p id="ai-prompt-detail-use-case" class="ai-prompt-detail-use-case"></p>
           </section>
 
           <section class="ai-prompt-detail-section nx-detail-panel nx-prompt-content" aria-label="Prompt Content">
             <div class="ai-prompt-detail-section-heading">
-              <h3><span class="nx-panel-icon" aria-hidden="true">▤</span> Prompt Content</h3>
+              <h3><span class="nx-panel-icon" aria-hidden="true"><svg class="nx-panel-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3h7l5 5v13H7z"></path><path d="M14 3v5h5M10 13h6M10 17h6"></path></svg></span> Prompt Content</h3>
               <button id="ai-prompt-detail-copy" class="ai-prompt-copy-button" type="button" title="Copy prompt" aria-label="Copy prompt">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="10" height="10" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                 Copy Prompt
@@ -71,7 +71,7 @@
 
           <section class="ai-prompt-community-discussion nx-detail-panel nx-discussion" aria-label="Discussion">
             <div class="nx-discussion-heading">
-              <h3><span class="nx-panel-icon" aria-hidden="true">▣</span> Discussion <small id="nx-prompt-discussion-count"></small></h3>
+              <h3><span class="nx-panel-icon" aria-hidden="true"><svg class="nx-panel-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16v10H9l-5 4V6z"></path></svg></span> Discussion <small id="nx-prompt-discussion-count"></small></h3>
             </div>
             <div id="ai-prompt-community-comments" aria-live="polite"></div>
             <div class="ai-prompt-community-comments-pager nx-comment-pager">
@@ -91,7 +91,7 @@
       <!-- Reference layout: stacked informational/action cards in a narrow right sidebar -->
       <aside class="nx-prompt-detail-aside" aria-label="Prompt information and related content">
         <section class="nx-detail-panel nx-about-panel" aria-labelledby="nx-about-title">
-          <h3 id="nx-about-title"><span class="nx-panel-icon" aria-hidden="true">●</span> About This Prompt</h3>
+          <h3 id="nx-about-title"><span class="nx-panel-icon" aria-hidden="true"><svg class="nx-panel-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"></circle><path d="M12 10v5M12 7h.01"></path></svg></span> About This Prompt</h3>
           <dl class="nx-about-rows">
             <div><dt>Prompt ID</dt><dd id="nx-about-id">—</dd></div>
             <div><dt>Category</dt><dd id="nx-about-category">—</dd></div>
@@ -104,18 +104,18 @@
         </section>
 
         <section class="ai-prompt-phase1-related nx-detail-panel nx-related-panel" aria-label="Related published prompts">
-          <div class="nx-related-title"><h3><span class="nx-panel-icon" aria-hidden="true">↗</span> Related Prompts</h3></div>
+          <div class="nx-related-title"><h3><span class="nx-panel-icon" aria-hidden="true"><svg class="nx-panel-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"></path><path d="M9 7h8v8"></path></svg></span> Related Prompts</h3></div>
           <div id="ai-prompt-phase1-related-list" class="ai-prompt-phase1-related-list"></div>
         </section>
 
         <section id="ai-prompt-detail-admin-actions" class="ai-prompt-detail-admin-actions nx-detail-panel nx-owner-panel" aria-label="Owner and administrator actions" hidden>
-          <h3><span class="nx-panel-icon" aria-hidden="true">⚙</span> Owner Actions</h3>
+          <h3><span class="nx-panel-icon" aria-hidden="true"><svg class="nx-panel-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0A1.65 1.65 0 0 0 10 3.09V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0A1.65 1.65 0 0 0 20.91 10H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"></path></svg></span> Owner Actions</h3>
           <div class="nx-owner-buttons">
-            <button id="ai-prompt-detail-edit" type="button" class="ai-prompt-secondary-button">✎ &nbsp; Edit Prompt</button>
-            <button id="ai-prompt-detail-delete" type="button" class="ai-prompt-danger-button" hidden>▤ &nbsp; Delete Prompt</button>
+            <button id="ai-prompt-detail-edit" type="button" class="ai-prompt-secondary-button">Edit Prompt</button>
+            <button id="ai-prompt-detail-delete" type="button" class="ai-prompt-danger-button" hidden>Delete Prompt</button>
           </div>
         </section>
-        <button type="button" class="nx-aside-back" data-ai-prompt-detail-close>← &nbsp; Back to Results</button>
+        <button type="button" class="nx-aside-back" data-ai-prompt-detail-close>Back to Results</button>
       </aside>
     </div>
   </div>

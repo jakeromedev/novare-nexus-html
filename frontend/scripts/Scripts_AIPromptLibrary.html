@@ -3663,9 +3663,14 @@
     renderDiscoveryBreadcrumbs_();
   }
 
-  function showPhase1DetailState_(title, message) {
+  function showPhase1DetailState_(title, message, isLoading) {
     if (refs.detailShell) refs.detailShell.hidden = true;
-    if (refs.detailState) refs.detailState.hidden = false;
+    if (refs.detailState) {
+      refs.detailState.hidden = false;
+      // Only the in-flight request animates. Not-found and permission/error
+      // states keep their readable text and the Back to Results action.
+      refs.detailState.classList.toggle("is-loading", !!isLoading);
+    }
     if (refs.detailStateTitle) refs.detailStateTitle.textContent = title;
     if (refs.detailStateMessage) refs.detailStateMessage.textContent = message;
   }
@@ -3815,7 +3820,7 @@
     state.lastDetailId = route.id;
     state.activePromptId = "";
     const request = ++state.detailRequestId;
-    showPhase1DetailState_("Loading prompt…", "Checking the published prompt and your access permissions.");
+    showPhase1DetailState_("Getting your prompt ready…", "Fetching the published prompt and checking your access.", true);
     if (!isAppsScriptAvailable()) {
       showPhase1DetailState_("Prompt unavailable", "Open the NEXUS web app to read this prompt.");
       return;
@@ -4975,15 +4980,29 @@
     const copies = Math.max(0,Number(prompt.copyCount)||0);
     const comments = Math.max(0,Number(prompt.commentCount)||0);
     if (refs.detailVotes) refs.detailVotes.textContent = upvotes + " upvotes";
-    if (refs.detailCopies) refs.detailCopies.textContent = "▤ " + copies;
-    if (refs.detailCommentCount) refs.detailCommentCount.textContent = "◯ " + comments;
+    // Use two text nodes with a CSS-drawn SVG icon, not font-dependent
+    // symbols. This also keeps all three metrics aligned on smaller screens.
+    function renderMetric(element, value, caption) {
+      if (!element) return;
+      const number = document.createElement("span");
+      number.className = "nx-metric-number";
+      number.textContent = String(value);
+      const label = document.createElement("span");
+      label.className = "nx-metric-caption";
+      label.textContent = caption;
+      element.replaceChildren(number, label);
+    }
+    renderMetric(refs.detailCopies, copies, "Copies");
+    renderMetric(refs.detailCommentCount, comments, "Comments");
+    if (refs.detailCopies) refs.detailCopies.setAttribute("aria-label", copies + " copies");
+    if (refs.detailCommentCount) refs.detailCommentCount.setAttribute("aria-label", comments + " comments");
     const discussionCount = state.root && state.root.querySelector("#nx-prompt-discussion-count");
     if (discussionCount) discussionCount.textContent = "(" + comments + ")";
     if (refs.detailUpvote) {
       refs.detailUpvote.disabled = !canWriteCommunity_() || prompt.status !== "Active" || !!state.votePending[prompt.id];
       refs.detailUpvote.setAttribute("aria-pressed", prompt.upvotedByMe ? "true" : "false");
       refs.detailUpvote.setAttribute("aria-label", (prompt.upvotedByMe ? "Remove upvote" : "Upvote") + ". " + upvotes + " total upvotes");
-      refs.detailUpvote.textContent = "♧ " + upvotes;
+      renderMetric(refs.detailUpvote, upvotes, "Upvotes");
     }
   }
 
@@ -5151,7 +5170,7 @@
     if (refs.phase2Bookmark) {
       refs.phase2Bookmark.hidden = !state.identityVerified || !published;
       refs.phase2Bookmark.disabled = !writable;
-      refs.phase2Bookmark.textContent = prompt.bookmarkedByMe ? "★ Saved" : "☆ Save";
+      refs.phase2Bookmark.textContent = prompt.bookmarkedByMe ? "Saved" : "Save";
       refs.phase2Bookmark.setAttribute("aria-pressed", prompt.bookmarkedByMe ? "true" : "false");
     }
     if (refs.phase2Fork) {

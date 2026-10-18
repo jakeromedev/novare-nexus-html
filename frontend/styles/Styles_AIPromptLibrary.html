@@ -6372,4 +6372,113 @@ td.ai-prompt-table-action-cell:has(
   }
   .ai-prompt-library-page .ai-prompt-community-nav #ai-prompt-library-add svg {width:15px;height:15px;}
 }
+
+/* Shared sticky tabs are now outside the listing-only surface.
+   Keep their margin consistent when opening a full-page editor/details. */
+.ai-prompt-library-page > .ai-prompt-community-nav {
+  margin:0 20px 16px;
+  width:calc(100% - 40px);
+  box-sizing:border-box;
+}
+.ai-prompt-library-page > .ai-prompt-community-nav:has(#ai-prompt-library-add.is-editor-active) {
+  border-bottom-color:#bcd4ff;
+}
+@media(max-width:767px) {
+  .ai-prompt-library-page > .ai-prompt-community-nav {margin:0 0 12px;width:100%;}
+}
+/* ============================================================
+   PHASE 3 — full-page creation/editing and published My Prompts
+   Preserve the existing NEXUS shell / Prompt Hub route behavior.
+============================================================ */
+.ai-prompt-library-page .ai-prompt-phase3-editor-page[hidden],
+.ai-prompt-library-page .ai-prompt-phase3-access[hidden],
+.ai-prompt-library-page .ai-prompt-phase3-editor-page .ai-prompt-dialog-shell[hidden] {display:none!important;}
+.ai-prompt-library-page .ai-prompt-phase3-editor-page {
+  display:block!important;
+  position:relative!important;
+  overflow:visible!important;
+  inset:auto!important;
+  width:min(1240px,calc(100% - 40px))!important;
+  max-width:none!important;
+  max-height:none!important;
+  margin:22px auto 48px!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+.ai-prompt-library-page .ai-prompt-phase3-editor-page[hidden] {display:none!important;}
+.ai-prompt-library-page .ai-prompt-phase3-editor-page > .ai-prompt-dialog-shell {
+  width:100%;height:auto!important;min-height:0!important;max-height:none!important;overflow:visible!important;
+  border:1px solid #dbe6f4;border-radius:18px;background:#fff;
+  box-shadow:0 16px 40px rgb(19 61 115 / 8%);
+}
+.ai-prompt-library-page .ai-prompt-phase3-editor-page .ai-prompt-dialog-header {
+  position:relative;padding:28px clamp(18px,3vw,38px);border-radius:18px 18px 0 0;
+}
+.ai-prompt-library-page .ai-prompt-phase3-editor-page .ai-prompt-dialog-header h2 {font-size:clamp(23px,3vw,32px);}
+.ai-prompt-library-page .ai-prompt-phase3-editor-page .ai-prompt-add-form {
+  height:auto!important;min-height:0!important;max-height:none!important;
+  overflow:visible!important;flex:0 0 auto!important;
+}
+.ai-prompt-library-page .ai-prompt-phase3-editor-page .ai-prompt-add-scroll {
+  height:auto!important;max-height:none!important;overflow:visible!important;
+  flex:0 0 auto!important;padding:24px clamp(18px,3vw,38px)!important;
+}
+.ai-prompt-library-page .ai-prompt-phase3-editor-page .ai-prompt-add-footer {
+  position:sticky;bottom:0;z-index:8;display:flex;justify-content:flex-end;
+  padding:18px clamp(18px,3vw,38px)!important;background:rgb(255 255 255 / 98%);
+  border-radius:0 0 18px 18px;border-top:1px solid #dce8f6;
+}
+.ai-prompt-library-page .ai-prompt-phase3-editor-page .ai-prompt-classification-layout {align-items:start;}
+.ai-prompt-library-page .ai-prompt-phase3-breadcrumb {
+  display:flex;align-items:center;gap:12px;margin:0 0 18px;color:#6780a1;font-size:13px;
+}
+.ai-prompt-library-page .ai-prompt-phase3-breadcrumb button {
+  padding:8px 0;border:0;background:transparent;color:#1763db;font-weight:750;cursor:pointer;
+}
+.ai-prompt-library-page .ai-prompt-phase3-access {
+  border:1px solid #dbe7f5;border-radius:16px;padding:40px 30px;background:white;
+}
+.ai-prompt-library-page .ai-prompt-phase3-access h2 {margin:0 0 10px;color:#142c56;font-size:26px;}
+.ai-prompt-library-page .ai-prompt-phase3-access p {color:#5d7291;}
+.ai-prompt-library-page .ai-prompt-phase3-access button {padding:10px 16px;background:#1764ea;color:#fff;border:0;border-radius:8px;cursor:pointer;}
+.ai-prompt-library-page .ai-prompt-phase3-preview-card {background:#f8fbff;border:1px solid #d9e5f6;border-radius:14px;padding:22px;min-width:0;}
+.ai-prompt-library-page .ai-prompt-phase3-preview-header {display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.ai-prompt-library-page .ai-prompt-phase3-preview-card h4 {margin:0;font-size:21px;color:#0c2d67;word-break:break-word;}
+.ai-prompt-library-page .ai-prompt-phase3-preview-badge,.ai-prompt-library-page .ai-prompt-phase3-published {white-space:nowrap;color:#167a58;background:#d9f8ed;border-radius:40px;padding:5px 10px;font-size:11px;font-weight:800;}
+.ai-prompt-library-page .ai-prompt-phase3-preview-meta {color:#567498;font-size:12px;margin:8px 0 18px;}
+.ai-prompt-library-page .ai-prompt-phase3-preview-card h5 {font-size:13px;font-weight:800;color:#183b73;margin:16px 0 7px;}
+.ai-prompt-library-page .ai-prompt-phase3-preview-card pre {
+  white-space:pre-wrap;overflow-wrap:anywhere;font-family:inherit;font-size:13px;
+  line-height:1.7;color:#1a365f;background:#fff;border:1px solid #e0eaf7;border-radius:10px;padding:15px;margin:0;
+}
+.ai-prompt-library-page #ai-prompt-phase3-preview-use-case {white-space:pre-wrap;}
+.ai-prompt-library-page .ai-prompt-phase3-my-heading {display:flex;justify-content:space-between;align-items:start;gap:16px;margin:3px 0 20px;}
+.ai-prompt-library-page .ai-prompt-phase3-my-heading h2 {font-size:23px;color:#122d59;margin:0;}
+.ai-prompt-library-page .ai-prompt-phase3-my-heading p {margin:6px 0;color:#647c9e;font-size:13px;}
+.ai-prompt-library-page .ai-prompt-phase3-my-heading > span {font-size:12px;background:#eaf2ff;border-radius:20px;padding:7px 12px;color:#1858bd;white-space:nowrap;}
+.ai-prompt-library-page .ai-prompt-phase3-my-grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;}
+.ai-prompt-library-page .ai-prompt-phase3-my-card {min-width:0;padding:20px;background:#fff;border:1px solid #dce6f4;border-radius:14px;box-shadow:0 4px 12px rgb(28 69 128 / 4%);}
+.ai-prompt-library-page .ai-prompt-phase3-my-card-header {display:flex;align-items:start;justify-content:space-between;gap:12px;}
+.ai-prompt-library-page .ai-prompt-phase3-my-title {text-align:left;border:0;background:transparent;color:#1765e8;font-size:16px;font-weight:800;cursor:pointer;padding:0;}
+.ai-prompt-library-page .ai-prompt-phase3-my-excerpt {font-size:13px;color:#47617f;line-height:1.65;min-height:35px;}
+.ai-prompt-library-page .ai-prompt-phase3-my-meta {display:flex;flex-wrap:wrap;gap:6px;margin:13px 0;}
+.ai-prompt-library-page .ai-prompt-phase3-my-meta span {padding:5px 9px;border-radius:18px;background:#eef3f9;color:#526987;font-size:11px;}
+.ai-prompt-library-page .ai-prompt-phase3-updated {font-size:11px;color:#7a8fa8;}
+.ai-prompt-library-page .ai-prompt-phase3-my-footer {display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding-top:14px;border-top:1px solid #e6edf6;}
+.ai-prompt-library-page .ai-prompt-phase3-my-footer > span {font-size:11px;color:#617a97;}
+.ai-prompt-library-page .ai-prompt-phase3-my-actions {display:flex;gap:8px;}
+.ai-prompt-library-page .ai-prompt-phase3-my-actions button {padding:8px 16px;border:1px solid #cfdff4;border-radius:8px;background:#f7faff;color:#174b9d;font-size:12px;font-weight:800;cursor:pointer;}
+.ai-prompt-library-page .ai-prompt-phase3-my-actions button.is-primary {background:#1766ef;color:white;border-color:#1766ef;}
+.ai-prompt-library-page.is-phase3-editor-route #ai-prompt-library-content {display:none!important;}
+@media(max-width:760px) {
+  .ai-prompt-library-page .ai-prompt-phase3-my-grid {grid-template-columns:1fr;}
+  .ai-prompt-library-page .ai-prompt-phase3-editor-page {width:calc(100% - 18px)!important;margin:12px auto 24px!important;}
+  .ai-prompt-library-page .ai-prompt-phase3-editor-page .ai-prompt-dialog-header {padding:20px 16px;}
+  .ai-prompt-library-page .ai-prompt-phase3-editor-page .ai-prompt-add-scroll {padding:16px!important;}
+  .ai-prompt-library-page .ai-prompt-phase3-editor-page .ai-prompt-add-footer {padding:15px!important;}
+  .ai-prompt-library-page .ai-prompt-phase3-my-heading {flex-wrap:wrap;}
+}
 </style>

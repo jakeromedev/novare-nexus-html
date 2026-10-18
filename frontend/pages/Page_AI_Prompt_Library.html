@@ -67,17 +67,7 @@
 
   </section>
 
-  <section
-    id="ai-prompt-library-content"
-    class="ai-prompt-library-placeholder"
-    aria-label="AI Prompt Library content area"
-  >
-    <div
-      id="ai-prompt-library-surface"
-      class="ai-prompt-library-placeholder-surface ai-prompt-library-surface"
-    >
-      <!-- Sticky Prompt Hub navigation: the creation CTA is a blue nav action,
-           not a separate floating row. Preserve the existing button ID for JS. -->
+  <!-- Shared sticky navigation stays visible on listings, details and editor pages. -->
       <nav class="ai-prompt-community-nav" aria-label="Prompt Library sections">
         <div class="ai-prompt-community-tabs" role="group" aria-label="Browse Prompt Hub">
           <button type="button" id="ai-prompt-community-explore" class="is-active" aria-current="page">Explore</button>
@@ -99,6 +89,19 @@
           </button>
         </div>
       </nav>
+
+  <section
+    id="ai-prompt-library-content"
+    class="ai-prompt-library-placeholder"
+    aria-label="AI Prompt Library content area"
+  >
+    <div
+      id="ai-prompt-library-surface"
+      class="ai-prompt-library-placeholder-surface ai-prompt-library-surface"
+    >
+      <!-- Sticky Prompt Hub navigation: the creation CTA is a blue nav action,
+           not a separate floating row. Preserve the existing button ID for JS. -->
+
       <p class="ai-prompt-community-identity" id="ai-prompt-community-identity" role="status" hidden></p>
       <nav id="ai-prompt-discovery-breadcrumbs" class="ai-prompt-discovery-breadcrumbs" aria-label="Prompt Hub breadcrumbs" hidden></nav>
 
@@ -503,14 +506,23 @@
     </div>
   </dialog>
 
-  <!-- Admin Add / Edit Prompt modal -->
-  <dialog id="ai-prompt-add-dialog" class="ai-prompt-dialog ai-prompt-add-dialog">
+  <!-- Phase 3: routed full-page published-prompt editor. Do not use a modal. -->
+  <section id="ai-prompt-add-dialog" class="ai-prompt-phase3-editor-page ai-prompt-add-dialog" aria-label="Prompt Editor" hidden>
+    <nav class="ai-prompt-phase3-breadcrumb" aria-label="Editor navigation">
+      <button type="button" data-ai-prompt-add-close>← Back to Prompt Hub</button>
+      <span aria-hidden="true">›</span><span id="ai-prompt-phase3-crumb">Post a Prompt</span>
+    </nav>
+    <div id="ai-prompt-phase3-access" class="ai-prompt-phase3-access" role="status" aria-live="polite" hidden>
+      <h2 id="ai-prompt-phase3-access-title">Checking access…</h2>
+      <p id="ai-prompt-phase3-access-message">Checking whether you can publish or edit this prompt.</p>
+      <button type="button" data-ai-prompt-add-close>Return to Prompt Hub</button>
+    </div>
     <div class="ai-prompt-dialog-shell">
       <header class="ai-prompt-dialog-header">
         <div>
           <p class="ai-prompt-dialog-eyebrow">NEXUS COMMUNITY</p>
           <div class="ai-prompt-editor-title-line">
-            <h2 id="ai-prompt-editor-title">Post a Prompt</h2>
+            <h2 id="ai-prompt-editor-title" tabindex="-1">Post a Prompt</h2>
             <span id="ai-prompt-editor-id" class="ai-prompt-editor-id" hidden></span>
           </div>
           <p id="ai-prompt-editor-description">
@@ -521,7 +533,7 @@
           class="ai-prompt-dialog-close"
           type="button"
           data-ai-prompt-add-close
-          aria-label="Close Add Prompt"
+          aria-label="Leave editor"
         >×</button>
       </header>
 
@@ -676,7 +688,7 @@
               <span class="ai-prompt-form-step" aria-hidden="true">3</span>
               <div>
                 <h3>Publish</h3>
-                <p>Choose whether this prompt is visible to users right away.</p>
+                <p>Published prompts are immediately visible to authorized NEXUS employees.</p>
               </div>
             </div>
 
@@ -684,10 +696,7 @@
               <label class="ai-prompt-form-field ai-prompt-status-field">
                 <span>Publish as <b>*</b></span>
                 <select name="status" required>
-                  <option value="Active">Active — visible to users</option>
-                  <option value="Draft" disabled hidden>Draft — on hold</option>
-                  <option value="Inactive">Inactive — hidden</option>
-                  <option value="Retired">Retired — archived from users</option>
+                  <option value="Active">Publish now — visible to users</option>
                 </select>
               </label>
 
@@ -701,6 +710,21 @@
             </div>
           </section>
 
+          <section class="ai-prompt-form-section ai-prompt-phase3-preview" aria-label="Live prompt preview">
+            <div class="ai-prompt-form-section-heading">
+              <span class="ai-prompt-form-step" aria-hidden="true">4</span>
+              <div><h3>Preview</h3><p>Check how your published prompt will read.</p></div>
+            </div>
+            <div class="ai-prompt-phase3-preview-card">
+              <div class="ai-prompt-phase3-preview-header">
+                <h4 id="ai-prompt-phase3-preview-title">Your prompt title</h4>
+                <span class="ai-prompt-phase3-preview-badge">Published</span>
+              </div>
+              <p id="ai-prompt-phase3-preview-meta" class="ai-prompt-phase3-preview-meta"></p>
+              <h5>Use case</h5><p id="ai-prompt-phase3-preview-use-case"></p>
+              <h5>Prompt content</h5><pre id="ai-prompt-phase3-preview-prompt"></pre>
+            </div>
+          </section>
           <p id="ai-prompt-add-error" class="ai-prompt-add-error" role="alert" hidden></p>
         </div>
 
@@ -714,7 +738,7 @@
         </footer>
       </form>
     </div>
-  </dialog>
+  </section>
 
   <div id="ai-prompt-library-toast" class="ai-prompt-library-toast" role="status" aria-live="polite" hidden>
     <span class="ai-prompt-library-toast-icon" aria-hidden="true">✓</span>

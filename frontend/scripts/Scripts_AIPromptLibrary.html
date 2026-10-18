@@ -50,6 +50,11 @@
     searchTimer: null,
     editingPromptId: "",
     editorBaseline: "",
+    editorReady: false,
+    editorRouteHash: "",
+    editorReturnHash: "#ai-prompt-library?view=explore",
+    editorRouteKey: "",
+    editorSaving: false,
     documentFilterListenerBound: false,
     // This flag lives only for the current visit to the Prompt Library route.
     // It is reset when the global Nexus route changes to another module.
@@ -65,6 +70,29 @@
   };
 
   const refs = {};
+
+  // The detail design is authored in Page_AI_Prompt_Details.html, not in the
+  // growing Prompt Library HTML. Index.html exposes the compiled partial in a
+  // template; replace only the old detail DOM before references/events bind.
+  function mountDedicatedPromptDetails_(root) {
+    if (root.querySelector("#ai-prompt-detail-dialog.nx-prompt-detail")) return;
+    const template = document.getElementById("nexus-prompt-detail-template");
+    const existing = root.querySelector("#ai-prompt-detail-dialog");
+    if (!template || !existing || !template.content) {
+      console.error("[Prompt Hub] Dedicated detail template is missing. Check Index.html include.");
+      return;
+    }
+    const fragment = template.content.cloneNode(true);
+    if (!fragment.querySelector("#ai-prompt-detail-dialog")) return;
+    existing.replaceWith(fragment);
+    const nav = root.querySelector(".ai-prompt-community-nav");
+    if (nav && !nav.querySelector(".nx-prompt-hub-brand")) {
+      const brand = document.createElement("span");
+      brand.className = "nx-prompt-hub-brand";
+      brand.textContent = "✣  Prompt Hub";
+      nav.insertBefore(brand, nav.firstChild);
+    }
+  }
 
   function isAppsScriptAvailable() {
     return Boolean(
@@ -90,6 +118,7 @@
     state.root = root;
 
     try {
+      mountDedicatedPromptDetails_(root);
       cacheRefs(root);
       syncPromptHubStickyOffset_();
 
@@ -264,6 +293,14 @@
     );
 
     refs.addDialog = root.querySelector("#ai-prompt-add-dialog");
+    refs.editorAccess = root.querySelector("#ai-prompt-phase3-access");
+    refs.editorAccessTitle = root.querySelector("#ai-prompt-phase3-access-title");
+    refs.editorAccessMessage = root.querySelector("#ai-prompt-phase3-access-message");
+    refs.editorCrumb = root.querySelector("#ai-prompt-phase3-crumb");
+    refs.editorPreviewTitle = root.querySelector("#ai-prompt-phase3-preview-title");
+    refs.editorPreviewMeta = root.querySelector("#ai-prompt-phase3-preview-meta");
+    refs.editorPreviewUseCase = root.querySelector("#ai-prompt-phase3-preview-use-case");
+    refs.editorPreviewPrompt = root.querySelector("#ai-prompt-phase3-preview-prompt");
     refs.addForm = root.querySelector("#ai-prompt-add-form");
     refs.addClose = Array.from(
       root.querySelectorAll("[data-ai-prompt-add-close]")
@@ -709,6 +746,11 @@
     // Global router handles all top-level routes. Prompt Hub handles only its subroute.
     window.addEventListener("hashchange", handlePromptSubroute_);
     window.addEventListener("popstate", handlePromptSubroute_);
+    window.addEventListener("beforeunload", function(event) {
+      if (!hasUnsavedEditorChanges_()) return;
+      event.preventDefault();
+      event.returnValue = "";
+    });
     refs.detailClose.forEach(function (button) {
       button.addEventListener(
         "click",
@@ -717,10 +759,16 @@
     });
 
     if (refs.detailCopy) {
-      refs.detailCopy.addEventListener(
-        "click",
-        copyActivePrompt
-      );
+      refs.detailCopy.addEventListener("click", function () {
+        copyPromptById(state.activePromptId, refs.detailCopy);
+      });
+    }
+    // Second Copy Prompt button in the upper action row uses the same API.
+    if (refs.detailPage) {
+      refs.detailPage.addEventListener("click", function (event) {
+        const secondary = event.target.closest("[data-ai-prompt-detail-copy]");
+        if (secondary) copyPromptById(state.activePromptId, secondary);
+      });
     }
 
     if (refs.detailEdit) {
@@ -784,24 +832,6 @@
       );
     }
 
-    if (refs.addDialog) {
-      refs.addDialog.addEventListener(
-        "click",
-        function (event) {
-          if (event.target === refs.addDialog) {
-            requestCloseAddPromptDialog_();
-          }
-        }
-      );
-
-      refs.addDialog.addEventListener(
-        "cancel",
-        function (event) {
-          event.preventDefault();
-          requestCloseAddPromptDialog_();
-        }
-      );
-    }
 
     if (!state.documentFilterListenerBound) {
       document.addEventListener(
@@ -835,8 +865,7 @@
 
 
       if (
-        refs.addDialog &&
-        refs.addDialog.open
+        state.editorReady
       ) {
         event.preventDefault();
         requestCloseAddPromptDialog_();
@@ -1332,6 +1361,23 @@
       refs.promptCounter.textContent =
         length + "/12000";
     }
+    renderPhase3Preview_();
+  }
+
+  function renderPhase3Preview_() {
+    if (!refs.addForm) return;
+    const form = refs.addForm.elements;
+    const title = String(form.promptName && form.promptName.value || "").trim();
+    const category = refs.newCategoryField && !refs.newCategoryField.hidden
+      ? String(refs.newCategoryInput.value || "").trim()
+      : String(refs.categorySelect && refs.categorySelect.value || "").trim();
+    const type = refs.newPromptTypeField && !refs.newPromptTypeField.hidden
+      ? String(refs.newPromptTypeInput.value || "").trim()
+      : String(refs.promptTypeSelect && refs.promptTypeSelect.value || "").trim();
+    if (refs.editorPreviewTitle) refs.editorPreviewTitle.textContent = title || "Your prompt title";
+    if (refs.editorPreviewMeta) refs.editorPreviewMeta.textContent = [category, type].filter(Boolean).join(" · ") || "Select a category and prompt type";
+    if (refs.editorPreviewUseCase) refs.editorPreviewUseCase.textContent = String(form.useCase && form.useCase.value || "").trim() || "Describe the use case…";
+    if (refs.editorPreviewPrompt) refs.editorPreviewPrompt.textContent = String(form.prompt && form.prompt.value || "").trim() || "Your reusable prompt will appear here…";
   }
 
 
@@ -1384,9 +1430,7 @@
 
 
   function hasUnsavedEditorChanges_() {
-    if (!refs.addDialog || !refs.addDialog.open) {
-      return false;
-    }
+    if (!state.editorReady || state.editorSaving) return false;
 
     return (
       state.editorBaseline !==
@@ -1406,6 +1450,9 @@
     }
 
     closeAddPromptDialog(true);
+    const returnHash = state.editorReturnHash || "#ai-prompt-library?view=explore";
+    if (window.location.hash !== returnHash) window.location.hash = returnHash;
+    handlePromptSubroute_();
   }
 
 
@@ -1858,9 +1905,9 @@
       message = "Explore published prompts and use the bookmark icon to save your favorites.";
       action = "browse";
       actionLabel = "Explore prompts";
-    } else if (state.activeView === "my-prompts" && !state.myPrompts.length) {
-      title = "You haven't posted any prompts yet";
-      message = "Use Post a Prompt to share your first contribution.";
+    } else if (state.activeView === "my-prompts" && !state.myPrompts.some(function(p){return p.status === "Active";})) {
+      title = "No published prompts yet";
+      message = "Use + Create a Prompt to publish your first contribution. Draft management is currently on hold.";
     } else if (state.query) {
       title = rawQuery
         ? 'No prompts match "' + rawQuery + '"'
@@ -2303,12 +2350,21 @@
       refs.results.appendChild(feed);
     } else {
       if (state.activeView === "my-prompts") {
-        const heading = document.createElement("h3");
-        heading.className = "ai-prompt-community-feed-title";
-        heading.textContent = "My Contributions";
+        const heading = document.createElement("div");
+        heading.className = "ai-prompt-phase3-my-heading";
+        const copy = document.createElement("div");
+        const title = document.createElement("h2"); title.textContent = "My Published Prompts";
+        const subtitle = document.createElement("p"); subtitle.textContent = "Manage the reusable prompts you have shared with the NEXUS community.";
+        copy.append(title, subtitle);
+        const count = document.createElement("span"); count.textContent = filtered.length + (filtered.length === 1 ? " published prompt" : " published prompts");
+        heading.append(copy, count);
         refs.results.appendChild(heading);
+        const grid = document.createElement("div"); grid.className = "ai-prompt-phase3-my-grid";
+        pageItems.forEach(function (prompt) { grid.appendChild(createPhase3MyCard_(prompt)); });
+        refs.results.appendChild(grid);
+      } else {
+        refs.results.appendChild(createPromptTable(pageItems));
       }
-      refs.results.appendChild(createPromptTable(pageItems));
     }
 
     renderPagination(
@@ -2319,6 +2375,42 @@
     );
   }
 
+
+  function createPhase3MyCard_(prompt) {
+    const card = document.createElement("article");
+    card.className = "ai-prompt-phase3-my-card";
+    const header = document.createElement("div"); header.className = "ai-prompt-phase3-my-card-header";
+    const heading = document.createElement("button"); heading.type = "button";
+    heading.className = "ai-prompt-phase3-my-title";
+    heading.dataset.aiPromptOpen = "1"; heading.dataset.aiPromptId = String(prompt.id);
+    heading.textContent = prompt.promptName || "Untitled prompt";
+    const badge = document.createElement("span"); badge.className = "ai-prompt-phase3-published"; badge.textContent = "Published";
+    header.append(heading, badge);
+    const text = document.createElement("p"); text.className = "ai-prompt-phase3-my-excerpt";
+    text.textContent = String(prompt.useCase || "No use case description.").slice(0, 220);
+    const meta = document.createElement("div"); meta.className = "ai-prompt-phase3-my-meta";
+    [prompt.category, prompt.promptType].filter(Boolean).forEach(function(value) {
+      const tag = document.createElement("span"); tag.textContent = value; meta.appendChild(tag);
+    });
+    const footer = document.createElement("div"); footer.className = "ai-prompt-phase3-my-footer";
+    const stats = document.createElement("span");
+    stats.textContent = "↑ " + (Number(prompt.upvoteCount)||0) + " votes  ·  " + (Number(prompt.copyCount)||0) + " copies  ·  " + (Number(prompt.commentCount)||0) + " comments";
+    const buttons = document.createElement("div"); buttons.className = "ai-prompt-phase3-my-actions";
+    const view = document.createElement("button"); view.type = "button"; view.textContent = "View";
+    view.dataset.aiPromptOpen = "1"; view.dataset.aiPromptId = String(prompt.id);
+    buttons.appendChild(view);
+    if (canEditCommunityPrompt_(prompt)) {
+      const edit = document.createElement("button"); edit.type = "button"; edit.textContent = "Edit";
+      edit.dataset.aiPromptAction = "edit"; edit.dataset.aiPromptId = String(prompt.id);
+      edit.className = "is-primary"; buttons.appendChild(edit);
+    }
+    footer.append(stats, buttons);
+    const updated = document.createElement("p"); updated.className = "ai-prompt-phase3-updated";
+    const date = prompt.lastUpdated || prompt.updatedAt || prompt.createdAt;
+    updated.textContent = "ID " + String(prompt.id || "") + (date ? " · Updated " + new Date(date).toLocaleDateString() : "");
+    card.append(header, text, meta, updated, footer);
+    return card;
+  }
 
   function getVisiblePrompts() {
     let prompts = state.activeView === "my-prompts"
@@ -3499,7 +3591,7 @@
     if (parts[0] !== "ai-prompt-library") return null;
     const params = new URLSearchParams(parts.slice(1).join("?"));
     const rawView = params.get("view") || "explore";
-    const view = rawView === "prompt" || LISTING_VIEWS_.includes(rawView) ? rawView : "explore";
+    const view = ["prompt", "new", "edit"].includes(rawView) || LISTING_VIEWS_.includes(rawView) ? rawView : "explore";
     const id = String(params.get("id") || "").trim();
     return {
       view: view, id: /^[a-zA-Z0-9_-]{1,80}$/.test(id) ? id : "",
@@ -3587,9 +3679,76 @@
     if (state.root) state.root.classList.toggle("is-phase1-detail-route", showDetails);
   }
 
+  // Phase 3: dedicated routes, scoped to published-prompt authoring.
+  function showPhase3EditorAccess_(title, message) {
+    if (refs.editorAccessTitle) refs.editorAccessTitle.textContent = title;
+    if (refs.editorAccessMessage) refs.editorAccessMessage.textContent = message;
+    if (refs.editorAccess) refs.editorAccess.hidden = false;
+    const shell = refs.addDialog && refs.addDialog.querySelector(".ai-prompt-dialog-shell");
+    if (shell) shell.hidden = true;
+  }
+
+  function setPhase3Layout_(editing) {
+    const editorVisible = Boolean(editing);
+    // Moving from Details to Edit invalidates cached detail reads. Otherwise
+    // Save -> Prompt Details could reuse stale content for the same prompt ID.
+    if (editorVisible && state.root && !state.root.classList.contains("is-phase3-editor-route")) {
+      state.detailRequestId += 1;
+      state.lastDetailId = "";
+      state.activePromptId = "";
+    }
+    if (state.root) state.root.classList.toggle("is-phase3-editor-route", editorVisible);
+    if (refs.addButton) refs.addButton.classList.toggle("is-editor-active", editorVisible);
+    if (refs.addDialog) refs.addDialog.hidden = !editorVisible;
+    if (refs.hero) refs.hero.hidden = editorVisible || state.promptHeroDismissed;
+    if (refs.listContent) refs.listContent.hidden = editorVisible;
+    if (refs.detailPage) refs.detailPage.hidden = true;
+    if (state.root) state.root.classList.remove("is-phase1-detail-route");
+    state.isDetailRoute = false;
+  }
+
+  function handlePhase3EditorRoute_(route) {
+    const edit = route.view === "edit";
+    setPhase3Layout_(true);
+    dismissPromptHero_(false);
+    const key = edit ? "edit:" + route.id : "new";
+    // Keep partially completed form intact if the global shell rerenders.
+    if (state.editorReady && state.editorRouteKey === key) return;
+    if (!state.libraryLoaded) {
+      showPhase3EditorAccess_("Loading editor…", "Checking your verified Workspace identity and publishing permissions.");
+      return;
+    }
+    if (!canWriteCommunity_()) {
+      showPhase3EditorAccess_("Publishing unavailable", "Your account must be verified and community contributions must be enabled.");
+      return;
+    }
+    let prompt = null;
+    if (edit) {
+      prompt = state.myPrompts.find(function (item) {return item.id === route.id;});
+      if (!prompt && state.adminView && getEffectiveRole() === "admin") {
+        prompt = state.prompts.find(function (item) {return item.id === route.id;});
+      }
+      if (!prompt || !canEditCommunityPrompt_(prompt)) {
+        showPhase3EditorAccess_("Prompt unavailable", "Only the verified creator or a real administrator may edit a published prompt.");
+        return;
+      }
+    }
+    state.editorRouteKey = key;
+    state.editorRouteHash = window.location.hash;
+    openPromptEditor(prompt);
+  }
+
   function handlePromptSubroute_() {
     if (!state.root) return;
     const route = parsePhase1Subroute_();
+    const incomingKey = route && (route.view === "edit" ? "edit:" + route.id : route.view === "new" ? "new" : "");
+    if (state.editorReady && state.editorRouteKey !== incomingKey && hasUnsavedEditorChanges_()) {
+      if (!window.confirm("Discard your unsaved prompt changes?")) {
+        replaceListingHash_(state.editorRouteHash);
+        return;
+      }
+    }
+    if (state.editorReady && state.editorRouteKey !== incomingKey) closeAddPromptDialog(true);
     if (!route) {
       exitPromptHeroVisit_();
       // Another global NEXUS page was selected; invalidate pending detail reads.
@@ -3602,6 +3761,14 @@
       return;
     }
     enterPromptHeroVisit_();
+    if (route.view === "new" || route.view === "edit") {
+      handlePhase3EditorRoute_(route);
+      return;
+    }
+    if (state.root) state.root.classList.remove("is-phase3-editor-route");
+    if (refs.addButton) refs.addButton.classList.remove("is-editor-active");
+    if (refs.addDialog) refs.addDialog.hidden = true;
+    if (refs.listContent) refs.listContent.hidden = false;
     // Opening a prompt from a direct link is already a content-first entry.
     // Keep the hero out of subsequent listing navigation in this visit.
     if (route.view === "prompt" && !state.promptHeroDismissed) {
@@ -3691,9 +3858,15 @@
       link.className = "ai-prompt-phase1-related-card";
       const title = document.createElement("strong");
       title.textContent = item.promptName || item.id;
+      const description = document.createElement("span");
+      description.className = "nx-related-description";
+      const useCase = String(item.useCase || "").trim();
+      description.textContent = useCase.length > 80 ? useCase.slice(0,77).trimEnd()+"…" : useCase;
       const caption = document.createElement("span");
-      caption.textContent = (item.category || "Prompt") + " · " + (item.promptType || "General");
-      link.append(title, caption);
+      caption.textContent = (item.category || "Prompt") + "  ·  " +
+        Math.max(0,Number(item.copyCount)||0) + " copies  ·  ↑ " +
+        Math.max(0,Number(item.upvoteCount)||0);
+      link.append(title, description, caption);
       refs.detailRelated.appendChild(link);
     });
   }
@@ -3745,6 +3918,15 @@
         prompt.useCase ||
         "No use case has been provided.";
     }
+
+    const summary = state.root.querySelector("#nx-prompt-detail-summary");
+    if (summary) {
+      const useCase = String(prompt.useCase || "").trim();
+      summary.textContent = useCase ?
+        (useCase.length > 195 ? useCase.slice(0, 192).trimEnd() + "…" : useCase) :
+        "A reusable prompt shared by the NEXUS community.";
+    }
+    renderPromptAbout_(prompt);
 
     const promptContent = String(
       prompt.prompt || ""
@@ -3800,49 +3982,48 @@
     loadCommunityComments_();
   }
 
+  function formatPromptDetailDate_(value) {
+    if (!value) return "—";
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? String(value).slice(0, 10) :
+      date.toLocaleDateString(undefined, {year:"numeric",month:"short",day:"numeric"});
+  }
+
+  function renderPromptAbout_(prompt) {
+    const fields = {
+      "nx-about-id": prompt.id,
+      "nx-about-category": prompt.category,
+      "nx-about-type": prompt.promptType,
+      "nx-about-author": prompt.owner || "NEXUS Contributor",
+      "nx-about-created": formatPromptDetailDate_(prompt.createdAt),
+      "nx-about-updated": formatPromptDetailDate_(prompt.lastUpdated)
+    };
+    Object.keys(fields).forEach(function (id) {
+      const element = state.root.querySelector("#"+id);
+      if (element) element.textContent = String(fields[id] || "—");
+    });
+  }
+
   function renderDetailMeta(prompt) {
     if (!refs.detailMeta) return;
-
     refs.detailMeta.replaceChildren();
-
     const entries = [
-      { label: "Posted by", value: prompt.owner || "Nexus Team", className: "is-author" },
-      {
-        label: "Category",
-        value: prompt.category,
-        className: "is-category"
-      },
-      {
-        label: "Prompt Type",
-        value: prompt.promptType,
-        className: "is-type"
-      },
-      { label:"Status", value:"Published", className:"is-status is-active" },
-      { label:"Last updated", value:prompt.lastUpdated
-          ? String(prompt.lastUpdated).slice(0, 10) : "", className:"is-updated" }
+      {label:"Posted by",value:prompt.owner || "NEXUS Contributor",className:"is-author"},
+      {label:"Category",value:prompt.category || "—",className:"is-category"},
+      {label:"Prompt Type",value:prompt.promptType || "—",className:"is-type"},
+      {label:"Status",value:"Published",className:"is-status"},
+      {label:"Last updated",value:formatPromptDetailDate_(prompt.lastUpdated),className:"is-updated"}
     ];
-
     entries.forEach(function (entry) {
-      if (!entry.value) return;
-
       const item = document.createElement("span");
-      item.className =
-        "ai-prompt-detail-meta-pill " +
-        entry.className;
-      item.setAttribute(
-        "title",
-        entry.label + ": " + entry.value
-      );
-
-      const dot = document.createElement("span");
-      dot.className =
-        "ai-prompt-detail-meta-dot";
-      dot.setAttribute("aria-hidden", "true");
-
-      const value = document.createElement("span");
-      value.textContent = entry.value;
-
-      item.append(dot, value);
+      item.className = "ai-prompt-detail-meta-pill " + entry.className;
+      const label = document.createElement("small");
+      label.className = "nx-meta-label";
+      label.textContent = entry.label;
+      const value = document.createElement("strong");
+      value.className = "nx-meta-value";
+      value.textContent = String(entry.value);
+      item.append(label,value);
       refs.detailMeta.appendChild(item);
     });
   }
@@ -4027,8 +4208,10 @@
       showToast("Community posting requires a verified account and administrator activation.", "error");
       return;
     }
-
-    openPromptEditor(null);
+    if (!state.editorReady) state.editorReturnHash = window.location.hash || "#ai-prompt-library?view=explore";
+    const hash = "#ai-prompt-library?view=new";
+    if (window.location.hash !== hash) window.location.hash = hash;
+    handlePromptSubroute_();
   }
 
 
@@ -4043,12 +4226,10 @@
 
     if (!prompt) return;
 
-    const openEditor = function () {
-      openPromptEditor(prompt);
-    };
-
-    // Editing remains a modal until Phase 3; do not abandon the Details route.
-    openEditor();
+    if (!state.editorReady) state.editorReturnHash = window.location.hash || "#ai-prompt-library?view=my-prompts";
+    const hash = "#ai-prompt-library?view=edit&id=" + encodeURIComponent(String(prompt.id));
+    if (window.location.hash !== hash) window.location.hash = hash;
+    handlePromptSubroute_();
   }
 
 
@@ -4068,14 +4249,7 @@
     refs.addForm.reset();
     clearAddError();
     const statusOptions = refs.addForm.elements.status;
-    if (statusOptions) {
-      Array.from(statusOptions.options).forEach(function (option) {
-        if (["Inactive", "Retired"].includes(option.value)) {
-          option.hidden = !(state.adminView && getEffectiveRole() === "admin");
-          option.disabled = option.hidden;
-        }
-      });
-    }
+    if (statusOptions) statusOptions.value = "Active";
 
     populateCategorySelect();
     populatePromptTypeSelect();
@@ -4137,10 +4311,7 @@
           prompt.prompt || "";
       }
 
-      if (status) {
-        status.value =
-          prompt.status || "Active";
-      }
+      if (status) status.value = "Active";
     } else {
       const status =
         refs.addForm.elements.status;
@@ -4166,9 +4337,15 @@
     }
 
     setAddSubmitting(false);
+    state.editorReady = true;
+    if (refs.editorCrumb) refs.editorCrumb.textContent = isEditing ? "Edit Prompt" : "Post a Prompt";
+    if (refs.editorAccess) refs.editorAccess.hidden = true;
+    if (refs.addDialog.querySelector(".ai-prompt-dialog-shell")) refs.addDialog.querySelector(".ai-prompt-dialog-shell").hidden = false;
     updatePromptFieldCounters_();
-    openDialog(refs.addDialog);
     updateEditorBaseline_();
+    requestAnimationFrame(function () {
+      if (refs.editorTitle && state.editorReady) refs.editorTitle.focus({preventScroll: true});
+    });
   }
 
 
@@ -4188,8 +4365,9 @@
 
     state.editingPromptId = "";
     state.editorBaseline = "";
-
-    closeDialog(refs.addDialog);
+    state.editorReady = false;
+    state.editorRouteKey = "";
+    if (refs.addDialog) refs.addDialog.hidden = true;
   }
 
 
@@ -4227,9 +4405,8 @@
   function handleCategorySelectionChange() {
     if (!refs.categorySelect) return;
 
-    if (refs.categorySelect.value) {
-      setNewCategoryMode(false);
-    }
+    if (refs.categorySelect.value) setNewCategoryMode(false);
+    renderPhase3Preview_();
   }
 
 
@@ -4330,9 +4507,8 @@
   function handlePromptTypeSelectionChange() {
     if (!refs.promptTypeSelect) return;
 
-    if (refs.promptTypeSelect.value) {
-      setNewPromptTypeMode(false);
-    }
+    if (refs.promptTypeSelect.value) setNewPromptTypeMode(false);
+    renderPhase3Preview_();
   }
 
 
@@ -4482,20 +4658,29 @@
       prompt: String(
         form.get("prompt") || ""
       ).trim(),
-      status: String(
-        form.get("status") || "Active"
-      )
+      status: "Active" // Draft/Inactive/Retired authoring is deferred.
     };
 
     const isEditing = Boolean(state.editingPromptId);
 
     clearAddError();
+    state.editorSaving = true;
     setAddSubmitting(true);
 
     const runner = google.script.run
       .withSuccessHandler(function (response) {
         setAddSubmitting(false);
         closeAddPromptDialog(true);
+        state.editorSaving = false;
+        const savedId = response && response.prompt && String(response.prompt.id || "");
+        if (savedId) {
+          state.listingContext = {view: "my-prompts", routeHash: "#ai-prompt-library?view=my-prompts", scroll: 0};
+          window.location.hash = "#ai-prompt-library?view=prompt&id=" + encodeURIComponent(savedId);
+          handlePromptSubroute_();
+        } else {
+          window.location.hash = "#ai-prompt-library?view=my-prompts";
+          handlePromptSubroute_();
+        }
 
         showToast(
           response && response.message
@@ -4512,6 +4697,7 @@
       })
       .withFailureHandler(function (error) {
         setAddSubmitting(false);
+        state.editorSaving = false;
 
         console.error(
           isEditing
@@ -4541,6 +4727,7 @@
       }
     } catch (error) {
       setAddSubmitting(false);
+      state.editorSaving = false;
 
       console.error(
         "[AI Prompt Library] Unable to start save request:",
@@ -4567,7 +4754,7 @@
     } else {
       refs.addSubmit.textContent = state.editingPromptId
         ? "Save Changes"
-        : "Publish / Save Draft";
+        : "Publish Prompt";
     }
   }
 
@@ -4784,13 +4971,19 @@
 
   function updateCommunityEngagement_(prompt) {
     if (!prompt) return;
-    if (refs.detailVotes) refs.detailVotes.textContent = (Number(prompt.upvoteCount)||0) + " upvotes";
-    if (refs.detailCopies) refs.detailCopies.textContent = (Number(prompt.copyCount)||0) + " copies";
-    if (refs.detailCommentCount) refs.detailCommentCount.textContent = (Number(prompt.commentCount)||0) + " comments";
+    const upvotes = Math.max(0,Number(prompt.upvoteCount)||0);
+    const copies = Math.max(0,Number(prompt.copyCount)||0);
+    const comments = Math.max(0,Number(prompt.commentCount)||0);
+    if (refs.detailVotes) refs.detailVotes.textContent = upvotes + " upvotes";
+    if (refs.detailCopies) refs.detailCopies.textContent = "▤ " + copies;
+    if (refs.detailCommentCount) refs.detailCommentCount.textContent = "◯ " + comments;
+    const discussionCount = state.root && state.root.querySelector("#nx-prompt-discussion-count");
+    if (discussionCount) discussionCount.textContent = "(" + comments + ")";
     if (refs.detailUpvote) {
       refs.detailUpvote.disabled = !canWriteCommunity_() || prompt.status !== "Active" || !!state.votePending[prompt.id];
       refs.detailUpvote.setAttribute("aria-pressed", prompt.upvotedByMe ? "true" : "false");
-      refs.detailUpvote.textContent = prompt.upvotedByMe ? "▲ Upvoted" : "▲ Upvote";
+      refs.detailUpvote.setAttribute("aria-label", (prompt.upvotedByMe ? "Remove upvote" : "Upvote") + ". " + upvotes + " total upvotes");
+      refs.detailUpvote.textContent = "♧ " + upvotes;
     }
   }
 
@@ -4837,6 +5030,8 @@
       if (refs.commentsPage) refs.commentsPage.textContent = "Page " + state.commentsPage;
       if (refs.commentsPrev) refs.commentsPrev.disabled = state.commentsPage <= 1;
       if (refs.commentsNext) refs.commentsNext.disabled = state.commentsPage * 15 >= state.commentsTotal;
+      const pager = refs.commentsPage && refs.commentsPage.closest(".ai-prompt-community-comments-pager");
+      if (pager) pager.hidden = state.commentsTotal <= 15;
       if (refs.commentForm) refs.commentForm.hidden = data.canComment !== true;
     }).withFailureHandler(function (error) {
       if (id === state.activePromptId) refs.comments.textContent = getErrorMessage(error,"Unable to load discussion.");
@@ -5332,10 +5527,11 @@
       closeDetailDialog();
     }
 
-    if (refs.addDialog && refs.addDialog.open &&
-        state.editingPromptId &&
+    if (state.editorReady && state.editingPromptId &&
         !canEditCommunityPrompt_(findCommunityPrompt_(state.editingPromptId))) {
       closeAddPromptDialog(true);
+      window.location.hash = "#ai-prompt-library?view=explore";
+      handlePromptSubroute_();
     }
     loadLibrary();
   });

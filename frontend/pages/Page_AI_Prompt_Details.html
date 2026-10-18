@@ -1,0 +1,122 @@
+<!-- NOVARE NEXUS — Prompt Details · dedicated routed page partial.
+     Mounted under the existing #ai-prompt-library?view=prompt&id=... route.
+     IDs deliberately preserve existing community handlers and server permission checks. -->
+<section id="ai-prompt-detail-dialog" class="ai-prompt-phase1-detail-page nx-prompt-detail" aria-label="Prompt Details" hidden>
+  <div class="ai-prompt-phase1-navigation nx-prompt-detail-breadcrumbs">
+    <button id="ai-prompt-phase1-back" type="button" class="ai-prompt-phase1-back nx-link-back">← &nbsp; Back to Results</button>
+    <nav id="ai-prompt-phase1-breadcrumbs" aria-label="Prompt location">
+      <span>Prompt Hub</span><span aria-hidden="true">›</span>
+      <span id="ai-prompt-phase1-origin">Explore</span><span aria-hidden="true">›</span>
+      <span id="ai-prompt-phase1-current">Prompt Details</span>
+    </nav>
+  </div>
+
+  <div id="ai-prompt-phase1-state" class="ai-prompt-phase1-state" role="status" aria-live="polite" hidden>
+    <h2 id="ai-prompt-phase1-state-title" tabindex="-1">Loading prompt…</h2>
+    <p id="ai-prompt-phase1-state-message">Checking availability and access.</p>
+    <button type="button" class="ai-prompt-secondary-button" data-ai-prompt-detail-close>Back to Results</button>
+  </div>
+
+  <div class="ai-prompt-dialog-shell nx-prompt-detail-shell">
+    <div class="nx-prompt-detail-columns">
+      <div class="nx-prompt-detail-main">
+        <!-- Reference layout: title and badges / intro / contributor metadata / engagement actions -->
+        <header class="nx-prompt-detail-intro ai-prompt-dialog-header">
+          <div class="nx-prompt-detail-titlebar">
+            <div class="nx-prompt-detail-heading">
+              <div class="ai-prompt-detail-title-line">
+                <h2 id="ai-prompt-detail-title" tabindex="-1">Prompt</h2>
+                <span id="ai-prompt-detail-id" class="ai-prompt-detail-id" hidden></span>
+                <span id="ai-prompt-phase2-verified" class="ai-prompt-phase2-verified nx-prompt-verified" hidden>✓ Verified</span>
+              </div>
+              <p id="nx-prompt-detail-summary" class="nx-prompt-detail-summary">A reusable prompt shared by the NEXUS community.</p>
+            </div>
+            <div id="ai-prompt-community-detail-engagement" class="ai-prompt-community-engagement nx-detail-stats" aria-label="Prompt engagement">
+              <button id="ai-prompt-community-detail-upvote" type="button" aria-pressed="false" class="nx-stat-vote" title="Upvote this prompt">♧ Upvote</button>
+              <span id="ai-prompt-community-detail-votes">0 upvotes</span>
+              <span id="ai-prompt-community-detail-copies">0 copies</span>
+              <span id="ai-prompt-community-detail-comment-count">0 comments</span>
+            </div>
+          </div>
+          <div class="nx-prompt-detail-quick-actions">
+            <div id="ai-prompt-phase2-actions" class="ai-prompt-phase2-actions" hidden>
+              <button type="button" id="ai-prompt-phase2-bookmark" aria-pressed="false">☆ Save</button>
+              <button type="button" id="ai-prompt-phase2-report">⚑ Report</button>
+              <button type="button" class="nx-copy-secondary" data-ai-prompt-detail-copy>▣ Copy Prompt</button>
+              <button type="button" id="ai-prompt-phase2-verify" hidden>Verify Prompt</button>
+              <button type="button" id="ai-prompt-phase2-fork" hidden>Fork Prompt</button>
+              <button type="button" id="ai-prompt-phase2-history" hidden>Version History</button>
+            </div>
+          </div>
+          <div id="ai-prompt-detail-meta" class="ai-prompt-detail-meta nx-prompt-detail-meta" aria-label="Prompt metadata"></div>
+          <p id="ai-prompt-phase2-origin" class="ai-prompt-phase2-origin" hidden></p>
+        </header>
+
+        <div class="ai-prompt-dialog-body nx-prompt-detail-body">
+          <section class="ai-prompt-detail-section nx-detail-panel nx-use-case" aria-label="Use Case">
+            <h3><span class="nx-panel-icon" aria-hidden="true">◎</span> Use Case</h3>
+            <p id="ai-prompt-detail-use-case" class="ai-prompt-detail-use-case"></p>
+          </section>
+
+          <section class="ai-prompt-detail-section nx-detail-panel nx-prompt-content" aria-label="Prompt Content">
+            <div class="ai-prompt-detail-section-heading">
+              <h3><span class="nx-panel-icon" aria-hidden="true">▤</span> Prompt Content</h3>
+              <button id="ai-prompt-detail-copy" class="ai-prompt-copy-button" type="button" title="Copy prompt" aria-label="Copy prompt">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="10" height="10" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                Copy Prompt
+              </button>
+            </div>
+            <pre id="ai-prompt-detail-prompt" class="ai-prompt-detail-prompt"></pre>
+          </section>
+
+          <section class="ai-prompt-community-discussion nx-detail-panel nx-discussion" aria-label="Discussion">
+            <div class="nx-discussion-heading">
+              <h3><span class="nx-panel-icon" aria-hidden="true">▣</span> Discussion <small id="nx-prompt-discussion-count"></small></h3>
+            </div>
+            <div id="ai-prompt-community-comments" aria-live="polite"></div>
+            <div class="ai-prompt-community-comments-pager nx-comment-pager">
+              <button type="button" id="ai-prompt-comments-prev">Previous</button>
+              <span id="ai-prompt-comments-page">Page 1</span>
+              <button type="button" id="ai-prompt-comments-next">Next</button>
+            </div>
+            <form id="ai-prompt-comment-form" class="ai-prompt-community-comment-form nx-comment-form">
+              <label class="nx-visually-hidden" for="ai-prompt-comment-body">Add a comment</label>
+              <textarea id="ai-prompt-comment-body" maxlength="2000" rows="2" placeholder="Add a comment…" required></textarea>
+              <button id="ai-prompt-comment-submit" type="submit">Post Comment</button>
+            </form>
+          </section>
+        </div>
+      </div>
+
+      <!-- Reference layout: stacked informational/action cards in a narrow right sidebar -->
+      <aside class="nx-prompt-detail-aside" aria-label="Prompt information and related content">
+        <section class="nx-detail-panel nx-about-panel" aria-labelledby="nx-about-title">
+          <h3 id="nx-about-title"><span class="nx-panel-icon" aria-hidden="true">●</span> About This Prompt</h3>
+          <dl class="nx-about-rows">
+            <div><dt>Prompt ID</dt><dd id="nx-about-id">—</dd></div>
+            <div><dt>Category</dt><dd id="nx-about-category">—</dd></div>
+            <div><dt>Prompt Type</dt><dd id="nx-about-type">—</dd></div>
+            <div><dt>Status</dt><dd class="nx-published"><span aria-hidden="true" class="nx-green-dot"></span>Published</dd></div>
+            <div><dt>Posted by</dt><dd id="nx-about-author">—</dd></div>
+            <div><dt>Created</dt><dd id="nx-about-created">—</dd></div>
+            <div><dt>Last Updated</dt><dd id="nx-about-updated">—</dd></div>
+          </dl>
+        </section>
+
+        <section class="ai-prompt-phase1-related nx-detail-panel nx-related-panel" aria-label="Related published prompts">
+          <div class="nx-related-title"><h3><span class="nx-panel-icon" aria-hidden="true">↗</span> Related Prompts</h3></div>
+          <div id="ai-prompt-phase1-related-list" class="ai-prompt-phase1-related-list"></div>
+        </section>
+
+        <section id="ai-prompt-detail-admin-actions" class="ai-prompt-detail-admin-actions nx-detail-panel nx-owner-panel" aria-label="Owner and administrator actions" hidden>
+          <h3><span class="nx-panel-icon" aria-hidden="true">⚙</span> Owner Actions</h3>
+          <div class="nx-owner-buttons">
+            <button id="ai-prompt-detail-edit" type="button" class="ai-prompt-secondary-button">✎ &nbsp; Edit Prompt</button>
+            <button id="ai-prompt-detail-delete" type="button" class="ai-prompt-danger-button" hidden>▤ &nbsp; Delete Prompt</button>
+          </div>
+        </section>
+        <button type="button" class="nx-aside-back" data-ai-prompt-detail-close>← &nbsp; Back to Results</button>
+      </aside>
+    </div>
+  </div>
+</section>

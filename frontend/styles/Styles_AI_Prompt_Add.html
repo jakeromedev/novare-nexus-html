@@ -256,10 +256,15 @@
 .ai-prompt-library-page .nx-prompt-add .nx-add-action-bar {
   position:sticky!important;bottom:0!important;z-index:21;
   display:flex!important;justify-content:space-between!important;align-items:center!important;
-  width:calc(100% + 174px);margin:18px 0 0 -174px!important;
-  padding:15px 22px!important;border-top:1px solid #e3eaf5!important;
-  background:rgba(255,255,255,.975)!important;backdrop-filter:blur(10px);
-  border-radius:0!important;box-shadow:0 -5px 22px rgba(25,60,118,.06);
+  width:100%!important;max-width:100%;box-sizing:border-box;
+  margin:18px 0 0!important;
+  padding:14px clamp(14px,2vw,24px)!important;
+  gap:12px;
+  border:1px solid #dce7f7!important;
+  background:rgba(255,255,255,.98)!important;
+  backdrop-filter:blur(10px);
+  border-radius:12px!important;
+  box-shadow:0 6px 22px rgba(25,60,118,.08);
 }
 .ai-prompt-library-page .nx-prompt-add .nx-add-action-bar .ai-prompt-secondary-button {
   min-height:39px;padding:0 20px!important;border-radius:8px!important;
@@ -288,7 +293,7 @@
  .ai-prompt-library-page .nx-prompt-add .nx-add-benefits {padding:14px 11px;gap:8px;}
  .ai-prompt-library-page .nx-prompt-add .nx-add-workspace {grid-template-columns:135px minmax(0,1fr);gap:15px;}
  .ai-prompt-library-page .nx-prompt-add .nx-add-form-grid {grid-template-columns:minmax(0,1.5fr) minmax(280px,.9fr);}
- .ai-prompt-library-page .nx-prompt-add .nx-add-action-bar {width:calc(100% + 150px);margin-left:-150px!important;}
+
 }
 @media(max-width:1030px) {
  .ai-prompt-library-page .nx-prompt-add .nx-add-intro {grid-template-columns:1fr 180px;}
@@ -305,7 +310,7 @@
  .ai-prompt-library-page .nx-prompt-add .nx-add-step:not(:last-child):after {display:none;}
  .ai-prompt-library-page .nx-prompt-add .nx-add-form-grid {grid-template-columns:1fr;}
  .ai-prompt-library-page .nx-prompt-add .nx-add-preview-rail {position:static;}
- .ai-prompt-library-page .nx-prompt-add .nx-add-action-bar {margin-left:0!important;width:100%;}
+
  .ai-prompt-library-page .nx-prompt-add .ai-prompt-classification-layout {grid-template-columns:1fr 1fr;}
  .ai-prompt-library-page .nx-prompt-add .ai-prompt-name-field {grid-column:1/-1;}
 }
@@ -353,6 +358,52 @@
   @keyframes nx-add-step-reveal {
     from { opacity: .35; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
+  }
+}
+
+/* Final Preview appears only at Step 4; no empty right-hand column earlier. */
+.ai-prompt-library-page .nx-prompt-add #nx-add-step-4[hidden] {
+  display:none!important;
+}
+.ai-prompt-library-page .nx-prompt-add:not(.is-preview-step) .nx-add-form-grid {
+  grid-template-columns:minmax(0,1fr)!important;
+}
+.ai-prompt-library-page .nx-prompt-add.is-preview-step .nx-add-preview-panel {
+  border:2px solid #337dff!important;
+  background:linear-gradient(160deg,#ffffff 60%,#f1f7ff 100%)!important;
+  box-shadow:0 0 0 5px rgba(43,116,250,.10),0 14px 34px rgba(40,95,204,.12)!important;
+}
+.ai-prompt-library-page .nx-prompt-add.is-preview-step .nx-add-preview-panel .nx-add-card-icon {
+  background:linear-gradient(135deg,#1972ff,#1156e9);
+  color:white;
+}
+.ai-prompt-library-page .nx-prompt-add.is-preview-step .nx-add-preview-panel .nx-add-section-title h3 {
+  color:#1257d6;
+}
+.ai-prompt-library-page .nx-prompt-add.is-preview-step .nx-add-preview-tip {
+  border:1px solid #cbdfff;
+}
+/* Keep action controls inside the editor; avoid wide white strips/negative offsets. */
+.ai-prompt-library-page .nx-prompt-add .nx-add-action-bar {
+  left:auto!important;
+  right:auto!important;
+  flex-wrap:wrap;
+}
+@media(max-width:590px) {
+  .ai-prompt-library-page .nx-prompt-add .nx-add-action-bar {
+    gap:10px;
+    padding:11px 12px!important;
+  }
+  .ai-prompt-library-page .nx-prompt-add .nx-add-action-primary {
+    margin-left:auto;
+  }
+}
+@media(max-width:830px) {
+  /* Keep final actions after the form on narrow screens; this prevents the
+     floating Ask NOSCA control from sitting on top of the Publish button. */
+  .ai-prompt-library-page .nx-prompt-add .nx-add-action-bar {
+    position:static!important;
+    margin:14px 0 90px!important;
   }
 }
 </style>

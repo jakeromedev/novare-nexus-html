@@ -1409,7 +1409,7 @@
 
   // Progressive authoring: unlock the next section only after the current
   // section validates. Previously unlocked sections stay visible and editable.
-  // The live preview remains visible on the right at every step.
+  // The final review preview appears only during the active Preview step.
   let promptEditorStep_ = 1;
   let promptEditorUnlockedStep_ = 1;
   const EDITOR_STEPS_ = ["Classification", "Prompt Information", "Publish", "Preview"];
@@ -1428,6 +1428,12 @@
       const section = refs.addDialog.querySelector("#nx-add-step-" + step);
       if (section) section.hidden = step > promptEditorUnlockedStep_;
     }
+    // Preview is a dedicated final step. Hide it whenever an earlier step
+    // is active, even if Step 4 was previously unlocked.
+    const preview = refs.addDialog.querySelector("#nx-add-step-4");
+    const previewActive = promptEditorStep_ === 4;
+    if (preview) preview.hidden = !previewActive;
+    refs.addDialog.classList.toggle("is-preview-step", previewActive);
     refs.addDialog.querySelectorAll("[data-nx-add-step]").forEach(function (button) {
       const step = Number(button.dataset.nxAddStep);
       const active = step === promptEditorStep_;

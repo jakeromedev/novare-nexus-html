@@ -250,6 +250,154 @@ function loadNoscaExistingIndex_() {
 }
 
 /**
+ * LEGACY FULL SCAN SAFE WRITE SUPPORT
+ *
+ * Read the existing index once, retaining physical row numbers. Unlike the
+ * original full-sheet writer, these helpers never clear/reorder unrelated rows.
+ * A duplicate Item ID is unsafe for incremental upserts and aborts the scan.
+ */
+function loadNoscaIndexPatchSnapshot_() {
+  const sheet = getNoscaIndexSheet_();
+  assertNoscaIndexHeaders_(sheet);
+  const width = NOSCA_CONFIG.indexHeaders.length;
+  const lastRow = sheet.getLastRow();
+  const values = lastRow > 1
+    ? sheet.getRange(2, 1, lastRow - 1, width).getValues()
+    : [];
+  const records = {};
+  const rowNumbers = {};
+  values.forEach(function (row, index) {
+    const id = String(row[0] || '').trim();
+    if (!id) return;
+    if (rowNumbers[id]) {
+      throw new Error('Duplicate NOSCA_Index Item ID ' + id +
+        '. Resolve the duplicate before resuming the full scan.');
+    }
+    const generated = String(row[10] || '').trim();
+    const manual = String(row[11] || '').trim();
+    rowNumbers[id] = index + 2;
+    records[id] = {
+      fileId: id,
+      itemType: String(row[1] || '').trim(),
+      fileName: String(row[2] || '').trim(),
+      folderPath: String(row[3] || '').trim(),
+      hierarchyContext: String(row[4] || '').trim(),
+      documentType: String(row[5] || '').trim(),
+      fileFormat: String(row[6] || '').trim(),
+      mimeType: String(row[7] || '').trim(),
+      modifiedAt: normalizeNoscaComparableDate_(row[8]),
+      driveUrl: String(row[9] || '').trim(),
+      generatedKeywords: generated,
+      manualKeywords: manual,
+      keywords: [generated, manual].filter(Boolean).join(', '),
+      indexedAt: normalizeNoscaDateValue_(row[12]),
+      status: String(row[13] || '').trim(),
+      notes: String(row[14] || '').trim()
+    };
+  });
+  return {sheet: sheet, rowNumbers: rowNumbers, records: records,
+    lastRow: lastRow, width: width};
+}
+
+/**
+ * Commit only affected records of a legacy full-scan batch.
+ * - Existing changed rows: columns A:K and M:O only (never L / Manual Keywords).
+ * - Existing unchanged rows: only column M / Indexed At (scan generation).
+ * - New rows: a single contiguous append; no delete/reorder of existing rows.
+ *
+ * Safe to replay a failed batch: each record is addressed by Item ID and a
+ * retry of a partly written batch updates that same row instead of duplicating.
+ */
+function writeNoscaLegacyPartialBatch_(snapshot, changedById, touchedById,
+                                        newById, stamp) {
+  const sheet = snapshot.sheet;
+  const changedIds = Object.keys(changedById);
+  const newIds = Object.keys(newById);
+  const touchedIds = Object.keys(touchedById).filter(function (id) {
+    return !changedById[id] && !newById[id];
+  });
+
+  // Existing changed records. Preserve column L even if users edited it after
+  // the snapshot was read; it is NEVER included in these write ranges.
+  changedIds.forEach(function (id) {
+    const rowNo = snapshot.rowNumbers[id];
+    if (!rowNo) throw new Error('Missing legacy index row for ' + id);
+    const values = noscaIndexRecordToRow_(changedById[id]);
+    sheet.getRange(rowNo, 1, 1, 11).setValues([values.slice(0, 11)]);
+    sheet.getRange(rowNo, 13, 1, 3).setValues([values.slice(12, 15)]);
+  });
+
+  // Appending after any changed-row operations is safe for a retry. If this
+  // write succeeds but a later operation fails, the next invocation loads
+  // the now-present IDs instead of appending them again.
+  if (newIds.length) {
+    const startRow = sheet.getLastRow() + 1;
+    const needed = startRow + newIds.length - 1;
+    if (needed > sheet.getMaxRows()) {
+      sheet.insertRowsAfter(sheet.getMaxRows(), needed - sheet.getMaxRows());
+    }
+    const values = newIds.map(function (id) {
+      return noscaIndexRecordToRow_(newById[id]);
+    });
+    sheet.getRange(startRow, 1, values.length, snapshot.width).setValues(values);
+  }
+
+  // The final scan detects unseen files using Indexed At. Stamp unchanged
+  // records as visited too. RangeList coalesces many unrelated cells into
+  // bounded service operations instead of rewriting thousands of columns.
+  const addresses = touchedIds.map(function (id) {
+    if (!snapshot.rowNumbers[id]) {
+      throw new Error('Missing legacy index row for touch ' + id);
+    }
+    return 'M' + snapshot.rowNumbers[id];
+  });
+  for (let i = 0; i < addresses.length; i += 50) {
+    sheet.getRangeList(addresses.slice(i, i + 50)).setValue(stamp);
+  }
+  SpreadsheetApp.flush();
+  return {changed: changedIds.length, inserted: newIds.length,
+    stampedUnchanged: touchedIds.length};
+}
+
+/** Finalize in place: only M:O of unseen records, in bounded contiguous runs. */
+function finalizeNoscaLegacyPartialRows_(snapshot, scanStartedAt) {
+  const stamp = new Date(scanStartedAt);
+  const comparable = normalizeNoscaComparableDate_(scanStartedAt);
+  const rowChanges = [];
+  Object.keys(snapshot.records).forEach(function (id) {
+    const record = snapshot.records[id];
+    if (normalizeNoscaComparableDate_(record.indexedAt) === comparable) {
+      return;
+    }
+    rowChanges.push({number: snapshot.rowNumbers[id], values: [stamp,
+      NOSCA_CONFIG.statuses.skipped,
+      'Source file was not found under the configured Ask NOSCA ' +
+      'knowledge root during the latest completed full scan.']});
+  });
+  rowChanges.sort(function (a, b) {return a.number - b.number;});
+  let begin = 0;
+  let batch = [];
+  function commit() {
+    if (!batch.length) return;
+    snapshot.sheet.getRange(begin, 13, batch.length, 3).setValues(batch);
+    batch = [];
+  }
+  rowChanges.forEach(function (update) {
+    if (!batch.length) begin = update.number;
+    if (batch.length &&
+        (update.number !== begin + batch.length || batch.length >= 80)) {
+      commit();
+      begin = update.number;
+    }
+    batch.push(update.values);
+  });
+  commit();
+  SpreadsheetApp.flush();
+  return {removedFiles: rowChanges.length,
+    writtenRows: Object.keys(snapshot.records).length};
+}
+
+/**
  * Replaces index data rows while preserving sheet formatting and validation.
  */
 function writeNoscaIndexRows_(rows) {

@@ -238,6 +238,21 @@ function getNoscaIndexRefreshStatus() {
 }
 
 /**
+ * Logs the current resumable index-refresh checkpoint without changing it.
+ * Run this wrapper from the Apps Script editor to see status in Executions.
+ *
+ * @return {Object}
+ */
+function logNoscaIndexRefreshStatus() {
+  const status = getNoscaIndexRefreshStatus();
+  console.log(
+    '[NOSCA Index Refresh Status]\n' +
+    JSON.stringify(status, null, 2)
+  );
+  return status;
+}
+
+/**
  * Public diagnostic for the current NOSCA_Index contents.
  */
 function getNoscaIndexStatus() {
@@ -355,105 +370,71 @@ function createNoscaIndexScanState_() {
   };
 }
 
+/**
+ * Legacy full-scan writer optimized for the transition to delta sync.
+ * No sorting, clearing, or rewriting the full NOSCA_Index per batch.
+ * The traversal checkpoint remains unchanged and retries are idempotent.
+ */
 function applyNoscaIndexBatch_(items, scanStartedAt) {
-  const existing = loadNoscaExistingIndex_();
+  const snapshot = loadNoscaIndexPatchSnapshot_();
+  const existing = snapshot.records;
   const indexedAt = new Date(scanStartedAt);
-
   if (isNaN(indexedAt.getTime())) {
     throw new Error('Ask NOSCA scan checkpoint has an invalid start time.');
   }
-
+  const changedById = {};
+  const touchedById = {};
+  const newById = {};
   const summary = {
-    processedFiles: 0,
-    processedItems: 0,
-    newFiles: 0,
-    updatedFiles: 0,
-    unchangedFiles: 0,
-    unsupportedFiles: 0,
-    folderItems: 0,
-    fileItems: 0,
-    writtenRows: 0
+    processedFiles: 0, processedItems: 0, newFiles: 0,
+    updatedFiles: 0, unchangedFiles: 0, unsupportedFiles: 0,
+    folderItems: 0, fileItems: 0, writtenRows: 0
   };
 
   (items || []).forEach(function (item) {
     if (!item || !item.id) return;
-
     const previous = existing[item.id] || null;
     const next = buildNoscaIndexRecord_(item, previous, indexedAt);
-    const changed =
-      !previous ||
-      hasNoscaIndexMetadataChanged_(previous, next);
-
-    if (!previous) {
-      summary.newFiles += 1;
-    } else if (changed) {
-      summary.updatedFiles += 1;
-    } else {
-      summary.unchangedFiles += 1;
-    }
-
+    const changed = !previous ||
+      hasNoscaIndexMetadataChanged_(previous, next) ||
+      previous.notes !== next.notes;
+    if (!previous) summary.newFiles += 1;
+    else if (changed) summary.updatedFiles += 1;
+    else summary.unchangedFiles += 1;
     if (next.status === NOSCA_CONFIG.statuses.unsupported) {
       summary.unsupportedFiles += 1;
     }
-
     if (next.itemType === NOSCA_CONFIG.itemTypes.folder) {
       summary.folderItems += 1;
     } else {
       summary.fileItems += 1;
       summary.processedFiles += 1;
     }
-
     next.indexedAt = indexedAt;
-
     existing[item.id] = next;
+    if (!snapshot.rowNumbers[item.id]) {
+      newById[item.id] = next;
+    } else if (changed) {
+      changedById[item.id] = next;
+    } else {
+      touchedById[item.id] = true;
+    }
     summary.processedItems += 1;
   });
 
-  const records = Object.keys(existing)
-    .map(function (fileId) {
-      return existing[fileId];
-    })
-    .sort(compareNoscaIndexRecords_);
-
-  const rows = records.map(noscaIndexRecordToRow_);
-  writeNoscaIndexRows_(rows);
-  summary.writtenRows = rows.length;
-
-  console.log('[Ask NOSCA] Index batch written:', summary);
-
+  const patch = writeNoscaLegacyPartialBatch_(snapshot, changedById,
+    touchedById, newById, indexedAt);
+  summary.writtenRows = Object.keys(existing).length;
+  summary.partialWrites = patch;
+  console.log('[Ask NOSCA] Index batch updated in place:', summary);
   return summary;
 }
 
 function finalizeNoscaIndexScan_(state) {
-  const existing = loadNoscaExistingIndex_();
-  const scanStartedAt = normalizeNoscaComparableDate_(state.scanStartedAt);
-  const indexedAt = new Date(state.scanStartedAt);
-  const records = [];
-  let removedFiles = 0;
-
-  Object.keys(existing).forEach(function (fileId) {
-    const record = existing[fileId];
-    const touchedAt = normalizeNoscaComparableDate_(record.indexedAt);
-
-    if (touchedAt !== scanStartedAt) {
-      record.status = NOSCA_CONFIG.statuses.skipped;
-      record.indexedAt = indexedAt;
-      record.notes =
-        'Source file was not found under the configured Ask NOSCA ' +
-        'knowledge root during the latest completed full scan.';
-      removedFiles += 1;
-    }
-
-    records.push(record);
-  });
-
-  records.sort(compareNoscaIndexRecords_);
-  writeNoscaIndexRows_(records.map(noscaIndexRecordToRow_));
-
-  return {
-    removedFiles: removedFiles,
-    writtenRows: records.length
-  };
+  const snapshot = loadNoscaIndexPatchSnapshot_();
+  const result = finalizeNoscaLegacyPartialRows_(snapshot, state.scanStartedAt);
+  console.log('[Ask NOSCA] Finalized untouched rows in place:', result);
+  return result;
 }
 
 function buildNoscaIndexRefreshResult_(

@@ -176,6 +176,13 @@ const NOSCA_CONFIG = Object.freeze({
     diagnosticMaxFiles: 8
   }),
 
+  // Drive search is opt-in through Script Property NOSCA_SEARCH_BACKEND=drive.
+  driveSearch: Object.freeze({
+    pageSize: 100,
+    maxPages: 2,
+    maxScopedResults: 60
+  }),
+
   retrieval: Object.freeze({
     // Number of metadata-ranked files to extract for one knowledge question.
     maxCandidateFiles: 5,

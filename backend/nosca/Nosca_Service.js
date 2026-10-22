@@ -126,6 +126,9 @@ function askNosca(request) {
             contextChunkCount: 0,
             contextChars: 0,
             lookupSummary: lookup.summary,
+            searchBackend: lookup.backend || 'index',
+            searchElapsedMs: lookup.searchElapsedMs || 0,
+            searchTruncated: lookup.truncated === true,
             requestedDocumentTypes:
               lookup.requestedDocumentTypes || [],
             retrievalWarnings: []
@@ -184,10 +187,15 @@ function askNosca(request) {
           contextChunkCount: 0,
           contextChars: 0,
           lookupSummary: lookup.summary,
+          searchBackend: lookup.backend || 'index',
+          searchElapsedMs: lookup.searchElapsedMs || 0,
+          searchTruncated: lookup.truncated === true,
           requestedDocumentTypes:
             lookup.requestedDocumentTypes || [],
           retrievalWarnings: [
-            'No matching indexed documents were found.'
+            lookup.backend === 'drive'
+              ? 'No matching readable Drive documents were found.'
+              : 'No matching indexed documents were found.'
           ]
         },
         elapsedMs: lookupElapsedMs
@@ -277,7 +285,10 @@ function askNosca(request) {
           contextChunkCount: 0,
           contextChars: 0,
           retrievalWarnings:
-            retrieval.warnings || []
+            retrieval.warnings || [],
+          searchBackend: retrieval.backend || 'index',
+          searchElapsedMs: retrieval.searchElapsedMs || 0,
+          extractionElapsedMs: retrieval.extractionElapsedMs || 0
         },
         elapsedMs: Date.now() - startedAt
       };
@@ -305,10 +316,12 @@ function askNosca(request) {
       return noResult;
     }
 
+    const generationStartedAt = Date.now();
     const generated = generateNoscaGroundedAnswer_(
       resolvedQuestion,
       retrieval
     );
+    const generationElapsedMs = Date.now() - generationStartedAt;
 
     const result = {
       ok: true,
@@ -345,6 +358,10 @@ function askNosca(request) {
           retrieval.totalContextChars,
         retrievalWarnings:
           retrieval.warnings || [],
+        searchBackend: retrieval.backend || 'index',
+        searchElapsedMs: retrieval.searchElapsedMs || 0,
+        extractionElapsedMs: retrieval.extractionElapsedMs || 0,
+        generationElapsedMs: generationElapsedMs,
         finishReason:
           generated.finishReason || ''
       },

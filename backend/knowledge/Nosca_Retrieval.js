@@ -49,6 +49,9 @@ function previewNoscaRetrieval(question) {
     contextChunkCount: result.contextChunks.length,
     totalContextChars: result.totalContextChars,
     elapsedMs: result.elapsedMs,
+    backend: result.backend || 'index',
+    searchElapsedMs: result.searchElapsedMs || 0,
+    extractionElapsedMs: result.extractionElapsedMs || 0,
     candidates: result.candidates.map(function (candidate) {
       return {
         fileId: candidate.fileId,
@@ -120,17 +123,35 @@ function retrieveNoscaContext_(question) {
     );
   }
 
-  const existing = loadNoscaExistingIndex_();
-
-  noscaDebugLog_(
-    'NOSCA_Index summary',
-    summarizeNoscaIndexForDebug_(existing)
-  );
-
-  const rankedCandidates = rankNoscaIndexRecords_(
-    existing,
-    normalizedQuestion
-  );
+  const driveMode = useNoscaNativeDriveSearch_();
+  const searchStartedAt = Date.now();
+  const search = driveMode
+    ? searchNoscaDriveRecords_(normalizedQuestion)
+    : null;
+  const existing = driveMode ? null : loadNoscaExistingIndex_();
+  if (!driveMode) {
+    noscaDebugLog_('NOSCA_Index summary', summarizeNoscaIndexForDebug_(existing));
+  }
+  const rankedCandidates = driveMode
+    ? search.records
+        .filter(function (record) {
+          return record.itemType !== NOSCA_CONFIG.itemTypes.folder &&
+            record.status === NOSCA_CONFIG.statuses.active &&
+            NOSCA_SUPPORTED_CONTENT_MIME_TYPES.indexOf(record.mimeType) !== -1;
+        })
+        .map(function (record) {
+          const scoreResult = scoreNoscaMetadataRecord_(record,normalizedQuestion);
+          return Object.assign({},record,{
+            // Native fullText may hit document BODY even when metadata does not.
+            // Let the chunk scorer verify such candidates after extraction.
+            metadataScore: Math.max(scoreResult.score,
+              NOSCA_CONFIG.retrieval.minMetadataScore),
+            matchedTerms: scoreResult.matchedTerms
+          });
+        })
+        .sort(compareNoscaCandidates_)
+    : rankNoscaIndexRecords_(existing,normalizedQuestion);
+  const searchElapsedMs = Date.now() - searchStartedAt;
 
   noscaDebugLog_(
     'Top metadata-ranked candidates BEFORE threshold',
@@ -203,14 +224,17 @@ function retrieveNoscaContext_(question) {
       candidates: [],
       contextChunks: [],
       totalContextChars: 0,
-      warnings: [
-        'No sufficiently relevant source files were found in NOSCA_Index.'
-      ],
+      warnings: [driveMode
+        ? 'No matching readable Drive files were found under the knowledge root.'
+        : 'No sufficiently relevant source files were found in NOSCA_Index.'],
+      backend: driveMode ? 'drive' : 'index',
+      searchElapsedMs: searchElapsedMs,
       elapsedMs: Date.now() - startedAt
     };
   }
 
-  const warnings = [];
+  const warnings = search && search.warning ? [search.warning] : [];
+  const extractionStartedAt = Date.now();
   const scoredChunks = [];
 
   candidates.forEach(function (candidate) {
@@ -414,6 +438,9 @@ function retrieveNoscaContext_(question) {
     contextChunks: bounded.contextChunks,
     totalContextChars: bounded.totalChars,
     warnings: warnings,
+    backend: driveMode ? 'drive' : 'index',
+    searchElapsedMs: searchElapsedMs,
+    extractionElapsedMs: Date.now() - extractionStartedAt,
     elapsedMs: Date.now() - startedAt
   };
 }
@@ -461,6 +488,9 @@ function isNoscaDocumentLookupQuestion_(question) {
  * not necessarily extract their contents.
  */
 function findNoscaIndexedDocuments_(question) {
+  if (useNoscaNativeDriveSearch_()) {
+    return findNoscaDriveDocuments_(question);
+  }
   const normalizedQuestion = normalizeNoscaQuery_(question);
   const existing = loadNoscaExistingIndex_();
   const requestedTypes = detectNoscaRequestedDocumentTypes_(
@@ -574,6 +604,48 @@ function findNoscaIndexedDocuments_(question) {
     results: selected,
     summary: summarizeNoscaDocumentLookupResults_(selected)
   };
+}
+
+/** Live Drive document lookup; returns the SAME contract used by NOSCA UI. */
+function findNoscaDriveDocuments_(question) {
+  const normalizedQuestion = normalizeNoscaQuery_(question);
+  const search = searchNoscaDriveRecords_(normalizedQuestion);
+  const requestedTypes = detectNoscaRequestedDocumentTypes_(normalizedQuestion.text);
+  const requestedItemTypes = detectNoscaRequestedItemTypes_(normalizedQuestion.text);
+  const records = search.records.map(function(record) {
+    const scoring = scoreNoscaMetadataRecord_(record,normalizedQuestion);
+    const coverage = evaluateNoscaLookupCoverage_(record,normalizedQuestion,
+      requestedTypes,requestedItemTypes);
+    return Object.assign({},record,{
+      metadataScore:scoring.score,matchedTerms:scoring.matchedTerms,
+      lookupCoverage:coverage.ratio,
+      lookupMatchedTerms:coverage.matchedTerms,
+      lookupRequiredAnchors:coverage.requiredAnchors,
+      lookupMissingAnchors:coverage.missingAnchors,
+      lookupPassesContext:coverage.passes
+    });
+  }).filter(function(record) {
+    return record.metadataScore >= NOSCA_CONFIG.retrieval.minMetadataScore &&
+      record.lookupPassesContext &&
+      (!requestedItemTypes.length ||
+        requestedItemTypes.indexOf(record.itemType)!==-1) &&
+      (!requestedTypes.length ||
+        requestedTypes.indexOf(record.documentType)!==-1);
+  }).sort(compareNoscaLookupCandidates_);
+  const limit = Math.max(Number(NOSCA_CONFIG.retrieval.maxDocumentLookupResults||12),1);
+  const selected = (requestedTypes.length || requestedItemTypes.length)
+    ? records.slice(0,limit)
+    : selectNoscaDiversifiedDocumentResults_(records,limit);
+  selected.forEach(function(record,index){record.sourceIndex=index+1;});
+  return {ok:true, question:normalizedQuestion.text,
+    queryTerms:normalizedQuestion.terms,
+    requestedDocumentTypes:requestedTypes,
+    requestedItemTypes:requestedItemTypes,
+    totalMatches:records.length,
+    results:selected,
+    summary:summarizeNoscaDocumentLookupResults_(selected),
+    backend:'drive',searchElapsedMs:search.elapsedMs,
+    truncated:search.truncated, warning:search.warning};
 }
 
 function detectNoscaRequestedDocumentTypes_(question) {

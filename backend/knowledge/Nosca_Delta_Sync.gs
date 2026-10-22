@@ -49,12 +49,14 @@ function pollNoscaDriveChanges_() {
   });
   if(lease.busy)return {busy:true,fetched:0,queued:0,advanced:false};
   try {
+    // Apps Script Advanced Drive Service requires pageToken as the FIRST
+    // positional argument, not in the optional-parameter object.
     const params=Object.assign({
-      pageToken:lease.token, pageSize:NOSCA_DELTA.maxChangesPage,
+      pageSize:NOSCA_DELTA.maxChangesPage,
       includeRemoved:true, supportsAllDrives:true, includeItemsFromAllDrives:true,
       fields:'nextPageToken,newStartPageToken,changes(fileId,removed,time,changeType,file(id,name,mimeType,parents,driveId,trashed,modifiedTime,webViewLink))'
     },root.driveId?{driveId:root.driveId}:{});
-    const page=Drive.Changes.list(params);
+    const page=Drive.Changes.list(lease.token,params);
     const changes=page.changes||[];
     const events=changes.map(function(change,i){return noscaDeltaEventRow_(scope,lease.token,i,change);}).filter(Boolean);
     const next=page.nextPageToken || page.newStartPageToken || '';

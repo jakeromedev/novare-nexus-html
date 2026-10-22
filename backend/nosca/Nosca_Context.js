@@ -428,14 +428,14 @@ function buildNoscaResolvedQuestion_(
 function buildNoscaTopicLabel_(topicTerms) {
   return (topicTerms || [])
     .map(function (term) {
-      if (String(term).length <= 4) {
-        return String(term).toUpperCase();
-      }
-
-      return String(term)
-        .charAt(0)
-        .toUpperCase() +
-        String(term).slice(1);
+      // Only true acronyms are uppercased; ordinary words like "year"
+      // should not render as "YEAR" in human-facing search responses.
+      const upper = {pjl:true,api:true,ee:true,gcp:true,cx:true,
+        hmo:true,bop:true,aws:true};
+      if (upper[String(term)]) return String(term).toUpperCase();
+      if (/^\d+$/.test(String(term))) return String(term);
+      if (String(term) === 'cashhub') return 'CashHub';
+      return String(term).charAt(0).toUpperCase() + String(term).slice(1);
     })
     .join(' ')
     .slice(0, 160);

@@ -136,7 +136,8 @@ function noscaDriveScopeMemoFromFolderMap_(root, metrics) {
  * an exhaustive list. The Drive API's fullText search is token-based, not
  * semantic or identical to Google Drive's website UI.
  */
-function searchNoscaDriveRecords_(question, scopeStrategyOverride) {
+function searchNoscaDriveRecords_(question, scopeStrategyOverride, searchOptions) {
+  searchOptions = searchOptions || {};
   const startedAt = Date.now();
   assertNoscaAdvancedDriveService_();
   const scopeStrategy = scopeStrategyOverride || noscaDriveScopeStrategy_();
@@ -188,19 +189,19 @@ function searchNoscaDriveRecords_(question, scopeStrategyOverride) {
   }
 
   const config = NOSCA_CONFIG.driveSearch || {};
-  const pageSize = Math.min(1000, Math.max(1, Number(config.pageSize || 100)));
-  const maxPages = Math.min(10, Math.max(1, Number(config.maxPages || 2)));
-  const maxResults = Math.min(200, Math.max(1, Number(config.maxScopedResults || 60)));
-  const q = 'trashed = false and (' + searchTerms.map(function (term) {
+  const pageSize = Math.min(1000, Math.max(1, Number(searchOptions.pageSize || config.pageSize || 100)));
+  const maxPages = Math.min(10, Math.max(1, Number(searchOptions.maxPages || config.maxPages || 2)));
+  const maxResults = Math.min(200, Math.max(1, Number(searchOptions.maxResults || config.maxScopedResults || 60)));
+  const q = searchOptions.q || ('trashed = false and (' + searchTerms.map(function (term) {
     return "fullText contains '" + escapeNoscaDriveQueryValue_(term) + "'";
-  }).join(' or ') + ')';
+  }).join(' or ') + ')');
   const params = {
     q: q,
     pageSize: pageSize,
     supportsAllDrives: true,
     includeItemsFromAllDrives: true,
     fields: 'nextPageToken,incompleteSearch,files(id,name,mimeType,parents,driveId,webViewLink,modifiedTime,trashed)',
-    orderBy: 'modifiedTime desc'
+    orderBy: searchOptions.orderBy || 'modifiedTime desc'
   };
   // 'allDrives' covers My Drive and shared drives the requester belongs to;
   // Google may flag broad queries as incompleteSearch. We surface that warning.
@@ -288,6 +289,7 @@ function searchNoscaDriveRecords_(question, scopeStrategyOverride) {
     scanned: scanned,
     truncated: truncated,
     metrics: metrics,
+    queryTier: searchOptions.tier || 'legacy',
     warning: truncated
       ? 'Drive search was bounded; additional matching files may exist.'
       : ''
@@ -302,6 +304,9 @@ function noscaDriveSearchTerms_(query) {
   const seen = {};
   const selected = [];
   terms.forEach(function (term) {
+    // Bare numbers can match thousands of file bodies; keep them as required
+    // ranking qualifiers, but do not use them in the broad Drive OR query.
+    if (/^\d+$/.test(term)) return;
     // Avoid spending the limited Drive search window on generic categories.
     if (/^(novare|proposal|proposals|document|documents|file|files|deck|decks|presentation|presentations|solution|solutions|capability|capabilities)$/.test(term)) return;
     if (!seen[term] && selected.length < 5) {
@@ -335,6 +340,178 @@ function noscaDriveSearchTerms_(query) {
     });
   });
   return selected.slice(0, 7);
+}
+
+/**
+ * Phase 2: a focused knowledge-query plan, deliberately separate from ordinary
+ * document lookups. Filename discovery is performed first; indexed document
+ * text is queried second. Both phases are bounded and may be incomplete.
+ * Generic organization words must not displace the actual requested topic.
+ * No additional Drive permissions, ancestry lookups or NOSCA_Index reads.
+ */
+function noscaKnowledgeTopicQuery_(question) {
+  const query = typeof question === 'string' ? normalizeNoscaQuery_(question) : question;
+  const generic = {
+    novare:true, offering:true, offerings:true, offer:true, offers:true,
+    service:true, services:true, solution:true, solutions:true,
+    capability:true, capabilities:true, available:true, provide:true,
+    provided:true, portfolio:true, products:true, product:true
+  };
+  const topics = (query.terms || []).filter(function(term) {
+    return !generic[term] && /^[a-z0-9+#&.\-]{2,60}$/.test(term);
+  }).slice(0, 4);
+  const isCX = (topics.indexOf('customer') !== -1 &&
+    topics.indexOf('experience') !== -1) ||
+    /\bcustomer experience\b/.test(query.normalized || '');
+  const synonyms = isCX ? [
+    'customer engagement', 'customer journey', 'digital experience',
+    'contact center', 'contact centre', 'omnichannel', 'cx'
+  ] : [];
+  const phrases = [];
+  for (let i = 0; i < topics.length - 1; i += 1) {
+    phrases.push(topics[i] + ' ' + topics[i + 1]);
+  }
+  return {
+    text: query.text, normalized: query.normalized,
+    terms: topics, phrases: phrases,
+    synonyms: synonyms,
+    topicPhrase: topics.length > 1 ? topics.join(' ') : ''
+  };
+}
+
+/** Set NOSCA_KNOWLEDGE_RELEVANCE=focused only after the diagnostic is checked. */
+function noscaKnowledgeRelevanceMode_() {
+  const mode = String(PropertiesService.getScriptProperties()
+    .getProperty('NOSCA_KNOWLEDGE_RELEVANCE') || 'legacy').toLowerCase().trim();
+  if (mode !== 'legacy' && mode !== 'focused') {
+    throw new Error('NOSCA_KNOWLEDGE_RELEVANCE must be "legacy" or "focused".');
+  }
+  return mode;
+}
+
+function noscaFocusedKnowledgeQueryParts_(topic) {
+  function quoted(value) {return "'" + escapeNoscaDriveQueryValue_(value) + "'";}
+  const titleWords = topic.terms.concat(
+    topic.synonyms.filter(function(v) {return v.indexOf(' ') < 0;})
+  ).slice(0, 6);
+  const titleQ = titleWords.length ?
+    'trashed = false and (' + titleWords.map(function(t) {
+      return 'name contains ' + quoted(t);
+    }).join(' or ') + ')' : '';
+  const focused = [];
+  topic.phrases.slice(0, 3).forEach(function(phrase) {
+    // Drive requires double quotes inside the single-quoted value for phrases.
+    focused.push('fullText contains ' + quoted('"' + phrase + '"'));
+  });
+  topic.synonyms.slice(0, 6).forEach(function(term) {
+    focused.push('fullText contains ' + quoted(
+      term.indexOf(' ') === -1 ? term : '"' + term + '"'));
+  });
+  if (topic.terms.length > 1) {
+    focused.push('(' + topic.terms.slice(0, 3).map(function(term) {
+      return 'fullText contains ' + quoted(term);
+    }).join(' and ') + ')');
+  } else if (topic.terms.length === 1) {
+    focused.push('fullText contains ' + quoted(topic.terms[0]));
+  }
+  return {titleQ:titleQ,
+    textQ: focused.length ? 'trashed = false and (' + focused.join(' or ') + ')' : ''};
+}
+
+/**
+ * Score only the topic, not words such as "Novare" or "offerings".
+ * Title evidence is more trustworthy than an unverified Drive fullText hit.
+ * We still preserve weaker body matches as fallback candidates for extraction.
+ */
+function scoreNoscaFocusedKnowledgeRecord_(record, topic) {
+  const name = normalizeNoscaSearchText_(record.fileName || '');
+  const core = {text:topic.text, normalized:topic.normalized,
+    terms:topic.terms, phrases:topic.phrases};
+  const raw = scoreNoscaMetadataRecord_(record,core);
+  const matchedTopicTerms = topic.terms.filter(function(t) {
+    return containsNoscaSearchTerm_(name,t);
+  });
+  const strongPhrase = topic.phrases.some(function(p) {
+    return p.length > 3 && name.indexOf(p) !== -1;
+  });
+  const matchedSynonyms = topic.synonyms.filter(function(alias) {
+    return containsNoscaSearchTerm_(name,alias);
+  });
+  const titleTopicMatches = matchedTopicTerms.length;
+  let bonus = strongPhrase ? 24 : 0;
+  if (titleTopicMatches >= 2) bonus += 14;
+  if (matchedSynonyms.length) bonus += 20;
+  const hasTopicTitle = strongPhrase || titleTopicMatches >= 2 ||
+    matchedSynonyms.length > 0 || (topic.terms.length === 1 &&
+    titleTopicMatches === 1);
+  // Prefer solution/catalog documents only when their title is topical.
+  if (hasTopicTitle && /\b(overview|offering|offerings|capabilit|portfolio|solution|deck|catalog)\w*/.test(name)) bonus += 6;
+  if (/\b(draft|wip|working copy|copy of)\b/.test(name)) bonus -= 7;
+  return {
+    score: Math.max(0,raw.score + bonus),
+    matchedTerms: raw.matchedTerms,
+    titleTopicMatches:titleTopicMatches,
+    matchedSynonyms:matchedSynonyms,
+    strongTitleMatch:hasTopicTitle
+  };
+}
+
+/**
+ * Read-only focused discovery. This function can run in diagnostics before
+ * production opts into it. Restricted root scopes retain their legacy search
+ * to avoid bypassing existing membership validation.
+ */
+function searchNoscaFocusedKnowledgeRecords_(question) {
+  const started = Date.now();
+  const topic = noscaKnowledgeTopicQuery_(question);
+  const scope = noscaDriveScopeStrategy_();
+  if (scope !== 'none' || !topic.terms.length) {
+    const fallback = searchNoscaDriveRecords_(question);
+    fallback.strategy = 'legacy-fallback';
+    fallback.topicTerms = topic.terms;
+    return fallback;
+  }
+  const parts = noscaFocusedKnowledgeQueryParts_(topic);
+  const queries = [
+    {tier:'topic-title', q:parts.titleQ, maxResults:90},
+    {tier:'topic-text', q:parts.textQ, maxResults:90}
+  ].filter(function(step) {return !!step.q;});
+  const seen = {};
+  const records = [];
+  const tiers = [];
+  let apiCalls = 0, scanned = 0, truncated = false;
+  queries.forEach(function(step) {
+    const result = searchNoscaDriveRecords_(question,'none',{
+      q:step.q, tier:step.tier, maxResults:step.maxResults,
+      pageSize:100, maxPages:1
+    });
+    apiCalls += result.apiCalls;
+    scanned += result.scanned;
+    truncated = truncated || result.truncated;
+    tiers.push({tier:step.tier,elapsedMs:result.elapsedMs,
+      returned:result.records.length,scanned:result.scanned,
+      truncated:result.truncated,apiCalls:result.apiCalls});
+    result.records.forEach(function(r) {
+      if (!seen[r.fileId]) {
+        seen[r.fileId] = true;
+        records.push(r);
+      }
+    });
+  });
+  if (!records.length) {
+    const fallback = searchNoscaDriveRecords_(question);
+    fallback.strategy = 'legacy-no-focused-matches';
+    fallback.tiers = tiers;
+    fallback.topicTerms = topic.terms;
+    return fallback;
+  }
+  return {
+    records:records, scopeStrategy:'none', strategy:'focused',
+    topicTerms:topic.terms, synonyms:topic.synonyms,
+    elapsedMs:Date.now()-started, apiCalls:apiCalls,
+    scanned:scanned, truncated:truncated, tiers:tiers,
+    warning:truncated ? 'Focused Drive searches were bounded; results may be incomplete.' : ''
+  };
 }
 
 /**

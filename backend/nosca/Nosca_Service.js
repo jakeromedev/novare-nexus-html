@@ -367,6 +367,9 @@ function askNosca(request) {
         searchElapsedMs: retrieval.searchElapsedMs || 0,
         extractionElapsedMs: retrieval.extractionElapsedMs || 0,
         generationElapsedMs: generationElapsedMs,
+        geminiAttemptCount: Number(generated.attemptCount || 1),
+        geminiRetryWaitMs: Number(generated.retryWaitMs || 0),
+        geminiApiElapsedMs: Number(generated.apiElapsedMs || 0),
         finishReason:
           generated.finishReason || ''
       },
@@ -441,120 +444,164 @@ function testNoscaGroundedAnswer() {
 }
 
 /**
- * Immediate human-friendly reply for document lookup.
- * This uses returned metadata only (no Gemini call or content claims).
+ * Natural, metadata-grounded reply for a fast Drive document search.
+ *
+ * Do not generate a second Gemini request here: that would turn a ~2-3s
+ * lookup back into a slower generation workflow. Instead, mention concrete
+ * details visible in returned filenames and allow the source cards to hold
+ * the full filenames, counts, and links.
+ *
+ * This intentionally does NOT infer document contents or claim the set of
+ * Drive matches is exhaustive (Drive Search may be bounded/truncated).
  */
 function buildNoscaDocumentLookupAnswer_(lookup, contextResolution) {
-  const summary = lookup && lookup.summary || {};
-  const byType = summary.byDocumentType || {};
-  const byItemType = summary.byItemType || {};
-  const results = lookup && lookup.results || [];
-  const returned = results.length || Number(summary.returned || 0);
-  const folderCount = Number(
-    byItemType[NOSCA_CONFIG.itemTypes.folder] || 0
-  );
-  const fileCount = Math.max(returned - folderCount, 0);
+  const results = Array.isArray(lookup && lookup.results)
+    ? lookup.results : [];
   const context = contextResolution && contextResolution.context || {};
-  const topic = String(context.topicLabel || '').trim();
-  const requestedTypes = lookup && Array.isArray(lookup.requestedDocumentTypes)
+  const topic = noscaFriendlyLookupTopic_(context.topicLabel);
+  const topicPhrase = topic ? 'for ' + topic : 'in Drive';
+  const folderType = NOSCA_CONFIG.itemTypes.folder;
+  const files = results.filter(function (item) {
+    return item.itemType !== folderType;
+  });
+  const folders = results.filter(function (item) {
+    return item.itemType === folderType;
+  });
+  const requestedTypes = Array.isArray(lookup && lookup.requestedDocumentTypes)
     ? lookup.requestedDocumentTypes : [];
-  const requestedItemTypes = lookup && Array.isArray(lookup.requestedItemTypes)
+  const requestedItemTypes = Array.isArray(lookup && lookup.requestedItemTypes)
     ? lookup.requestedItemTypes : [];
+  const proposalType = NOSCA_CONFIG.documentTypes.proposal;
+  const isProposalSearch = requestedTypes.length === 1 &&
+    requestedTypes[0] === proposalType;
+  const isFolderSearch = requestedItemTypes.length === 1 &&
+    requestedItemTypes[0] === folderType;
 
-  let subject = '';
-  let count = returned;
-
-  if (requestedItemTypes.length === 1 &&
-      requestedItemTypes[0] === NOSCA_CONFIG.itemTypes.folder) {
-    count = folderCount;
-    subject = count === 1 ? 'folder' : 'folders';
-  } else if (requestedTypes.length === 1) {
-    count = fileCount;
-    const type = requestedTypes[0];
-    if (type === NOSCA_CONFIG.documentTypes.proposal) {
-      subject = count === 1 ? 'proposal' : 'proposals';
-    } else if (type === NOSCA_CONFIG.documentTypes.presentation) {
-      subject = count === 1 ? 'presentation' : 'presentations';
-    } else if (type === NOSCA_CONFIG.documentTypes.ee) {
-      subject = count === 1 ? 'effort estimate' : 'effort estimates';
-    } else {
-      subject = count === 1 ? 'matching file' : 'matching files';
+  // The year signals are taken ONLY from visible filenames; we do not claim
+  // they reflect a document's actual revision or modification date.
+  const details = files.map(function (item) {
+    const name = String(item.fileName || '');
+    const years = [];
+    const yearPattern = /(?:^|\D)(20\d{2})(?=\D|$)/g;
+    let match;
+    while ((match = yearPattern.exec(name)) !== null) {
+      const year = Number(match[1]);
+      if (year >= 2000 && year <= 2099 && years.indexOf(year) === -1) {
+        years.push(year);
+      }
     }
-  } else if (folderCount && fileCount) {
-    subject = (fileCount + (fileCount === 1 ? ' file' : ' files')) +
-      ' and ' + (folderCount + (folderCount === 1 ? ' folder' : ' folders'));
-  } else if (folderCount) {
-    subject = folderCount === 1 ? 'folder' : 'folders';
-  } else {
-    subject = count === 1 ? 'file' : 'files';
+    return {
+      name: name,
+      years: years,
+      renewal: /\brenewal\b/i.test(name),
+      proposal: item.documentType === proposalType || /\bproposal\b/i.test(name)
+    };
+  });
+  const allYears = [];
+  details.forEach(function (entry) {
+    entry.years.forEach(function (year) {
+      if (allYears.indexOf(year) === -1) allYears.push(year);
+    });
+  });
+  allYears.sort(function (a, b) { return b - a; });
+  const renewalEntries = details.filter(function (entry) {
+    return entry.renewal && entry.proposal;
+  });
+  const renewal = renewalEntries.length > 0;
+  const renewalYears = [];
+  renewalEntries.forEach(function (entry) {
+    entry.years.forEach(function (year) { renewalYears.push(year); });
+  });
+  const renewalYear = renewalYears.length
+    ? Math.max.apply(null, renewalYears) : 0;
+  const otherYears = allYears.filter(function (year) {
+    return year !== renewalYear;
+  }).slice(0, 2);
+
+  if (isFolderSearch || (folders.length && !files.length)) {
+    if (folders.length === 1) {
+      return 'Here’s the folder I came across ' + topicPhrase + '. You can open it below.';
+    }
+    return 'There are a few folders ' + topicPhrase + '. I’ve linked them below so you can browse what’s inside.';
   }
 
-  const matchDescription = topic ? ' for ' + topic : ' that match your search';
-  const quantity = folderCount && fileCount && requestedTypes.length !== 1
-    ? '' : String(count) + ' ';
-  const opening = 'I found ' + quantity + subject + matchDescription + '.';
-
-  if (lookup && lookup.truncated === true) {
-    return opening + '\n\n' +
-      'I’ve listed the best matches below. If you’re looking for a ' +
-      'specific year or project, tell me and I can narrow it down.';
+  if (files.length === 1) {
+    if (renewalYear) {
+      return 'A ' + renewalYear + ' renewal proposal came up ' + topicPhrase + '. You can open it below.';
+    }
+    if (isProposalSearch) {
+      return 'Here’s the proposal that came up ' + topicPhrase + '. You can open it below.';
+    }
+    return 'This is the file that came up ' + topicPhrase + '. I’ve linked it below.';
   }
 
-  return opening + '\n\n' +
-    (returned === 1
-      ? 'You can open it below to take a closer look.'
-      : 'I’ve linked them below so you can take a closer look.') +
-    ' If you have something specific in mind, I can narrow the search further.';
+  if (renewalYear && otherYears.length) {
+    return 'For ' + (topic || 'this search') + ', I’m seeing a ' +
+      renewalYear + ' renewal proposal alongside files labeled ' +
+      noscaJoinLookupYears_(otherYears) + '. The links are below.';
+  }
+  if (renewalYear) {
+    return 'A ' + renewalYear + ' renewal proposal is among the matches ' +
+      topicPhrase + '. I’ve linked the related files below.';
+  }
+  if (renewal) {
+    return 'There’s a renewal proposal among the results ' + topicPhrase +
+      '. I’ve included the other matching files below as well.';
+  }
+  if (isProposalSearch && allYears.length >= 2) {
+    return 'I’m seeing proposals ' + topicPhrase + ' labeled ' +
+      noscaJoinLookupYears_(allYears.slice(0, 3)) +
+      '. You can open the versions below.';
+  }
+  if (isProposalSearch) {
+    return 'Here are the proposals that came up ' + topicPhrase +
+      '. I’ve kept the file links together below.';
+  }
+  if (files.length && folders.length) {
+    return 'There’s a mix of documents and folders ' + topicPhrase +
+      '. I’ve put the matching links below.';
+  }
+  if (allYears.length >= 2) {
+    return 'For ' + (topic || 'your search') + ', I’m seeing files labeled ' +
+      noscaJoinLookupYears_(allYears.slice(0, 3)) +
+      '. I’ve linked them below.';
+  }
+  if (allYears.length === 1) {
+    return 'The matches ' + topicPhrase + ' include files labeled ' +
+      allYears[0] + '. I’ve linked them below.';
+  }
+  return 'Here’s what came up ' + topicPhrase +
+    '. You can open the matching files directly below.';
 }
 
-function buildNoscaNoDocumentLookupAnswer_(
-  lookup,
-  contextResolution
-) {
-  const context =
-    contextResolution &&
-    contextResolution.context
-      ? contextResolution.context
-      : {};
+/** Preserve known client/product capitalization in an otherwise lightweight reply. */
+function noscaFriendlyLookupTopic_(value) {
+  return String(value || '').trim()
+    .replace(/\bcashhub\b/gi, 'CashHub')
+    .replace(/\bpjl\b/gi, 'PJL')
+    .replace(/\bapi\b/gi, 'API')
+    .replace(/\bgcp\b/gi, 'GCP')
+    .slice(0, 160);
+}
 
-  const topicLabel =
-    String(context.topicLabel || '').trim();
+function noscaJoinLookupYears_(years) {
+  return joinNoscaFriendlyList_((years || []).map(String));
+}
 
-  const requestedTypes =
-    lookup && Array.isArray(lookup.requestedDocumentTypes)
-      ? lookup.requestedDocumentTypes
-      : [];
-
-  let target = 'matching files';
-
-  if (
-    requestedTypes.length === 1 &&
-    requestedTypes[0] === NOSCA_CONFIG.documentTypes.ee
-  ) {
-    target = 'an EE file';
-  } else if (
-    requestedTypes.length === 1 &&
-    requestedTypes[0] === NOSCA_CONFIG.documentTypes.proposal
-  ) {
-    target = 'a proposal';
-  } else if (
-    requestedTypes.length === 1 &&
-    requestedTypes[0] === NOSCA_CONFIG.documentTypes.presentation
-  ) {
-    target = 'a presentation';
-  }
-
-  let message = 'I couldn’t find ' + target;
-
-  if (topicLabel) {
-    message += ' for ' + topicLabel;
-  }
-
-  message +=
-    '. Try using a different project or client name, a broader search term, ' +
-    'or another document type.';
-
-  return message;
+function buildNoscaNoDocumentLookupAnswer_(lookup, contextResolution) {
+  const context = contextResolution && contextResolution.context || {};
+  const topic = noscaFriendlyLookupTopic_(context.topicLabel);
+  const requestedTypes = Array.isArray(lookup && lookup.requestedDocumentTypes)
+    ? lookup.requestedDocumentTypes : [];
+  const type = requestedTypes.length === 1 ? requestedTypes[0] : '';
+  const what = type === NOSCA_CONFIG.documentTypes.proposal
+    ? 'a matching proposal'
+    : type === NOSCA_CONFIG.documentTypes.presentation
+      ? 'a matching presentation'
+      : type === NOSCA_CONFIG.documentTypes.ee
+        ? 'a matching effort estimate' : 'a close match';
+  return 'I’m not seeing ' + what + (topic ? ' for ' + topic : '') +
+    ' in these Drive results. Try a project name, a year, or a different keyword.';
 }
 
 function joinNoscaFriendlyList_(items) {

@@ -224,6 +224,8 @@ function callNoscaGemini_(request) {
   );
 
   let lastFailure = null;
+  const totalRequestStartedAt = Date.now();
+  let accumulatedRetryWaitMs = 0;
 
   for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
     const attemptStartedAt = Date.now();
@@ -247,7 +249,11 @@ function callNoscaGemini_(request) {
           );
         }
 
-        return parseNoscaGeminiResponse_(body, model);
+        const parsed = parseNoscaGeminiResponse_(body, model);
+        parsed.attemptCount = attempt;
+        parsed.retryWaitMs = accumulatedRetryWaitMs;
+        parsed.apiElapsedMs = Date.now() - totalRequestStartedAt;
+        return parsed;
       }
 
       const apiError = parseNoscaGeminiApiError_(body, status);
@@ -303,6 +309,7 @@ function callNoscaGemini_(request) {
           (retryAfterMs > 0 ? ' | serverRetryAfterMs=' + retryAfterMs : '')
       );
 
+      accumulatedRetryWaitMs += delayMs;
       Utilities.sleep(delayMs);
       continue;
     } catch (error) {
@@ -348,6 +355,7 @@ function callNoscaGemini_(request) {
           delayMs
       );
 
+      accumulatedRetryWaitMs += delayMs;
       Utilities.sleep(delayMs);
     }
   }

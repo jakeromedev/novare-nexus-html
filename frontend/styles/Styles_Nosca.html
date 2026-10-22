@@ -93,6 +93,14 @@
       height: 24px;
     }
 
+    /* Drive-hosted mascot shown in the chat header after a successful load. */
+    .nosca-brand .nosca-chat-avatar-image {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      border-radius: inherit;
+    }
+
     .nosca-heading {
       min-width: 0;
       flex: 1;
@@ -323,6 +331,14 @@
     .nosca-message-avatar svg {
       width: 18px;
       height: 18px;
+    }
+
+    /* Small NOSCA message avatar; the existing SVG remains its fallback. */
+    .nosca-message-avatar .nosca-chat-avatar-image {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      border-radius: inherit;
     }
 
     .nosca-message-body {

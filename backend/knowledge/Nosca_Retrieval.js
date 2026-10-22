@@ -225,10 +225,12 @@ function retrieveNoscaContext_(question) {
       contextChunks: [],
       totalContextChars: 0,
       warnings: [driveMode
-        ? 'No matching readable Drive files were found under the knowledge root.'
+        ? 'No matching readable Drive files were found.'
         : 'No sufficiently relevant source files were found in NOSCA_Index.'],
       backend: driveMode ? 'drive' : 'index',
       searchElapsedMs: searchElapsedMs,
+      extractionElapsedMs: 0,
+      candidateExtractionMetrics: [],
       elapsedMs: Date.now() - startedAt
     };
   }
@@ -236,8 +238,11 @@ function retrieveNoscaContext_(question) {
   const warnings = search && search.warning ? [search.warning] : [];
   const extractionStartedAt = Date.now();
   const scoredChunks = [];
+  // Diagnostic-only metadata; never stores extracted text or source excerpts.
+  const candidateExtractionMetrics = [];
 
   candidates.forEach(function (candidate) {
+    const fileStartedAt = Date.now();
     try {
       noscaDebugLog_(
         'Extracting candidate',
@@ -355,9 +360,27 @@ function retrieveNoscaContext_(question) {
         scoredChunks,
         rankedFileChunks
       );
+      candidateExtractionMetrics.push({
+        fileName: candidate.fileName,
+        fileFormat: candidate.fileFormat,
+        elapsedMs: Date.now() - fileStartedAt,
+        extractedChars: Number(extraction.charCount || 0),
+        retainedChunks: rankedFileChunks.length,
+        warningCount: (extraction.warnings || []).length,
+        ok: true
+      });
     } catch (error) {
       const errorMessage =
         getNoscaErrorMessage_(error);
+      candidateExtractionMetrics.push({
+        fileName: candidate.fileName,
+        fileFormat: candidate.fileFormat,
+        elapsedMs: Date.now() - fileStartedAt,
+        extractedChars: 0,
+        retainedChunks: 0,
+        warningCount: 1,
+        ok: false
+      });
 
       noscaDebugError_(
         'Candidate extraction failed',
@@ -441,6 +464,7 @@ function retrieveNoscaContext_(question) {
     backend: driveMode ? 'drive' : 'index',
     searchElapsedMs: searchElapsedMs,
     extractionElapsedMs: Date.now() - extractionStartedAt,
+    candidateExtractionMetrics: candidateExtractionMetrics,
     elapsedMs: Date.now() - startedAt
   };
 }

@@ -46,8 +46,12 @@ function resolveNoscaConversationContext_(question, previousContext) {
   const explicitTopicTerms =
     extractNoscaConversationTopicTerms_(currentQuestion);
 
+  // Short search-bar style keyword queries are file-discovery requests.
+  // Without this, "pjl cashhub" enters grounded Q&A, causing unnecessary
+  // document extraction and a Gemini call before showing any results.
   const directLookup =
-    isNoscaDocumentLookupQuestion_(currentQuestion);
+    isNoscaDocumentLookupQuestion_(currentQuestion) ||
+    isNoscaKeywordOnlyLookup_(currentQuestion);
 
   const knowledgeIntent =
     hasNoscaKnowledgeIntent_(currentQuestion);
@@ -314,6 +318,44 @@ function extractNoscaConversationTopicTerms_(question) {
       return !ignore[term];
     })
     .slice(0, 12);
+}
+
+/**
+ * Recognize brief subject-only searches without a navigation verb:
+ *   "pjl cashhub", "CashHub proposal", "Apigee".
+ * Questions and instructions such as "What is CashHub?" or
+ * "Summarize CashHub" still use grounded Gemini Q&A.
+ *
+ * Limit the heuristic to 1-4 simple words and reject conversational
+ * commands, follow-up cues, and sentence punctuation. The user can always
+ * explicitly request an explanation, summary, comparison, or other Q&A.
+ */
+function isNoscaKeywordOnlyLookup_(question) {
+  const text = String(question || '').trim();
+  if (!text || /[?!.:;\n\r]/.test(text)) return false;
+  if (hasNoscaKnowledgeIntent_(text) || hasNoscaFollowUpCue_(text)) {
+    return false;
+  }
+
+  const normalized = normalizeNoscaSearchText_(text);
+  const words = normalized.split(/\s+/).filter(Boolean);
+  if (!words.length || words.length > 4) return false;
+
+  const nonSearchWords = {
+    hello: true, hi: true, hey: true, thanks: true, thank: true,
+    please: true, help: true, can: true, could: true, should: true,
+    would: true, will: true, i: true, you: true, we: true,
+    my: true, our: true, your: true, me: true, about: true,
+    tell: true, explain: true, summarize: true, summarise: true,
+    describe: true, compare: true, analyze: true, analyse: true,
+    why: true, how: true, what: true, who: true, when: true,
+    where: true, is: true, are: true, does: true, do: true,
+    define: true, meaning: true, write: true, draft: true,
+    generate: true, create: true, make: true, recommend: true
+  };
+  return words.every(function (word) {
+    return !nonSearchWords[word] && /^[a-z0-9][a-z0-9+&-]*$/.test(word);
+  });
 }
 
 function hasNoscaKnowledgeIntent_(question) {

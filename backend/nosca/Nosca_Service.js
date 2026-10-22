@@ -103,6 +103,8 @@ function askNosca(request) {
         const lookupAnswer =
           buildNoscaDocumentLookupAnswer_(lookup, contextResolution);
 
+        // Document lookups return conversational text and Drive links in a
+        // single fast response, without staging a separate Gemini request.
         const lookupResult = {
           ok: true,
           requestId: requestId,
@@ -153,7 +155,10 @@ function askNosca(request) {
             returned: lookupSources.length,
             summary: lookup.summary,
             contextApplied:
-              contextResolution.contextApplied
+              contextResolution.contextApplied,
+            searchBackend: lookup.backend || 'index',
+            searchElapsedMs: lookup.searchElapsedMs || 0,
+            elapsedMs: lookupElapsedMs
           }
         );
 
@@ -387,6 +392,10 @@ function askNosca(request) {
         sourceCount: result.sources.length,
         model: result.model,
         tokenCount: result.usage.totalTokenCount,
+        searchBackend: retrieval.backend || 'index',
+        searchElapsedMs: retrieval.searchElapsedMs || 0,
+        extractionElapsedMs: retrieval.extractionElapsedMs || 0,
+        generationElapsedMs: generationElapsedMs,
         elapsedMs: result.elapsedMs
       }
     );
@@ -431,150 +440,71 @@ function testNoscaGroundedAnswer() {
   );
 }
 
-function buildNoscaDocumentLookupAnswer_(
-  lookup,
-  contextResolution
-) {
-  const summary =
-    lookup && lookup.summary
-      ? lookup.summary
-      : {
-        returned: 0,
-        byDocumentType: {},
-        byItemType: {}
-      };
-
+/**
+ * Immediate human-friendly reply for document lookup.
+ * This uses returned metadata only (no Gemini call or content claims).
+ */
+function buildNoscaDocumentLookupAnswer_(lookup, contextResolution) {
+  const summary = lookup && lookup.summary || {};
   const byType = summary.byDocumentType || {};
   const byItemType = summary.byItemType || {};
-  const returned = Number(summary.returned || 0);
+  const results = lookup && lookup.results || [];
+  const returned = results.length || Number(summary.returned || 0);
   const folderCount = Number(
     byItemType[NOSCA_CONFIG.itemTypes.folder] || 0
   );
   const fileCount = Math.max(returned - folderCount, 0);
+  const context = contextResolution && contextResolution.context || {};
+  const topic = String(context.topicLabel || '').trim();
+  const requestedTypes = lookup && Array.isArray(lookup.requestedDocumentTypes)
+    ? lookup.requestedDocumentTypes : [];
+  const requestedItemTypes = lookup && Array.isArray(lookup.requestedItemTypes)
+    ? lookup.requestedItemTypes : [];
 
-  const context =
-    contextResolution &&
-    contextResolution.context
-      ? contextResolution.context
-      : {};
+  let subject = '';
+  let count = returned;
 
-  const topicLabel =
-    String(context.topicLabel || '').trim();
-
-  const requestedTypes =
-    lookup && Array.isArray(lookup.requestedDocumentTypes)
-      ? lookup.requestedDocumentTypes
-      : [];
-
-  const requestedItemTypes =
-    lookup && Array.isArray(lookup.requestedItemTypes)
-      ? lookup.requestedItemTypes
-      : [];
-
-  const counts = [];
-
-  function addCount(type, singular, plural) {
-    const count = Number(byType[type] || 0);
-
-    if (count > 0) {
-      counts.push(
-        count + ' ' + (count === 1 ? singular : plural)
-      );
-    }
-  }
-
-  addCount(
-    NOSCA_CONFIG.documentTypes.ee,
-    'EE file',
-    'EE files'
-  );
-  addCount(
-    NOSCA_CONFIG.documentTypes.proposal,
-    'proposal',
-    'proposals'
-  );
-  addCount(
-    NOSCA_CONFIG.documentTypes.presentation,
-    'presentation',
-    'presentations'
-  );
-
-  let opening = '';
-
-  if (
-    requestedItemTypes.length === 1 &&
-    requestedItemTypes[0] === NOSCA_CONFIG.itemTypes.folder
-  ) {
-    opening =
-      'I found ' +
-      folderCount +
-      (folderCount === 1 ? ' matching folder' : ' matching folders');
+  if (requestedItemTypes.length === 1 &&
+      requestedItemTypes[0] === NOSCA_CONFIG.itemTypes.folder) {
+    count = folderCount;
+    subject = count === 1 ? 'folder' : 'folders';
   } else if (requestedTypes.length === 1) {
-    const requested = requestedTypes[0];
-    let friendlyType = requested;
-
-    if (requested === NOSCA_CONFIG.documentTypes.ee) {
-      friendlyType = 'EE';
-    } else if (
-      requested === NOSCA_CONFIG.documentTypes.presentation
-    ) {
-      friendlyType = 'presentation';
-    } else if (
-      requested === NOSCA_CONFIG.documentTypes.proposal
-    ) {
-      friendlyType = 'proposal';
-    }
-
-    opening =
-      'I found ' +
-      fileCount +
-      ' ' +
-      friendlyType +
-      (fileCount === 1 ? ' file' : ' files');
-  } else {
-    if (folderCount && fileCount) {
-      opening =
-        'I found ' +
-        folderCount +
-        (folderCount === 1 ? ' matching folder' : ' matching folders') +
-        ' and ' +
-        fileCount +
-        (fileCount === 1 ? ' matching file' : ' matching files');
-    } else if (folderCount) {
-      opening =
-        'I found ' +
-        folderCount +
-        (folderCount === 1 ? ' matching folder' : ' matching folders');
+    count = fileCount;
+    const type = requestedTypes[0];
+    if (type === NOSCA_CONFIG.documentTypes.proposal) {
+      subject = count === 1 ? 'proposal' : 'proposals';
+    } else if (type === NOSCA_CONFIG.documentTypes.presentation) {
+      subject = count === 1 ? 'presentation' : 'presentations';
+    } else if (type === NOSCA_CONFIG.documentTypes.ee) {
+      subject = count === 1 ? 'effort estimate' : 'effort estimates';
     } else {
-      opening =
-        'I found ' +
-        fileCount +
-        (fileCount === 1 ? ' matching file' : ' matching files');
+      subject = count === 1 ? 'matching file' : 'matching files';
     }
+  } else if (folderCount && fileCount) {
+    subject = (fileCount + (fileCount === 1 ? ' file' : ' files')) +
+      ' and ' + (folderCount + (folderCount === 1 ? ' folder' : ' folders'));
+  } else if (folderCount) {
+    subject = folderCount === 1 ? 'folder' : 'folders';
+  } else {
+    subject = count === 1 ? 'file' : 'files';
   }
 
-  if (topicLabel) {
-    opening += ' for ' + topicLabel;
+  const matchDescription = topic ? ' for ' + topic : ' that match your search';
+  const quantity = folderCount && fileCount && requestedTypes.length !== 1
+    ? '' : String(count) + ' ';
+  const opening = 'I found ' + quantity + subject + matchDescription + '.';
+
+  if (lookup && lookup.truncated === true) {
+    return opening + '\n\n' +
+      'I’ve listed the best matches below. If you’re looking for a ' +
+      'specific year or project, tell me and I can narrow it down.';
   }
 
-  opening += '.';
-
-  if (
-    requestedTypes.length === 0 &&
-    counts.length
-  ) {
-    opening += ' The files include ' +
-      joinNoscaFriendlyList_(counts) +
-      '.';
-  }
-
-  return (
-    opening +
-    '\n\n' +
-    'I prioritized results that match the same Drive hierarchy, so client, ' +
-    'project, renewal, and year context are kept together. Open any result ' +
-    'below to go straight to it in Drive.'
-  );
+  return opening + '\n\n' +
+    (returned === 1
+      ? 'You can open it below to take a closer look.'
+      : 'I’ve linked them below so you can take a closer look.') +
+    ' If you have something specific in mind, I can narrow the search further.';
 }
 
 function buildNoscaNoDocumentLookupAnswer_(

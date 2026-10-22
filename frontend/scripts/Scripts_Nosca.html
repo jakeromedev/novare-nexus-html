@@ -460,7 +460,7 @@
       return;
     }
 
-    appendAssistantMessage({
+    const assistantRow = appendAssistantMessage({
       requestId: String(response.requestId || "").trim(),
       answer: answer,
       grounded: response.grounded !== false,
@@ -555,6 +555,7 @@
 
     const text = document.createElement("div");
     text.className = "nosca-message-text nosca-answer-text";
+    // Show the server's human-friendly answer for document lookups as well.
     renderSafeAnswer(text, data.answer);
 
     bubble.appendChild(label);
@@ -587,6 +588,7 @@
     row.appendChild(avatar);
     row.appendChild(body);
     dom.messages.appendChild(row);
+    return row;
   }
 
   function appendLoadingMessage() {

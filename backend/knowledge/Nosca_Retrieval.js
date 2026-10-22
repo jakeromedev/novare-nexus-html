@@ -668,19 +668,19 @@ function detectNoscaRequestedDocumentTypes_(question) {
   }
 
   if (
-    value.indexOf(' proposal ') !== -1 ||
-    value.indexOf(' bid ') !== -1 ||
-    value.indexOf(' rfp ') !== -1 ||
-    value.indexOf(' rfi ') !== -1 ||
-    value.indexOf(' rfq ') !== -1
+    /\bproposals?\b/.test(value) ||
+    /\bbids?\b/.test(value) ||
+    /\brfps?\b/.test(value) ||
+    /\brfis?\b/.test(value) ||
+    /\brfqs?\b/.test(value)
   ) {
     add(types.proposal);
   }
 
   if (
-    value.indexOf(' presentation ') !== -1 ||
-    value.indexOf(' deck ') !== -1 ||
-    value.indexOf(' slides ') !== -1 ||
+    /\bpresentations?\b/.test(value) ||
+    /\bdecks?\b/.test(value) ||
+    /\bslides?\b/.test(value) ||
     value.indexOf(' ppt ') !== -1 ||
     value.indexOf(' pptx ') !== -1 ||
     value.indexOf(' powerpoint ') !== -1
@@ -814,13 +814,21 @@ function getNoscaLookupTopicTerms_(
     ee: true,
     effort: true,
     estimate: true,
+    estimates: true,
     estimation: true,
+    estimations: true,
     proposal: true,
+    proposals: true,
     bid: true,
+    bids: true,
     rfp: true,
+    rfps: true,
     rfi: true,
+    rfis: true,
     rfq: true,
+    rfqs: true,
     tender: true,
+    tenders: true,
     presentation: true,
     presentations: true,
     deck: true,

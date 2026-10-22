@@ -188,10 +188,12 @@ function callNoscaGemini_(request) {
         ]
       }
     ],
-    generationConfig: {
+    generationConfig: Object.assign({
       temperature: NOSCA_CONFIG.gemini.temperature,
       maxOutputTokens: NOSCA_CONFIG.gemini.maxOutputTokens
-    }
+    }, request.responseMimeType
+      ? {responseMimeType: String(request.responseMimeType)}
+      : {})
   };
 
   const options = {

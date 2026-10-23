@@ -125,9 +125,15 @@ function retrieveNoscaContext_(question) {
 
   const driveMode = useNoscaNativeDriveSearch_();
   const searchStartedAt = Date.now();
+  const focusedKnowledge = driveMode &&
+    noscaKnowledgeRelevanceMode_() === 'focused';
   const search = driveMode
-    ? searchNoscaDriveRecords_(normalizedQuestion)
+    ? (focusedKnowledge
+      ? searchNoscaFocusedKnowledgeRecords_(normalizedQuestion)
+      : searchNoscaDriveRecords_(normalizedQuestion))
     : null;
+  const knowledgeTopic = focusedKnowledge
+    ? noscaKnowledgeTopicQuery_(normalizedQuestion) : normalizedQuestion;
   const existing = driveMode ? null : loadNoscaExistingIndex_();
   if (!driveMode) {
     noscaDebugLog_('NOSCA_Index summary', summarizeNoscaIndexForDebug_(existing));
@@ -140,18 +146,32 @@ function retrieveNoscaContext_(question) {
             NOSCA_SUPPORTED_CONTENT_MIME_TYPES.indexOf(record.mimeType) !== -1;
         })
         .map(function (record) {
-          const scoreResult = scoreNoscaMetadataRecord_(record,normalizedQuestion);
+          const scoreResult = focusedKnowledge
+            ? scoreNoscaFocusedKnowledgeRecord_(record,knowledgeTopic)
+            : scoreNoscaMetadataRecord_(record,normalizedQuestion);
           return Object.assign({},record,{
-            // Native fullText may hit document BODY even when metadata does not.
-            // Let the chunk scorer verify such candidates after extraction.
+            // Native fullText can match document BODY even if the title does not.
+            // Preserve those records only as weak fallback retrieval candidates.
             metadataScore: Math.max(scoreResult.score,
               NOSCA_CONFIG.retrieval.minMetadataScore),
-            matchedTerms: scoreResult.matchedTerms
+            matchedTerms: scoreResult.matchedTerms,
+            strongTitleMatch: scoreResult.strongTitleMatch === true
           });
         })
         .sort(compareNoscaCandidates_)
     : rankNoscaIndexRecords_(existing,normalizedQuestion);
   const searchElapsedMs = Date.now() - searchStartedAt;
+  if (driveMode) {
+    noscaDebugLog_('Drive knowledge search strategy', {
+      relevanceMode: focusedKnowledge ? 'focused' : 'legacy',
+      strategy: search && search.strategy || 'legacy',
+      topicTerms: focusedKnowledge ? knowledgeTopic.terms : normalizedQuestion.terms,
+      apiCalls: search && search.apiCalls || 0,
+      candidatesFound: search && search.records && search.records.length || 0,
+      truncated: !!(search && search.truncated),
+      tiers: search && search.tiers || []
+    });
+  }
 
   noscaDebugLog_(
     'Top metadata-ranked candidates BEFORE threshold',
@@ -630,46 +650,280 @@ function findNoscaIndexedDocuments_(question) {
   };
 }
 
-/** Live Drive document lookup; returns the SAME contract used by NOSCA UI. */
+/**
+ * Native Drive file lookup with bounded, title-focused recovery.
+ *
+ * A broad fullText OR query is sorted by modified date. Its first 60 matches
+ * can be unrelated to a specific older document (e.g. "3 year roadmap").
+ * After ranking the broad results, probe a meaningful filename term only if
+ * the first bounded page did not supply enough matches. No folder traversal,
+ * Gemini request, or NOSCA_Index read is needed.
+ */
 function findNoscaDriveDocuments_(question) {
+  // V3 is deliberately opt-in and isolated from grounded knowledge Q&A.
+  if (noscaPhase2BEnabled_()) {
+    try {
+      const newer = noscaFindDriveDocumentsV3_(question);
+      // Fail safely back to V2 only if all V3 API tiers failed; an ordinary
+      // zero-match query must NOT trigger another expensive set of searches.
+      const d = newer.searchDiagnostics || {};
+      if ((d.tiers || []).length > 0 || !(d.errors || []).length) {
+        return newer;
+      }
+      noscaDebugWarn_('Phase 2B failed all Drive tiers; using V2', {
+        patchVersion: 'nosca-lookup-v3-20261023', errors: d.errors
+      });
+    } catch (error) {
+      noscaDebugWarn_('Phase 2B exception; using V2', {
+        patchVersion: 'nosca-lookup-v3-20261023',
+        error: String(error && error.message || error).slice(0,180)
+      });
+    }
+  }
   const normalizedQuestion = normalizeNoscaQuery_(question);
-  const search = searchNoscaDriveRecords_(normalizedQuestion);
   const requestedTypes = detectNoscaRequestedDocumentTypes_(normalizedQuestion.text);
   const requestedItemTypes = detectNoscaRequestedItemTypes_(normalizedQuestion.text);
-  const records = search.records.map(function(record) {
-    const scoring = scoreNoscaMetadataRecord_(record,normalizedQuestion);
-    const coverage = evaluateNoscaLookupCoverage_(record,normalizedQuestion,
-      requestedTypes,requestedItemTypes);
-    return Object.assign({},record,{
-      metadataScore:scoring.score,matchedTerms:scoring.matchedTerms,
-      lookupCoverage:coverage.ratio,
-      lookupMatchedTerms:coverage.matchedTerms,
-      lookupRequiredAnchors:coverage.requiredAnchors,
-      lookupMissingAnchors:coverage.missingAnchors,
-      lookupPassesContext:coverage.passes
+  const limit = Math.max(Number(NOSCA_CONFIG.retrieval.maxDocumentLookupResults || 12), 1);
+  const search = searchNoscaDriveRecords_(normalizedQuestion);
+  const candidatesById = {};
+  const allCandidates = [];
+  const focusedSearches = [];
+  const focusErrors = [];
+  const anchor = noscaDriveLookupTitleAnchor_(normalizedQuestion);
+
+  function addCandidate(record) {
+    if (!record || !record.fileId || candidatesById[record.fileId]) return;
+    candidatesById[record.fileId] = true;
+    allCandidates.push(record);
+  }
+  search.records.forEach(addCandidate);
+
+  function rankMatches() {
+    return allCandidates.map(function(record) {
+      const scoring = scoreNoscaMetadataRecord_(record, normalizedQuestion);
+      const coverage = evaluateNoscaLookupCoverage_(record, normalizedQuestion,
+        requestedTypes, requestedItemTypes);
+      return Object.assign({}, record, {
+        metadataScore: scoring.score, matchedTerms: scoring.matchedTerms,
+        lookupCoverage: coverage.ratio,
+        lookupMatchedTerms: coverage.matchedTerms,
+        lookupRequiredAnchors: coverage.requiredAnchors,
+        lookupMissingAnchors: coverage.missingAnchors,
+        lookupMissingNumbers: coverage.missingNumericQualifiers,
+        lookupPassesContext: coverage.passes
+      });
+    }).filter(function(record) {
+      return record.metadataScore >= NOSCA_CONFIG.retrieval.minMetadataScore &&
+        record.lookupPassesContext &&
+        (!requestedItemTypes.length ||
+          requestedItemTypes.indexOf(record.itemType) !== -1) &&
+        (!requestedTypes.length ||
+          requestedTypes.indexOf(record.documentType) !== -1);
+    }).sort(compareNoscaLookupCandidates_);
+  }
+
+  function hasStrongTitleResult(records) {
+    return records.some(function(record) {
+      return record.lookupCoverage >= 0.9 &&
+        containsNoscaSearchTerm_(normalizeNoscaSearchText_(record.fileName), anchor);
     });
-  }).filter(function(record) {
-    return record.metadataScore >= NOSCA_CONFIG.retrieval.minMetadataScore &&
-      record.lookupPassesContext &&
-      (!requestedItemTypes.length ||
-        requestedItemTypes.indexOf(record.itemType)!==-1) &&
-      (!requestedTypes.length ||
-        requestedTypes.indexOf(record.documentType)!==-1);
-  }).sort(compareNoscaLookupCandidates_);
-  const limit = Math.max(Number(NOSCA_CONFIG.retrieval.maxDocumentLookupResults||12),1);
+  }
+
+  function runFocused(corpus) {
+    // Name matching is far more selective than fullText OR. Search the 'user'
+    // corpus first because allDrives may report an incomplete cross-drive query.
+    // This is still the requesting employee's own Drive permissions.
+    if (noscaDriveScopeStrategy_() !== 'none') return null;
+    try {
+      const focus = searchNoscaDriveRecords_(normalizedQuestion, 'none', {
+        tier: 'lookup-filename-v2',
+        q: "trashed = false and name contains '" +
+          escapeNoscaDriveQueryValue_(anchor) + "'",
+        corpus: corpus,
+        maxResults: 200,
+        maxPages: 3,
+        pageSize: 100
+      });
+      focusedSearches.push(focus);
+      focus.records.forEach(addCandidate);
+      return focus;
+    } catch (error) {
+      // Preserve original discovery results and surface focused failure to logs.
+      focusErrors.push(corpus + ': ' + String(error && error.message || error).slice(0, 180));
+      return null;
+    }
+  }
+
+  let records = rankMatches();
+  const numericQualifier = normalizedQuestion.terms.some(function(term) {
+    return /^\d{1,4}$/.test(term);
+  });
+  const strongResultPresent = anchor && hasStrongTitleResult(records);
+  const shouldFocus = Boolean(anchor) &&
+    (records.length < Math.min(3, limit) ||
+      (numericQualifier && !strongResultPresent));
+
+  if (shouldFocus) {
+    const userSearch = runFocused('user');
+    records = rankMatches();
+    // If user-scope title search did not find an acceptable result, try the
+    // wider cross-drive corpus before declaring that no matching file exists.
+    if (!hasStrongTitleResult(records) &&
+        (!userSearch || !userSearch.records.length || records.length < 1)) {
+      runFocused('allDrives');
+      records = rankMatches();
+    }
+  }
+
   const selected = (requestedTypes.length || requestedItemTypes.length)
-    ? records.slice(0,limit)
-    : selectNoscaDiversifiedDocumentResults_(records,limit);
-  selected.forEach(function(record,index){record.sourceIndex=index+1;});
-  return {ok:true, question:normalizedQuestion.text,
-    queryTerms:normalizedQuestion.terms,
-    requestedDocumentTypes:requestedTypes,
-    requestedItemTypes:requestedItemTypes,
-    totalMatches:records.length,
-    results:selected,
-    summary:summarizeNoscaDocumentLookupResults_(selected),
-    backend:'drive',searchElapsedMs:search.elapsedMs,
-    truncated:search.truncated, warning:search.warning};
+    ? records.slice(0, limit)
+    : selectNoscaDiversifiedDocumentResults_(records, limit);
+  selected.forEach(function(record, index) { record.sourceIndex = index + 1; });
+  const searchElapsedMs = search.elapsedMs + focusedSearches.reduce(function(ms, focus) {
+    return ms + focus.elapsedMs;
+  }, 0);
+  const lastFocus = focusedSearches[focusedSearches.length - 1] || null;
+
+  return {
+    ok: true, question: normalizedQuestion.text,
+    queryTerms: normalizedQuestion.terms,
+    requestedDocumentTypes: requestedTypes,
+    requestedItemTypes: requestedItemTypes,
+    totalMatches: records.length,
+    results: selected,
+    summary: summarizeNoscaDocumentLookupResults_(selected),
+    backend: 'drive',
+    searchElapsedMs: searchElapsedMs,
+    truncated: search.truncated || focusedSearches.some(function(focus) {
+      return focus.truncated;
+    }),
+    warning: search.warning || (lastFocus && lastFocus.warning) || '',
+    searchDiagnostics: {
+      patchVersion: 'roadmap-lookup-v2-20261022',
+      recoveryUsed: focusedSearches.length > 0,
+      recoveryTitleTerm: focusedSearches.length ? anchor : '',
+      initialCandidates: search.records.length,
+      recoveryCandidates: focusedSearches.reduce(function(count, focus) {
+        return count + focus.records.length;
+      }, 0),
+      recoveryCorpora: focusedSearches.map(function(focus) { return focus.corpus; }),
+      focusedErrors: focusErrors,
+      uniqueCandidates: allCandidates.length,
+      apiCalls: search.apiCalls + focusedSearches.reduce(function(count, focus) {
+        return count + focus.apiCalls;
+      }, 0),
+      matchedCandidates: records.length
+    }
+  };
+}
+
+/** Pick a useful title token; do not use a generic "year" or a bare digit. */
+function noscaDriveLookupTitleAnchor_(query) {
+  const generic = {
+    year:true, years:true, novare:true, document:true, documents:true,
+    proposal:true, proposals:true, file:true, files:true, deck:true,
+    decks:true, presentation:true, presentations:true, slide:true,
+    slides:true, folder:true, folders:true, material:true, materials:true
+  };
+  const terms = (query.terms || []).filter(function(term) {
+    return !generic[term] && !/^\d+$/.test(term) &&
+      /^[a-z0-9+#&.-]{3,60}$/.test(term);
+  });
+  terms.sort(function(a,b) {return b.length - a.length;});
+  return terms.length ? terms[0] : '';
+}
+
+/**
+ * Live end-to-end Drive lookup probe. Never invokes Gemini or writes to the index.
+ * Run this from the Apps Script editor after deploying the backend code.
+ * Distinct version string helps detect stale Apps Script deployments.
+ */
+function benchmarkNoscaRoadmapLookupV2() {
+  const query = '3 year roadmap';
+  const startedAt = Date.now();
+  const normalized = normalizeNoscaQuery_(query);
+  const context = resolveNoscaConversationContext_(query, null);
+  const result = findNoscaIndexedDocuments_(query);
+  const report = {
+    version: 'roadmap-lookup-v2-20261022',
+    question: query,
+    searchBackend: useNoscaNativeDriveSearch_() ? 'drive' : 'index',
+    scopeStrategy: noscaDriveScopeStrategy_(),
+    configuredCorpus: String(PropertiesService.getScriptProperties()
+      .getProperty('NOSCA_DRIVE_CORPUS') || 'allDrives'),
+    resolvedIntent: context.intent,
+    resolvedQuestion: context.resolvedQuestion,
+    normalizedTerms: normalized.terms,
+    elapsedMs: Date.now() - startedAt,
+    searchMs: result.searchElapsedMs || 0,
+    searchDiagnostics: result.searchDiagnostics || {},
+    returned: result.results.length,
+    matches: result.results.map(function(record) {
+      return {
+        name: record.fileName,
+        type: record.documentType,
+        score: record.metadataScore,
+        coverage: record.lookupCoverage,
+        matchedTerms: record.lookupMatchedTerms,
+        missingNumbers: record.lookupMissingNumbers,
+        url: record.driveUrl
+      };
+    })
+  };
+  console.log('[NOSCA ROADMAP V2][LOOKUP]\n' + JSON.stringify(report, null, 2));
+  return report;
+}
+
+/**
+ * Separate raw API probes: if the lookup is empty, show whether Drive actually
+ * returns name matches under the user or allDrives corpus, regardless of NOSCA
+ * ranking. This lets us distinguish ACL, Drive search, and ranking failures.
+ */
+function benchmarkNoscaRoadmapDriveRawV2() {
+  const normalized = normalizeNoscaQuery_('3 year roadmap');
+  const q = "trashed = false and name contains 'roadmap'";
+  const result = {
+    version: 'roadmap-lookup-v2-20261022',
+    question: normalized.text,
+    query: q,
+    configuredScope: noscaDriveScopeStrategy_(),
+    corpora: {}
+  };
+  ['user', 'allDrives'].forEach(function(corpus) {
+    try {
+      const search = searchNoscaDriveRecords_(normalized, 'none', {
+        tier: 'roadmap-raw-diagnostic',
+        q: q, corpus: corpus, maxResults: 200, maxPages: 3,
+        pageSize: 100
+      });
+      const ranked = search.records.map(function(record) {
+        const coverage = evaluateNoscaLookupCoverage_(record, normalized, [], []);
+        const score = scoreNoscaMetadataRecord_(record, normalized);
+        return {
+          name: record.fileName, fileId: record.fileId,
+          metadataScore: score.score, coverage: coverage.ratio,
+          matchedTerms: coverage.matchedTerms,
+          missingNumbers: coverage.missingNumericQualifiers,
+          passes: coverage.passes
+        };
+      });
+      result.corpora[corpus] = {
+        apiCalls: search.apiCalls, count: search.records.length,
+        elapsedMs: search.elapsedMs, truncated: search.truncated,
+        matches: ranked.filter(function(item) {return item.passes;}).slice(0, 15),
+        rejectedExamples: ranked.filter(function(item) {return !item.passes;}).slice(0, 6)
+      };
+    } catch (error) {
+      result.corpora[corpus] = {error: String(error && error.message || error)};
+    }
+  });
+  console.log('[NOSCA ROADMAP V2][RAW DRIVE]\n' + JSON.stringify(result, null, 2));
+  return result;
+}
+
+/** Retain the previous benchmark function name for convenience. */
+function benchmarkNoscaRoadmapLookup() {
+  return benchmarkNoscaRoadmapLookupV2();
 }
 
 function detectNoscaRequestedDocumentTypes_(question) {
@@ -809,8 +1063,18 @@ function evaluateNoscaLookupCoverage_(
     minimumMatched = 0;
   }
 
+  // Numeric qualifiers are mandatory: a request for "3 year roadmap"
+  // should not return a five-year roadmap or a document dated 2023 solely
+  // because the rest of the words matched.
+  const missingNumbers = topicTerms.filter(function(term) {
+    if (!/^\d{1,4}$/.test(term)) return false;
+    const digitBoundary = new RegExp('(^|[^0-9])' + term + '($|[^0-9])');
+    return !digitBoundary.test(searchable);
+  });
+
   const passes =
     missingAnchors.length === 0 &&
+    missingNumbers.length === 0 &&
     matched >= minimumMatched &&
     (
       total < 2 ||
@@ -825,7 +1089,8 @@ function evaluateNoscaLookupCoverage_(
     totalTerms: total,
     ratio: Number(ratio.toFixed(3)),
     requiredAnchors: requiredAnchors,
-    missingAnchors: missingAnchors
+    missingAnchors: missingAnchors,
+    missingNumericQualifiers: missingNumbers
   };
 }
 
@@ -1561,6 +1826,12 @@ function isNoscaMeaningfulQueryTerm_(term) {
 
   if (!value || stopWords[value]) {
     return false;
+  }
+
+  // Keep numeric qualifiers such as "3" in "3 year roadmap". Otherwise
+  // a generic "year roadmap" matches unrelated two- or five-year plans.
+  if (/^\d{1,4}$/.test(value)) {
+    return true;
   }
 
   if (/^[a-z0-9+#&.-]{2,}$/.test(value)) {

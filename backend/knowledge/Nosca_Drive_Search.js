@@ -203,16 +203,26 @@ function searchNoscaDriveRecords_(question, scopeStrategyOverride, searchOptions
     fields: 'nextPageToken,incompleteSearch,files(id,name,mimeType,parents,driveId,webViewLink,modifiedTime,trashed)',
     orderBy: searchOptions.orderBy || 'modifiedTime desc'
   };
+  // Drive API rejects sorting when a files.list query includes fullText terms.
+  // Let Drive return those matches in its native relevance order.
+  if (/\bfullText\s+contains\b/i.test(q)) {
+    delete params.orderBy;
+  }
   // 'allDrives' covers My Drive and shared drives the requester belongs to;
   // Google may flag broad queries as incompleteSearch. We surface that warning.
   // 'user' is faster and can be chosen if broad all-drives queries are slow.
   if (scopeStrategy === 'none') {
-    const preferredCorpus = String(PropertiesService.getScriptProperties()
-      .getProperty('NOSCA_DRIVE_CORPUS') || 'allDrives').trim();
-    if (preferredCorpus !== 'user' && preferredCorpus !== 'allDrives') {
-      throw new Error('NOSCA_DRIVE_CORPUS must be "user" or "allDrives".');
+    const preferredCorpus = String(searchOptions.corpus ||
+      PropertiesService.getScriptProperties().getProperty('NOSCA_DRIVE_CORPUS') ||
+      'allDrives').trim();
+    if (preferredCorpus !== 'user' && preferredCorpus !== 'allDrives' &&
+        !(preferredCorpus === 'drive' && searchOptions.driveId)) {
+      throw new Error('NOSCA_DRIVE_CORPUS must be "user" or "allDrives"; targeted drive searches need an explicit driveId.');
     }
     params.corpora = preferredCorpus;
+    if (preferredCorpus === 'drive') {
+      params.driveId = String(searchOptions.driveId);
+    }
   } else if (root.driveId) {
     params.corpora = 'drive';
     params.driveId = root.driveId;
@@ -233,6 +243,7 @@ function searchNoscaDriveRecords_(question, scopeStrategyOverride, searchOptions
   let scanned = 0;
   let incomplete = false;
   let stoppedEarly = false;
+  let lastPageHadNextToken = false;
 
   do {
     if (nextPageToken) params.pageToken = nextPageToken;
@@ -270,13 +281,18 @@ function searchNoscaDriveRecords_(question, scopeStrategyOverride, searchOptions
         normalizedItem.folderPath = '';
         normalizedItem.hierarchyContext = '';
       }
-      results.push(buildNoscaIndexRecord_(normalizedItem, null, new Date()));
+      const record = buildNoscaIndexRecord_(normalizedItem, null, new Date());
+      // Preserve provenance for metadata-only lookup ranking and diagnostics.
+      record.driveId = String(item.driveId || '');
+      record.modifiedTime = String(item.modifiedTime || '');
+      results.push(record);
       if (results.length >= maxResults) {
         stoppedEarly = true;
         break;
       }
     }
     nextPageToken = String(page.nextPageToken || '');
+    lastPageHadNextToken = Boolean(nextPageToken);
     if (stoppedEarly) break;
   } while (nextPageToken && pages < maxPages);
 
@@ -284,10 +300,17 @@ function searchNoscaDriveRecords_(question, scopeStrategyOverride, searchOptions
   return {
     records: results,
     scopeStrategy: scopeStrategy,
+    corpus: params.corpora || '',
+    query: q,
     elapsedMs: Date.now() - startedAt,
     apiCalls: pages,
     scanned: scanned,
     truncated: truncated,
+    incompleteSearch: incomplete,
+    nextPageTokenPresent: lastPageHadNextToken,
+    pageCount: pages,
+    stoppedByMaxResults: stoppedEarly,
+    stoppedByMaxPages: Boolean(nextPageToken && pages >= maxPages),
     metrics: metrics,
     queryTier: searchOptions.tier || 'legacy',
     warning: truncated

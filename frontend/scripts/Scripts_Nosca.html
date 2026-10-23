@@ -573,7 +573,8 @@
     bubble.appendChild(text);
     body.appendChild(bubble);
 
-    if (data.grounded === false) {
+    // Document lookups with no results are not AI answers lacking approved sources.
+    if (data.grounded === false && data.responseMode !== "document_lookup") {
       const note = document.createElement("div");
       note.className = "nosca-answer-note";
       note.textContent =

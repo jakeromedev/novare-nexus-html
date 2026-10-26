@@ -660,6 +660,11 @@ function findNoscaIndexedDocuments_(question) {
  * Gemini request, or NOSCA_Index read is needed.
  */
 function findNoscaDriveDocuments_(question) {
+  // Opt-in central metadata discovery. Never fall back to employee-scoped
+  // Drive results when central mode is enabled but unavailable.
+  if (noscaCentralDiscoveryEnabled_()) {
+    return noscaFindCentralDocuments_(question);
+  }
   // V3 is deliberately opt-in and isolated from grounded knowledge Q&A.
   if (noscaPhase2BEnabled_()) {
     try {

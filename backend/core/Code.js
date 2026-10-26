@@ -3,6 +3,9 @@
  * Deploy this Apps Script project as a Web App, then embed the /exec URL in Google Sites.
  */
 function doGet() {
+  // Block the privileged discovery deployment from rendering the employee UI.
+  const centralGuard = noscaCentralPortalGuard_();
+  if (centralGuard) return centralGuard;
   const template = HtmlService.createTemplateFromFile('frontend/pages/Index');
 
   return template

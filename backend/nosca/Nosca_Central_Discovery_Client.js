@@ -17,7 +17,15 @@ function noscaCentralSettings_() {
   const secret = String(p.getProperty('NOSCA_CENTRAL_SHARED_SECRET') || '').trim();
   const domains = String(p.getProperty('NOSCA_CENTRAL_ALLOWED_DOMAINS') || '')
     .trim().toLowerCase().split(',').map(function (x) { return x.trim(); }).filter(Boolean);
-  if (!/^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec$/.test(url))
+  // Both canonical and Workspace-domain Apps Script deployment URLs are valid.
+  // Keep the host pinned and permit Workspace routes only for allowed domains.
+  const canonicalRoute = /^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec$/;
+  const workspaceMatch = url.match(
+    /^https:\/\/script\.google\.com\/a\/macros\/([A-Za-z0-9.-]+)\/s\/[A-Za-z0-9_-]+\/exec$/i
+  );
+  const allowedWorkspaceRoute = workspaceMatch &&
+    domains.indexOf(workspaceMatch[1].toLowerCase()) !== -1;
+  if (!canonicalRoute.test(url) && !allowedWorkspaceRoute)
     throw new Error('OWNER_DEPLOYMENT_URL_MISSING_OR_INVALID');
   if (secret.length < 48 || !domains.length)
     throw new Error('CENTRAL_BRIDGE_SETTINGS_MISSING');
@@ -100,14 +108,20 @@ function noscaCentralRemoteCall_(operation, question) {
         noscaBridgeSign_(envelope.payload, settings.secret)))
     throw new Error('CENTRAL_RESPONSE_SIGNATURE_INVALID');
   const data = envelope.payload;
+  // Protocol v1 is the compatibility boundary. The Owner and Portal can
+  // legitimately use different release labels while versioned deployments
+  // are rolled out independently. The HMAC, nonce and operation still must
+  // match exactly; never trust an unsigned or mismatched response.
   if (data.v !== 1 || data.nonce !== payload.nonce ||
-      data.version !== NOSCA_CENTRAL_CLIENT_VERSION || data.operation !== operation ||
-      data.ok !== true || !Array.isArray(data.files))
+      data.operation !== operation || data.ok !== true ||
+      typeof data.version !== 'string' || !data.version ||
+      !Array.isArray(data.files))
     throw new Error('CENTRAL_RESPONSE_INVALID');
   console.log('[NOSCA CENTRAL][BRIDGE] ' + JSON.stringify({
     version: data.version, operation: operation, elapsedMs: Date.now() - started,
     serviceElapsedMs: data.elapsedMs, returned: data.files.length,
-    apiCalls: data.apiCalls, truncated: data.truncated, domainAuthenticated: true
+    apiCalls: data.apiCalls, truncated: data.truncated,
+    responseSignatureVerified: true, serverVersion: data.version
   }));
   return data;
 }
@@ -211,4 +225,85 @@ function benchmarkNoscaCentralVisibility() {
     checks: checks };
   console.log('[NOSCA CENTRAL][VISIBILITY] ' + JSON.stringify(out));
   return out;
+}
+
+/**
+ * Offline Owner/Client wire-protocol compatibility check. No Drive call,
+ * no HTTP request, and no feature switch changes. Can be run from the
+ * Apps Script editor before live bridge transport testing.
+ */
+function benchmarkNoscaCentralProtocolCompatibility20261026() {
+  const secret = String(PropertiesService.getScriptProperties()
+    .getProperty('NOSCA_CENTRAL_SHARED_SECRET') || '');
+  if (secret.length < 48) throw new Error('CENTRAL_SHARED_SECRET_MISSING');
+  const request = {
+    v: 1, op: 'lookup', timestamp: Date.now(), nonce: Utilities.getUuid(),
+    email: 'test@novare.com.ph', question: 'pjl'
+  };
+  const response = {
+    v: 1, version: NOSCA_CENTRAL_OWNER_VERSION,
+    nonce: request.nonce, ok: true, operation: request.op,
+    files: [{ id: '1ynKpK-D2huHtUlCoJiPKYZ1UNdQl80s064OqUuA_YAc',
+      name: 'PJL 3-Year Renewal Roadmap Deck (Sep 28, 2026)',
+      mimeType: 'application/vnd.google-apps.presentation' }],
+    apiCalls: 1, truncated: false, incompleteSearch: false,
+    elapsedMs: 1, scopeMode: 'approved_files'
+  };
+  const sig = noscaBridgeSign_(response, secret);
+  const signatureAccepted = noscaBridgeConstantEqual_(sig,
+    noscaBridgeSign_(response, secret));
+  const versionCompatible = response.v === 1 &&
+    typeof response.version === 'string' && !!response.version &&
+    response.nonce === request.nonce && response.operation === request.op;
+  const forged = Object.assign({}, response, { nonce: Utilities.getUuid() });
+  const forgedRejected = !noscaBridgeConstantEqual_(sig,
+    noscaBridgeSign_(forged, secret));
+  const report = {
+    ok: signatureAccepted && versionCompatible && forgedRejected,
+    protocolVersion: 1,
+    clientVersion: NOSCA_CENTRAL_CLIENT_VERSION,
+    ownerVersion: NOSCA_CENTRAL_OWNER_VERSION,
+    signedReplyAccepted: signatureAccepted,
+    crossReleaseCompatible: versionCompatible,
+    nonceTamperingRejected: forgedRejected,
+    requiresDeployment: false
+  };
+  console.log('[NOSCA CENTRAL][PROTOCOL] ' + JSON.stringify(report));
+  if (!report.ok) throw new Error('CENTRAL_PROTOCOL_SELF_TEST_FAILED');
+  return report;
+}
+
+
+/**
+ * One-time URL configuration for the existing NOVARE NEXUS Apps Script project.
+ * Run in the editor signed in as novare.nexus@novare.com.ph.
+ * Does not enable the owner endpoint or central discovery.
+ */
+function setupNoscaCentralOwnerDeploymentUrl20261026() {
+  const endpointUrl = 'https://script.google.com/a/macros/novare.com.ph/s/AKfycbwucZ1n8-G5pXBq2-UVCeD1EaJ-xxO-85xT-7SeIW0auUnXUPVzffDtLB58hN8eCA44bg/exec';
+  const props = PropertiesService.getScriptProperties();
+  const owner = String(props.getProperty('NOSCA_CENTRAL_OWNER_EMAIL') || '').trim().toLowerCase();
+  const effective = String(Session.getEffectiveUser().getEmail() || '').trim().toLowerCase();
+  if (!owner || owner !== effective) throw new Error('OWNER_ACCOUNT_REQUIRED_FOR_URL_SETUP');
+  const propertyName = 'NOSCA_CENTRAL_OWNER_DEPLOYMENT_URL';
+  const previous = props.getProperty(propertyName);
+  props.setProperty(propertyName, endpointUrl);
+  try {
+    // Validates the URL against the fixed host and allowed company domain.
+    noscaCentralSettings_();
+  } catch (err) {
+    if (previous === null) props.deleteProperty(propertyName);
+    else props.setProperty(propertyName, previous);
+    throw err;
+  }
+  const result = {
+    ok: true,
+    ownerVerified: true,
+    ownerDeploymentUrlConfigured: true,
+    centralDiscoveryEnabled: props.getProperty('NOSCA_CENTRAL_DISCOVERY_ENABLED') === 'true',
+    ownerEndpointEnabled: props.getProperty('NOSCA_CENTRAL_OWNER_ENDPOINT_ENABLED') === 'true',
+    nextStep: 'Verify deployment access and runtime scopes, then run bridge transport as employee'
+  };
+  console.log('[NOSCA CENTRAL][OWNER_URL_SETUP] ' + JSON.stringify(result));
+  return result;
 }

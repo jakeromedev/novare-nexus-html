@@ -10,12 +10,10 @@
  * - Does NOT remove or modify unrelated script properties (including GEMINI_API_KEY).
  * - Never prints the generated signing secret.
  * - Starts with BOTH central-discovery feature switches OFF.
- * - Does NOT automatically authorize any Shared Drives or account-wide discovery.
+ * - Does NOT automatically authorize account-wide discovery.
  * - Safe to rerun; will not rotate an existing valid signing secret.
  *
- * Two settings intentionally cannot be guessed:
- *   NOSCA_CENTRAL_ALLOWED_DRIVE_IDS    (approved Shared Drive IDs)
- *   NOSCA_CENTRAL_OWNER_DEPLOYMENT_URL (URL after new deployment exists)
+ * The owner deployment URL is configured separately after deployment.
  */
 function setupNoscaCentralDiscoveryProperties() {
   const owner = 'novare.nexus@novare.com.ph';
@@ -43,15 +41,14 @@ function setupNoscaCentralDiscoveryProperties() {
     }
     const existingMode = String(current.NOSCA_CENTRAL_SCOPE_MODE || '')
       .trim().toLowerCase();
-    if (existingMode && existingMode !== 'approved_drives') {
-      throw new Error('SCOPE_ALREADY_CONFIGURED: Existing mode is not approved_drives; review manually.');
+    if (existingMode && existingMode !== 'account') {
+      throw new Error('SCOPE_NOT_ACCOUNT: Run setupNoscaCentralAccountWideDiscovery instead.');
     }
 
     const defaults = {
       NOSCA_CENTRAL_OWNER_EMAIL: owner,
       NOSCA_CENTRAL_ALLOWED_DOMAINS: 'novare.com.ph',
-      NOSCA_CENTRAL_SCOPE_MODE: 'approved_drives',
-      NOSCA_CENTRAL_ALLOWED_DRIVE_IDS: '',
+      NOSCA_CENTRAL_SCOPE_MODE: 'account',
       NOSCA_CENTRAL_OWNER_ENDPOINT_ENABLED: 'false',
       NOSCA_CENTRAL_DISCOVERY_ENABLED: 'false',
       NOSCA_CENTRAL_OWNER_DEPLOYMENT_URL: ''
@@ -86,13 +83,12 @@ function setupNoscaCentralDiscoveryProperties() {
     }
 
     const after = store.getProperties();
-    const approvedDriveCount = String(after.NOSCA_CENTRAL_ALLOWED_DRIVE_IDS || '')
-      .split(',').map(function (s) { return s.trim(); }).filter(Boolean).length;
     const ownerUrlSet = !!String(after.NOSCA_CENTRAL_OWNER_DEPLOYMENT_URL || '').trim();
     const enabled = after.NOSCA_CENTRAL_OWNER_ENDPOINT_ENABLED === 'true' ||
       after.NOSCA_CENTRAL_DISCOVERY_ENABLED === 'true';
     const pending = [];
-    if (!approvedDriveCount) pending.push('Select and approve Shared Drive IDs when Nexus has access.');
+    if (after.NOSCA_CENTRAL_ACCOUNT_WIDE_APPROVED !== 'I_ACKNOWLEDGE_METADATA_VISIBILITY')
+      pending.push('Run setupNoscaCentralAccountWideDiscovery as Nexus owner to acknowledge account-wide metadata visibility.');
     if (!ownerUrlSet) pending.push('Create the owner deployment, then save its /exec URL.');
     if (enabled) pending.push('One or more existing feature flags are enabled; verify before proceeding.');
 
@@ -105,7 +101,8 @@ function setupNoscaCentralDiscoveryProperties() {
       secretPresent: String(after.NOSCA_CENTRAL_SHARED_SECRET || '').length >= 48,
       secretGenerated: secretGenerated,
       scopeMode: after.NOSCA_CENTRAL_SCOPE_MODE,
-      approvedDriveCount: approvedDriveCount,
+      accountWideApproved: after.NOSCA_CENTRAL_ACCOUNT_WIDE_APPROVED ===
+        'I_ACKNOWLEDGE_METADATA_VISIBILITY',
       ownerDeploymentUrlSet: ownerUrlSet,
       ownerEndpointEnabled: after.NOSCA_CENTRAL_OWNER_ENDPOINT_ENABLED === 'true',
       centralDiscoveryEnabled: after.NOSCA_CENTRAL_DISCOVERY_ENABLED === 'true',

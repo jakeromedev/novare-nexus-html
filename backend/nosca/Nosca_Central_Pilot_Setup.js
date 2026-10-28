@@ -1,49 +1,59 @@
 /**
- * NOVARE NEXUS — PILOT SETUP FOR INDIVIDUALLY SHARED FILES.
- * Add this entire file to the SAME existing Apps Script project.
- * Run setupNoscaCentralPjlPilot() as novare.nexus@novare.com.ph.
+ * NOVARE NEXUS — Switch central discovery to the Nexus account's Drive scope.
+ * Run ONCE as novare.nexus@novare.com.ph, in the SAME Apps Script project.
  *
- * This is NOT the production rollout. It verifies the existing shared file
- * directly, sets only an approved-file allowlist, and leaves both web app
- * feature switches OFF. It never modifies GEMINI_API_KEY or other settings.
+ * IMPORTANT: Every domain-authorized NOSCA user can discover filenames and
+ * links for ALL files accessible to the Nexus account, including restricted
+ * files they cannot open. This does not fetch document contents or change
+ * Google Drive sharing permissions. Do not run until metadata visibility is
+ * approved by the organization and legacy public deployments are retired.
+ *
+ * Preserves Gemini key, current endpoint URL, shared secret, and feature flags.
  */
-function setupNoscaCentralPjlPilot() {
-  const owner = 'novare.nexus@novare.com.ph';
-  const account = String(Session.getEffectiveUser().getEmail() || '').trim().toLowerCase();
-  if (account !== owner) throw new Error('PILOT_OWNER_REQUIRED');
-  const fileId = '1ynKpK-D2huHtUlCoJiPKYZ1UNdQl80s064OqUuA_YAc';
+function setupNoscaCentralAccountWideDiscovery() {
   const props = PropertiesService.getScriptProperties();
+  const expected = 'novare.nexus@novare.com.ph';
+  const owner = String(props.getProperty('NOSCA_CENTRAL_OWNER_EMAIL') || '')
+    .trim().toLowerCase();
+  const effective = String(Session.getEffectiveUser().getEmail() || '')
+    .trim().toLowerCase();
+  if (effective !== expected || owner !== expected)
+    throw new Error('ACCOUNT_SETUP_REQUIRES_NEXUS_OWNER');
   if (String(props.getProperty('NOSCA_CENTRAL_SHARED_SECRET') || '').length < 48)
-    throw new Error('PILOT_SHARED_SECRET_MISSING');
-  // Confirm owner access BEFORE changing configuration.
-  const f = Drive.Files.get(fileId, {
-    fields: 'id,name,mimeType,trashed,webViewLink', supportsAllDrives: true
-  });
-  if (!f || f.id !== fileId || f.trashed) throw new Error('PILOT_FILE_NOT_READABLE');
+    throw new Error('CENTRAL_SHARED_SECRET_MISSING');
+  if (!String(props.getProperty('NOSCA_CENTRAL_ALLOWED_DOMAINS') || '').trim())
+    throw new Error('CENTRAL_ALLOWED_DOMAINS_MISSING');
 
-  props.setProperties({
-    NOSCA_CENTRAL_SCOPE_MODE: 'approved_files',
-    NOSCA_CENTRAL_ALLOWED_FILE_IDS: fileId,
-    NOSCA_CENTRAL_OWNER_ENDPOINT_ENABLED: 'false',
-    NOSCA_CENTRAL_DISCOVERY_ENABLED: 'false'
-  }, false);
-
-  // Same search helper the owner endpoint uses when serving requests.
+  const lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  try {
+    // Explicit owner acknowledgment: account-scoped metadata is available to
+    // signed, authorized internal NOSCA users, regardless of Drive file ACL.
+    props.setProperties({
+      NOSCA_CENTRAL_SCOPE_MODE: 'account',
+      NOSCA_CENTRAL_ACCOUNT_WIDE_APPROVED: 'I_ACKNOWLEDGE_METADATA_VISIBILITY'
+    }, false);
+    // The former allowlists must NOT determine search results anymore.
+    props.deleteProperty('NOSCA_CENTRAL_ALLOWED_FILE_IDS');
+    props.deleteProperty('NOSCA_CENTRAL_ALLOWED_DRIVE_IDS');
+  } finally {
+    lock.releaseLock();
+  }
   const cfg = noscaOwnerConfig_();
-  const test = noscaOwnerSearch_('pjl', cfg);
   const report = {
-    ok: test.files.some(function (x) { return x.id === fileId; }),
-    scopeMode: cfg.mode, account: account, allowlistedFileCount: cfg.fileIds.length,
-    search: 'pjl', matches: test.files.length, apiCalls: test.apiCalls,
-    results: test.files.map(function (x) {
-      return { name: x.name, mimeType: x.mimeType, link: x.webViewLink };
-    }),
-    employeePortalUnchanged: true,
-    ownerEndpointEnabled: false,
-    centralDiscoveryEnabled: false,
-    nextTest: 'benchmarkNoscaCentralOwnerSecurity'
+    ok: true, executedAsOwner: true, scopeMode: cfg.mode,
+    approvedFileFilteringRemoved: true,
+    metadataVisibility: 'all-files-visible-to-novare-nexus-account',
+    ownerEndpointEnabled: props.getProperty('NOSCA_CENTRAL_OWNER_ENDPOINT_ENABLED') === 'true',
+    centralDiscoveryEnabled: props.getProperty('NOSCA_CENTRAL_DISCOVERY_ENABLED') === 'true',
+    otherScriptPropertiesPreserved: true,
+    nextTest: 'benchmarkNoscaCentralAccountWideSearch20261029'
   };
-  console.log('[NOSCA CENTRAL][PILOT] ' + JSON.stringify(report, null, 2));
-  if (!report.ok) throw new Error('PILOT_SEARCH_DID_NOT_RETURN_SHARED_PJL_FILE');
+  console.log('[NOSCA CENTRAL][ACCOUNT_SETUP] ' + JSON.stringify(report));
   return report;
+}
+
+/** Retired old pilot name so it cannot accidentally restore the file allowlist. */
+function setupNoscaCentralPjlPilot() {
+  throw new Error('PILOT_RETIRED: Run setupNoscaCentralAccountWideDiscovery instead.');
 }

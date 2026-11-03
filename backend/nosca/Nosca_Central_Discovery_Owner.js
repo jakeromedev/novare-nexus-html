@@ -12,22 +12,25 @@
 const NOSCA_CENTRAL_OWNER_VERSION = 'nosca-central-single-project-20261029-account';
 
 function noscaOwnerConfig_() {
-  const props = PropertiesService.getScriptProperties();
-  const owner = String(props.getProperty('NOSCA_CENTRAL_OWNER_EMAIL') || '').trim().toLowerCase();
+  // One Script Properties service read per owner invocation.
+  // Preserve all access and scope checks; no cross-invocation caching.
+  const props = PropertiesService.getScriptProperties().getProperties();
+  const owner = String(props.NOSCA_CENTRAL_OWNER_EMAIL || '').trim().toLowerCase();
   const effective = String(Session.getEffectiveUser().getEmail() || '').trim().toLowerCase();
   if (!owner || !effective || owner !== effective) throw new Error('OWNER_IDENTITY_MISMATCH');
-  const secret = String(props.getProperty('NOSCA_CENTRAL_SHARED_SECRET') || '').trim();
-  const domains = String(props.getProperty('NOSCA_CENTRAL_ALLOWED_DOMAINS') || '')
+  const secret = String(props.NOSCA_CENTRAL_SHARED_SECRET || '').trim();
+  const domains = String(props.NOSCA_CENTRAL_ALLOWED_DOMAINS || '')
     .trim().toLowerCase().split(',').map(function (s) { return s.trim(); }).filter(Boolean);
-  const mode = String(props.getProperty('NOSCA_CENTRAL_SCOPE_MODE') || '').trim().toLowerCase();
+  const mode = String(props.NOSCA_CENTRAL_SCOPE_MODE || '').trim().toLowerCase();
   // Account-wide metadata visibility is a deliberate, one-time owner opt-in.
   // It does NOT grant employees permission to open documents.
-  const accountWideApproved = props.getProperty('NOSCA_CENTRAL_ACCOUNT_WIDE_APPROVED') ===
+  const accountWideApproved = props.NOSCA_CENTRAL_ACCOUNT_WIDE_APPROVED ===
     'I_ACKNOWLEDGE_METADATA_VISIBILITY';
   if (secret.length < 48 || !domains.length) throw new Error('CENTRAL_CONFIGURATION_MISSING');
   if (mode !== 'account' || !accountWideApproved)
     throw new Error('ACCOUNT_DISCOVERY_SETUP_REQUIRED');
-  return { owner: owner, secret: secret, domains: domains, mode: 'account' };
+  return { owner: owner, secret: secret, domains: domains, mode: 'account',
+    endpointEnabled: props.NOSCA_CENTRAL_OWNER_ENDPOINT_ENABLED === 'true' };
 }
 
 function noscaOwnerSign_(data, secret) {
@@ -155,25 +158,46 @@ function doPost(e) {
   const started = Date.now();
   let cfg, signed;
   try {
+    // Profile the entire owner handler, not just Drive.Files.list().
+    const configStarted = Date.now();
     cfg = noscaOwnerConfig_();
-    if (PropertiesService.getScriptProperties().getProperty('NOSCA_CENTRAL_OWNER_ENDPOINT_ENABLED') !== 'true')
-      throw new Error('OWNER_ENDPOINT_DISABLED');
+    const configMs = Date.now() - configStarted;
+    if (!cfg.endpointEnabled) throw new Error('OWNER_ENDPOINT_DISABLED');
+
+    const authStarted = Date.now();
     const raw = String(e && e.postData && e.postData.contents || '');
     if (!raw || raw.length > 3500) throw new Error('INVALID_REQUEST_SIZE');
     const auth = noscaOwnerAuthorize_(JSON.parse(raw), cfg);
+    const authMs = Date.now() - authStarted;
+
+    const searchStarted = Date.now();
     const result = auth.op === 'ping' ? {
       files: [], apiCalls: 0, truncated: false, incompleteSearch: false, elapsedMs: 0, scopeMode: cfg.mode
     } : noscaOwnerSearch_(auth.question, cfg);
+    const searchMs = Date.now() - searchStarted;
+
+    // These metrics are signed along with the normal response. No identity,
+    // file contents, secret, or OAuth credentials are added to the response.
+    const performance = {
+      configMs: configMs, authMs: authMs, searchMs: searchMs,
+      preSignMs: Date.now() - started
+    };
     const payload = {
       v: 1, version: NOSCA_CENTRAL_OWNER_VERSION, nonce: auth.nonce,
       ok: true, operation: auth.op, files: result.files, apiCalls: result.apiCalls,
       truncated: result.truncated, incompleteSearch: result.incompleteSearch,
-      elapsedMs: result.elapsedMs, scopeMode: result.scopeMode
+      elapsedMs: result.elapsedMs, scopeMode: result.scopeMode,
+      performance: performance
     };
+    const signingStarted = Date.now();
     signed = { payload: payload, signature: noscaOwnerSign_(payload, cfg.secret) };
+    const signingMs = Date.now() - signingStarted;
     console.log('[NOSCA CENTRAL][OWNER] ' + JSON.stringify({
-      version: payload.version, operation: auth.op, elapsedMs: Date.now() - started,
-      apiCalls: result.apiCalls, returned: result.files.length, scopeMode: cfg.mode
+      version: payload.version, trace: auth.nonce.slice(0, 8),
+      operation: auth.op, elapsedMs: Date.now() - started,
+      configMs: configMs, authMs: authMs, searchMs: searchMs,
+      signingMs: signingMs, apiCalls: result.apiCalls,
+      returned: result.files.length, scopeMode: cfg.mode
     }));
     return noscaOwnerJson_(signed);
   } catch (err) {

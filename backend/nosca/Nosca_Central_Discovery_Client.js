@@ -12,10 +12,11 @@ function noscaCentralDiscoveryEnabled_() {
 }
 
 function noscaCentralSettings_() {
-  const p = PropertiesService.getScriptProperties();
-  const url = String(p.getProperty('NOSCA_CENTRAL_OWNER_DEPLOYMENT_URL') || '').trim();
-  const secret = String(p.getProperty('NOSCA_CENTRAL_SHARED_SECRET') || '').trim();
-  const domains = String(p.getProperty('NOSCA_CENTRAL_ALLOWED_DOMAINS') || '')
+  // Read once per remote call; preserve employee identity and URL validation.
+  const p = PropertiesService.getScriptProperties().getProperties();
+  const url = String(p.NOSCA_CENTRAL_OWNER_DEPLOYMENT_URL || '').trim();
+  const secret = String(p.NOSCA_CENTRAL_SHARED_SECRET || '').trim();
+  const domains = String(p.NOSCA_CENTRAL_ALLOWED_DOMAINS || '')
     .trim().toLowerCase().split(',').map(function (x) { return x.trim(); }).filter(Boolean);
   // Both canonical and Workspace-domain Apps Script deployment URLs are valid.
   // Keep the host pinned and permit Workspace routes only for allowed domains.
@@ -60,49 +61,75 @@ function noscaBridgeConstantEqual_(a, b) {
  * If the domain webapp rejects server-side OAuth, fail closed. Do NOT open
  * the owner deployment to Anyone/anonymous to bypass Google's auth gate.
  */
-function noscaCentralFetch_(url, jsonBody) {
+function noscaCentralFetch_(url, jsonBody, performance) {
+  const authStarted = Date.now();
   const oauth = ScriptApp.getOAuthToken();
+  if (performance) performance.oauthMs = Date.now() - authStarted;
   if (!oauth) throw new Error('EMPLOYEE_OAUTH_TOKEN_UNAVAILABLE');
+
+  const firstStarted = Date.now();
   const first = UrlFetchApp.fetch(url, {
     method: 'post', contentType: 'application/json', payload: jsonBody,
     headers: { Authorization: 'Bearer ' + oauth },
     muteHttpExceptions: true, followRedirects: false
   });
+  if (performance) performance.postFetchMs = Date.now() - firstStarted;
   const code = first.getResponseCode();
   if (code === 301 || code === 302 || code === 303 || code === 307 || code === 308) {
     const h = first.getHeaders();
     const location = String(h.Location || h.location || '').trim();
     if (!/^https:\/\/script\.googleusercontent\.com\//.test(location))
       throw new Error('UNEXPECTED_REDIRECT_HOST');
+    // Preserve the security boundary: never forward the employee bearer token
+    // to googleusercontent.com. ContentService redirects are unavoidable.
+    const redirectStarted = Date.now();
     const second = UrlFetchApp.fetch(location, {
       method: 'get', followRedirects: false, muteHttpExceptions: true
     });
+    if (performance) {
+      performance.redirectFetchMs = Date.now() - redirectStarted;
+      performance.redirected = true;
+    }
     if (second.getResponseCode() !== 200)
       throw new Error('DOMAIN_TRANSPORT_RESPONSE_' + second.getResponseCode());
     return second.getContentText();
   }
+  if (performance) { performance.redirectFetchMs = 0; performance.redirected = false; }
   if (code !== 200) throw new Error('DOMAIN_TRANSPORT_RESPONSE_' + code);
   return first.getContentText();
 }
 
 /** Signed and authenticated call to the Nexus-owned deployment. */
 function noscaCentralRemoteCall_(operation, question) {
+  const started = Date.now();
+  const performance = {};
+  const settingsStarted = Date.now();
   const settings = noscaCentralSettings_();
+  performance.settingsMs = Date.now() - settingsStarted;
+  const identityStarted = Date.now();
   const email = noscaCentralEmployee_(settings.domains);
+  performance.identityMs = Date.now() - identityStarted;
   const text = String(question || '').replace(/\s+/g, ' ').trim();
   if (operation !== 'ping' && (text.length === 0 || text.length > 500))
     throw new Error('INVALID_CENTRAL_QUERY');
   if (['ping', 'lookup'].indexOf(operation) < 0) throw new Error('INVALID_OPERATION');
   const payload = { v: 1, op: operation, timestamp: Date.now(),
     nonce: Utilities.getUuid(), email: email, question: text };
+  const signingStarted = Date.now();
   const request = JSON.stringify({ payload: payload,
     signature: noscaBridgeSign_(payload, settings.secret) });
-  const started = Date.now();
-  const responseText = noscaCentralFetch_(settings.url, request);
+  performance.requestSignMs = Date.now() - signingStarted;
+
+  const transportStarted = Date.now();
+  const responseText = noscaCentralFetch_(settings.url, request, performance);
+  performance.transportMs = Date.now() - transportStarted;
   if (responseText.length > 160000) throw new Error('CENTRAL_RESPONSE_TOO_LARGE');
+  const parsingStarted = Date.now();
   let envelope;
   try { envelope = JSON.parse(responseText); }
   catch (err) { throw new Error('DOMAIN_TRANSPORT_NON_JSON'); }
+  performance.responseParseMs = Date.now() - parsingStarted;
+  const verificationStarted = Date.now();
   if (!envelope || !envelope.payload || !envelope.signature ||
       !noscaBridgeConstantEqual_(envelope.signature,
         noscaBridgeSign_(envelope.payload, settings.secret)))
@@ -117,11 +144,24 @@ function noscaCentralRemoteCall_(operation, question) {
       typeof data.version !== 'string' || !data.version ||
       !Array.isArray(data.files))
     throw new Error('CENTRAL_RESPONSE_INVALID');
+  performance.responseVerifyMs = Date.now() - verificationStarted;
+  performance.totalMs = Date.now() - started;
+  const ownerPerformance = data.performance || null;
+  const ownerReportedMs = ownerPerformance && Number.isFinite(Number(ownerPerformance.preSignMs))
+    ? Number(ownerPerformance.preSignMs) : null;
+  performance.ownerReportedMs = ownerReportedMs;
+  // Includes Google deployment startup, domain authentication, redirect and
+  // network; it is an estimate, NOT an exact measurement of Google overhead.
+  performance.transportMinusOwnerEstimateMs = ownerReportedMs === null ? null
+    : Math.max(0, performance.transportMs - ownerReportedMs);
+  // Preserve the existing BRIDGE log prefix for current NOSCA diagnostics.
   console.log('[NOSCA CENTRAL][BRIDGE] ' + JSON.stringify({
-    version: data.version, operation: operation, elapsedMs: Date.now() - started,
+    version: data.version, trace: payload.nonce.slice(0, 8),
+    operation: operation, elapsedMs: performance.totalMs,
     serviceElapsedMs: data.elapsedMs, returned: data.files.length,
     apiCalls: data.apiCalls, truncated: data.truncated,
-    responseSignatureVerified: true, serverVersion: data.version
+    responseSignatureVerified: true, serverVersion: data.version,
+    performance: performance, ownerPerformance: ownerPerformance
   }));
   return data;
 }
@@ -306,4 +346,61 @@ function setupNoscaCentralOwnerDeploymentUrl20261026() {
   };
   console.log('[NOSCA CENTRAL][OWNER_URL_SETUP] ' + JSON.stringify(result));
   return result;
+}
+
+
+/**
+ * PRIORITY 1: Diagnose bridge latency without querying Drive. Run as an
+ * authorized employee in the Apps Script editor. One authenticated remote
+ * ping, no cache, and no Script Property modifications.
+ */
+function benchmarkNoscaPhase1BridgePing20261029() {
+  const started = Date.now();
+  const response = noscaCentralRemoteCall_('ping', '');
+  const out = { ok: true, test: 'BRIDGE_PHASE1_PING',
+    elapsedMs: Date.now() - started, ownerElapsedMs: response.elapsedMs,
+    ownerPerformance: response.performance || null, apiCalls: response.apiCalls,
+    returned: response.files.length, signedResponseVerified: true };
+  console.log('[NOSCA CENTRAL][PHASE1_PING] ' + JSON.stringify(out));
+  return out;
+}
+
+/**
+ * PRIORITY 1: Benchmark an uncached first-time Central Discovery lookup.
+ * The existing BRIDGE log prints detailed settings, OAuth, POST, redirect,
+ * parsing and signing timings. No changes to V3 ranking or knowledge Q&A.
+ */
+function benchmarkNoscaPhase1BridgeLookup20261029() {
+  const started = Date.now();
+  const result = noscaFindCentralDocuments_('novare nexus');
+  const out = { ok: result.ok && result.backend === 'central_metadata',
+    test: 'BRIDGE_PHASE1_LOOKUP', elapsedMs: Date.now() - started,
+    backend: result.backend, apiCalls: result.searchDiagnostics.apiCalls,
+    ownerDriveSearchMs: result.searchDiagnostics.centralServiceMs,
+    returned: result.results.length,
+    top: result.results.slice(0, 3).map(function (f) { return f.fileName; }),
+    noCache: true, noEmployeeAccessChecks: true };
+  console.log('[NOSCA CENTRAL][PHASE1_LOOKUP] ' + JSON.stringify(out));
+  return out;
+}
+
+/**
+ * Repeat the same query twice. Unlike caching benchmarks, this SHOULD issue
+ * two signed HTTP calls (and two owner Drive searches); it measures platform
+ * run-to-run variability and confirms we haven't introduced result caching.
+ */
+function benchmarkNoscaPhase1BridgeRepeat20261029() {
+  const runs = [];
+  for (let i = 0; i < 2; i++) {
+    const started = Date.now();
+    const response = noscaCentralRemoteLookup_('pjl');
+    runs.push({ run: i + 1, elapsedMs: Date.now() - started,
+      apiCalls: response.apiCalls, returned: response.files.length,
+      ownerDriveSearchMs: response.elapsedMs,
+      ownerPerformance: response.performance || null });
+  }
+  const out = { ok: runs.length === 2, test: 'BRIDGE_PHASE1_REPEAT',
+    runs: runs, noCache: true, noPermissionCheck: true };
+  console.log('[NOSCA CENTRAL][PHASE1_REPEAT] ' + JSON.stringify(out));
+  return out;
 }

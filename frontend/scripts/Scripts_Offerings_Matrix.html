@@ -1,0 +1,316 @@
+<script>
+(function () {
+  "use strict";
+
+  /*
+   * H2 Offerings — visually aligned THINK / BUILD / RUN catalog.
+   * The reference does not include catalog CRUD endpoints. New/edit/delete
+   * actions therefore operate on this page's in-memory PREVIEW only.
+   */
+  const categories = [
+    { id: "ai", label: "AI", icon: "brain", color: "#435af5" },
+    { id: "software", label: "SOFTWARE", icon: "software", color: "#237cf2" },
+    { id: "data", label: "DATA", icon: "database", color: "#179fba" },
+    { id: "cloud", label: "CLOUD", icon: "cloud", color: "#3493dd" },
+    { id: "netsec", label: "NETSEC", icon: "shield", color: "#ed335b" },
+    { id: "salesforce", label: "SALESFORCE", icon: "zap", color: "#f18d19" },
+    { id: "managed", label: "MANAGED SERVICES", icon: "activity", color: "#209c79" }
+  ];
+  const stages = [
+    { id: "think", label: "THINK", sub: "Assess | Plan | Design", icon: "brain" },
+    { id: "build", label: "BUILD", sub: "Develop | Integrate | Modernize", icon: "layers" },
+    { id: "run", label: "RUN", sub: "Operate | Manage | Optimize", icon: "activity" }
+  ];
+  const initialOfferings = [
+    ["ai", "think", "AI Readiness Assessment", "", false, "brain"],
+    ["ai", "build", "Agentic FDE", "", false, "brain"],
+    ["ai", "run", "AI Ops", "", true, "brain"],
+    ["software", "think", "Application Modernization", "", false, "software"],
+    ["software", "build", "AI-Native Software Development", "", false, "software"],
+    ["software", "run", "Application Managed Services", "(AMS)", true, "software"],
+    ["data", "think", "Data Posture", "", false, "database"],
+    ["data", "build", "Data Platform & Transformation", "", false, "database"],
+    ["data", "run", "Managed Data Ops", "", true, "database"],
+    ["cloud", "think", "Cloud Strategy", "", false, "cloud"],
+    ["cloud", "build", "Cloud Engineering", "", false, "cloud"],
+    ["cloud", "build", "Sovereign AI & Compute", "(KUBESHIFT – AI, DATA, CLOUD)", false, "box"],
+    ["cloud", "run", "Managed Cloud Ops", "", true, "cloud"],
+    ["netsec", "think", "Security Assessment", "(Post-Quantum Cryptography & VAPT)", false, "shield"],
+    ["netsec", "build", "Security", "(Install & Config)", false, "shield"],
+    ["netsec", "run", "Novare Vantage SOC", "", true, "shield"],
+    ["salesforce", "think", "Salesforce/CRM Approach", "", false, "zap"],
+    ["salesforce", "build", "Salesforce/CRM", "", false, "zap"],
+    ["salesforce", "run", "Salesforce/CRM AMS", "", false, "zap"],
+    ["managed", "run", "Managed Service Desk", "", false, "activity"]
+  ].map(function (item, index) {
+    return { id: "matrix-" + (index + 1), coe: item[0], stage: item[1], name: item[2],
+      subtitle: item[3], marked: item[4], icon: item[5] };
+  });
+  const initialProducts = [
+    { id: "product-pulse", name: "Novare Pulse" },
+    { id: "product-regrep", name: "Novare RegRep" }
+  ];
+  const instances = new WeakMap();
+
+  const glyphs = {
+    brain: '<path d="M12 6a3.2 3.2 0 0 0-5.8-1.9 3.8 3.8 0 0 0-3 5.6 4 4 0 0 0 1 6.9A3.4 3.4 0 0 0 10 19V8.8M12 6a3.2 3.2 0 0 1 5.8-1.9 3.8 3.8 0 0 1 3 5.6 4 4 0 0 1-1 6.9A3.4 3.4 0 0 1 14 19V8.8M10 13h4"/>',
+    software: '<path d="m12 2 4.5 2.6v5.1L12 12.3 7.5 9.7V4.6L12 2ZM7.5 10.5l4.5 2.6v5.1l-4.5 2.6L3 18.2v-5.1l4.5-2.6ZM16.5 10.5l4.5 2.6v5.1l-4.5 2.6-4.5-2.6v-5.1l4.5-2.6Z"/>',
+    database: '<ellipse cx="12" cy="5" rx="8.2" ry="3"/><path d="M3.8 5v14c0 1.7 3.7 3 8.2 3s8.2-1.3 8.2-3V5M3.8 12c0 1.6 3.7 3 8.2 3s8.2-1.4 8.2-3"/>',
+    cloud: '<path d="M7.2 19H18a4.4 4.4 0 0 0 .1-8.8 6.5 6.5 0 0 0-12.7 1.5A3.7 3.7 0 0 0 7.2 19Z"/>',
+    shield: '<path d="M12 2.5 20 6v5.8c0 5-3.3 8.1-8 10.1-4.7-2-8-5.1-8-10.1V6l8-3.5Z"/>',
+    zap: '<path d="m13 2-9 11h7l-1 9 10-12h-7l.0-8Z"/>',
+    activity: '<path d="M2 12h4l3.2-7 5.1 14L17 12h5"/>',
+    layers: '<path d="m12 2 9 5-9 5-9-5 9-5ZM3 12l9 5 9-5M3 17l9 5 9-5"/>',
+    box: '<path d="m12 2 9 5v10l-9 5-9-5V7l9-5ZM3 7l9 5 9-5M12 12v10"/>',
+    external: '<rect x="4" y="6" width="14" height="14" rx="2"/><path d="M12 4h8v8M20 4l-10 10"/>',
+    edit: '<path d="M4 20h5l11-11a3 3 0 0 0-5-5L4 15v5ZM13.5 5.5l5 5"/>',
+    trash: '<path d="M4 7h16M9 7V4h6v3M6 7l1 14h10l1-14M10 11v7M14 11v7"/>',
+    file: '<path d="M6 2h8l5 5v15H6V2ZM14 2v5h5M9 12h7M9 16h7"/>',
+    briefcase: '<rect x="3" y="7" width="18" height="14" rx="2"/><path d="M8 7V4h8v3M3 13h18"/>'
+  };
+
+  function icon(name, cls) {
+    return '<svg class="' + (cls || '') + '" viewBox="0 0 24 24" aria-hidden="true" ' +
+      'fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
+      (glyphs[name] || glyphs.layers) + '</svg>';
+  }
+  function esc(value) {
+    return String(value == null ? '' : value).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function clone(value) { return JSON.parse(JSON.stringify(value)); }
+  function findItem(state, id, kind) {
+    const collection = kind === 'product' ? state.products : state.offerings;
+    return collection.find(function (item) { return item.id === id; });
+  }
+  function getFiltered(state) {
+    const coe = state.root.querySelector('#offerings-matrix-coe').value;
+    const mark = state.root.querySelector('#offerings-matrix-status').value;
+    const query = state.root.querySelector('#offerings-matrix-search').value.trim().toLocaleLowerCase();
+    return state.offerings.filter(function (item) {
+      if (coe !== 'all' && item.coe !== coe) return false;
+      if (mark !== 'all' && (mark === 'marked') !== Boolean(item.marked)) return false;
+      const category = categories.find(function (cat) { return cat.id === item.coe; });
+      return !query || [item.name, item.subtitle, item.stage, category ? category.label : '']
+        .join(' ').toLocaleLowerCase().includes(query);
+    });
+  }
+  function actionButtons(item, kind) {
+    const suffix = kind === 'product' ? '-product' : '';
+    return '<span class="offerings-matrix-item-actions">' +
+      '<button type="button" data-matrix-open' + suffix + '="' + esc(item.id) + '" title="View details" aria-label="View ' + esc(item.name) + '">' + icon('external') + '</button>' +
+      '<button type="button" data-matrix-edit' + suffix + '="' + esc(item.id) + '" title="Edit this preview" aria-label="Edit ' + esc(item.name) + '">' + icon('edit') + '</button>' +
+      '<button type="button" data-matrix-delete' + suffix + '="' + esc(item.id) + '" title="Remove from this preview" aria-label="Remove ' + esc(item.name) + '">' + icon('trash') + '</button>' +
+      '</span>';
+  }
+  function renderOffering(item) {
+    return '<div class="offerings-matrix-item" data-stage="' + item.stage + '">' +
+      '<button class="offerings-matrix-item-primary" type="button" data-matrix-open="' + esc(item.id) + '" title="View catalog entry">' +
+      icon(item.icon, 'offerings-matrix-offering-icon') +
+      '<span class="offerings-matrix-item-label"><span class="offerings-matrix-item-name">' + esc(item.name) + (item.marked ? '<span class="offerings-matrix-star">*</span>' : '') + '</span>' +
+      (item.subtitle ? '<small>' + esc(item.subtitle) + '</small>' : '') + '</span></button>' +
+      actionButtons(item, 'offering') + '</div>';
+  }
+  function renderCell(list, stage) {
+    if (!list.length) return '<div class="offerings-matrix-cell offerings-matrix-cell--' + stage + '"><div class="offerings-matrix-placeholder" aria-label="No offering in this stage">—</div></div>';
+    return '<div class="offerings-matrix-cell offerings-matrix-cell--' + stage + '">' + list.map(renderOffering).join('') + '</div>';
+  }
+  function arrowMarkup(haveFrom, haveTo, branch, purple) {
+    if (!haveFrom || !haveTo) return '<div class="offerings-matrix-connector is-empty"><span>—</span></div>';
+    let path = '<path d="M3 12h27m-5-4 5 4-5 4"/>';
+    if (branch === 'split') path = '<path d="M2 21h7c8 0 9-16 24-16m-24 16c8 0 9 16 24 16" transform="translate(0,-9) scale(1,.7)"/><path d="m28 1 5 4-5 4M28 23l5 4-5 4" transform="translate(0,3) scale(1,.7)"/>';
+    if (branch === 'merge') path = '<path d="M2 5c14 0 16 16 25 16h7M2 37c14 0 16-16 25-16" transform="translate(0,-9) scale(1,.7)"/><path d="m29 17 5 4-5 4" transform="translate(0,-2)"/>';
+    return '<div class="offerings-matrix-connector' + (purple ? ' is-purple' : '') + '"><svg viewBox="0 0 36 28" preserveAspectRatio="none" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">' + path + '</svg></div>';
+  }
+  function getColCounts(items) {
+    return stages.map(function (stage) { return items.filter(function (i) { return i.stage === stage.id; }).length; });
+  }
+  function renderMatrix(state, items) {
+    const counts = getColCounts(items);
+    const header = '<div class="offerings-matrix-grid-header">' +
+      '<div class="offerings-matrix-head-coe">' + icon('layers') + '<span>COE</span></div>' +
+      stageHeading(stages[0], counts[0]) + '<div class="offerings-matrix-head-arrow">→</div>' +
+      stageHeading(stages[1], counts[1]) + '<div class="offerings-matrix-head-arrow">→</div>' +
+      stageHeading(stages[2], counts[2]) + '</div>';
+    const rows = categories.map(function (cat) {
+      const grouped = {};
+      stages.forEach(function (stage) { grouped[stage.id] = items.filter(function (i) { return i.coe === cat.id && i.stage === stage.id; }); });
+      const number = Object.keys(grouped).reduce(function (n, key) { return n + grouped[key].length; }, 0);
+      if (!number) return '';
+      const branch = grouped.build.length > 1 ? 'split' : '';
+      const merge = grouped.build.length > 1 ? 'merge' : '';
+      return '<div class="offerings-matrix-grid-row' + (branch ? ' has-multiple-build' : '') + '" style="--matrix-coe-color:' + cat.color + '">' +
+        '<div class="offerings-matrix-coe-cell"><span class="offerings-matrix-coe-badge">' + icon(cat.icon) + '</span><span class="offerings-matrix-coe-meta"><strong>' + esc(cat.label) + '</strong><small><b>•</b> ' + number + ' offering' + (number === 1 ? '' : 's') + '</small></span></div>' +
+        renderCell(grouped.think, 'think') + arrowMarkup(grouped.think.length, grouped.build.length, branch, false) +
+        renderCell(grouped.build, 'build') + arrowMarkup(grouped.build.length, grouped.run.length, merge, true) +
+        renderCell(grouped.run, 'run') + '</div>';
+    }).join('');
+    return '<div class="offerings-matrix-grid" role="region" aria-label="Think build run offerings matrix">' + header + rows + '</div>';
+  }
+  function stageHeading(stage, count) {
+    return '<div class="offerings-matrix-stage-head is-' + stage.id + '">' + icon(stage.icon) +
+      '<span class="offerings-matrix-stage-copy"><strong>' + stage.label + '</strong><small>' + stage.sub + '</small></span>' +
+      '<span class="offerings-matrix-stage-count">' + count + '</span></div>';
+  }
+  function renderTable(items) {
+    return '<div class="offerings-matrix-table-scroll"><table class="offerings-matrix-table"><caption class="offerings-sr-only">Offering catalog</caption>' +
+      '<thead><tr><th>COE</th><th>STAGE</th><th>OFFERING</th><th>REFERENCE</th><th>ACTIONS</th></tr></thead><tbody>' +
+      items.map(function (item) {
+        const cat = categories.find(function (c) { return c.id === item.coe; });
+        return '<tr><td><span class="offerings-matrix-table-coe">' + icon(cat ? cat.icon : 'layers') + esc(cat ? cat.label : '') + '</span></td>' +
+          '<td><span class="offerings-matrix-table-stage is-' + item.stage + '">' + item.stage.toUpperCase() + '</span></td>' +
+          '<td><button type="button" class="offerings-matrix-table-title" data-matrix-open="' + esc(item.id) + '">' + esc(item.name) + '</button>' + (item.subtitle ? '<small>' + esc(item.subtitle) + '</small>' : '') + '</td>' +
+          '<td>' + (item.marked ? 'Marked *' : 'Unmarked') + '</td><td>' + actionButtons(item, 'offering') + '</td></tr>';
+      }).join('') + '</tbody></table></div>';
+  }
+  function renderProducts(state) {
+    const node = state.root.querySelector('#offerings-products-grid');
+    if (!node) return;
+    node.innerHTML = state.products.map(function (product) {
+      return '<div class="offerings-product-item"><span class="offerings-product-icon">' + icon('briefcase') + '</span>' +
+        '<button type="button" class="offerings-product-name" data-matrix-open-product="' + esc(product.id) + '">' + esc(product.name) + '</button>' +
+        actionButtons(product, 'product') + '</div>';
+    }).join('') || '<p class="offerings-products-empty">No products in this preview.</p>';
+  }
+  function render(state) {
+    const items = getFiltered(state);
+    const board = state.root.querySelector('#offerings-matrix-board');
+    const empty = state.root.querySelector('#offerings-matrix-empty');
+    const isMatrix = state.view === 'matrix';
+    state.root.querySelectorAll('[data-matrix-view]').forEach(function (button) {
+      const pressed = button.dataset.matrixView === state.view;
+      button.classList.toggle('is-active', pressed);
+      button.setAttribute('aria-pressed', String(pressed));
+    });
+    board.innerHTML = items.length ? (isMatrix ? renderMatrix(state, items) : renderTable(items)) : '';
+    empty.hidden = items.length > 0;
+    renderProducts(state);
+  }
+  function closeModal(state) {
+    const modal = state.root.querySelector('#offerings-matrix-modal');
+    modal.hidden = true;
+    state.root.ownerDocument.body.classList.remove('offerings-modal-open');
+    if (state.lastFocused && typeof state.lastFocused.focus === 'function') state.lastFocused.focus();
+  }
+  function showModal(state, title, body) {
+    const modal = state.root.querySelector('#offerings-matrix-modal');
+    state.lastFocused = state.root.ownerDocument.activeElement;
+    state.root.querySelector('#offerings-matrix-modal-title').textContent = title;
+    state.root.querySelector('#offerings-matrix-modal-content').innerHTML = body;
+    modal.hidden = false;
+    state.root.ownerDocument.body.classList.add('offerings-modal-open');
+    const focusTarget = modal.querySelector('[name="matrix-name"]') || modal.querySelector('[data-matrix-close]');
+    if (focusTarget) focusTarget.focus();
+  }
+  function showDetails(state, item, kind) {
+    if (!item) return;
+    const category = categories.find(function (c) { return c.id === item.coe; });
+    const meta = kind === 'product' ? 'Industry-Specific Data Product' :
+      (category ? category.label + ' / ' : '') + item.stage.toUpperCase();
+    const body = '<div class="offerings-matrix-details"><span class="offerings-matrix-detail-chip">' + esc(meta) + '</span>' +
+      '<h4>' + esc(item.name) + (item.marked ? '*' : '') + '</h4>' +
+      (item.subtitle ? '<p>' + esc(item.subtitle) + '</p>' : '') +
+      '<p>This catalog entry is presented from the supplied layout reference. A resource destination has not yet been connected.</p>' +
+      '</div>';
+    showModal(state, 'Catalog entry', body);
+  }
+  function editForm(state, item, kind) {
+    const isProduct = kind === 'product';
+    const title = (item ? 'Edit ' : 'Add ') + (isProduct ? 'product' : 'offering');
+    const body = '<p class="offerings-matrix-preview-notice">Preview only: changes here are temporary and are not saved to Google Sheets or Apps Script.</p>' +
+      '<form id="offerings-matrix-edit-form" data-matrix-form="' + kind + '" data-matrix-id="' + esc(item ? item.id : '') + '">' +
+      '<label>NAME<input name="matrix-name" required maxlength="110" value="' + esc(item ? item.name : '') + '" placeholder="Offering name"></label>' +
+      (isProduct ? '' : '<div class="offerings-matrix-form-columns"><label>CENTER OF EXCELLENCE<select name="matrix-coe">' +
+        categories.map(function (c) { return '<option value="' + c.id + '"' + (item && item.coe === c.id ? ' selected' : '') + '>' + esc(c.label) + '</option>'; }).join('') +
+        '</select></label><label>STAGE<select name="matrix-stage">' +
+        stages.map(function (s) { return '<option value="' + s.id + '"' + (item && item.stage === s.id ? ' selected' : '') + '>' + s.label + '</option>'; }).join('') +
+        '</select></label></div><label>SUBTITLE / CONTEXT<input name="matrix-subtitle" maxlength="140" value="' + esc(item ? item.subtitle : '') + '" placeholder="Optional subtitle"></label>' +
+        '<label class="offerings-matrix-checkbox"><input type="checkbox" name="matrix-marked"' + (item && item.marked ? ' checked' : '') + '> Mark with * from reference</label>') +
+      '<div class="offerings-matrix-form-actions"><button type="button" class="offerings-matrix-cancel" data-matrix-close>Cancel</button>' +
+      '<button class="offerings-matrix-save" type="submit">Apply to preview</button></div></form>';
+    showModal(state, title, body);
+  }
+  function submitForm(state, form) {
+    if (!form.reportValidity()) return;
+    const kind = form.dataset.matrixForm;
+    const id = form.dataset.matrixId;
+    const name = form.elements['matrix-name'].value.trim();
+    if (!name) return;
+    const products = kind === 'product';
+    const source = products ? state.products : state.offerings;
+    let item = id && findItem(state, id, kind);
+    if (!item) {
+      state.lastId += 1;
+      item = { id: 'preview-' + state.lastId, name: name };
+      source.push(item);
+    }
+    item.name = name;
+    if (!products) {
+      item.coe = form.elements['matrix-coe'].value;
+      item.stage = form.elements['matrix-stage'].value;
+      item.subtitle = form.elements['matrix-subtitle'].value.trim();
+      item.marked = form.elements['matrix-marked'].checked;
+      const coe = categories.find(function (c) { return c.id === item.coe; });
+      item.icon = coe ? coe.icon : 'layers';
+    }
+    closeModal(state);
+    render(state);
+  }
+  function initialize(pageRoot) {
+    // The SPA passes its route wrapper, not the nested .offerings-page node.
+    if (!pageRoot) return;
+    pageRoot = pageRoot.classList.contains('offerings-page--matrix')
+      ? pageRoot : pageRoot.querySelector('.offerings-page--matrix');
+    if (!pageRoot) return;
+    if (instances.has(pageRoot)) { render(instances.get(pageRoot)); return; }
+    const state = { root: pageRoot, offerings: clone(initialOfferings), products: clone(initialProducts), view: 'matrix', lastFocused: null, lastId: 100 };
+    instances.set(pageRoot, state);
+    pageRoot.querySelector('#offerings-matrix-coe').addEventListener('change', function () { render(state); });
+    pageRoot.querySelector('#offerings-matrix-status').addEventListener('change', function () { render(state); });
+    pageRoot.querySelector('#offerings-matrix-search').addEventListener('input', function () { render(state); });
+    pageRoot.addEventListener('click', function (event) {
+      const button = event.target.closest('[data-matrix-view], [data-matrix-add], [data-matrix-open], [data-matrix-open-product], [data-matrix-edit], [data-matrix-edit-product], [data-matrix-delete], [data-matrix-delete-product], [data-matrix-close]');
+      if (!button || !pageRoot.contains(button)) {
+        if (event.target === pageRoot.querySelector('#offerings-matrix-modal')) closeModal(state);
+        return;
+      }
+      if (button.hasAttribute('data-matrix-close')) { closeModal(state); return; }
+      if (button.hasAttribute('data-matrix-view')) { state.view = button.dataset.matrixView; render(state); return; }
+      if (button.hasAttribute('data-matrix-add')) { editForm(state, null, button.dataset.matrixAdd); return; }
+      for (const action of ['open', 'edit', 'delete']) {
+        for (const suffix of ['', '-product']) {
+          const attr = 'data-matrix-' + action + suffix;
+          if (!button.hasAttribute(attr)) continue;
+          const kind = suffix ? 'product' : 'offering';
+          const id = button.getAttribute(attr);
+          const item = findItem(state, id, kind);
+          if (!item) return;
+          if (action === 'open') showDetails(state, item, kind);
+          if (action === 'edit') editForm(state, item, kind);
+          if (action === 'delete' && window.confirm('Remove "' + item.name + '" from this temporary preview? This does not change the saved catalog.')) {
+            const list = kind === 'product' ? state.products : state.offerings;
+            const index = list.indexOf(item);
+            if (index >= 0) list.splice(index, 1);
+            render(state);
+          }
+          return;
+        }
+      }
+    });
+    pageRoot.addEventListener('submit', function (event) {
+      const form = event.target.closest('#offerings-matrix-edit-form');
+      if (!form || !pageRoot.contains(form)) return;
+      event.preventDefault();
+      submitForm(state, form);
+    });
+    pageRoot.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape' && !pageRoot.querySelector('#offerings-matrix-modal').hidden) {
+        event.preventDefault(); closeModal(state);
+      }
+    });
+    render(state);
+  }
+  window.NexusOfferingsMatrix = Object.freeze({ initialize: initialize });
+}());
+</script>

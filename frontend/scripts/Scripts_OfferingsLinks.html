@@ -172,6 +172,11 @@
         pageRoot,
         OFFERINGS_CONFIG
       );
+
+    // Bind the new catalog only after the existing resource links are registered.
+    if (window.NexusOfferingsMatrix) {
+      window.NexusOfferingsMatrix.initialize(pageRoot);
+    }
   }
 
   function refresh(pageRoot) {

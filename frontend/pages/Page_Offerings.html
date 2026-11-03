@@ -1,13 +1,9 @@
 <!-- =========================================================
-     H2: OFFERINGS
-     Novare Nexus / ONESCA
-     Semantic page structure based on the supplied reference.
-     Styling belongs in Styles.html.
-     Interactions/data rendering belong in Scripts.html.
+     H2 OFFERINGS — THINK / BUILD / RUN CAPABILITY MATRIX
+     The matrix catalog is the primary offerings view.
+     The new matrix is a UI catalog preview (not a backend data source).
 ========================================================== -->
-
-<section class="offerings-page" data-page="offerings">
-
+<section class="offerings-page offerings-page--matrix" data-page="offerings">
   <!-- =======================================================
        HERO
        Global nav contract: data-page-hero
@@ -53,873 +49,107 @@
         </h1>
 
         <p class="offerings-hero-description">
-          Infusing autonomous intelligence into your mission-critical operations
-          for unmatched speed, optimization, and security.
+          A structured portfolio of end-to-end solutions that infuse autonomous intelligence
+          into your mission-critical operations for unmatched speed, optimization, and security.
         </p>
       </div>
 </div>
   </section>
 
-  <!-- =======================================================
-       CORE OFFERINGS
-  ======================================================== -->
-  <section
-    class="offerings-core-section"
-    aria-labelledby="core-offerings-title"
-  >
-    <header class="offerings-section-header offerings-core-header offerings-core-header-premium">
-      <div class="offerings-core-header-media" aria-hidden="true">
-        <img
-          id="core-offerings-header-bg-image"
-          class="offerings-core-header-bg-image"
-          data-image-key="core-offerings-header-bg"
-          alt=""
-          width="2400"
-          height="800"
-          loading="lazy"
-          decoding="async"
-          fetchpriority="low"
-          hidden
-        >
-        <div
-          id="core-offerings-header-bg-fallback"
-          class="image-placeholder offerings-core-header-bg-fallback"
-          data-image-fallback="core-offerings-header-bg"
-          hidden
-        ></div>
-      </div>
 
+  <section class="offerings-core-section" aria-labelledby="core-offerings-title">
+    <header class="offerings-section-header offerings-core-header offerings-core-header-premium offerings-matrix-toolbar">
+      <div class="offerings-core-header-media" aria-hidden="true">
+        <img id="core-offerings-header-bg-image" class="offerings-core-header-bg-image"
+             data-image-key="core-offerings-header-bg" alt="" width="2400" height="800"
+             loading="lazy" decoding="async" fetchpriority="low" hidden>
+        <div id="core-offerings-header-bg-fallback" class="image-placeholder offerings-core-header-bg-fallback"
+             data-image-fallback="core-offerings-header-bg" hidden></div>
+      </div>
       <div class="offerings-core-header-content">
         <div class="offerings-core-header-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24">
-            <path d="M5.5 7.5h5v5h-5z"></path>
-            <path d="M13.5 4.5h5v5h-5z"></path>
-            <path d="M13.5 14.5h5v5h-5z"></path>
-            <path d="M10.5 10h3M16 9.5v5"></path>
-          </svg>
+          <svg viewBox="0 0 24 24"><path d="M5.5 7.5h5v5h-5zM13.5 4.5h5v5h-5zM13.5 14.5h5v5h-5zM10.5 10h3M16 9.5v5"></path></svg>
         </div>
-
         <div class="offerings-section-heading offerings-core-heading">
-          <div class="offerings-core-kicker">
-            <span class="offerings-core-accent" aria-hidden="true"></span>
-            <span>AI-POWERED PORTFOLIO</span>
-          </div>
-
+          <div class="offerings-core-kicker"><span class="offerings-core-accent" aria-hidden="true"></span><span>AI-POWERED PORTFOLIO</span></div>
           <h2 id="core-offerings-title">CORE OFFERINGS</h2>
-          <p>End-to-end solutions, reimagined with AI.</p>
+        </div>
+        <p class="offerings-matrix-toolbar-caption">A capability matrix for end-to-end solutions, from strategy to build to run.</p>
+        <div class="offerings-matrix-controls" role="group" aria-label="Offering matrix controls">
+          <div class="offerings-matrix-view-switch" role="group" aria-label="Catalog view">
+            <button type="button" class="offerings-matrix-view is-active" data-matrix-view="matrix" aria-pressed="true">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg> Matrix
+            </button>
+            <button type="button" class="offerings-matrix-view" data-matrix-view="table" aria-pressed="false">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M10 4v16"/></svg> Table
+            </button>
+          </div>
+          <span class="offerings-matrix-toolbar-divider" aria-hidden="true"></span>
+          <label class="offerings-matrix-select-wrap">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 9 5-9 5-9-5 9-5ZM3 12l9 5 9-5M3 17l9 5 9-5"/></svg>
+            <select id="offerings-matrix-coe" aria-label="Filter by center of excellence">
+              <option value="all">All COEs</option>
+              <option value="ai">AI</option><option value="software">Software</option>
+              <option value="data">Data</option><option value="cloud">Cloud</option>
+              <option value="netsec">NetSec</option><option value="salesforce">Salesforce</option>
+              <option value="managed">Managed Services</option>
+            </select>
+            <svg class="offerings-matrix-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+          </label>
+          <label class="offerings-matrix-select-wrap">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4l3-6 4 12 3-6h4"/></svg>
+            <select id="offerings-matrix-status" aria-label="Filter by reference marking" title="Asterisks from the provided reference do not indicate verified availability">
+              <option value="all">All Statuses</option>
+              <option value="unmarked">Unmarked</option>
+              <option value="marked">Marked (*)</option>
+            </select>
+            <svg class="offerings-matrix-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+          </label>
+          <label class="offerings-matrix-search-wrap">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.3"/><path d="m16 16 4.6 4.6"/></svg>
+            <input id="offerings-matrix-search" type="search" autocomplete="off" placeholder="Search offerings, tech, SMEs…" aria-label="Search offerings">
+          </label>
+          <button type="button" class="offerings-matrix-add" data-matrix-add="offering" title="Add offering to this preview" aria-label="Add offering to preview">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
         </div>
       </div>
     </header>
 
-    <div id="core-offerings-grid" class="core-offerings-grid" aria-live="polite">
-
-      <!-- 01 — SOFA 2.0 -->
-      <article
-        class="core-offering-card is-experience"
-        data-offering-id="sofa-2"
-        data-coe="experience"
-        aria-labelledby="offering-sofa-title"
-      >
-        <div class="core-offering-card-topline">
-          <span class="core-offering-number">01</span>
-          <span class="core-offering-coe-chip">EXPERIENCE</span>
-        </div>
-
-        <div class="core-offering-visual">
-          <img
-            id="offering-sofa-image"
-            class="core-offering-image"
-            data-image-key="offering-sofa"
-            alt=""
-            width="700"
-            height="420"
-            loading="lazy"
-            decoding="async"
-            fetchpriority="low"
-            hidden
-          >
-          <div
-            id="offering-sofa-fallback"
-            class="image-placeholder core-offering-image-fallback"
-            data-image-fallback="offering-sofa"
-            role="img"
-            aria-label="SOFA 2.0 visual unavailable"
-            hidden
-          >
-            SOFA 2.0
-          </div>
-        </div>
-
-        <div class="core-offering-content">
-          <h3 id="offering-sofa-title">SOFA 2.0</h3>
-          <p class="core-offering-coe">COE: Experience – CX/API</p>
-          <p class="core-offering-description">
-            Accelerate application development with autonomous agents for smarter,
-            faster, and more intuitive digital experiences.
-          </p>
-
-          <div class="offering-artifacts offering-artifacts-static">
-            <p class="offering-artifacts-title">STANDARD ARTIFACTS</p>
-            <ul class="offering-artifact-list" aria-label="Standard artifacts">
-              <li class="offering-artifact">
-                <span class="artifact-icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" aria-hidden="true">
-  <path d="M6 3.75h9.5L19 7.25v13H6z"></path>
-  <path d="M15.5 3.75v3.5H19"></path>
-  <path d="M9 11h7M9 14h7M9 17h5"></path>
-</svg>
-                </span>
-                <span>Pitchbook</span>
-              </li>
-              <li class="offering-artifact">
-                <span class="artifact-icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" aria-hidden="true">
-  <path d="M4.5 5.5c2.8-.9 5.2-.5 7.5 1.2v12.1c-2.3-1.7-4.7-2.1-7.5-1.2z"></path>
-  <path d="M19.5 5.5c-2.8-.9-5.2-.5-7.5 1.2v12.1c2.3-1.7 4.7-2.1 7.5-1.2z"></path>
-</svg>
-                </span>
-                <span>Discovery Guide</span>
-              </li>
-              <li class="offering-artifact">
-                <span class="artifact-icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" aria-hidden="true">
-  <path d="M6 3.75h9.5L19 7.25v13H6z"></path>
-  <path d="M15.5 3.75v3.5H19"></path>
-  <path d="M9 12.25l1.6 1.6 3.4-3.6"></path>
-  <path d="M9 17h7"></path>
-</svg>
-                </span>
-                <span>Standard Proposal</span>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <button
-          class="offering-explore-button"
-          type="button"
-          data-offerings-action="explore-sofa"
-        >
-          <span>Explore Offering</span>
-          <span aria-hidden="true">→</span>
-        </button>
-      </article>
-
-      <!-- 02 — RAFA -->
-      <article
-        class="core-offering-card is-data"
-        data-offering-id="rafa"
-        data-coe="data"
-        aria-labelledby="offering-rafa-title"
-      >
-        <div class="core-offering-card-topline">
-          <span class="core-offering-number">02</span>
-          <span class="core-offering-coe-chip">DATA</span>
-        </div>
-
-        <div class="core-offering-visual">
-          <img
-            id="offering-rafa-image"
-            class="core-offering-image"
-            data-image-key="offering-rafa"
-            alt=""
-            width="700"
-            height="420"
-            loading="lazy"
-            decoding="async"
-            fetchpriority="low"
-            hidden
-          >
-          <div
-            id="offering-rafa-fallback"
-            class="image-placeholder core-offering-image-fallback"
-            data-image-fallback="offering-rafa"
-            role="img"
-            aria-label="RAFA visual unavailable"
-            hidden
-          >
-            RAFA
-          </div>
-        </div>
-
-        <div class="core-offering-content">
-          <h3 id="offering-rafa-title">RAFA</h3>
-          <p class="core-offering-coe">COE: Intelligence – Data</p>
-          <p class="core-offering-description">
-            Turn complex data into real-time insights with autonomous agents
-            designed for regulated and highly governed environments.
-          </p>
-
-          <div class="offering-artifacts offering-artifacts-static">
-            <p class="offering-artifacts-title">STANDARD ARTIFACTS</p>
-            <ul class="offering-artifact-list" aria-label="Standard artifacts">
-              <li class="offering-artifact">
-                <span class="artifact-icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" aria-hidden="true">
-  <path d="M6 3.75h9.5L19 7.25v13H6z"></path>
-  <path d="M15.5 3.75v3.5H19"></path>
-  <path d="M9 11h7M9 14h7M9 17h5"></path>
-</svg>
-                </span>
-                <span>Pitchbook</span>
-              </li>
-              <li class="offering-artifact">
-                <span class="artifact-icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" aria-hidden="true">
-  <path d="M4.5 5.5c2.8-.9 5.2-.5 7.5 1.2v12.1c-2.3-1.7-4.7-2.1-7.5-1.2z"></path>
-  <path d="M19.5 5.5c-2.8-.9-5.2-.5-7.5 1.2v12.1c2.3-1.7 4.7-2.1 7.5-1.2z"></path>
-</svg>
-                </span>
-                <span>Discovery Guide</span>
-              </li>
-              <li class="offering-artifact">
-                <span class="artifact-icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" aria-hidden="true">
-  <path d="M6 3.75h9.5L19 7.25v13H6z"></path>
-  <path d="M15.5 3.75v3.5H19"></path>
-  <path d="M9 12.25l1.6 1.6 3.4-3.6"></path>
-  <path d="M9 17h7"></path>
-</svg>
-                </span>
-                <span>Standard Proposal</span>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <button
-          class="offering-explore-button"
-          type="button"
-          data-offerings-action="explore-rafa"
-        >
-          <span>Explore Offering</span>
-          <span aria-hidden="true">→</span>
-        </button>
-      </article>
-
-      <!-- 03 — MCLOUD -->
-      <article
-        class="core-offering-card is-cloud"
-        data-offering-id="mcloud"
-        data-coe="cloud"
-        aria-labelledby="offering-mcloud-title"
-      >
-        <div class="core-offering-card-topline">
-          <span class="core-offering-number">03</span>
-          <span class="core-offering-coe-chip">CLOUD</span>
-        </div>
-
-        <div class="core-offering-visual">
-          <img
-            id="offering-mcloud-image"
-            class="core-offering-image"
-            data-image-key="offering-mcloud"
-            alt=""
-            width="700"
-            height="420"
-            loading="lazy"
-            decoding="async"
-            fetchpriority="low"
-            hidden
-          >
-          <div
-            id="offering-mcloud-fallback"
-            class="image-placeholder core-offering-image-fallback"
-            data-image-fallback="offering-mcloud"
-            role="img"
-            aria-label="MCLOUD visual unavailable"
-            hidden
-          >
-            MCLOUD
-          </div>
-        </div>
-
-        <div class="core-offering-content">
-          <h3 id="offering-mcloud-title">MCLOUD</h3>
-          <p class="core-offering-coe">COE: Intelligence – Cloud</p>
-          <p class="core-offering-description">
-            Modernize and optimize infrastructure operations with autonomous
-            cloud agents for greater agility and observability.
-          </p>
-
-          <div class="offering-artifacts offering-artifacts-static">
-            <p class="offering-artifacts-title">STANDARD ARTIFACTS</p>
-            <ul class="offering-artifact-list" aria-label="Standard artifacts">
-              <li class="offering-artifact">
-                <span class="artifact-icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" aria-hidden="true">
-  <path d="M6 3.75h9.5L19 7.25v13H6z"></path>
-  <path d="M15.5 3.75v3.5H19"></path>
-  <path d="M9 11h7M9 14h7M9 17h5"></path>
-</svg>
-                </span>
-                <span>Pitchbook</span>
-              </li>
-              <li class="offering-artifact">
-                <span class="artifact-icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" aria-hidden="true">
-  <path d="M4.5 5.5c2.8-.9 5.2-.5 7.5 1.2v12.1c-2.3-1.7-4.7-2.1-7.5-1.2z"></path>
-  <path d="M19.5 5.5c-2.8-.9-5.2-.5-7.5 1.2v12.1c2.3-1.7 4.7-2.1 7.5-1.2z"></path>
-</svg>
-                </span>
-                <span>Discovery Guide</span>
-              </li>
-              <li class="offering-artifact">
-                <span class="artifact-icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" aria-hidden="true">
-  <path d="M6 3.75h9.5L19 7.25v13H6z"></path>
-  <path d="M15.5 3.75v3.5H19"></path>
-  <path d="M9 12.25l1.6 1.6 3.4-3.6"></path>
-  <path d="M9 17h7"></path>
-</svg>
-                </span>
-                <span>Standard Proposal</span>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <button
-          class="offering-explore-button"
-          type="button"
-          data-offerings-action="explore-mcloud"
-        >
-          <span>Explore Offering</span>
-          <span aria-hidden="true">→</span>
-        </button>
-      </article>
-
-      <!-- 04 — MSOC -->
-      <article
-        class="core-offering-card is-netsec"
-        data-offering-id="msoc"
-        data-coe="netsec"
-        aria-labelledby="offering-msoc-title"
-      >
-        <div class="core-offering-card-topline">
-          <span class="core-offering-number">04</span>
-          <span class="core-offering-coe-chip">NETSEC</span>
-        </div>
-
-        <div class="core-offering-visual">
-          <img
-            id="offering-msoc-image"
-            class="core-offering-image"
-            data-image-key="offering-msoc"
-            alt=""
-            width="700"
-            height="420"
-            loading="lazy"
-            decoding="async"
-            fetchpriority="low"
-            hidden
-          >
-          <div
-            id="offering-msoc-fallback"
-            class="image-placeholder core-offering-image-fallback"
-            data-image-fallback="offering-msoc"
-            role="img"
-            aria-label="MSOC visual unavailable"
-            hidden
-          >
-            MSOC
-          </div>
-        </div>
-
-        <div class="core-offering-content">
-          <h3 id="offering-msoc-title">MSOC</h3>
-          <p class="core-offering-coe">COE: Modernization – NETSEC</p>
-          <p class="core-offering-description">
-            Proactively detect, respond, and neutralize threats with autonomous
-            security agents built for always-on protection.
-          </p>
-
-          <div class="offering-artifacts offering-artifacts-static">
-            <p class="offering-artifacts-title">STANDARD ARTIFACTS</p>
-            <ul class="offering-artifact-list" aria-label="Standard artifacts">
-              <li class="offering-artifact">
-                <span class="artifact-icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" aria-hidden="true">
-  <path d="M6 3.75h9.5L19 7.25v13H6z"></path>
-  <path d="M15.5 3.75v3.5H19"></path>
-  <path d="M9 11h7M9 14h7M9 17h5"></path>
-</svg>
-                </span>
-                <span>Pitchbook</span>
-              </li>
-              <li class="offering-artifact">
-                <span class="artifact-icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" aria-hidden="true">
-  <path d="M4.5 5.5c2.8-.9 5.2-.5 7.5 1.2v12.1c-2.3-1.7-4.7-2.1-7.5-1.2z"></path>
-  <path d="M19.5 5.5c-2.8-.9-5.2-.5-7.5 1.2v12.1c2.3-1.7 4.7-2.1 7.5-1.2z"></path>
-</svg>
-                </span>
-                <span>Discovery Guide</span>
-              </li>
-              <li class="offering-artifact">
-                <span class="artifact-icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" aria-hidden="true">
-  <path d="M6 3.75h9.5L19 7.25v13H6z"></path>
-  <path d="M15.5 3.75v3.5H19"></path>
-  <path d="M9 12.25l1.6 1.6 3.4-3.6"></path>
-  <path d="M9 17h7"></path>
-</svg>
-                </span>
-                <span>Standard Proposal</span>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <button
-          class="offering-explore-button"
-          type="button"
-          data-offerings-action="explore-msoc"
-        >
-          <span>Explore Offering</span>
-          <span aria-hidden="true">→</span>
-        </button>
-      </article>
-
-      <!-- 05 — MS -->
-      <article
-        class="core-offering-card is-edge"
-        data-offering-id="ms"
-        data-coe="edge"
-        aria-labelledby="offering-ms-title"
-      >
-        <div class="core-offering-card-topline">
-          <span class="core-offering-number">05</span>
-          <span class="core-offering-coe-chip">EDGE</span>
-        </div>
-
-        <div class="core-offering-visual">
-          <img
-            id="offering-ms-image"
-            class="core-offering-image"
-            data-image-key="offering-ms"
-            alt=""
-            width="700"
-            height="420"
-            loading="lazy"
-            decoding="async"
-            fetchpriority="low"
-            hidden
-          >
-          <div
-            id="offering-ms-fallback"
-            class="image-placeholder core-offering-image-fallback"
-            data-image-fallback="offering-ms"
-            role="img"
-            aria-label="MS visual unavailable"
-            hidden
-          >
-            MS
-          </div>
-        </div>
-
-        <div class="core-offering-content">
-          <h3 id="offering-ms-title">MS</h3>
-          <p class="core-offering-coe">COE: Modernization – EDGE</p>
-          <p class="core-offering-description">
-            Deliver seamless, resilient end-user experiences with autonomous
-            edge agents anywhere, anytime.
-          </p>
-
-          <div class="offering-artifacts offering-artifacts-static">
-            <p class="offering-artifacts-title">STANDARD ARTIFACTS</p>
-            <ul class="offering-artifact-list" aria-label="Standard artifacts">
-              <li class="offering-artifact">
-                <span class="artifact-icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" aria-hidden="true">
-  <path d="M6 3.75h9.5L19 7.25v13H6z"></path>
-  <path d="M15.5 3.75v3.5H19"></path>
-  <path d="M9 11h7M9 14h7M9 17h5"></path>
-</svg>
-                </span>
-                <span>Pitchbook</span>
-              </li>
-              <li class="offering-artifact">
-                <span class="artifact-icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" aria-hidden="true">
-  <path d="M4.5 5.5c2.8-.9 5.2-.5 7.5 1.2v12.1c-2.3-1.7-4.7-2.1-7.5-1.2z"></path>
-  <path d="M19.5 5.5c-2.8-.9-5.2-.5-7.5 1.2v12.1c2.3-1.7 4.7-2.1 7.5-1.2z"></path>
-</svg>
-                </span>
-                <span>Discovery Guide</span>
-              </li>
-              <li class="offering-artifact">
-                <span class="artifact-icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" aria-hidden="true">
-  <path d="M6 3.75h9.5L19 7.25v13H6z"></path>
-  <path d="M15.5 3.75v3.5H19"></path>
-  <path d="M9 12.25l1.6 1.6 3.4-3.6"></path>
-  <path d="M9 17h7"></path>
-</svg>
-                </span>
-                <span>Standard Proposal</span>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <button
-          class="offering-explore-button"
-          type="button"
-          data-offerings-action="explore-ms"
-        >
-          <span>Explore Offering</span>
-          <span aria-hidden="true">→</span>
-        </button>
-      </article>
+    <div class="offerings-matrix-surface" id="offerings-matrix-surface">
+      <div class="offerings-matrix-board" id="offerings-matrix-board" aria-live="polite"></div>
+      <div class="offerings-matrix-empty" id="offerings-matrix-empty" hidden>No matching offerings. Try another search or filter.</div>
     </div>
 
+    <section class="offerings-data-products" aria-labelledby="offerings-products-title">
+      <div class="offerings-data-products-header">
+        <div class="offerings-data-products-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="m12 2 9 5-9 5-9-5 9-5ZM3 12l9 5 9-5M3 17l9 5 9-5"/></svg>
+        </div>
+        <div class="offerings-data-products-heading">
+          <div class="offerings-data-products-title-row">
+            <h3 id="offerings-products-title">INDUSTRY-SPECIFIC DATA PRODUCTS</h3>
+            <span class="offerings-products-chip">PLATFORMS &amp; IP</span>
+          </div>
+          <p>Proprietary domain data products in the Novare catalog.</p>
+        </div>
+        <button class="offerings-products-add" type="button" data-matrix-add="product">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg> Add Product
+        </button>
+      </div>
+      <div class="offerings-products-grid" id="offerings-products-grid" aria-live="polite"></div>
+    </section>
+    <p class="offerings-matrix-note">* Labels follow the supplied portfolio reference; availability and status require confirmation.</p>
   </section>
 
-  <!-- =======================================================
-       AI ACCELERATORS
-  ======================================================== -->
-  <section
-    class="offerings-accelerators-section"
-    aria-labelledby="ai-accelerators-title"
-  >
-    <header class="offerings-section-header offerings-accelerators-header">
-      <div class="offerings-section-title-row">
-        <h2 id="ai-accelerators-title">AI ACCELERATORS</h2>
-        <span class="offerings-section-rule" aria-hidden="true"></span>
-        <p>Capability builders for a smarter, stronger tomorrow.</p>
+  <div class="offerings-matrix-modal-backdrop" id="offerings-matrix-modal" hidden>
+    <div class="offerings-matrix-modal" role="dialog" aria-modal="true" aria-labelledby="offerings-matrix-modal-title">
+      <div class="offerings-matrix-modal-head">
+        <h3 id="offerings-matrix-modal-title">Offering details</h3>
+        <button type="button" data-matrix-close aria-label="Close dialog">×</button>
       </div>
-    </header>
-
-    <div id="ai-accelerators-grid" class="ai-accelerators-grid" aria-live="polite">
-
-      <article
-        class="ai-accelerator-card is-ai-education"
-        data-accelerator-id="ai-education"
-        aria-labelledby="ai-education-title"
-      >
-        <div class="ai-accelerator-main">
-          <div class="ai-accelerator-icon">
-            <img
-              id="accelerator-ai-education-image"
-              data-image-key="accelerator-ai-education"
-              alt=""
-              width="180"
-              height="180"
-              loading="lazy"
-              decoding="async"
-              fetchpriority="low"
-              hidden
-            >
-            <div
-              id="accelerator-ai-education-fallback"
-              class="image-placeholder"
-              data-image-fallback="accelerator-ai-education"
-              role="img"
-              aria-label="AI Education visual unavailable"
-              hidden
-            >
-              AI
-            </div>
-          </div>
-
-          <div class="ai-accelerator-copy">
-            <h3 id="ai-education-title">AI EDUCATION</h3>
-            <p class="ai-accelerator-coe">COE: Encompassing</p>
-            <p>Build AI fluency across the organization.</p>
-          </div>
-        </div>
-
-          <div class="offering-artifacts ai-accelerator-artifacts offering-artifacts-static">
-            <p class="offering-artifacts-title">STANDARD ARTIFACTS</p>
-            <ul class="offering-artifact-list" aria-label="Standard artifacts">
-            <li class="offering-artifact">
-              <span class="artifact-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-  <path d="M6 3.75h9.5L19 7.25v13H6z"></path>
-  <path d="M15.5 3.75v3.5H19"></path>
-  <path d="M9 11h7M9 14h7M9 17h5"></path>
-</svg>
-              </span>
-              <span>Pitchbook</span>
-            </li>
-            <li class="offering-artifact">
-              <span class="artifact-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-  <path d="M4.5 5.5c2.8-.9 5.2-.5 7.5 1.2v12.1c-2.3-1.7-4.7-2.1-7.5-1.2z"></path>
-  <path d="M19.5 5.5c-2.8-.9-5.2-.5-7.5 1.2v12.1c2.3-1.7 4.7-2.1 7.5-1.2z"></path>
-</svg>
-              </span>
-              <span>Discovery Guide</span>
-            </li>
-            <li class="offering-artifact">
-              <span class="artifact-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-  <path d="M6 3.75h9.5L19 7.25v13H6z"></path>
-  <path d="M15.5 3.75v3.5H19"></path>
-  <path d="M9 12.25l1.6 1.6 3.4-3.6"></path>
-  <path d="M9 17h7"></path>
-</svg>
-              </span>
-              <span>Standard Proposal</span>
-            </li>
-            </ul>
-          </div>
-
-        <button
-          class="offering-explore-button"
-          type="button"
-          data-offerings-action="explore-ai-education"
-          aria-label="Explore AI Education offering"
-        >
-          <span>Explore Offering</span>
-          <span aria-hidden="true">→</span>
-        </button>
-      </article>
-
-      <article
-        class="ai-accelerator-card is-personal-ai"
-        data-accelerator-id="personal-ai"
-        aria-labelledby="personal-ai-title"
-      >
-        <div class="ai-accelerator-main">
-          <div class="ai-accelerator-icon">
-            <img
-              id="accelerator-personal-ai-image"
-              data-image-key="accelerator-personal-ai"
-              alt=""
-              width="180"
-              height="180"
-              loading="lazy"
-              decoding="async"
-              fetchpriority="low"
-              hidden
-            >
-            <div
-              id="accelerator-personal-ai-fallback"
-              class="image-placeholder"
-              data-image-fallback="accelerator-personal-ai"
-              role="img"
-              aria-label="Personal AI visual unavailable"
-              hidden
-            >
-              AI
-            </div>
-          </div>
-
-          <div class="ai-accelerator-copy">
-            <h3 id="personal-ai-title">PERSONAL AI</h3>
-            <p class="ai-accelerator-coe">COE: Modernization – EDGE</p>
-            <p>Your AI companion for higher productivity.</p>
-          </div>
-        </div>
-
-          <div class="offering-artifacts ai-accelerator-artifacts offering-artifacts-static">
-            <p class="offering-artifacts-title">STANDARD ARTIFACTS</p>
-            <ul class="offering-artifact-list" aria-label="Standard artifacts">
-            <li class="offering-artifact">
-              <span class="artifact-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-  <path d="M6 3.75h9.5L19 7.25v13H6z"></path>
-  <path d="M15.5 3.75v3.5H19"></path>
-  <path d="M9 11h7M9 14h7M9 17h5"></path>
-</svg>
-              </span>
-              <span>Pitchbook</span>
-            </li>
-            <li class="offering-artifact">
-              <span class="artifact-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-  <path d="M4.5 5.5c2.8-.9 5.2-.5 7.5 1.2v12.1c-2.3-1.7-4.7-2.1-7.5-1.2z"></path>
-  <path d="M19.5 5.5c-2.8-.9-5.2-.5-7.5 1.2v12.1c2.3-1.7 4.7-2.1 7.5-1.2z"></path>
-</svg>
-              </span>
-              <span>Discovery Guide</span>
-            </li>
-            <li class="offering-artifact">
-              <span class="artifact-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-  <path d="M6 3.75h9.5L19 7.25v13H6z"></path>
-  <path d="M15.5 3.75v3.5H19"></path>
-  <path d="M9 12.25l1.6 1.6 3.4-3.6"></path>
-  <path d="M9 17h7"></path>
-</svg>
-              </span>
-              <span>Standard Proposal</span>
-            </li>
-            </ul>
-          </div>
-
-        <button
-          class="offering-explore-button"
-          type="button"
-          data-offerings-action="explore-personal-ai"
-          aria-label="Explore Personal AI offering"
-        >
-          <span>Explore Offering</span>
-          <span aria-hidden="true">→</span>
-        </button>
-      </article>
-
-      <article
-        class="ai-accelerator-card is-sovereign-ai"
-        data-accelerator-id="sovereign-ai"
-        aria-labelledby="sovereign-ai-title"
-      >
-        <div class="ai-accelerator-main">
-          <div class="ai-accelerator-icon">
-            <img
-              id="accelerator-sovereign-ai-image"
-              data-image-key="accelerator-sovereign-ai"
-              alt=""
-              width="180"
-              height="180"
-              loading="lazy"
-              decoding="async"
-              fetchpriority="low"
-              hidden
-            >
-            <div
-              id="accelerator-sovereign-ai-fallback"
-              class="image-placeholder"
-              data-image-fallback="accelerator-sovereign-ai"
-              role="img"
-              aria-label="Sovereign AI visual unavailable"
-              hidden
-            >
-              AI
-            </div>
-          </div>
-
-          <div class="ai-accelerator-copy">
-            <h3 id="sovereign-ai-title">SOVEREIGN AI</h3>
-            <p class="ai-accelerator-coe">COE: Modernization – INFRA</p>
-            <p>AI on your terms for a safer, stronger nation.</p>
-          </div>
-        </div>
-
-          <div class="offering-artifacts ai-accelerator-artifacts offering-artifacts-static">
-            <p class="offering-artifacts-title">STANDARD ARTIFACTS</p>
-            <ul class="offering-artifact-list" aria-label="Standard artifacts">
-            <li class="offering-artifact">
-              <span class="artifact-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-  <path d="M6 3.75h9.5L19 7.25v13H6z"></path>
-  <path d="M15.5 3.75v3.5H19"></path>
-  <path d="M9 11h7M9 14h7M9 17h5"></path>
-</svg>
-              </span>
-              <span>Pitchbook</span>
-            </li>
-            <li class="offering-artifact">
-              <span class="artifact-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-  <path d="M4.5 5.5c2.8-.9 5.2-.5 7.5 1.2v12.1c-2.3-1.7-4.7-2.1-7.5-1.2z"></path>
-  <path d="M19.5 5.5c-2.8-.9-5.2-.5-7.5 1.2v12.1c2.3-1.7 4.7-2.1 7.5-1.2z"></path>
-</svg>
-              </span>
-              <span>Discovery Guide</span>
-            </li>
-            <li class="offering-artifact">
-              <span class="artifact-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-  <path d="M6 3.75h9.5L19 7.25v13H6z"></path>
-  <path d="M15.5 3.75v3.5H19"></path>
-  <path d="M9 12.25l1.6 1.6 3.4-3.6"></path>
-  <path d="M9 17h7"></path>
-</svg>
-              </span>
-              <span>Standard Proposal</span>
-            </li>
-            </ul>
-          </div>
-
-        <button
-          class="offering-explore-button"
-          type="button"
-          data-offerings-action="explore-sovereign-ai"
-          aria-label="Explore Sovereign AI offering"
-        >
-          <span>Explore Offering</span>
-          <span aria-hidden="true">→</span>
-        </button>
-      </article>
+      <div id="offerings-matrix-modal-content"></div>
     </div>
-  </section>
-
-  <!-- =======================================================
-       QUOTE / DELIVERY LANES
-  ======================================================== -->
-  <section
-    id="offerings-quote-section"
-    class="offerings-quote-section"
-    aria-label="Delivery and staffing offerings"
-  >
-    <article class="offerings-quote-card is-supply-deliver">
-      <div class="offerings-quote-icon" aria-hidden="true">
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
-             stroke-linejoin="round">
-          <path d="M3 7h11v10H3z"/>
-          <path d="M14 10h4l3 3v4h-7z"/>
-          <circle cx="7" cy="18" r="2"/>
-          <circle cx="18" cy="18" r="2"/>
-        </svg>
-      </div>
-
-      <div class="offerings-quote-copy">
-        <h2>SUPPLY &amp; DELIVER</h2>
-        <p>From strategy to execution, we make it real.</p>
-      </div>
-
-      <button
-        class="offerings-quote-button"
-        type="button"
-        data-offerings-action="quote-supply-deliver"
-        aria-label="Generate a quote for Supply and Deliver"
-      >
-        <span>Generate a Quote</span>
-        <span aria-hidden="true">→</span>
-      </button>
-    </article>
-
-    <span class="offerings-quote-divider" aria-hidden="true"></span>
-
-    <article class="offerings-quote-card is-staff-aug">
-      <div class="offerings-quote-icon" aria-hidden="true">
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
-             stroke-linejoin="round">
-          <circle cx="9" cy="8" r="3"/>
-          <circle cx="17" cy="9" r="2"/>
-          <path d="M3 19c0-3.4 2.4-5.5 6-5.5s6 2.1 6 5.5M14 15c3.6-.6 6 1.2 6 4"/>
-        </svg>
-      </div>
-
-      <div class="offerings-quote-copy">
-        <h2>MRS / STAFF AUG</h2>
-        <p>Augment your team with the right expertise.</p>
-      </div>
-
-      <button
-        class="offerings-quote-button"
-        type="button"
-        data-offerings-action="quote-staff-aug"
-        aria-label="Generate a quote for MRS / Staff Aug"
-      >
-        <span>Generate a Quote</span>
-        <span aria-hidden="true">→</span>
-      </button>
-    </article>
-  </section>
-
-
-
-  <p
-    id="offerings-status"
-    class="offerings-status"
-    role="status"
-    aria-live="polite"
-  ></p>
-
+  </div>
+  <p id="offerings-status" class="offerings-status" role="status" aria-live="polite"></p>
 </section>

@@ -118,10 +118,26 @@
   }
   function arrowMarkup(haveFrom, haveTo, branch, purple) {
     if (!haveFrom || !haveTo) return '<div class="offerings-matrix-connector is-empty"><span>—</span></div>';
-    let path = '<path d="M3 12h27m-5-4 5 4-5 4"/>';
-    if (branch === 'split') path = '<path d="M2 21h7c8 0 9-16 24-16m-24 16c8 0 9 16 24 16" transform="translate(0,-9) scale(1,.7)"/><path d="m28 1 5 4-5 4M28 23l5 4-5 4" transform="translate(0,3) scale(1,.7)"/>';
-    if (branch === 'merge') path = '<path d="M2 5c14 0 16 16 25 16h7M2 37c14 0 16-16 25-16" transform="translate(0,-9) scale(1,.7)"/><path d="m29 17 5 4-5 4" transform="translate(0,-2)"/>';
-    return '<div class="offerings-matrix-connector' + (purple ? ' is-purple' : '') + '"><svg viewBox="0 0 36 28" preserveAspectRatio="none" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">' + path + '</svg></div>';
+    let viewBox = '0 0 36 28';
+    let path = '<path d="M3 14h24m-5-4 5 4-5 4"/>';
+    if (branch === 'split') {
+      viewBox = '0 0 40 64';
+      path = [
+        '<path d="M3 32h8c10 0 11-18 21-18h2"/>',
+        '<path d="M3 32h8c10 0 11 18 21 18h2"/>',
+        '<path d="m31 10 5 4-5 4"/>',
+        '<path d="m31 46 5 4-5 4"/>'
+      ].join('');
+    }
+    if (branch === 'merge') {
+      viewBox = '0 0 40 64';
+      path = [
+        '<path d="M3 14h2c10 0 11 18 21 18h8"/>',
+        '<path d="M3 50h2c10 0 11-18 21-18h8"/>',
+        '<path d="m31 28 5 4-5 4"/>'
+      ].join('');
+    }
+    return '<div class="offerings-matrix-connector' + (purple ? ' is-purple' : '') + '"><svg viewBox="' + viewBox + '" preserveAspectRatio="none" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">' + path + '</svg></div>';
   }
   function getColCounts(items) {
     return stages.map(function (stage) { return items.filter(function (i) { return i.stage === stage.id; }).length; });

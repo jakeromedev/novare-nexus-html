@@ -2,8 +2,8 @@
 /* ============================================================
    NOVARE NEXUS — OFFERINGS CAPABILITY MATRIX (H2)
    Mockup-accurate add-on, intentionally scoped to this page.
-   Loaded LAST to override legacy fixed-height hero parity only
-   on Offerings, not on any of the other Nexus routes.
+   Loaded LAST; aligns the Offerings hero and first-panel overlap
+   with the shared Overview layout without changing other routes.
 ============================================================ */
 .offerings-page--matrix {
   --matrix-navy: #0d2472;
@@ -18,9 +18,10 @@
 }
 .offerings-page--matrix, .offerings-page--matrix * { box-sizing: border-box; }
 .offerings-page--matrix .offerings-hero.page-hero[data-page-hero] {
-  height: 214px !important;
-  min-height: 214px !important;
-  max-height: 214px !important;
+  /* Match Overview / shared Home hero geometry on desktop. */
+  height: 468px !important;
+  min-height: 468px !important;
+  max-height: 468px !important;
   padding: calc(var(--topbar-height, 62px) + 14px) 40px 13px !important;
   background: #e8f5ff;
 }
@@ -35,28 +36,34 @@
   padding-top: 0 !important;
 }
 .offerings-page--matrix .offerings-hero-copy h1 {
-  width: max-content;
-  max-width: 100% !important;
-  font-size: clamp(2rem, 2.75vw, 2.85rem) !important;
-  letter-spacing: -.052em !important;
-  line-height: 1.03 !important;
-  font-weight: 850 !important;
+  width: auto;
+  max-width: 680px !important;
+  /* Same typography contract as the Overview page. */
+  font-size: clamp(3.05rem, 4.25vw, 4.55rem) !important;
+  letter-spacing: -.055em !important;
+  line-height: .92 !important;
+  font-weight: 800 !important;
   white-space: normal !important;
+  text-wrap: balance;
 }
 .offerings-page--matrix .offerings-hero-copy h1 span,
 .offerings-page--matrix .offerings-hero-copy h1 strong { display: inline !important; }
+.offerings-page--matrix .offerings-hero-copy h1 strong { font-weight: 800 !important; }
 .offerings-page--matrix .offerings-hero-copy h1 span::after { content: " "; white-space: pre; }
 .offerings-page--matrix .offerings-eyebrow {
-  margin: 0 0 6px !important;
-  font-size: .74rem !important;
-  letter-spacing: .23em !important;
+  margin: 0 0 7px !important;
+  font-size: .86rem !important;
+  font-weight: 800 !important;
+  line-height: 1.1 !important;
+  letter-spacing: .28em !important;
 }
 .offerings-page--matrix .offerings-hero-description {
-  max-width: 675px !important;
-  margin: 8px 0 0 !important;
-  font-size: .89rem !important;
-  font-weight: 680 !important;
+  max-width: 680px !important;
+  margin: 10px 0 0 !important;
+  font-size: clamp(.98rem, 1.25vw, 1.18rem) !important;
+  font-weight: 600 !important;
   line-height: 1.35 !important;
+  letter-spacing: normal !important;
 }
 .offerings-page--matrix .offerings-hero-overlay {
   background: linear-gradient(90deg,
@@ -70,7 +77,8 @@
 
 /* Core section / dual-purpose portfolio toolbar */
 .offerings-page--matrix > .offerings-core-section {
-  margin: -5px 28px 0 !important;
+  /* Match Overview: first content panel overlaps the banner by 82px. */
+  margin: -82px 28px 0 !important;
   padding: 0 !important;
   position: relative;
   z-index: 3;
@@ -419,16 +427,59 @@
   .offerings-page--matrix .offerings-matrix-toolbar .offerings-core-header-content { flex-wrap: wrap; }
   .offerings-page--matrix .offerings-matrix-controls { flex: 1 1 100%; justify-content: flex-start; margin-left: 0; }
   .offerings-page--matrix .offerings-matrix-toolbar .offerings-core-header-content { padding: 12px 16px !important; }
-  .offerings-page--matrix .offerings-hero.page-hero[data-page-hero] { height: 235px !important; min-height: 235px !important; max-height: 235px !important; }
   .offerings-page--matrix .offerings-hero-copy { width: 76% !important; }
 }
+/* Mirror Overview's compact-desktop and tablet typography scales. */
+@media (min-width: 1200px) and (max-width: 1399px) {
+  .offerings-page--matrix .offerings-hero-copy h1 {
+    max-width: 620px !important;
+    font-size: clamp(2.85rem, 4.35vw, 3.8rem) !important;
+  }
+  .offerings-page--matrix .offerings-hero-description { max-width: 620px !important; }
+}
+@media (min-width: 768px) and (max-width: 1199px) {
+  .offerings-page--matrix .offerings-hero-copy h1 {
+    font-size: clamp(2.65rem, 5.4vw, 3.7rem) !important;
+  }
+  .offerings-page--matrix .offerings-hero-description { font-size: .94rem !important; }
+}
+/* Responsive hero heights mirror Overview / the shared hero parity rules. */
+@media (min-width: 1200px) and (max-width: 1350px) {
+  .offerings-page--matrix .offerings-hero.page-hero[data-page-hero] {
+    height: 440px !important;
+    min-height: 440px !important;
+    max-height: 440px !important;
+  }
+}
+@media (min-width: 768px) and (max-width: 1199px) {
+  .offerings-page--matrix .offerings-hero.page-hero[data-page-hero] {
+    height: 320px !important;
+    min-height: 320px !important;
+    max-height: 320px !important;
+  }
+}
 @media (max-width: 767px) {
-  .offerings-page--matrix .offerings-hero.page-hero[data-page-hero] { height: 260px !important; min-height: 260px !important; max-height: 260px !important; padding: 79px 18px 12px !important; }
+  .offerings-page--matrix .offerings-hero.page-hero[data-page-hero] { height: 320px !important; min-height: 320px !important; max-height: 320px !important; padding: 79px 18px 12px !important; }
   .offerings-page--matrix .offerings-hero-copy { width: min(98%, 560px) !important; max-width: 560px !important; }
-  .offerings-page--matrix .offerings-hero-copy h1 { width: auto; font-size: clamp(1.7rem,6.8vw,2.5rem) !important; }
-  .offerings-page--matrix .offerings-hero-description { font-size: .77rem !important; max-width: 94% !important; }
+  .offerings-page--matrix .offerings-eyebrow {
+    margin-bottom: 8px !important;
+    font-size: .7rem !important;
+    letter-spacing: .2em !important;
+  }
+  .offerings-page--matrix .offerings-hero-copy h1 {
+    width: auto;
+    max-width: 430px !important;
+    font-size: clamp(2.4rem, 11.5vw, 3.35rem) !important;
+    line-height: .95 !important;
+  }
+  .offerings-page--matrix .offerings-hero-description {
+    max-width: 360px !important;
+    margin-top: 12px !important;
+    font-size: .84rem !important;
+  }
   .offerings-page--matrix .offerings-hero-overlay { background: linear-gradient(90deg,rgb(247 252 255 / 97%),rgb(247 252 255 / 83%) 62%,rgb(247 252 255 / 45%)) !important; }
-  .offerings-page--matrix > .offerings-core-section { margin: -4px 12px 0 !important; }
+  /* Overview removes the hero/content overlap on phones. */
+  .offerings-page--matrix > .offerings-core-section { margin: 0 12px 0 !important; }
   .offerings-page--matrix .offerings-matrix-toolbar .offerings-core-heading { min-width: 0; }
   .offerings-page--matrix .offerings-matrix-toolbar .offerings-core-heading h2 { font-size: 1.14rem !important; }
   .offerings-page--matrix .offerings-matrix-toolbar .offerings-core-header-icon { width: 39px !important; height: 39px !important; flex-basis: 39px !important; }
@@ -443,5 +494,17 @@
   .offerings-page--matrix .offerings-data-products-header { flex-wrap: wrap; padding-top: 12px; padding-bottom: 12px; }
   .offerings-page--matrix .offerings-products-add { margin-left: auto; }
   .offerings-page--matrix .offerings-products-grid { grid-template-columns: 1fr; gap: 8px; }
+}
+@media (max-width: 440px) {
+  .offerings-page--matrix .offerings-hero-copy h1 {
+    font-size: clamp(2.15rem, 11vw, 2.8rem) !important;
+  }
+}
+@media (max-width: 420px) {
+  .offerings-page--matrix .offerings-hero.page-hero[data-page-hero] {
+    height: 305px !important;
+    min-height: 305px !important;
+    max-height: 305px !important;
+  }
 }
 </style>

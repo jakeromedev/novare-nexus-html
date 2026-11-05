@@ -21,6 +21,37 @@
   const OFFERINGS_LINKS =
     Object.freeze({
       // ---------------------------------------------------------
+      // THINK / BUILD / RUN OFFERING CATALOG — managed destinations
+      // ---------------------------------------------------------
+      "matrix-1": "off-tbr-ai-readiness",
+      "matrix-2": "off-tbr-agentic-fde",
+      "matrix-3": "off-tbr-ai-ops",
+      "matrix-4": "off-tbr-app-modernization",
+      "matrix-5": "off-tbr-ai-native-dev",
+      "matrix-6": "off-tbr-app-managed-services",
+      "matrix-7": "off-tbr-data-posture",
+      "matrix-8": "off-tbr-data-transformation",
+      "matrix-9": "off-tbr-managed-data-ops",
+      "matrix-10": "off-tbr-cloud-strategy",
+      "matrix-11": "off-tbr-cloud-engineering",
+      "matrix-12": "off-tbr-sovereign-ai-compute",
+      "matrix-13": "off-tbr-managed-cloud-ops",
+      "matrix-14": "off-tbr-security-assessment",
+      "matrix-15": "off-tbr-security",
+      "matrix-16": "off-tbr-vantage-soc",
+      "matrix-17": "off-tbr-salesforce-approach",
+      "matrix-18": "off-tbr-salesforce-crm",
+      "matrix-19": "off-tbr-salesforce-ams",
+      "matrix-20": "off-tbr-managed-service-desk",
+
+      // Industry-specific products
+      "product-pulse": "off-data-novare-pulse",
+      "product-regrep": "off-data-novare-regrep",
+
+      // Short-cut to the Velocity Offerings resource
+      "velocity-offerings": "off-velocity-offerings",
+
+      // ---------------------------------------------------------
       // CORE OFFERINGS — SOFA 2.0
       // ---------------------------------------------------------
       "sofa-pitchbook":
@@ -159,24 +190,24 @@
       links: OFFERINGS_LINKS
     });
 
+  function syncRenderedLinks(pageRoot) {
+    if (!pageRoot || !window.NexusManagedLinks) return;
+
+    // Always provide the complete Offerings action map. Initializing the
+    // shared runtime without this config can register an empty namespace,
+    // leaving the matrix cards unable to open Coming Soon/admin dialogs.
+    window.NexusManagedLinks.initialize(pageRoot, OFFERINGS_CONFIG);
+  }
+
   function initialize(pageRoot) {
-    if (
-      !pageRoot ||
-      !window.NexusManagedLinks
-    ) {
-      return;
-    }
+    if (!pageRoot) return;
 
-    window.NexusManagedLinks
-      .initialize(
-        pageRoot,
-        OFFERINGS_CONFIG
-      );
-
-    // Bind the new catalog only after the existing resource links are registered.
+    // Render dynamic matrix/product buttons before registering managed links.
+    // The matrix calls syncRenderedLinks again after a filter/view rerender.
     if (window.NexusOfferingsMatrix) {
       window.NexusOfferingsMatrix.initialize(pageRoot);
     }
+    syncRenderedLinks(pageRoot);
   }
 
   function refresh(pageRoot) {
@@ -202,6 +233,7 @@
   window.NexusOfferingsLinks =
     Object.freeze({
       initialize: initialize,
+      syncRenderedLinks: syncRenderedLinks,
       refresh: refresh,
       getConfiguredLinkKeys:
         getConfiguredLinkKeys

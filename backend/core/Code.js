@@ -851,3 +851,47 @@ function normalizeManagedLinkKeyForWrite_(value) {
 
   return key;
 }
+
+
+/**
+ * Returns the About Novare PNG as an image data URI for use inside Google Sites.
+ *
+ * Drive thumbnail URLs can return HTTP 403 inside embedded Apps Script pages
+ * even when the source file has link-viewer access. Read the actual file through
+ * the Apps Script account instead of relying on a transient thumbnail URL.
+ *
+ * This endpoint is deliberately restricted to one known Overview asset: do not
+ * expose a generic client-supplied Drive file ID as a fetch-by-ID service.
+ */
+function getNexusAboutNovareImage() {
+  const fileId = '19c6m8U3a9AwPpdBl0DVJEs1hsFLjYL2G';
+  const maxBytes = 5 * 1024 * 1024;
+
+  try {
+    const file = DriveApp.getFileById(fileId);
+    const mimeType = String(file.getMimeType() || '').toLowerCase();
+    if (!/^image\/(?:png|jpeg|webp|gif)$/.test(mimeType)) {
+      throw new Error('The configured About Novare file is not a supported image.');
+    }
+
+    if (file.getSize() > maxBytes) {
+      throw new Error('The About Novare image is larger than 5 MB. Optimize the PNG before embedding it.');
+    }
+
+    const bytes = file.getBlob().getBytes();
+    if (bytes.length > maxBytes) {
+      throw new Error('The About Novare image is larger than 5 MB.');
+    }
+
+    return {
+      ok: true,
+      dataUri: 'data:' + mimeType + ';base64,' + Utilities.base64Encode(bytes)
+    };
+  } catch (error) {
+    console.error('[NEXUS Overview image] Failed to load About Novare: ' + String(error));
+    return {
+      ok: false,
+      error: 'Unable to read the About Novare image from Drive. Check the file ID and the Apps Script executing account.'
+    };
+  }
+}

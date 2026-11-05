@@ -3118,7 +3118,10 @@
       if (fallback) fallback.hidden = true;
 
       try {
-        if (currentUrl) window.sessionStorage.setItem(cacheKey, currentUrl);
+        // Base64 image data is often large; cache only normal remote URLs.
+        if (currentUrl && !currentUrl.startsWith("data:")) {
+          window.sessionStorage.setItem(cacheKey, currentUrl);
+        }
       } catch (error) {
         // Ignore storage failures; successful image display is sufficient.
       }
@@ -4349,10 +4352,55 @@
     );
   }
 
+  // Cached only in this page session's JavaScript memory, never in sessionStorage.
+  let aboutNovareImageDataUri = "";
+
   function bindOverviewAsset(image, fallback, width) {
     if (!image) return;
-    const asset = overviewAssetRegistry[image.dataset.imageKey];
-    bindImageCandidates(image, fallback, getDriveImageCandidates(asset, width));
+    const key = image.dataset.imageKey;
+    const asset = overviewAssetRegistry[key];
+    if (!asset) return;
+
+    const remoteCandidates = getDriveImageCandidates(asset, width);
+    if (key !== "overview-about-novare") {
+      bindImageCandidates(image, fallback, remoteCandidates);
+      return;
+    }
+
+    // Drive thumbnail and googleusercontent URLs can be rejected with HTTP 403
+    // in Google Sites iframes even when the original PNG is shared correctly.
+    // For this image only, retrieve its bytes from the same Apps Script project.
+    if (aboutNovareImageDataUri) {
+      bindImageCandidates(image, fallback, [aboutNovareImageDataUri]);
+      return;
+    }
+
+    if (typeof google === "undefined" || !google.script || !google.script.run) {
+      bindImageCandidates(image, fallback, remoteCandidates);
+      return;
+    }
+
+    function useRemoteFallback(error) {
+      if (error) console.warn("About Novare image server fallback:", error);
+      if (image.isConnected) bindImageCandidates(image, fallback, remoteCandidates);
+    }
+
+    try {
+      google.script.run
+        .withSuccessHandler(function (response) {
+          const dataUri = response && response.ok ? String(response.dataUri || "") : "";
+          if (!/^data:image\/(?:png|jpeg|webp|gif);base64,/.test(dataUri)) {
+            useRemoteFallback(response && response.error ? response.error : "No valid image was returned");
+            return;
+          }
+          aboutNovareImageDataUri = dataUri;
+          if (image.isConnected) bindImageCandidates(image, fallback, [dataUri]);
+        })
+        .withFailureHandler(useRemoteFallback)
+        .getNexusAboutNovareImage();
+    } catch (error) {
+      useRemoteFallback(error);
+    }
   }
 
   function retryFailedOverviewAssets(pageRoot) {
@@ -7455,7 +7503,7 @@
            Keyboard navigation retains focus for accessibility. */
         if (
           event.detail > 0 &&
-          desktopSidebarQuery.matches &&
+          desktopQuery.matches &&
           state.desktopCollapsed
         ) {
           window.setTimeout(function () {

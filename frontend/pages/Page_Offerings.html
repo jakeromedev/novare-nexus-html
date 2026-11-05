@@ -1,7 +1,7 @@
 <!-- =========================================================
      H2 OFFERINGS — THINK / BUILD / RUN CAPABILITY MATRIX
      The matrix catalog is the primary offerings view.
-     The new matrix is a UI catalog preview (not a backend data source).
+     Matrix entries are navigable managed links (06_Assets destinations).
 ========================================================== -->
 <section class="offerings-page offerings-page--matrix" data-page="offerings">
   <!-- =======================================================
@@ -109,9 +109,6 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.3"/><path d="m16 16 4.6 4.6"/></svg>
             <input id="offerings-matrix-search" type="search" autocomplete="off" placeholder="Search offerings, tech, SMEs…" aria-label="Search offerings">
           </label>
-          <button type="button" class="offerings-matrix-add" data-matrix-add="offering" title="Add offering to this preview" aria-label="Add offering to preview">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
-          </button>
         </div>
       </div>
     </header>
@@ -120,6 +117,25 @@
       <div class="offerings-matrix-board" id="offerings-matrix-board" aria-live="polite"></div>
       <div class="offerings-matrix-empty" id="offerings-matrix-empty" hidden>No matching offerings. Try another search or filter.</div>
     </div>
+
+    <section class="offerings-velocity-section" aria-labelledby="offerings-velocity-title">
+      <div class="offerings-velocity-accent" aria-hidden="true"></div>
+      <div class="offerings-velocity-emblem" aria-hidden="true">
+        <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17.5 3 7 18h8l-2 11 12-16h-8l.5-10Z"/>
+          <path d="M4 9h6M2 14h5M23 25h5"/>
+        </svg>
+      </div>
+      <div class="offerings-velocity-copy">
+        <p class="offerings-velocity-kicker">EXPLORE MORE <span aria-hidden="true">·</span> SPECIALIZED OFFERINGS</p>
+        <h3 id="offerings-velocity-title">VELOCITY OFFERINGS</h3>
+        <p>Explore Novare's Velocity offerings and resources.</p>
+      </div>
+      <button type="button" class="offerings-velocity-link" data-offerings-action="velocity-offerings" aria-label="Open Velocity Offerings">
+        <span>Explore Velocity Offerings</span>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
+      </button>
+    </section>
 
     <section class="offerings-data-products" aria-labelledby="offerings-products-title">
       <div class="offerings-data-products-header">
@@ -133,23 +149,12 @@
           </div>
           <p>Proprietary domain data products in the Novare catalog.</p>
         </div>
-        <button class="offerings-products-add" type="button" data-matrix-add="product">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg> Add Product
-        </button>
+
       </div>
       <div class="offerings-products-grid" id="offerings-products-grid" aria-live="polite"></div>
     </section>
     <p class="offerings-matrix-note">* Labels follow the supplied portfolio reference; availability and status require confirmation.</p>
   </section>
 
-  <div class="offerings-matrix-modal-backdrop" id="offerings-matrix-modal" hidden>
-    <div class="offerings-matrix-modal" role="dialog" aria-modal="true" aria-labelledby="offerings-matrix-modal-title">
-      <div class="offerings-matrix-modal-head">
-        <h3 id="offerings-matrix-modal-title">Offering details</h3>
-        <button type="button" data-matrix-close aria-label="Close dialog">×</button>
-      </div>
-      <div id="offerings-matrix-modal-content"></div>
-    </div>
-  </div>
   <p id="offerings-status" class="offerings-status" role="status" aria-live="polite"></p>
 </section>

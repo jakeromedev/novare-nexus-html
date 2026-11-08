@@ -357,3 +357,83 @@ function benchmarkNoscaCentralBridgeDeepDive20261105() {
   console.log('[NOSCA CENTRAL][BRIDGE_DEEP_SUMMARY] ' + JSON.stringify(report));
   return report;
 }
+
+
+/**
+ * Compare live, uncached authenticated bridge calls with the existing
+ * ContentService JSON response and an opt-in HtmlService response.
+ * No document results are cached; both modes invoke fresh owner searches.
+ * Runs work even while NOSCA_CENTRAL_PREFER_HTML_RESPONSE is unset/false.
+ * Deploy the updated OWNER handler before running this comparison.
+ */
+function benchmarkNoscaCentralResponseModes20261105() {
+  const cases = [
+    {name: 'json_ping_1', mode: 'content-json', op: 'ping', question: ''},
+    {name: 'html_ping_1', mode: 'html-b64-v1', op: 'ping', question: ''},
+    {name: 'html_pjl_1', mode: 'html-b64-v1', op: 'lookup', question: 'pjl'},
+    {name: 'json_pjl_1', mode: 'content-json', op: 'lookup', question: 'pjl'},
+    {name: 'html_ping_2', mode: 'html-b64-v1', op: 'ping', question: ''},
+    {name: 'json_ping_2', mode: 'content-json', op: 'ping', question: ''},
+    {name: 'json_pjl_2', mode: 'content-json', op: 'lookup', question: 'pjl'},
+    {name: 'html_pjl_2', mode: 'html-b64-v1', op: 'lookup', question: 'pjl'}
+  ];
+  const started = Date.now();
+  const runs = cases.map(function (test) {
+    const metric = {};
+    try {
+      // Executes the exact production caller with an explicit wire mode.
+      // Every signed request is unique and passes the owner authorization.
+      noscaCentralRemoteCall_(test.op, test.question, test.mode, metric);
+      const result = {case: test.name, requestedMode: test.mode,
+        operation: test.op, ok: true,
+        responseMode: metric.responseMode, elapsedMs: metric.elapsedMs,
+        postFetchMs: metric.postFetchMs,
+        redirectFetchMs: metric.redirectFetchMs,
+        redirected: metric.redirected,
+        ownerPreSignMs: metric.ownerPreSignMs,
+        ownerVersion: metric.ownerVersion,
+        returned: metric.returned, apiCalls: metric.apiCalls};
+      console.log('[NOSCA CENTRAL][TRANSPORT_MODE_RUN] ' + JSON.stringify(result));
+      return result;
+    } catch (error) {
+      // Log a stable error identifier only, never employee email, URLs or secrets.
+      const message = String(error && error.message || '');
+      const code = /^(?:CENTRAL_|DOMAIN_|OWNER_|EMPLOYEE_|INVALID_)/.test(message)
+        ? message.replace(/[^A-Z0-9_]/g, '').slice(0, 80)
+        : 'TRANSPORT_BENCHMARK_ERROR';
+      const result = {case: test.name, requestedMode: test.mode, operation: test.op,
+        ok: false, errorCode: code};
+      console.log('[NOSCA CENTRAL][TRANSPORT_MODE_RUN] ' + JSON.stringify(result));
+      return result;
+    }
+  });
+  function summarize(mode, op) {
+    const filtered = runs.filter(function (r) {
+      return r.ok && r.requestedMode === mode && r.operation === op;
+    });
+    const avg = function (k) {
+      return filtered.length ? Math.round(filtered.reduce(function (n, r) {
+        return n + Number(r[k] || 0);
+      }, 0) / filtered.length) : null;
+    };
+    return {count: filtered.length, avgElapsedMs: avg('elapsedMs'),
+      avgPostFetchMs: avg('postFetchMs'), avgRedirectFetchMs: avg('redirectFetchMs'),
+      avgOwnerPreSignMs: avg('ownerPreSignMs'),
+      redirectedCount: filtered.filter(function (r) { return r.redirected; }).length};
+  }
+  const report = {
+    ok: runs.every(function (r) { return r.ok; }),
+    benchmark: 'NOSCA_CENTRAL_RESPONSE_MODE_AB_20261105',
+    noSearchResultCache: true,
+    totalMs: Date.now() - started,
+    jsonPing: summarize('content-json', 'ping'),
+    htmlPing: summarize('html-b64-v1', 'ping'),
+    jsonLookup: summarize('content-json', 'lookup'),
+    htmlLookup: summarize('html-b64-v1', 'lookup'),
+    runs: runs,
+    note: 'Separate live requests: outcomes can vary with Apps Script startup and Google routing. ' +
+      'A successful HTML test proves transport compatibility, not guaranteed speed improvement.'
+  };
+  console.log('[NOSCA CENTRAL][TRANSPORT_MODE_SUMMARY] ' + JSON.stringify(report));
+  return report;
+}

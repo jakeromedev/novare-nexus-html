@@ -68,7 +68,11 @@ function noscaOwnerAuthorize_(envelope, cfg) {
   const cache = CacheService.getScriptCache();
   if (cache.get(nonceKey)) throw new Error('REPLAY_REJECTED');
   cache.put(nonceKey, '1', 120);
-  return { op: p.op, email: email, question: question, nonce: p.nonce };
+  // The response-mode request is authenticated by the same HMAC as the query.
+  if (p.responseFormat !== undefined && p.responseFormat !== 'html-b64-v1')
+    throw new Error('INVALID_RESPONSE_FORMAT');
+  return { op: p.op, email: email, question: question, nonce: p.nonce,
+    responseFormat: p.responseFormat === 'html-b64-v1' ? 'html-b64-v1' : 'content-json' };
 }
 
 function noscaOwnerSearchAnchors_(question) {
@@ -144,7 +148,16 @@ function noscaOwnerSearch_(question, cfg) {
     incompleteSearch: incompleteSearch, elapsedMs: Date.now() - started, scopeMode: cfg.mode };
 }
 
-function noscaOwnerJson_(obj) {
+function noscaOwnerJson_(obj, mode) {
+  if (mode === 'html-b64-v1') {
+    // Experimental transport: HtmlService may return directly without the
+    // ContentService 302. The payload is *never* rendered as HTML; only
+    // encoded bytes are embedded, and the caller verifies HMAC + nonce.
+    const envelope = Utilities.base64EncodeWebSafe(JSON.stringify(obj));
+    return HtmlService.createHtmlOutput(
+      '<!doctype html><html><head><meta charset="utf-8"></head><body>' +
+      '<pre id="nosca-central-envelope-v1">' + envelope + '</pre></body></html>');
+  }
   return ContentService.createTextOutput(JSON.stringify(obj))
     .setMimeType(ContentService.MimeType.JSON);
 }
@@ -199,7 +212,7 @@ function doPost(e) {
       signingMs: signingMs, apiCalls: result.apiCalls,
       returned: result.files.length, scopeMode: cfg.mode
     }));
-    return noscaOwnerJson_(signed);
+    return noscaOwnerJson_(signed, auth.responseFormat);
   } catch (err) {
     // Do not disclose filename, user identity, or the secret in error responses.
     const code = /^(INVALID_|REPLAY_|EMPLOYEE_|OWNER_)/.test(String(err.message || ''))

@@ -30,7 +30,8 @@ function noscaCentralSettings_() {
     throw new Error('OWNER_DEPLOYMENT_URL_MISSING_OR_INVALID');
   if (secret.length < 48 || !domains.length)
     throw new Error('CENTRAL_BRIDGE_SETTINGS_MISSING');
-  return { url: url, secret: secret, domains: domains };
+  return { url: url, secret: secret, domains: domains,
+    preferHtml: p.NOSCA_CENTRAL_PREFER_HTML_RESPONSE === 'true' };
 }
 
 function noscaCentralEmployee_(domains) {
@@ -99,8 +100,34 @@ function noscaCentralFetch_(url, jsonBody, performance) {
   return first.getContentText();
 }
 
+/**
+ * An experimental direct HtmlService response can avoid the extra
+ * ContentService redirect on SOME Google deployments. It must be verified
+ * with the transport benchmark before enabling. Default is unchanged JSON.
+ * Do not cache document metadata or reuse results between requests.
+ */
+/** Decode ONLY a tagged, Base64-encoded owner envelope or legacy JSON. */
+function noscaCentralDecodeEnvelope_(responseText) {
+  const raw = String(responseText || '');
+  if (/^\s*\{/.test(raw)) {
+    try { return { envelope: JSON.parse(raw), mode: 'content-json' }; }
+    catch (_err) { throw new Error('DOMAIN_TRANSPORT_NON_JSON'); }
+  }
+  // HtmlService is an experiment, not a general HTML scraping mechanism.
+  // Never eval, render, or run scripts from the remote response.
+  const match = raw.match(/<pre\b[^>]*\bid=["']nosca-central-envelope-v1["'][^>]*>([A-Za-z0-9_\-+=\s]+)<\/pre>/i);
+  if (!match) throw new Error('DOMAIN_TRANSPORT_UNRECOGNIZED_FORMAT');
+  const encoded = match[1].replace(/\s+/g, '');
+  if (!encoded || encoded.length > 225000) throw new Error('CENTRAL_RESPONSE_TOO_LARGE');
+  try {
+    const bytes = Utilities.base64DecodeWebSafe(encoded);
+    const json = Utilities.newBlob(bytes).getDataAsString('UTF-8');
+    return { envelope: JSON.parse(json), mode: 'html-b64-v1' };
+  } catch (_err) { throw new Error('DOMAIN_TRANSPORT_HTML_DECODE_FAILED'); }
+}
+
 /** Signed and authenticated call to the Nexus-owned deployment. */
-function noscaCentralRemoteCall_(operation, question) {
+function noscaCentralRemoteCall_(operation, question, requestedMode, diagnostics) {
   const started = Date.now();
   const performance = {};
   const settingsStarted = Date.now();
@@ -113,8 +140,14 @@ function noscaCentralRemoteCall_(operation, question) {
   if (operation !== 'ping' && (text.length === 0 || text.length > 500))
     throw new Error('INVALID_CENTRAL_QUERY');
   if (['ping', 'lookup'].indexOf(operation) < 0) throw new Error('INVALID_OPERATION');
+  const mode = requestedMode || (settings.preferHtml ? 'html-b64-v1' : 'content-json');
+  if (mode !== 'content-json' && mode !== 'html-b64-v1')
+    throw new Error('INVALID_CENTRAL_RESPONSE_MODE');
   const payload = { v: 1, op: operation, timestamp: Date.now(),
     nonce: Utilities.getUuid(), email: email, question: text };
+  // Negotiate response format in the signed body so it can't be changed by
+  // intermediaries. Omit on legacy JSON calls for backward compatibility.
+  if (mode === 'html-b64-v1') payload.responseFormat = 'html-b64-v1';
   const signingStarted = Date.now();
   const request = JSON.stringify({ payload: payload,
     signature: noscaBridgeSign_(payload, settings.secret) });
@@ -123,12 +156,17 @@ function noscaCentralRemoteCall_(operation, question) {
   const transportStarted = Date.now();
   const responseText = noscaCentralFetch_(settings.url, request, performance);
   performance.transportMs = Date.now() - transportStarted;
-  if (responseText.length > 160000) throw new Error('CENTRAL_RESPONSE_TOO_LARGE');
+  // The HTML wire format expands Base64 by about 1/3; both formats are
+  // size-limited before parsing and always require a valid signed envelope.
+  if (responseText.length > (mode === 'html-b64-v1' ? 240000 : 160000))
+    throw new Error('CENTRAL_RESPONSE_TOO_LARGE');
   const parsingStarted = Date.now();
-  let envelope;
-  try { envelope = JSON.parse(responseText); }
-  catch (err) { throw new Error('DOMAIN_TRANSPORT_NON_JSON'); }
+  const decoded = noscaCentralDecodeEnvelope_(responseText);
+  const envelope = decoded.envelope;
   performance.responseParseMs = Date.now() - parsingStarted;
+  performance.responseMode = decoded.mode;
+  if (mode === 'html-b64-v1' && decoded.mode !== 'html-b64-v1')
+    throw new Error('CENTRAL_HTML_MODE_UNAVAILABLE');
   const verificationStarted = Date.now();
   if (!envelope || !envelope.payload || !envelope.signature ||
       !noscaBridgeConstantEqual_(envelope.signature,
@@ -154,6 +192,17 @@ function noscaCentralRemoteCall_(operation, question) {
   // network; it is an estimate, NOT an exact measurement of Google overhead.
   performance.transportMinusOwnerEstimateMs = ownerReportedMs === null ? null
     : Math.max(0, performance.transportMs - ownerReportedMs);
+  if (diagnostics) {
+    diagnostics.elapsedMs = performance.totalMs;
+    diagnostics.postFetchMs = performance.postFetchMs;
+    diagnostics.redirectFetchMs = performance.redirectFetchMs;
+    diagnostics.redirected = performance.redirected;
+    diagnostics.responseMode = decoded.mode;
+    diagnostics.ownerPreSignMs = ownerReportedMs;
+    diagnostics.apiCalls = data.apiCalls;
+    diagnostics.returned = data.files.length;
+    diagnostics.ownerVersion = data.version;
+  }
   // Preserve the existing BRIDGE log prefix for current NOSCA diagnostics.
   console.log('[NOSCA CENTRAL][BRIDGE] ' + JSON.stringify({
     version: data.version, trace: payload.nonce.slice(0, 8),

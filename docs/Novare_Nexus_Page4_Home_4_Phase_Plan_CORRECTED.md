@@ -354,13 +354,13 @@ home-hero
 Google Drive reference:
 
 ```text
-https://drive.google.com/file/d/1xAJNZvkEYW8QIb5Mlo42VAK_eTSbaP39/view?usp=sharing
+https://drive.google.com/file/d/1EQnI8498atNSUA53iWNmNzb3ZhxLtpfp/view?usp=sharing
 ```
 
 Drive file ID:
 
 ```text
-1xAJNZvkEYW8QIb5Mlo42VAK_eTSbaP39
+1EQnI8498atNSUA53iWNmNzb3ZhxLtpfp
 ```
 
 The implementation should load the actual image asset, not a placeholder.
@@ -1717,7 +1717,7 @@ These assets have already been generated and uploaded. They should be used immed
 
 | Asset Key | Purpose | Recommended Ratio | Drive Asset | Notes |
 |---|---|---:|---|---|
-| `home-hero` | Main Page 4 hero artwork | ~2.3:1 | [Open asset](https://drive.google.com/file/d/1xAJNZvkEYW8QIb5Mlo42VAK_eTSbaP39/view?usp=sharing) | Two professionals, tablets, futuristic city, blue/cyan ribbons, bright horizon. No baked-in text. |
+| `home-hero` | Main Page 4 hero artwork | ~2.3:1 | [Open asset](https://drive.google.com/file/d/1EQnI8498atNSUA53iWNmNzb3ZhxLtpfp/view?usp=sharing) | Two professionals, tablets, futuristic city, blue/cyan ribbons, bright horizon. No baked-in text. |
 | `role-execom` | Execom role card portrait | ~1.7:1 | [Open asset](https://drive.google.com/file/d/10YqCyORiRaCKQr5rCPGUe3pa7Tn4J4b0/view?usp=drive_link) | Professional executive portrait with soft pale-blue abstract background. |
 | `role-sales-executives` | Sales Executives role portrait | ~1.7:1 | [Open asset](https://drive.google.com/file/d/19H5dCRkUJr15Z7Q0wVVJHSHy_j1UYoyU/view?usp=drive_link) | Professional business portrait with soft peach/light-orange abstract background. |
 | `role-product-managers` | Product Managers role portrait | ~1.7:1 | [Open asset](https://drive.google.com/file/d/1E4i3IK6B-O-VqMVKpSmtrs0qFroo1Uvk/view?usp=drive_link) | Professional business portrait with soft lavender abstract background. |
@@ -1807,8 +1807,8 @@ Use this registry as the single source of truth for generated Home page assets.
 ```javascript
 const homeAssetRegistry = {
     "home-hero": {
-        fileId: "1xAJNZvkEYW8QIb5Mlo42VAK_eTSbaP39",
-        viewerUrl: "https://drive.google.com/file/d/1xAJNZvkEYW8QIb5Mlo42VAK_eTSbaP39/view?usp=sharing",
+        fileId: "1EQnI8498atNSUA53iWNmNzb3ZhxLtpfp",
+        viewerUrl: "https://drive.google.com/file/d/1EQnI8498atNSUA53iWNmNzb3ZhxLtpfp/view?usp=sharing",
         phase: 1
     },
 

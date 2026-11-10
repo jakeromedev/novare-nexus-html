@@ -3,7 +3,7 @@
   "use strict";
 
   // 1. CONFIGURATION
-  const config = { defaultRoute: "home", useServerHomeContent: false, useServerOverviewContent: false, useServerOfferingsContent: false, useServerOpportunitiesContent: false, useServerProgramsContent: false, useServerDeliveryContent: false, useServerGovernanceContent: false, useServerToolsContent: false, useServerSupportContent: false };
+  const config = { defaultRoute: "overview", useServerHomeContent: false, useServerOverviewContent: false, useServerOfferingsContent: false, useServerOpportunitiesContent: false, useServerProgramsContent: false, useServerDeliveryContent: false, useServerGovernanceContent: false, useServerToolsContent: false, useServerSupportContent: false };
   const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
   const mobileQuery = window.matchMedia("(max-width: 767px)");
   const tabletQuery = window.matchMedia("(min-width: 768px) and (max-width: 1199px)");
@@ -1144,8 +1144,8 @@
   // H5 DELIVERY — Phase 1–2 asset registry.
   const deliveryAssetRegistry = {
     "delivery-hero": {
-      fileId: "17xUUrIOtdNaaZfuzaMka-Lfhg4GVmYUF",
-      viewerUrl: "https://drive.google.com/file/d/17xUUrIOtdNaaZfuzaMka-Lfhg4GVmYUF/view?usp=drive_link",
+      fileId: "188WbsUhQH8encrYYVl6_aIm65Yv-vMKw",
+      viewerUrl: "https://drive.google.com/file/d/188WbsUhQH8encrYYVl6_aIm65Yv-vMKw/view?usp=drive_link",
       phase: 1
     },
     "delivery-closing-banner": {
@@ -2528,8 +2528,8 @@
       phase: 1
     },
     "overview-about-novare": {
-      fileId: "19c6m8U3a9AwPpdBl0DVJEs1hsFLjYL2G",
-      viewerUrl: "https://drive.google.com/file/d/19c6m8U3a9AwPpdBl0DVJEs1hsFLjYL2G/view?usp=drive_link",
+      fileId: "1SEuZon57o00yP0R4mG8EMwbJNQle_7mL",
+      viewerUrl: "https://drive.google.com/file/d/1SEuZon57o00yP0R4mG8EMwbJNQle_7mL/view?usp=drive_link",
       phase: 2
     },
     "overview-about-sca": {
@@ -4481,7 +4481,10 @@
     if (!pageRoot || !action) return;
 
     if (action === "novare-solution-groups") {
-      focusOverviewSection(pageRoot.querySelector("#overview-solution-groups-title"));
+      const section = pageRoot.querySelector("#overview-solution-groups");
+      if (section && !section.hidden) {
+        focusOverviewSection(pageRoot.querySelector("#overview-solution-groups-title"));
+      }
       return;
     }
 
@@ -4533,6 +4536,7 @@
       }
 
       initializeOverviewActions(pageRoot);
+      initializeHomeAiCommand(pageRoot);
       pageRoot.dataset.pageInitialized = "true";
       refreshOverviewFromServer(pageRoot);
       return;
@@ -5404,25 +5408,10 @@
       });
   }
 
-  function initializeHomePage(pageRoot) {
-    if (!pageRoot || pageRoot.dataset.pageInitialized === "true") return;
-
-    const initialData = getStaticHomeContent();
-
-    loadHomeAsset(pageRoot, "home-hero-image", "home-hero-fallback", 2000);
-    loadHomeAsset(pageRoot, "hero-handwritten-tagline", "home-handwriting-fallback", 480);
-    renderQuickAccess(pageRoot, initialData.quickAccess);
-    renderRoleExplorer(pageRoot, initialData.roles);
-    renderFeatured(pageRoot, initialData.featured);
-    renderWhatsNew(pageRoot, initialData.whatsNew);
-    renderHelpPanel(pageRoot, initialData.help);
-
-    if (window.NexusHomeLinks) {
-      window.NexusHomeLinks.initialize(
-        pageRoot
-      );
-    }
-
+  // Shared Ask NOSCA composer: the same Home behavior now lives on Overview.
+  // Keep IDs/classes stable so the existing shortcuts, animations and chat integration work.
+  function initializeHomeAiCommand(pageRoot) {
+    if (!pageRoot) return;
     const input = pageRoot.querySelector("#home-ai-input");
     const status = pageRoot.querySelector("#home-ai-status");
     const track = pageRoot.querySelector("#home-ai-track");
@@ -5431,6 +5420,7 @@
     const next = pageRoot.querySelector("#home-ai-next");
 
     if (!input || !status || !track || !form || !inputShell || !next) return;
+    if (form.dataset.noscaCommandInitialized === "true") return;
 
     function updateHomeAiComposerState() {
       form.classList.toggle("has-query", Boolean(input.value.trim()));
@@ -5502,6 +5492,30 @@
       target.scrollIntoView({ block: "nearest", inline: "nearest" });
       next.dataset.nextIndex = String((targetIndex + 1) % buttons.length);
     });
+
+    form.dataset.noscaCommandInitialized = "true";
+  }
+
+  function initializeHomePage(pageRoot) {
+    if (!pageRoot || pageRoot.dataset.pageInitialized === "true") return;
+
+    const initialData = getStaticHomeContent();
+
+    loadHomeAsset(pageRoot, "home-hero-image", "home-hero-fallback", 2000);
+    loadHomeAsset(pageRoot, "hero-handwritten-tagline", "home-handwriting-fallback", 480);
+    renderQuickAccess(pageRoot, initialData.quickAccess);
+    renderRoleExplorer(pageRoot, initialData.roles);
+    renderFeatured(pageRoot, initialData.featured);
+    renderWhatsNew(pageRoot, initialData.whatsNew);
+    renderHelpPanel(pageRoot, initialData.help);
+
+    if (window.NexusHomeLinks) {
+      window.NexusHomeLinks.initialize(
+        pageRoot
+      );
+    }
+
+    initializeHomeAiCommand(pageRoot);
 
     pageRoot.dataset.pageInitialized = "true";
 

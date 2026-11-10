@@ -1183,4 +1183,310 @@
       }
     }
 
+
+    /* Overview is now the landing page: retain the original Home Ask NOSCA
+       composer while matching the Overview hero and card spacing. */
+    .overview-page .overview-ai-command {
+      --home-navy: var(--overview-navy, #071D62);
+      position: relative;
+      z-index: 6;
+      margin: -76px 20px 0;
+      max-width: none;
+    }
+    /* The shared Styles_Responsive.css hero-overlap rule uses
+       margin-top: -82px !important on the reference grid. That rule was
+       appropriate when the cards followed the hero directly, but now
+       Ask NOSCA sits between them. Keep the hero-to-NOSCA overlap while
+       giving the cards real space below the composer at every width. */
+    .overview-page .overview-reference-grid {
+      margin-top: 24px !important;
+    }
+    /* Hide only the legacy section; preserve the markup for future restoration. */
+    .overview-page #overview-solution-groups[hidden] {
+      display: none !important;
+    }
+    @media (min-width: 768px) and (max-width: 1199px) {
+      .overview-page .overview-ai-command {
+        margin: -60px 20px 0;
+      }
+    }
+    @media (max-width: 767px) {
+      .overview-page .overview-ai-command {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 10px;
+        margin: 14px 0 0 !important;
+        padding: 10px;
+        border-radius: 16px !important;
+      }
+      .overview-page .overview-reference-grid {
+        margin-top: 18px !important;
+      }
+    }
+    /* =========================================================
+       OVERVIEW — FULL-WIDTH REFERENCE ROWS V1 (2026-11-11)
+       Replaces the three equal-height columns with three stacked
+       horizontal cards: visual summary on the left, accessible
+       managed resource links on the right. No markup/JS changes.
+       ========================================================= */
+    .overview-page .overview-reference-grid {
+      display: grid !important;
+      grid-template-columns: minmax(0, 1fr) !important;
+      align-items: stretch;
+      gap: 22px !important;
+      margin-right: 20px;
+      margin-left: 20px;
+    }
+
+    .overview-page .overview-reference-card,
+    .overview-page .overview-reference-card.overview-directory-card {
+      display: grid !important;
+      grid-template-columns: minmax(285px, 32%) minmax(0, 1fr);
+      align-items: stretch;
+      min-width: 0;
+      min-height: 0 !important;
+      padding: 0 !important;
+      overflow: hidden;
+      border: 1px solid #d0e5f8;
+      border-radius: 20px;
+      background: #ffffff;
+      box-shadow: 0 12px 34px rgb(9 60 134 / 8%), 0 2px 5px rgb(9 60 134 / 4%);
+    }
+
+    .overview-page .overview-reference-card-header,
+    .overview-page .overview-directory-card .overview-reference-card-header {
+      position: relative;
+      display: block !important;
+      width: auto;
+      min-width: 0;
+      min-height: 226px !important;
+      height: auto;
+      margin: 0 !important;
+      border-radius: 19px 0 0 19px !important;
+      overflow: hidden;
+      background: #e5f3fd;
+    }
+
+    .overview-page .overview-reference-card-header::before {
+      background:
+        linear-gradient(90deg,
+          rgb(248 252 255 / 98%) 0%,
+          rgb(246 251 255 / 93%) 30%,
+          rgb(242 250 255 / 68%) 60%,
+          rgb(242 250 255 / 21%) 100%),
+        linear-gradient(0deg, rgb(246 252 255 / 48%), transparent 65%);
+    }
+
+    .overview-page .overview-reference-thumbnail {
+      position: absolute;
+      inset: 0;
+      width: 100% !important;
+      height: 100% !important;
+      border-radius: 0;
+    }
+
+    .overview-page .overview-reference-heading-copy,
+    .overview-page .overview-directory-card .overview-reference-heading-copy {
+      position: absolute;
+      z-index: 3;
+      left: 27px;
+      bottom: 28px;
+      width: calc(100% - 100px);
+      max-width: 350px;
+      min-width: 0;
+      padding: 0;
+    }
+
+    .overview-page .overview-reference-heading-copy h2 {
+      font-size: clamp(1.48rem, 1.95vw, 2rem);
+      line-height: 1.07;
+      letter-spacing: -.035em;
+    }
+
+    .overview-page .overview-reference-heading-copy p {
+      max-width: 330px;
+      margin-top: 10px;
+      font-size: clamp(.76rem, .82vw, .91rem);
+      line-height: 1.42;
+      text-wrap: pretty;
+    }
+
+    .overview-page .overview-card-arrow {
+      right: 20px;
+      bottom: 22px;
+      width: 44px;
+      height: 44px;
+    }
+
+    .overview-page .overview-reference-links,
+    .overview-page .overview-directory-card .overview-reference-links {
+      display: grid !important;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      align-content: center;
+      align-items: stretch;
+      gap: 11px;
+      min-width: 0;
+      min-height: 0;
+      margin: 0 !important;
+      padding: 24px 26px;
+      overflow: visible;
+      border: 0;
+      border-radius: 0;
+      background: linear-gradient(115deg, #fff 0%, #fbfdff 100%);
+      box-shadow: none;
+    }
+
+    .overview-page .overview-reference-row,
+    .overview-page .overview-reference-row.overview-directory-row {
+      display: grid;
+      grid-template-columns: 31px minmax(0, 1fr) 20px;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      min-width: 0;
+      min-height: 52px;
+      padding: 10px 14px;
+      border: 1px solid #dceaf7 !important;
+      border-radius: 11px;
+      color: #1440a5;
+      background: #ffffff;
+      text-align: left;
+      font-size: clamp(.77rem, .86vw, .91rem);
+      font-weight: 680;
+      line-height: 1.25;
+      box-shadow: 0 3px 10px rgb(10 70 151 / 4%);
+      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease, background .18s ease;
+    }
+
+    .overview-page .overview-reference-row:last-child {
+      border-bottom: 1px solid #dceaf7 !important;
+    }
+
+    .overview-page .overview-reference-row:hover {
+      padding-left: 14px;
+      transform: translateY(-2px);
+      border-color: #9ac7f1 !important;
+      background: #f6fbff;
+      box-shadow: 0 8px 18px rgb(10 70 151 / 10%);
+    }
+
+    .overview-page .overview-reference-row:focus-visible,
+    .overview-page .overview-card-arrow:focus-visible {
+      outline: 3px solid #4b9dff;
+      outline-offset: 3px;
+    }
+
+    .overview-page .overview-reference-row-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      flex-shrink: 0;
+    }
+
+    .overview-page .overview-reference-row-icon svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .overview-page .overview-reference-chevron {
+      justify-self: end;
+      font-size: 1.4rem;
+    }
+
+    .overview-page .overview-reference-row.is-highlighted {
+      border-color: #a8cef8 !important;
+      background: linear-gradient(110deg, #e9f4ff 0%, #f8fbff 100%);
+      box-shadow: 0 5px 14px rgb(26 101 228 / 7%);
+    }
+
+    .overview-page .overview-reference-row.is-highlighted:hover {
+      background: linear-gradient(110deg, #deefff, #f4faff);
+    }
+
+    /* Keep the empty space after the hero reserved for Ask NOSCA. */
+    @media (min-width: 768px) {
+      .overview-page .overview-reference-grid { margin-top: 24px !important; }
+    }
+
+    /* On tablets the original -60px hero overlap can obscure the
+       Overview description. Reduce the overlap while keeping the
+       24px separation between Ask NOSCA and the first card. */
+    @media (min-width: 768px) and (max-width: 1199px) {
+      .overview-page .overview-ai-command {
+        margin-top: -22px !important;
+      }
+    }
+
+    /* Narrower desktops: give the links a full row beneath artwork. */
+    @media (max-width: 1199px) {
+      .overview-page .overview-reference-card,
+      .overview-page .overview-reference-card.overview-directory-card {
+        grid-template-columns: minmax(0, 1fr);
+        border-radius: 18px;
+      }
+      .overview-page .overview-reference-card-header,
+      .overview-page .overview-directory-card .overview-reference-card-header {
+        min-height: 188px !important;
+        border-radius: 17px 17px 0 0 !important;
+      }
+      .overview-page .overview-reference-heading-copy,
+      .overview-page .overview-directory-card .overview-reference-heading-copy {
+        left: 24px;
+        bottom: 24px;
+        width: min(70%, 410px);
+      }
+      .overview-page .overview-reference-links,
+      .overview-page .overview-directory-card .overview-reference-links {
+        padding: 18px 20px 21px;
+      }
+    }
+
+    @media (max-width: 767px) {
+      .overview-page .overview-reference-grid {
+        gap: 17px !important;
+        margin: 18px 0 0 !important;
+      }
+      .overview-page .overview-reference-card-header,
+      .overview-page .overview-directory-card .overview-reference-card-header {
+        min-height: 188px !important;
+        border-radius: 16px 16px 0 0 !important;
+      }
+      .overview-page .overview-reference-heading-copy,
+      .overview-page .overview-directory-card .overview-reference-heading-copy {
+        left: 19px;
+        bottom: 20px;
+        width: calc(100% - 94px);
+      }
+      .overview-page .overview-reference-heading-copy h2 {
+        font-size: clamp(1.36rem, 5vw, 1.72rem);
+      }
+      .overview-page .overview-reference-heading-copy p {
+        font-size: .75rem;
+      }
+      .overview-page .overview-card-arrow {
+        width: 41px;
+        height: 41px;
+        right: 15px;
+        bottom: 17px;
+      }
+      .overview-page .overview-reference-links,
+      .overview-page .overview-directory-card .overview-reference-links {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 9px;
+        padding: 15px;
+      }
+      .overview-page .overview-reference-row,
+      .overview-page .overview-reference-row.overview-directory-row {
+        min-height: 49px;
+        padding: 10px 12px;
+        font-size: .81rem;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .overview-page .overview-reference-row {
+        transition: none;
+      }
+      .overview-page .overview-reference-row:hover { transform: none; }
+    }
+
 </style>

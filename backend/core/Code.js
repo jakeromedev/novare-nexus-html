@@ -864,7 +864,7 @@ function normalizeManagedLinkKeyForWrite_(value) {
  * expose a generic client-supplied Drive file ID as a fetch-by-ID service.
  */
 function getNexusAboutNovareImage() {
-  const fileId = '19c6m8U3a9AwPpdBl0DVJEs1hsFLjYL2G';
+  const fileId = '1SEuZon57o00yP0R4mG8EMwbJNQle_7mL';
   const maxBytes = 5 * 1024 * 1024;
 
   try {
